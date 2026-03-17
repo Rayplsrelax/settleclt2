@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, movingQuotes, businessSubmissions, type InsertMovingQuote, type InsertBusinessSubmission } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,18 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// --- Lead capture: moving quotes ---
+export async function insertMovingQuote(data: InsertMovingQuote) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(movingQuotes).values(data);
+  return { success: true };
+}
+
+// --- Business listing submissions ---
+export async function insertBusinessSubmission(data: InsertBusinessSubmission) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(businessSubmissions).values(data);
+  return { success: true };
+}

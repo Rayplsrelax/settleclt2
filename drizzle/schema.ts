@@ -25,4 +25,33 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+// Lead capture — moving quote requests
+export const movingQuotes = mysqlTable("moving_quotes", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  fromCity: varchar("fromCity", { length: 255 }),
+  moveDate: varchar("moveDate", { length: 32 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type MovingQuote = typeof movingQuotes.$inferSelect;
+export type InsertMovingQuote = typeof movingQuotes.$inferInsert;
+
+// Business listing submissions
+export const businessSubmissions = mysqlTable("business_submissions", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  businessName: varchar("businessName", { length: 255 }).notNull(),
+  category: varchar("category", { length: 128 }).notNull(),
+  phone: varchar("phone", { length: 32 }),
+  website: varchar("website", { length: 512 }),
+  area: varchar("area", { length: 255 }),
+  description: text("description"),
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type BusinessSubmission = typeof businessSubmissions.$inferSelect;
+export type InsertBusinessSubmission = typeof businessSubmissions.$inferInsert;

@@ -1,0 +1,22 @@
+# Settle CLT — Project TODO
+
+- [x] Design system: Charlotte-inspired color palette, typography, global CSS variables
+- [x] Dark/light theme toggle with persistent localStorage preference
+- [x] Shared data: neighborhoods.ts with 8 neighborhoods (stats, narratives, tips, comparisons)
+- [x] Shared data: services.ts with 400+ businesses across 40 categories / 6 super groups
+- [x] Shared data: articles.ts for blog content
+- [x] Home page: hero, featured neighborhoods, directory CTA, lead form teaser
+- [x] Neighborhoods listing page: 8 clickable cards with stats, tags, descriptions
+- [x] Neighborhood detail page: hero, stats bar, day-in-the-life, cost, honest truths, first weekend, moving-from comparisons, directory CTAs
+- [x] Services directory page: search, super group tabs, category filters, area filter dropdown
+- [x] Directory deep-link support from neighborhood pages (?category=&area=&neighborhood=)
+- [x] My-neighborhood personalization via localStorage (banner + sort priority)
+- [x] Moving quotes lead capture form (name, email, from-city, move-date)
+- [x] Business listing submission form
+- [x] Blog section with article cards and detail view
+- [x] Responsive mobile-first design for all screen sizes
+- [x] tRPC backend: lead capture endpoint with DB persistence
+- [x] tRPC backend: business listing submission endpoint with DB persistence
+- [x] Navigation: top nav with links to all sections
+- [x] Vitest tests for backend endpoints
+- [x] Final checkpoint and delivery

@@ -4,31 +4,46 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
+import { lazy, Suspense } from "react";
 
-function Router() {
-  // make sure to consider if you need authentication for certain routes
+const Home = lazy(() => import("./pages/Home"));
+const Neighborhoods = lazy(() => import("./pages/Neighborhoods"));
+const NeighborhoodDetail = lazy(() => import("./pages/NeighborhoodDetail"));
+const Directory = lazy(() => import("./pages/Directory"));
+const Blog = lazy(() => import("./pages/Blog"));
+const ListYourBusiness = lazy(() => import("./pages/ListYourBusiness"));
+
+function PageLoader() {
   return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="animate-pulse text-muted-foreground text-lg font-display">Loading...</div>
+    </div>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
+function Router() {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/neighborhoods" component={Neighborhoods} />
+        <Route path="/neighborhood/:id" component={NeighborhoodDetail} />
+        <Route path="/directory" component={Directory} />
+        <Route path="/blog" component={Blog} />
+        <Route path="/list-your-business" component={ListYourBusiness} />
+        <Route path="/404" component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
+  );
+}
 
 function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider
         defaultTheme="light"
-        // switchable
+        switchable
       >
         <TooltipProvider>
           <Toaster />

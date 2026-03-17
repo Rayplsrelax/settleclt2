@@ -2,6 +2,8 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
+import { z } from "zod";
+import { insertMovingQuote, insertBusinessSubmission } from "./db";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -17,12 +19,46 @@ export const appRouter = router({
     }),
   }),
 
-  // TODO: add feature routers here, e.g.
-  // todo: router({
-  //   list: protectedProcedure.query(({ ctx }) =>
-  //     db.getUserTodos(ctx.user.id)
-  //   ),
-  // }),
+  leads: router({
+    submitQuote: publicProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        email: z.string().email(),
+        fromCity: z.string().optional(),
+        moveDate: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return insertMovingQuote({
+          name: input.name,
+          email: input.email,
+          fromCity: input.fromCity ?? null,
+          moveDate: input.moveDate ?? null,
+        });
+      }),
+    submitBusiness: publicProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        email: z.string().email(),
+        businessName: z.string().min(1),
+        category: z.string().min(1),
+        phone: z.string().optional(),
+        website: z.string().optional(),
+        area: z.string().optional(),
+        description: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return insertBusinessSubmission({
+          name: input.name,
+          email: input.email,
+          businessName: input.businessName,
+          category: input.category,
+          phone: input.phone ?? null,
+          website: input.website ?? null,
+          area: input.area ?? null,
+          description: input.description ?? null,
+        });
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
