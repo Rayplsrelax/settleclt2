@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Detailed neighborhood guide for Charlotte, NC. Day in the life, cost reality, honest truth, and more.">
+  <title>Neighborhood Guide | Settle CLT</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layouts.css">
+  <link rel="stylesheet" href="css/pages/neighborhood-detail.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__brand">
+        <span class="navbar__logo">Settle<span class="navbar__logo-accent">CLT</span></span>
+      </a>
+      <div class="navbar__links" id="nav-links">
+        <a href="index.html" class="navbar__link">Home</a>
+        <a href="neighborhoods.html" class="navbar__link active">Neighborhoods</a>
+        <a href="directory.html" class="navbar__link">Directory</a>
+        <a href="blog.html" class="navbar__link">Blog</a>
+      </div>
+      <div class="navbar__actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+          <span class="theme-toggle__knob">☀️</span>
+        </button>
+        <button class="navbar__menu-toggle" id="nav-toggle" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main-content" id="detail-root">
+    <!-- Content rendered by JS -->
+    <div style="text-align: center; padding: var(--sp-20) 0;">
+      <p style="color: var(--text-muted);">Loading neighborhood...</p>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__bottom">
+        <span>&copy; 2026 Settle CLT. All rights reserved.</span>
+        <div class="footer__social">
+          <a href="#" aria-label="Twitter">𝕏</a>
+          <a href="#" aria-label="Instagram">📷</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/data/neighborhoods.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/navigation.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const root = document.getElementById('detail-root');
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+
+      if (!id || typeof neighborhoods === 'undefined') {
+        root.innerHTML = notFoundHTML();
+        return;
+      }
+
+      const hood = neighborhoods.find(n => n.id === id);
+      if (!hood) {
+        root.innerHTML = notFoundHTML();
+        return;
+      }
+
+      // Update page title
+      document.title = `${hood.name} — Neighborhood Guide | Settle CLT`;
+      document.querySelector('meta[name="description"]').setAttribute('content',
+        `Complete guide to living in ${hood.name}, Charlotte NC. ${hood.vibe}. Day in the life, cost reality, honest truth, and more.`
+      );
+
+      root.innerHTML = renderDetail(hood);
+      initMovingHereBtn(hood);
+      initMovingFromPills(hood);
+      initCompareSection(hood);
+    });
+
+    /* ── Render Full Detail Page ── */
+    function renderDetail(h) {
+      const myHood = JSON.parse(localStorage.getItem('clt-my-neighborhood') || 'null');
+      const isSelected = myHood && myHood.neighborhood === h.id;
+      const hasQuiz = !!localStorage.getItem('clt-quiz-answers');
+
+      const heroPhoto = (h.photoUrls && h.photoUrls[0]) ? h.photoUrls[0] : '';
+
+      return `
+        <!-- BACK LINK -->
+        <div class="container">
+          <a href="neighborhoods.html" class="detail-back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            All Neighborhoods
+          </a>
+        </div>
+
+        <!-- HERO -->
+        <section class="detail-hero" style="background-image: url('${heroPhoto}');">
+          <div class="container">
+            <h1 class="detail-hero__name">${h.name}</h1>
+            <p class="detail-hero__vibe">${h.vibe}</p>
+            <div class="detail-hero__actions">
+              <button class="detail-hero__moving-btn ${isSelected ? 'is-selected' : ''}" id="moving-here-btn">
+                ${isSelected ? '✓ Your neighborhood' : '📍 I\'m moving here'}
+              </button>
+              ${hasQuiz
+                ? '<span class="detail-hero__match-badge">🎯 Match score coming soon</span>'
+                : ''
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- STATS BAR -->
+        <section class="container">
+          <div class="stats-bar">
+            ${statPill(h.stats.avgRent, 'Avg Rent')}
+            ${statPill(h.stats.walkScore, 'Walk Score')}
+            ${statPill(h.stats.transitScore, 'Transit Score')}
+            ${statPill(h.stats.medianHomePrice || '—', 'Home Price')}
+            ${statPill(h.stats.commuteToUptown || '—', 'Commute')}
+            ${statPill(h.stats.schoolTier || '—', 'Schools')}
+            ${statPill(h.stats.crimeLevel || '—', 'Crime')}
+            ${statPill(h.stats.nightlifeLevel || '—', 'Nightlife')}
+            ${statPill(h.stats.petFriendly ? '★'.repeat(h.stats.petFriendly) : '—', 'Pet Friendly')}
+            ${statPill(h.stats.familyScore ? '★'.repeat(h.stats.familyScore) : '—', 'Family Score')}
+          </div>
+        </section>
+
+        <!-- DAY IN THE LIFE -->
+        <section class="detail-section">
+          <div class="container">
+            <h2 class="detail-section__header">A day in the life</h2>
+            <div class="detail-section__text">
+              ${textToParagraphs(h.dayInTheLife)}
+            </div>
+          </div>
+        </section>
+
+        <!-- COST REALITY -->
+        <section class="detail-section">
+          <div class="container">
+            <h2 class="detail-section__header">What your money actually gets you</h2>
+            <div class="detail-section__text">
+              ${textToParagraphs(h.costReality)}
+            </div>
+          </div>
+        </section>
+
+        <!-- WHO LIVES HERE -->
+        <section class="detail-section">
+          <div class="container">
+            <h2 class="detail-section__header">Who actually lives here</h2>
+            <div class="detail-section__text">
+              ${textToParagraphs(h.whoLivesHere)}
+            </div>
+          </div>
+        </section>
+
+        <!-- HONEST TRUTH -->
+        <section class="detail-section">
+          <div class="container">
+            <h2 class="detail-section__header">The honest truth</h2>
+            <div class="detail-section__text">
+              ${textToParagraphs(h.honestTruth)}
+            </div>
+            <p class="detail-section__note">
+              Community members add to this every month — <a href="#community-section">join the conversation</a>.
+            </p>
+          </div>
+        </section>
+
+        <!-- FIRST WEEKEND -->
+        <section class="detail-section">
+          <div class="container">
+            <h2 class="detail-section__header">Your first 48 hours</h2>
+            <div class="weekend-cards">
+              ${(h.firstWeekend || []).map((fw, i) => `
+                <div class="weekend-card">
+                  <div class="weekend-card__number">${i + 1}</div>
+                  <h3 class="weekend-card__action">${fw.action}</h3>
+                  <p class="weekend-card__why">${fw.why}</p>
+                  <p class="weekend-card__tip">${fw.tip}</p>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </section>
+
+        <!-- MOVING FROM -->
+        <section class="detail-section">
+          <div class="container">
+            <h2 class="detail-section__header">If you're moving from...</h2>
+            <div class="moving-from__pills" id="moving-from-pills">
+              <button class="moving-from__pill active" data-city="nyc">NYC</button>
+              <button class="moving-from__pill" data-city="chicago">Chicago</button>
+              <button class="moving-from__pill" data-city="atlanta">Atlanta</button>
+              <button class="moving-from__pill" data-city="dc">DC</button>
+              <button class="moving-from__pill" data-city="houston">Houston</button>
+            </div>
+            <div class="moving-from__text" id="moving-from-text">
+              ${h.movingFrom ? h.movingFrom.nyc : ''}
+            </div>
+          </div>
+        </section>
+
+        <!-- SERVICES NEARBY -->
+        <section class="detail-section">
+          <div class="container">
+            <h2 class="detail-section__header">Services in ${h.name}</h2>
+            <div class="services-cta-grid">
+              ${(h.directoryCtaLinks || []).map(link => `
+                <a href="directory.html?category=${encodeURIComponent(link.category)}&area=${encodeURIComponent(link.area)}&neighborhood=${encodeURIComponent(h.name)}" class="services-cta-link">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  ${link.label}
+                </a>
+              `).join('')}
+            </div>
+            <p class="detail-section__note">Powered by the Settle CLT directory</p>
+          </div>
+        </section>
+
+        <!-- COMPARISON TEASER -->
+        <section class="detail-section">
+          <div class="container">
+            <h2 class="detail-section__header">Compare ${h.name} with another neighborhood</h2>
+            <div class="compare-row" id="compare-row">
+              <select id="compare-select">
+                ${neighborhoods.filter(n => n.id !== h.id).map(n =>
+                  `<option value="${n.id}">${n.name}</option>`
+                ).join('')}
+              </select>
+              <a href="#" class="btn btn--primary btn--sm" id="compare-btn">Compare</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- COMMUNITY PLACEHOLDER -->
+        <section class="detail-section" id="community-section">
+          <div class="container">
+            <h2 class="detail-section__header">Settler community</h2>
+            <div class="community-placeholder">
+              <div class="community-placeholder__icon">💬</div>
+              <h3 class="community-placeholder__title">Community discussions for ${h.name} are coming soon</h3>
+              <p class="community-placeholder__text">Be the first to share your experience living in ${h.name}. Community features launch in Phase 2.</p>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    /* ── Helpers ── */
+    function statPill(value, label) {
+      return `<div class="stat-pill"><span class="stat-pill__value">${value}</span><span class="stat-pill__label">${label}</span></div>`;
+    }
+
+    function textToParagraphs(text) {
+      if (!text) return '<p>—</p>';
+      return text.split('\n').filter(p => p.trim()).map(p => `<p>${p}</p>`).join('');
+    }
+
+    function notFoundHTML() {
+      return `
+        <div class="container" style="text-align: center; padding: var(--sp-20) 0;">
+          <h1 style="font-family: var(--font-heading); margin-bottom: var(--sp-4);">Neighborhood not found</h1>
+          <p style="color: var(--text-muted); margin-bottom: var(--sp-6);">We couldn't find that neighborhood. Try browsing all neighborhoods.</p>
+          <a href="neighborhoods.html" class="btn btn--primary">View All Neighborhoods</a>
+        </div>
+      `;
+    }
+
+    /* ── "I'm Moving Here" Button ── */
+    function initMovingHereBtn(hood) {
+      const btn = document.getElementById('moving-here-btn');
+      if (!btn) return;
+
+      btn.addEventListener('click', () => {
+        const myHood = JSON.parse(localStorage.getItem('clt-my-neighborhood') || 'null');
+        const isCurrentlySelected = myHood && myHood.neighborhood === hood.id;
+
+        if (isCurrentlySelected) {
+          localStorage.removeItem('clt-my-neighborhood');
+          btn.classList.remove('is-selected');
+          btn.textContent = '📍 I\'m moving here';
+        } else {
+          localStorage.setItem('clt-my-neighborhood', JSON.stringify({
+            neighborhood: hood.id,
+            name: hood.name
+          }));
+          btn.classList.add('is-selected');
+          btn.textContent = '✓ Your neighborhood';
+        }
+      });
+    }
+
+    /* ── Moving From Pills ── */
+    function initMovingFromPills(hood) {
+      const container = document.getElementById('moving-from-pills');
+      const textEl = document.getElementById('moving-from-text');
+      if (!container || !textEl || !hood.movingFrom) return;
+
+      container.addEventListener('click', (e) => {
+        const pill = e.target.closest('.moving-from__pill');
+        if (!pill) return;
+
+        container.querySelectorAll('.moving-from__pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+
+        const city = pill.dataset.city;
+        textEl.textContent = hood.movingFrom[city] || '';
+      });
+    }
+
+    /* ── Compare Section ── */
+    function initCompareSection(hood) {
+      const select = document.getElementById('compare-select');
+      const btn = document.getElementById('compare-btn');
+      if (!select || !btn) return;
+
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const otherId = select.value;
+        window.location.href = `neighborhoods.html?compare=${hood.id},${otherId}`;
+      });
+    }
+  </script>
+
+</body>
+</html>
