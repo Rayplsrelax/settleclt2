@@ -52,7 +52,7 @@ export default function NeighborhoodDetail() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const n = neighborhoods.find((nb) => nb.id === params.id);
-  const { myNeighborhood, setMyNeighborhood } = useMyNeighborhood();
+  const { myNeighborhood, setMyNeighborhood, clearMyNeighborhood } = useMyNeighborhood();
   const [selectedCity, setSelectedCity] = useState<string>("nyc");
   const [activeSection, setActiveSection] = useState("overview");
   const [heroIdx, setHeroIdx] = useState(0);
@@ -154,15 +154,26 @@ export default function NeighborhoodDetail() {
               {n.tags.map((tag) => (
                 <span key={tag} className="px-3 py-1 rounded-full bg-white/15 text-white text-sm">{tag}</span>
               ))}
-              {isMyNeighborhood ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-clt-gold/20 text-clt-gold text-sm font-medium">
-                  <Heart className="w-3.5 h-3.5 fill-current" /> Your neighborhood
-                </span>
-              ) : (
-                <Button onClick={handleSetMyNeighborhood} size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/10 rounded-full">
-                  <Heart className="w-3.5 h-3.5 mr-1.5" /> Set as my neighborhood
-                </Button>
-              )}
+              <Button
+                onClick={() => {
+                  if (isMyNeighborhood) {
+                    clearMyNeighborhood();
+                    toast.success('Neighborhood preference cleared.');
+                  } else {
+                    setMyNeighborhood(n.id);
+                    toast.success(`${n.name} is now your neighborhood! Directory results will be personalized.`);
+                  }
+                }}
+                size="sm"
+                variant="outline"
+                className={isMyNeighborhood
+                  ? "border-clt-gold/50 bg-clt-gold/20 text-clt-gold hover:bg-red-500/20 hover:text-red-400 hover:border-red-400/50 rounded-full"
+                  : "border-white/30 text-white hover:bg-white/10 rounded-full"
+                }
+              >
+                <Heart className={`w-3.5 h-3.5 mr-1.5 ${isMyNeighborhood ? 'fill-current' : ''}`} />
+                {isMyNeighborhood ? 'Your neighborhood ✕' : 'Set as my neighborhood'}
+              </Button>
               <Link href={`/compare?ids=${n.id}`}>
                 <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/10 rounded-full">
                   <GitCompare className="w-3.5 h-3.5 mr-1.5" /> Compare

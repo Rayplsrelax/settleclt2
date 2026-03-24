@@ -54,3 +54,6 @@
 - [x] Transform stats bar into an easy-to-read visual graphic (radar chart with stat cards)
 - [x] Add interactive Google Map to neighborhood detail pages with key places markers and legend
 - [x] Fix: Google Maps JavaScript API loaded multiple times on neighborhood detail pages
+- [x] Fix: Cannot unfavorite a neighborhood (Set as my neighborhood button doesn't toggle off)
+- [x] Audit all directory business listings for broken website links and closed businesses
+- [x] Remove invalid/closed businesses from services data (63 removed: 54 DNS dead + 9 parked domains)
