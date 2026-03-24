@@ -49,3 +49,7 @@
 - [x] Detail page: Add "Timeline to Settled" progress tracker
 - [x] Build /compare page with side-by-side neighborhood comparison
 - [x] Add compare route to App.tsx
+- [x] Remove "Honest Truth" section from all neighborhood detail pages (redundant with Vibe Check)
+- [x] Remove "Your First 48 Hours" section from all neighborhood detail pages (redundant with Timeline to Settled)
+- [x] Transform stats bar into an easy-to-read visual graphic (radar chart with stat cards)
+- [x] Add interactive Google Map to neighborhood detail pages with key places markers and legend

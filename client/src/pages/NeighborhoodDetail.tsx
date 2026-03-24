@@ -3,15 +3,20 @@ import { Link, useParams, useLocation } from "wouter";
 import { neighborhoods } from "@shared/neighborhoods";
 import { SERVICES, type Service } from "@shared/services";
 import { useMyNeighborhood } from "@/hooks/useMyNeighborhood";
+import { MapView } from "@/components/Map";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
   MapPin, Home, TrendingUp, Train, Shield, Dog, Moon, Baby, GraduationCap,
   ArrowRight, ChevronRight, ChevronLeft, Heart, Clock, DollarSign, Users,
-  AlertTriangle, Calendar, Plane, ThumbsUp, ThumbsDown, Gem, Map as MapIcon,
-  CheckCircle2, GitCompare, Zap
+  Calendar, Plane, ThumbsUp, ThumbsDown, Gem, Map as MapIcon,
+  CheckCircle2, GitCompare, Zap, AlertTriangle
 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import {
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
+  ResponsiveContainer
+} from "recharts";
 
 const CITY_LABELS: Record<string, string> = {
   nyc: "New York City", chicago: "Chicago", atlanta: "Atlanta", dc: "Washington DC", houston: "Houston",
@@ -23,12 +28,25 @@ const SECTIONS = [
   { id: "day-in-life", label: "Day in Life" },
   { id: "costs", label: "Costs" },
   { id: "hidden-gems", label: "Hidden Gems" },
-  { id: "honest-truth", label: "Honest Truth" },
-  { id: "first-weekend", label: "First 48 Hours" },
   { id: "settling", label: "Get Settled" },
   { id: "moving-from", label: "Moving From" },
+  { id: "map", label: "Map" },
   { id: "services", label: "Services" },
 ];
+
+// Map pin colors by type
+const PIN_COLORS: Record<string, string> = {
+  brewery: "#F59E0B",
+  coffee: "#8B5CF6",
+  transit: "#3B82F6",
+  shopping: "#EC4899",
+  park: "#10B981",
+  restaurant: "#EF4444",
+  entertainment: "#F97316",
+  grocery: "#14B8A6",
+  recreation: "#6366F1",
+  office: "#6B7280",
+};
 
 export default function NeighborhoodDetail() {
   const params = useParams<{ id: string }>();
@@ -74,6 +92,24 @@ export default function NeighborhoodDetail() {
   function scrollToSection(id: string) {
     sectionRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+
+  // Radar chart data — normalize scores to 0-100 scale
+  const radarData = useMemo(() => [
+    { stat: "Walk", value: n.stats.walkScore, fullMark: 100 },
+    { stat: "Nightlife", value: n.stats.nightlifeLevel === "active" ? 90 : n.stats.nightlifeLevel === "moderate" ? 60 : 30, fullMark: 100 },
+    { stat: "Family", value: n.stats.familyScore * 20, fullMark: 100 },
+    { stat: "Pet", value: n.stats.petFriendly * 20, fullMark: 100 },
+    { stat: "Schools", value: n.stats.schoolTier === "A+" ? 100 : n.stats.schoolTier === "A" ? 90 : n.stats.schoolTier === "B+" ? 80 : n.stats.schoolTier === "B" ? 70 : 60, fullMark: 100 },
+    { stat: "Safety", value: n.stats.crimeLevel === "low" ? 90 : n.stats.crimeLevel === "medium" ? 60 : 30, fullMark: 100 },
+  ], [n]);
+
+  // Map center from keyPlaces average
+  const mapCenter = useMemo(() => {
+    if (!n.keyPlaces?.length) return { lat: 35.2271, lng: -80.8431 }; // Charlotte default
+    const avgLat = n.keyPlaces.reduce((s, p) => s + p.lat, 0) / n.keyPlaces.length;
+    const avgLng = n.keyPlaces.reduce((s, p) => s + p.lng, 0) / n.keyPlaces.length;
+    return { lat: avgLat, lng: avgLng };
+  }, [n]);
 
   return (
     <PageLayout>
@@ -137,19 +173,43 @@ export default function NeighborhoodDetail() {
         </div>
       </section>
 
-      {/* Stats bar */}
+      {/* Settle Score — Visual Radar Chart + Key Stats */}
       <section className="bg-card border-b border-border">
-        <div className="container py-4 overflow-x-auto">
-          <div className="flex items-center gap-6 min-w-max">
-            <StatItem icon={<DollarSign className="w-4 h-4" />} label="Avg Rent" value={n.stats.avgRent} />
-            <StatItem icon={<Home className="w-4 h-4" />} label="Home Price" value={n.stats.medianHomePrice} />
-            <StatItem icon={<TrendingUp className="w-4 h-4" />} label="Walk Score" value={String(n.stats.walkScore)} />
-            <StatItem icon={<Train className="w-4 h-4" />} label="To Uptown" value={n.stats.commuteToUptown} />
-            <StatItem icon={<GraduationCap className="w-4 h-4" />} label="Schools" value={n.stats.schoolTier} />
-            <StatItem icon={<Shield className="w-4 h-4" />} label="Crime" value={n.stats.crimeLevel} />
-            <StatItem icon={<Moon className="w-4 h-4" />} label="Nightlife" value={n.stats.nightlifeLevel} />
-            <StatItem icon={<Dog className="w-4 h-4" />} label="Pet Score" value={`${n.stats.petFriendly}/5`} />
-            <StatItem icon={<Baby className="w-4 h-4" />} label="Family" value={`${n.stats.familyScore}/5`} />
+        <div className="container py-6">
+          <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6 items-center">
+            {/* Radar Chart */}
+            <div className="mx-auto md:mx-0 w-[260px] h-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="75%" data={radarData}>
+                  <PolarGrid stroke="var(--color-border)" />
+                  <PolarAngleAxis
+                    dataKey="stat"
+                    tick={{ fill: "var(--color-muted-foreground)", fontSize: 11, fontWeight: 600 }}
+                  />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                  <Radar
+                    name="Score"
+                    dataKey="value"
+                    stroke="oklch(0.75 0.18 85)"
+                    fill="oklch(0.75 0.18 85)"
+                    fillOpacity={0.25}
+                    strokeWidth={2}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+            {/* Key stats grid */}
+            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
+              <StatCard icon={<DollarSign className="w-4 h-4" />} label="Avg Rent" value={n.stats.avgRent} />
+              <StatCard icon={<Home className="w-4 h-4" />} label="Home Price" value={n.stats.medianHomePrice} />
+              <StatCard icon={<TrendingUp className="w-4 h-4" />} label="Walk Score" value={String(n.stats.walkScore)} highlight />
+              <StatCard icon={<Train className="w-4 h-4" />} label="To Uptown" value={n.stats.commuteToUptown} />
+              <StatCard icon={<GraduationCap className="w-4 h-4" />} label="Schools" value={n.stats.schoolTier} />
+              <StatCard icon={<Shield className="w-4 h-4" />} label="Crime" value={n.stats.crimeLevel} />
+              <StatCard icon={<Moon className="w-4 h-4" />} label="Nightlife" value={n.stats.nightlifeLevel} />
+              <StatCard icon={<Dog className="w-4 h-4" />} label="Pet Score" value={`${n.stats.petFriendly}/5`} />
+              <StatCard icon={<Baby className="w-4 h-4" />} label="Family" value={`${n.stats.familyScore}/5`} />
+            </div>
           </div>
         </div>
       </section>
@@ -302,33 +362,6 @@ export default function NeighborhoodDetail() {
           </div>
         </section>
 
-        {/* Honest Truth */}
-        <section id="honest-truth" ref={el => { sectionRefs.current["honest-truth"] = el; }}>
-          <SectionHeader icon={<AlertTriangle className="w-5 h-5" />} title="The Honest Truth" />
-          <div className="p-6 rounded-xl bg-destructive/5 border border-destructive/10">
-            {n.honestTruth.split("\n\n").map((p, i) => (
-              <p key={i} className="text-sm text-muted-foreground leading-relaxed mb-3 last:mb-0">{p}</p>
-            ))}
-          </div>
-        </section>
-
-        {/* First Weekend */}
-        <section id="first-weekend" ref={el => { sectionRefs.current["first-weekend"] = el; }}>
-          <SectionHeader icon={<Calendar className="w-5 h-5" />} title="Your First 48 Hours" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {n.firstWeekend.map((tip, i) => (
-              <div key={i} className="p-5 rounded-xl bg-card border border-border">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">{i + 1}</span>
-                  <h4 className="font-display font-semibold text-sm text-foreground">{tip.action}</h4>
-                </div>
-                <p className="text-sm text-muted-foreground">{tip.why}</p>
-                <p className="mt-3 text-xs text-primary font-medium">Tip: {tip.tip}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* Settling Timeline */}
         <section id="settling" ref={el => { sectionRefs.current["settling"] = el; }}>
           <SectionHeader icon={<CheckCircle2 className="w-5 h-5" />} title="Timeline to Settled" />
@@ -376,12 +409,76 @@ export default function NeighborhoodDetail() {
           </div>
         </section>
 
-        {/* Map Placeholder */}
-        <div className="p-8 rounded-xl bg-muted/50 border border-border text-center">
-          <MapIcon className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-          <h3 className="font-display font-semibold text-foreground">Interactive Map Coming Soon</h3>
-          <p className="text-sm text-muted-foreground mt-1">Key places, transit stops, and local favorites in {n.name}</p>
-        </div>
+        {/* Interactive Map */}
+        <section id="map" ref={el => { sectionRefs.current["map"] = el; }}>
+          <SectionHeader icon={<MapIcon className="w-5 h-5" />} title={`Explore ${n.name}`} />
+          <div className="rounded-xl overflow-hidden border border-border">
+            <MapView
+              className="h-[400px] md:h-[500px]"
+              initialCenter={mapCenter}
+              initialZoom={15}
+              onMapReady={(map) => {
+                // Add markers for each key place
+                n.keyPlaces.forEach((place) => {
+                  const pinColor = PIN_COLORS[place.type] || "#6B7280";
+
+                  // Create custom pin element
+                  const pinEl = document.createElement("div");
+                  pinEl.style.cssText = `
+                    width: 32px; height: 32px; border-radius: 50% 50% 50% 0;
+                    background: ${pinColor}; transform: rotate(-45deg);
+                    display: flex; align-items: center; justify-content: center;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.3); border: 2px solid white;
+                    cursor: pointer;
+                  `;
+                  const inner = document.createElement("div");
+                  inner.style.cssText = `
+                    transform: rotate(45deg); font-size: 12px; color: white; font-weight: bold;
+                  `;
+                  inner.textContent = place.type.charAt(0).toUpperCase();
+                  pinEl.appendChild(inner);
+
+                  const marker = new google.maps.marker.AdvancedMarkerElement({
+                    map,
+                    position: { lat: place.lat, lng: place.lng },
+                    title: `${place.name} (${place.type})`,
+                    content: pinEl,
+                  });
+
+                  // Info window on click
+                  const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                      <div style="padding: 8px; font-family: system-ui, sans-serif;">
+                        <strong style="font-size: 14px;">${place.name}</strong>
+                        <br/>
+                        <span style="color: ${pinColor}; font-size: 12px; text-transform: capitalize;">${place.type}</span>
+                      </div>
+                    `,
+                  });
+                  marker.addListener("click", () => {
+                    infoWindow.open({ anchor: marker, map });
+                  });
+                });
+
+                // Add transit layer
+                new google.maps.TransitLayer().setMap(map);
+              }}
+            />
+          </div>
+          {/* Map legend */}
+          <div className="flex flex-wrap gap-3 mt-4">
+            {Object.entries(PIN_COLORS).map(([type, color]) => {
+              const hasType = n.keyPlaces.some(p => p.type === type);
+              if (!hasType) return null;
+              return (
+                <div key={type} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
+                  <span className="capitalize">{type}</span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
 
         {/* Services */}
         <section id="services" ref={el => { sectionRefs.current["services"] = el; }}>
@@ -417,14 +514,14 @@ export default function NeighborhoodDetail() {
   );
 }
 
-function StatItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function StatCard({ icon, label, value, highlight }: { icon: React.ReactNode; label: string; value: string; highlight?: boolean }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-1">
-      <span className="text-muted-foreground">{icon}</span>
-      <div>
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-sm font-semibold text-foreground">{value}</p>
+    <div className={`p-3 rounded-lg border text-center ${highlight ? "bg-primary/5 border-primary/20" : "bg-background border-border"}`}>
+      <div className="flex items-center justify-center gap-1.5 mb-1">
+        <span className="text-muted-foreground">{icon}</span>
+        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{label}</span>
       </div>
+      <p className={`text-sm font-bold ${highlight ? "text-primary" : "text-foreground"}`}>{value}</p>
     </div>
   );
 }
