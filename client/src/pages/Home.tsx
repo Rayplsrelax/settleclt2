@@ -463,9 +463,9 @@ export default function Home() {
       <HowItWorks />
       <FeaturedNeighborhoods />
       <DirectoryPreview />
+      <CTABanner />
       <NewsletterSignup />
       <BlogPreview />
-      <CTABanner />
     </PageLayout>
   );
 }

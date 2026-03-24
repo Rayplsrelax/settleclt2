@@ -50,6 +50,12 @@ export interface Neighborhood {
   movingFrom: Record<string, string>;
   communityTopics: string[];
   directoryCtaLinks: DirectoryCtaLink[];
+  localsLove: string[];
+  localsDontLove: string[];
+  hiddenGems: { name: string; description: string; type: string; tip: string }[];
+  keyPlaces: { name: string; type: string; lat: number; lng: number }[];
+  monthlyCosts: { rent1br: number; rent2br: number; utilities: number; groceries: number; dining: number; transit: number; entertainment: number };
+  settlingTimeline: { week: string; milestone: string; directoryCta: string }[];
 }
 
 export const neighborhoods: Neighborhood[] = [
@@ -119,7 +125,44 @@ export const neighborhoods: Neighborhood[] = [
       { label: 'South End breweries & restaurants', category: 'breweries', area: 'South End' },
       { label: 'Apartments in South End', category: 'real-estate', area: 'South End' },
       { label: 'Coworking spaces nearby', category: 'coworking', area: 'South End' }
-    ]
+    ],
+    localsLove: [
+      'The Rail Trail connects everything — walk to 15+ breweries without crossing a major road',
+      'LYNX Blue Line makes Uptown commutes effortless',
+      'Food scene keeps getting better — Superica, Yafo Kitchen, Hai Hai all walkable',
+      'Dog-friendly everything — patios, trails, breweries welcome pups',
+      'Young energy — easy to make friends at brewery trivia or group fitness',
+    ],
+    localsDontLove: [
+      'Parking nightmare — street spots vanish by 6 PM, garages $75-$150/month extra',
+      'Construction noise constant — always 2-3 new buildings going up',
+      'Bland Street area floods during heavy summer storms',
+      'Saturday morning sidewalks have broken glass from Friday night',
+      'Transient population — neighbor might transfer to Nashville in 18 months',
+    ],
+    hiddenGems: [
+      { name: 'Rail Trail at sunrise', description: 'Before 7 AM the Rail Trail is empty and peaceful', type: 'experience', tip: 'Best between Bland Station and Atherton Mill' },
+      { name: 'Lenny Boy kombucha bar', description: 'Hidden behind the brewery with 20+ flavors on tap', type: 'food', tip: 'Try the lavender lemon' },
+      { name: 'Atherton Mill farmers market', description: 'Saturday market with the best breakfast tacos', type: 'food', tip: 'Get there by 9 AM' },
+      { name: 'Little Sugar Creek Greenway', description: 'Quiet tree-lined path most people miss', type: 'nature', tip: 'Enter behind Sycamore Brewing' },
+      { name: 'Design Center rooftop', description: 'Best skyline view in the neighborhood', type: 'view', tip: 'Open during business hours' },
+    ],
+    keyPlaces: [
+      { name: 'Sycamore Brewing', type: 'brewery', lat: 35.2121, lng: -80.857 },
+      { name: 'Undercurrent Coffee', type: 'coffee', lat: 35.2155, lng: -80.8565 },
+      { name: 'Bland Street LYNX', type: 'transit', lat: 35.214, lng: -80.8555 },
+      { name: 'Atherton Mill', type: 'shopping', lat: 35.2105, lng: -80.856 },
+      { name: 'Rail Trail', type: 'park', lat: 35.213, lng: -80.856 },
+      { name: 'Superica', type: 'restaurant', lat: 35.211, lng: -80.8575 },
+    ],
+    monthlyCosts: { rent1br: 1650, rent2br: 2400, utilities: 140, groceries: 350, dining: 400, transit: 75, entertainment: 200 },
+    settlingTimeline: [
+      { week: 'Week 1', milestone: 'Walk the full Rail Trail, set up utilities, find your coffee shop', directoryCta: 'utilities' },
+      { week: 'Week 2', milestone: 'Try 3 restaurants, join a gym, meet building regulars', directoryCta: 'gyms-fitness' },
+      { week: 'Month 1', milestone: 'Find your go-to brewery, get a haircut, establish grocery routine', directoryCta: 'breweries' },
+      { week: 'Month 3', milestone: 'You have a usual at two bars and know the barista by name', directoryCta: '' },
+    ],
+
   },
   {
     id: 'noda',
@@ -187,7 +230,43 @@ export const neighborhoods: Neighborhood[] = [
       { label: 'Breweries in the arts district', category: 'breweries', area: 'NoDa' },
       { label: 'Find a barber in NoDa', category: 'barbers', area: 'NoDa' },
       { label: 'NoDa apartments & lofts', category: 'real-estate', area: 'NoDa' }
-    ]
+    ],
+    localsLove: [
+      'Gallery crawl on first and third Fridays is a genuine community event',
+      'Live music every night — Neighborhood Theatre, Evening Muse all walkable',
+      'Murals change seasonally so the neighborhood always looks different',
+      'Rent is reasonable compared to South End for way more character',
+      'Creative community is real — neighbor might be a glassblower',
+    ],
+    localsDontLove: [
+      'Street parking impossible during gallery crawls and weekend nights',
+      'Active freight train tracks — light sleepers beware',
+      'Gentrification pricing out artists who built NoDa\'s identity',
+      'Car break-ins more common than anyone admits',
+      'LYNX station is a 10-minute walk from core of North Davidson',
+    ],
+    hiddenGems: [
+      { name: 'Alley behind Salud Cerveceria', description: 'Hidden beer garden with string lights and food trucks', type: 'food', tip: 'Enter from the parking lot side' },
+      { name: 'Free Range back patio', description: 'Quiet patio with train track views — oddly peaceful', type: 'brewery', tip: 'Best on Tuesday evenings' },
+      { name: 'NoDa Company Store', description: 'Vintage shop with curated local art and oddities', type: 'shopping', tip: 'Check their Instagram' },
+      { name: '36th Street mill walk', description: 'Best street art concentration in Charlotte', type: 'experience', tip: 'Go at golden hour' },
+      { name: 'Haberdish late-night menu', description: 'Secret fried chicken biscuits after 10 PM', type: 'food', tip: 'Thursday-Saturday only' },
+    ],
+    keyPlaces: [
+      { name: 'Neighborhood Theatre', type: 'entertainment', lat: 35.251, lng: -80.8175 },
+      { name: 'Smelly Cat Coffeehouse', type: 'coffee', lat: 35.2505, lng: -80.818 },
+      { name: 'Evening Muse', type: 'entertainment', lat: 35.25, lng: -80.8185 },
+      { name: 'Heist Brewery', type: 'brewery', lat: 35.2515, lng: -80.817 },
+      { name: '36th Street LYNX', type: 'transit', lat: 35.249, lng: -80.8165 },
+    ],
+    monthlyCosts: { rent1br: 1450, rent2br: 2100, utilities: 130, groceries: 320, dining: 300, transit: 75, entertainment: 150 },
+    settlingTimeline: [
+      { week: 'Week 1', milestone: 'Explore North Davidson on foot, find your coffee shop, set up utilities', directoryCta: 'utilities' },
+      { week: 'Week 2', milestone: 'Attend a gallery crawl, try 3 restaurants, see a live show', directoryCta: 'restaurants' },
+      { week: 'Month 1', milestone: 'Find your favorite brewery, get a haircut, join a creative meetup', directoryCta: 'breweries' },
+      { week: 'Month 3', milestone: 'You recognize the regulars at Smelly Cat and have a favorite mural', directoryCta: '' },
+    ],
+
   },
   {
     id: 'dilworth',
@@ -255,7 +334,43 @@ export const neighborhoods: Neighborhood[] = [
       { label: 'Find a plumber for your bungalow', category: 'plumbers', area: 'Charlotte Metro' },
       { label: 'Lawn care in Dilworth', category: 'lawn', area: 'Charlotte Metro' },
       { label: 'Dilworth real estate agents', category: 'real-estate', area: 'Charlotte Metro' }
-    ]
+    ],
+    localsLove: [
+      'Tree-canopied streets with historic bungalows — small town inside a city',
+      'Latta Park is gorgeous and never overcrowded',
+      'East Boulevard restaurants are walkable and consistently excellent',
+      'Tight-knit community — neighbors actually know each other\'s names',
+      'Close to South End and Uptown without the noise or density',
+    ],
+    localsDontLove: [
+      'Home prices skyrocketed — starter homes are $500K+',
+      'Street parking on East Blvd competitive on weekends',
+      'Limited nightlife — head to South End for late nights',
+      'Some streets lack sidewalks despite walkable reputation',
+      'HOA rules in some sections strict about exterior changes',
+    ],
+    hiddenGems: [
+      { name: 'Latta Park at sunset', description: 'Skyline view from the hill that rivals any rooftop bar', type: 'view', tip: 'Grassy hill near the playground' },
+      { name: 'Dilworth Grille back patio', description: 'Hidden garden patio that feels like a secret courtyard', type: 'food', tip: 'Request it specifically' },
+      { name: 'Kenilworth Avenue loop', description: '2-mile loop through the most beautiful historic homes', type: 'experience', tip: 'Best in spring with azaleas' },
+      { name: 'Common Market border', description: 'Part deli, part bar, part community center', type: 'food', tip: 'Thursday evening best vibe' },
+      { name: 'Little Free Libraries', description: 'Highest concentration in Charlotte — a scavenger hunt', type: 'experience', tip: '8+ scattered through neighborhood' },
+    ],
+    keyPlaces: [
+      { name: 'Latta Park', type: 'park', lat: 35.207, lng: -80.8555 },
+      { name: 'East Boulevard shops', type: 'shopping', lat: 35.205, lng: -80.852 },
+      { name: 'Dilworth Grille', type: 'restaurant', lat: 35.2055, lng: -80.853 },
+      { name: 'East/West LYNX', type: 'transit', lat: 35.21, lng: -80.8545 },
+      { name: 'Reid\'s Fine Foods', type: 'grocery', lat: 35.2045, lng: -80.8515 },
+    ],
+    monthlyCosts: { rent1br: 1800, rent2br: 2600, utilities: 160, groceries: 380, dining: 350, transit: 50, entertainment: 150 },
+    settlingTimeline: [
+      { week: 'Week 1', milestone: 'Walk every street, find Latta Park, set up utilities', directoryCta: 'utilities' },
+      { week: 'Week 2', milestone: 'Try East Blvd restaurants, introduce yourself to neighbors', directoryCta: 'restaurants' },
+      { week: 'Month 1', milestone: 'Join Dilworth Community Association, find a vet', directoryCta: 'veterinarians' },
+      { week: 'Month 3', milestone: 'You wave to 5 people on morning walks and have a favorite bench in Latta Park', directoryCta: '' },
+    ],
+
   },
   {
     id: 'ballantyne',
@@ -323,7 +438,43 @@ export const neighborhoods: Neighborhood[] = [
       { label: 'Lawn care & landscaping', category: 'lawn', area: 'South Charlotte' },
       { label: 'South Charlotte grocery stores', category: 'grocery', area: 'South Charlotte' },
       { label: 'Find a family doctor', category: 'healthcare', area: 'South Charlotte' }
-    ]
+    ],
+    localsLove: [
+      'Top-rated schools — Providence and Ardrey Kell consistently among best in CMS',
+      'Everything is new, clean, and well-maintained',
+      'Ballantyne Village has great shopping and restaurants',
+      'Golf courses and green space everywhere',
+      'Safe — one of the lowest crime rates in Charlotte',
+    ],
+    localsDontLove: [
+      'You need a car for literally everything — walk score is brutal',
+      'I-485 traffic during rush hour can add 30+ minutes',
+      'Chain restaurants dominate — unique food requires driving elsewhere',
+      'Cookie-cutter subdivisions — every street looks the same',
+      '25+ minutes to Uptown on a good day, 45+ during rush hour',
+    ],
+    hiddenGems: [
+      { name: 'Trails behind golf course', description: 'Miles of wooded walking trails most residents don\'t know about', type: 'nature', tip: 'Access from Ballantyne Hotel parking area' },
+      { name: 'Dressler\'s late happy hour', description: 'Half-price appetizers 9-11 PM at one of Charlotte\'s best restaurants', type: 'food', tip: 'Sit at the bar' },
+      { name: 'Lake Park', description: 'Quiet neighborhood lake with walking trail', type: 'nature', tip: 'Best at sunrise' },
+      { name: 'Backyard concerts', description: 'Free outdoor concerts in Corporate Park during summer', type: 'experience', tip: 'Bring chairs and a cooler — BYOB friendly' },
+      { name: 'Rea Road Farmers Market', description: 'Small but excellent Saturday market with local honey', type: 'food', tip: 'Honey vendor sells out fast' },
+    ],
+    keyPlaces: [
+      { name: 'Ballantyne Village', type: 'shopping', lat: 35.0555, lng: -80.8465 },
+      { name: 'Ballantyne Golf Club', type: 'recreation', lat: 35.053, lng: -80.844 },
+      { name: 'Corporate Park', type: 'office', lat: 35.0575, lng: -80.848 },
+      { name: 'Providence High School', type: 'school', lat: 35.061, lng: -80.839 },
+      { name: 'Stonecrest Shopping', type: 'shopping', lat: 35.049, lng: -80.835 },
+    ],
+    monthlyCosts: { rent1br: 1750, rent2br: 2200, utilities: 170, groceries: 400, dining: 300, transit: 200, entertainment: 150 },
+    settlingTimeline: [
+      { week: 'Week 1', milestone: 'Drive the neighborhood, find grocery store, set up utilities and internet', directoryCta: 'utilities' },
+      { week: 'Week 2', milestone: 'Explore Ballantyne Village, find a gym, register kids for school', directoryCta: 'gyms-fitness' },
+      { week: 'Month 1', milestone: 'Join a pool or tennis club, find family go-to restaurants', directoryCta: 'restaurants' },
+      { week: 'Month 3', milestone: 'You know carpool rules, have a favorite trail, kids have friends on the street', directoryCta: '' },
+    ],
+
   },
   {
     id: 'plaza-midwood',
@@ -391,7 +542,43 @@ export const neighborhoods: Neighborhood[] = [
       { label: 'Find a vet nearby', category: 'pets', area: 'Charlotte Metro' },
       { label: 'Barbers & salons in the area', category: 'barbers', area: 'Charlotte Metro' },
       { label: 'Plaza Midwood apartments', category: 'real-estate', area: 'Charlotte Metro' }
-    ]
+    ],
+    localsLove: [
+      'Best food scene in Charlotte — Central Avenue is a culinary world tour',
+      'Genuinely diverse — hear 5 languages at the grocery store',
+      'Independent shops and businesses, not chains',
+      'Dogs everywhere — possibly the most dog-friendly neighborhood',
+      'The vibe is unpretentious — nobody cares what you drive',
+    ],
+    localsDontLove: [
+      'Central Avenue traffic is terrible during rush hour',
+      'Gentrification changing the neighborhood fast — longtime businesses closing',
+      'Some blocks have noticeable property crime uptick',
+      'No direct LYNX access — need a car or bus',
+      'Parking at popular restaurants on weekends requires strategy',
+    ],
+    hiddenGems: [
+      { name: 'Midwood Smokehouse back deck', description: 'Picnic tables under oak trees — feels like a backyard BBQ', type: 'food', tip: 'Go weekday for no wait' },
+      { name: 'Plaza Midwood mural walk', description: '12+ murals in a half-mile from Thomas to Central', type: 'experience', tip: 'Best in morning light' },
+      { name: 'Spoke Easy community rides', description: 'Free group bike rides every Wednesday evening', type: 'experience', tip: 'Show up at 6:30 PM, all levels' },
+      { name: 'Intermezzo Tuesday deal', description: 'Half-price pizzas on Tuesdays — best deal in Charlotte', type: 'food', tip: 'Call ahead for pickup' },
+      { name: 'Old rail trestle walk', description: 'Walking path with wildflowers and skyline views', type: 'nature', tip: 'Access from end of Matheson Avenue' },
+    ],
+    keyPlaces: [
+      { name: 'Central Avenue restaurants', type: 'restaurant', lat: 35.222, lng: -80.815 },
+      { name: 'Common Market', type: 'coffee', lat: 35.2215, lng: -80.816 },
+      { name: 'Midwood Smokehouse', type: 'restaurant', lat: 35.2225, lng: -80.8145 },
+      { name: 'Plaza Midwood Park', type: 'park', lat: 35.223, lng: -80.814 },
+      { name: 'Thomas Street Tavern', type: 'bar', lat: 35.2218, lng: -80.8155 },
+    ],
+    monthlyCosts: { rent1br: 1500, rent2br: 2150, utilities: 135, groceries: 300, dining: 350, transit: 100, entertainment: 150 },
+    settlingTimeline: [
+      { week: 'Week 1', milestone: 'Walk Central Avenue end to end, find your coffee shop, set up utilities', directoryCta: 'utilities' },
+      { week: 'Week 2', milestone: 'Try 5 different restaurants (Thai, BBQ, tacos, pizza, brunch)', directoryCta: 'restaurants' },
+      { week: 'Month 1', milestone: 'Find your go-to bar, join a community ride, establish grocery routine', directoryCta: 'breweries' },
+      { week: 'Month 3', milestone: 'You have opinions about which taco truck is best and your dog has friends at the park', directoryCta: '' },
+    ],
+
   },
   {
     id: 'uptown',
@@ -459,7 +646,43 @@ export const neighborhoods: Neighborhood[] = [
       { label: 'Coworking spaces in Uptown', category: 'coworking', area: 'Uptown' },
       { label: 'Gyms & fitness in Uptown', category: 'fitness', area: 'Uptown' },
       { label: 'Things to do in Uptown', category: 'attractions', area: 'Uptown' }
-    ]
+    ],
+    localsLove: [
+      'Walk to everything — Panthers, Hornets, concerts, restaurants',
+      'No car needed — highest walk score in Charlotte',
+      'Romare Bearden Park is a gem for after-work decompression',
+      'Energy on game days and event nights is electric',
+      'Proximity to best jobs in banking, finance, and tech',
+    ],
+    localsDontLove: [
+      'Rent is highest in Charlotte for the smallest spaces',
+      'Streets feel empty after 7 PM on weeknights',
+      'Grocery options limited — likely drive to Harris Teeter in Dilworth',
+      'Homeless population visible and can feel uncomfortable for newcomers',
+      'Weekend noise from bars and events can be intense',
+    ],
+    hiddenGems: [
+      { name: 'Gantt Center free first Sunday', description: 'Free admission the first Sunday of every month', type: 'experience', tip: 'Go early — busy by noon' },
+      { name: 'Romare Bearden Park at night', description: 'Beautifully lit with skyline views — most romantic spot in Charlotte', type: 'view', tip: 'Wednesday evenings are quietest' },
+      { name: 'Overstreet Mall tunnels', description: 'Elevated walkways connecting Uptown buildings', type: 'experience', tip: 'Enter from Wells Fargo on Tryon' },
+      { name: '7th Street Public Market', description: 'Food hall with local vendors most workers walk past', type: 'food', tip: 'Ramen stall and crepe stand are best secrets' },
+      { name: 'Fourth Ward walking tour', description: 'Victorian homes from 1800s hidden between skyscrapers', type: 'experience', tip: 'Start at Old Settlers Cemetery on West 5th' },
+    ],
+    keyPlaces: [
+      { name: 'Bank of America Stadium', type: 'entertainment', lat: 35.2258, lng: -80.8528 },
+      { name: 'Spectrum Center', type: 'entertainment', lat: 35.2251, lng: -80.8392 },
+      { name: 'Romare Bearden Park', type: 'park', lat: 35.224, lng: -80.848 },
+      { name: '7th Street Market', type: 'food', lat: 35.2275, lng: -80.8375 },
+      { name: 'Trade & Tryon', type: 'landmark', lat: 35.2271, lng: -80.8431 },
+    ],
+    monthlyCosts: { rent1br: 1900, rent2br: 2800, utilities: 150, groceries: 400, dining: 450, transit: 0, entertainment: 250 },
+    settlingTimeline: [
+      { week: 'Week 1', milestone: 'Walk every block of Uptown, find your grocery solution, set up utilities', directoryCta: 'utilities' },
+      { week: 'Week 2', milestone: 'Explore Romare Bearden Park, find lunch spots, check out 7th Street Market', directoryCta: 'restaurants' },
+      { week: 'Month 1', milestone: 'Attend a Panthers or Hornets game, find your gym', directoryCta: 'gyms-fitness' },
+      { week: 'Month 3', milestone: 'You navigate the Overstreet Mall by memory and time walks to avoid lunch rush on Tryon', directoryCta: '' },
+    ],
+
   },
   {
     id: 'myers-park',
@@ -527,7 +750,43 @@ export const neighborhoods: Neighborhood[] = [
       { label: 'Private schools & childcare', category: 'childcare', area: 'South Charlotte' },
       { label: 'Lawn care & landscaping', category: 'lawn', area: 'South Charlotte' },
       { label: 'SouthPark restaurants', category: 'restaurants', area: 'South Charlotte' }
-    ]
+    ],
+    localsLove: [
+      'The most beautiful streets in Charlotte — Queens Road is iconic',
+      'Proximity to SouthPark Mall and top-tier shopping',
+      'Excellent private schools — Charlotte Latin, Providence Day, Country Day',
+      'Mature oak canopy creates a park-like atmosphere everywhere',
+      'Established community with deep Charlotte roots',
+    ],
+    localsDontLove: [
+      'Home prices start at $700K and go well into the millions',
+      'Can feel exclusive and insular if you\'re new to Charlotte',
+      'Limited dining and nightlife within the neighborhood itself',
+      'Queens Road traffic during school drop-off and pick-up is brutal',
+      'Some areas feel disconnected from the new Charlotte energy',
+    ],
+    hiddenGems: [
+      { name: 'Queens Road West walking loop', description: '3-mile loop through the grandest homes under a cathedral of oaks', type: 'experience', tip: 'Best in October when leaves turn' },
+      { name: 'Mint Museum Randolph gardens', description: 'Free sculpture garden behind the museum, rarely crowded', type: 'view', tip: 'Enter from Randolph Road side' },
+      { name: 'Myers Park ice cream social', description: 'Seasonal neighborhood events — fastest way to meet established residents', type: 'experience', tip: 'Check the HOA newsletter' },
+      { name: 'Little Sugar Creek Greenway', description: 'The Myers Park section is the most scenic stretch in the system', type: 'nature', tip: 'Enter near Brandywine Avenue' },
+      { name: 'SouthPark hidden patios', description: 'Garden patios behind the mall most shoppers never find', type: 'food', tip: 'Best for a quiet weekday lunch' },
+    ],
+    keyPlaces: [
+      { name: 'Queens Road', type: 'landmark', lat: 35.193, lng: -80.837 },
+      { name: 'SouthPark Mall', type: 'shopping', lat: 35.156, lng: -80.827 },
+      { name: 'Mint Museum Randolph', type: 'entertainment', lat: 35.193, lng: -80.831 },
+      { name: 'Freedom Park', type: 'park', lat: 35.199, lng: -80.845 },
+      { name: 'Myers Park Presbyterian', type: 'landmark', lat: 35.188, lng: -80.835 },
+    ],
+    monthlyCosts: { rent1br: 2000, rent2br: 2900, utilities: 180, groceries: 420, dining: 350, transit: 150, entertainment: 200 },
+    settlingTimeline: [
+      { week: 'Week 1', milestone: 'Drive Queens Road, find your grocery store, set up utilities', directoryCta: 'utilities' },
+      { week: 'Week 2', milestone: 'Visit SouthPark Mall, explore Freedom Park, introduce yourself to neighbors', directoryCta: 'restaurants' },
+      { week: 'Month 1', milestone: 'Join the HOA, find private school tours, establish routines', directoryCta: 'veterinarians' },
+      { week: 'Month 3', milestone: 'You know which oak tree is oldest on your street and your kids have playdates scheduled', directoryCta: '' },
+    ],
+
   },
   {
     id: 'university-city',
@@ -595,7 +854,43 @@ export const neighborhoods: Neighborhood[] = [
       { label: 'Gyms & fitness centers', category: 'fitness', area: 'University Area' },
       { label: 'Grocery stores nearby', category: 'grocery', area: 'University Area' },
       { label: 'Auto repair & car wash', category: 'auto', area: 'University Area' }
-    ]
+    ],
+    localsLove: [
+      'Most affordable neighborhood on this list — your dollar goes furthest',
+      'LYNX Blue Line Extension connects you to Uptown without driving',
+      'UNCC campus brings energy, events, and diversity',
+      'New development bringing better restaurants and retail',
+      'Quick access to Concord Mills and Carowinds for weekend fun',
+    ],
+    localsDontLove: [
+      'Still car-dependent despite the LYNX — most errands require driving',
+      'Chain restaurants and strip malls dominate the landscape',
+      'Some areas feel disconnected from real Charlotte culture',
+      'Student housing complexes can be noisy during school year',
+      'Limited nightlife — drive to NoDa or South End for a night out',
+    ],
+    hiddenGems: [
+      { name: 'UNCC Botanical Gardens', description: 'Free beautiful botanical garden on campus most non-students miss', type: 'nature', tip: 'Visit in spring for rhododendron bloom' },
+      { name: 'Kabuto Japanese Steakhouse', description: 'Old-school hibachi spot from before the LYNX — locals swear by it', type: 'food', tip: 'Go for lunch — same quality, half price' },
+      { name: 'Research Park trails', description: 'Miles of paved trails through corporate campus, empty on weekends', type: 'nature', tip: 'Park at David Taylor Drive entrance' },
+      { name: 'Carowinds season pass hack', description: 'Season pass costs less than two single-day visits', type: 'experience', tip: 'Buy in September for next-year discount' },
+      { name: 'International groceries on N. Tryon', description: 'Super G Mart has ingredients you can\'t find anywhere else in Charlotte', type: 'food', tip: 'Go on weekday mornings for best selection' },
+    ],
+    keyPlaces: [
+      { name: 'UNC Charlotte', type: 'school', lat: 35.3076, lng: -80.7335 },
+      { name: 'UNCC LYNX Station', type: 'transit', lat: 35.309, lng: -80.732 },
+      { name: 'University Place', type: 'shopping', lat: 35.305, lng: -80.745 },
+      { name: 'Research Park', type: 'office', lat: 35.31, lng: -80.74 },
+      { name: 'UNCC Botanical Gardens', type: 'park', lat: 35.306, lng: -80.728 },
+    ],
+    monthlyCosts: { rent1br: 1250, rent2br: 1700, utilities: 125, groceries: 300, dining: 200, transit: 75, entertainment: 100 },
+    settlingTimeline: [
+      { week: 'Week 1', milestone: 'Explore campus area, find grocery store, set up utilities and internet', directoryCta: 'utilities' },
+      { week: 'Week 2', milestone: 'Try the international restaurants on N. Tryon, find a gym', directoryCta: 'restaurants' },
+      { week: 'Month 1', milestone: 'Get a LYNX pass, explore NoDa and South End on weekends', directoryCta: 'gyms-fitness' },
+      { week: 'Month 3', milestone: 'You have a favorite study spot, know the LYNX schedule by heart, and have explored 3+ other neighborhoods', directoryCta: '' },
+    ],
+
   }
 ];
 

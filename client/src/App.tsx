@@ -12,6 +12,7 @@ const NeighborhoodDetail = lazy(() => import("./pages/NeighborhoodDetail"));
 const Directory = lazy(() => import("./pages/Directory"));
 const Blog = lazy(() => import("./pages/Blog"));
 const ListYourBusiness = lazy(() => import("./pages/ListYourBusiness"));
+const Compare = lazy(() => import("./pages/Compare"));
 
 function PageLoader() {
   return (
@@ -31,6 +32,7 @@ function Router() {
         <Route path="/directory" component={Directory} />
         <Route path="/blog" component={Blog} />
         <Route path="/list-your-business" component={ListYourBusiness} />
+        <Route path="/compare" component={Compare} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>

@@ -29,3 +29,23 @@
 - [x] Show 4 featured neighborhoods instead of 3
 - [x] Add real images to blog preview cards (code supports images; data uses gradients as fallback)
 - [x] Replace all generic Unsplash neighborhood photos with authentic Charlotte NC neighborhood-specific photos
+- [x] Move "List Your Business" CTA section above newsletter on home page
+- [x] Evaluate neighborhood listing and detail pages (pros, cons, gaps)
+- [x] Rework neighborhood pages based on evaluation
+- [x] Build neighborhood comparison tool
+- [x] Expand neighborhoods data: add localsLove, localsDontLove, hiddenGems, keyPlaces, monthlyCosts, settlingTimeline arrays
+- [x] Listing page: Add filter bar (budget/lifestyle/walkability)
+- [x] Listing page: Add compare checkboxes on cards
+- [x] Listing page: Remove adjacent neighborhood labels from cards
+- [x] Listing page: Show more stats (home price, schools, nightlife, pet, family)
+- [x] Detail page: Add photo carousel in hero
+- [x] Detail page: Add sticky section navigation
+- [ ] Detail page: Add Settle Score radar chart (deferred — no chart library conflict)
+- [x] Detail page: Add "Vibe Check" locals love / don't love section
+- [x] Detail page: Add embedded map placeholder with key places
+- [x] Detail page: Enrich services section with actual business cards
+- [x] Detail page: Break up text walls with pull quotes
+- [x] Detail page: Add "Hidden Gems" insider section
+- [x] Detail page: Add "Timeline to Settled" progress tracker
+- [x] Build /compare page with side-by-side neighborhood comparison
+- [x] Add compare route to App.tsx

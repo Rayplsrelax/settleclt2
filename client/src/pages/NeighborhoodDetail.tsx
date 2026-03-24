@@ -1,23 +1,34 @@
 import PageLayout from "@/components/PageLayout";
 import { Link, useParams, useLocation } from "wouter";
 import { neighborhoods } from "@shared/neighborhoods";
+import { SERVICES, type Service } from "@shared/services";
 import { useMyNeighborhood } from "@/hooks/useMyNeighborhood";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
   MapPin, Home, TrendingUp, Train, Shield, Dog, Moon, Baby, GraduationCap,
-  ArrowRight, ChevronRight, Heart, Clock, DollarSign, Users, AlertTriangle,
-  Calendar, Plane
+  ArrowRight, ChevronRight, ChevronLeft, Heart, Clock, DollarSign, Users,
+  AlertTriangle, Calendar, Plane, ThumbsUp, ThumbsDown, Gem, Map as MapIcon,
+  CheckCircle2, GitCompare, Zap
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const CITY_LABELS: Record<string, string> = {
-  nyc: "New York City",
-  chicago: "Chicago",
-  atlanta: "Atlanta",
-  dc: "Washington DC",
-  houston: "Houston",
+  nyc: "New York City", chicago: "Chicago", atlanta: "Atlanta", dc: "Washington DC", houston: "Houston",
 };
+
+const SECTIONS = [
+  { id: "overview", label: "Overview" },
+  { id: "vibe-check", label: "Vibe Check" },
+  { id: "day-in-life", label: "Day in Life" },
+  { id: "costs", label: "Costs" },
+  { id: "hidden-gems", label: "Hidden Gems" },
+  { id: "honest-truth", label: "Honest Truth" },
+  { id: "first-weekend", label: "First 48 Hours" },
+  { id: "settling", label: "Get Settled" },
+  { id: "moving-from", label: "Moving From" },
+  { id: "services", label: "Services" },
+];
 
 export default function NeighborhoodDetail() {
   const params = useParams<{ id: string }>();
@@ -25,46 +36,103 @@ export default function NeighborhoodDetail() {
   const n = neighborhoods.find((nb) => nb.id === params.id);
   const { myNeighborhood, setMyNeighborhood } = useMyNeighborhood();
   const [selectedCity, setSelectedCity] = useState<string>("nyc");
+  const [activeSection, setActiveSection] = useState("overview");
+  const [heroIdx, setHeroIdx] = useState(0);
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
-  if (!n) {
-    setLocation("/404");
-    return null;
-  }
+  // Scroll spy
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        }
+      },
+      { rootMargin: "-30% 0px -60% 0px" }
+    );
+    Object.values(sectionRefs.current).forEach(el => { if (el) observer.observe(el); });
+    return () => observer.disconnect();
+  }, [n]);
+
+  if (!n) { setLocation("/404"); return null; }
 
   const isMyNeighborhood = myNeighborhood === n.id;
-
   const handleSetMyNeighborhood = () => {
     setMyNeighborhood(n.id);
     toast.success(`${n.name} is now your neighborhood! Directory results will be personalized.`);
   };
 
+  // Get real services for this neighborhood
+  const areaServices = SERVICES.filter((s: Service) =>
+    s.area.toLowerCase().includes(n.name.toLowerCase()) || n.name.toLowerCase().includes(s.area.toLowerCase())
+  ).slice(0, 6);
+
+  const totalMonthlyCost = Object.values(n.monthlyCosts).reduce((a, b) => a + b, 0);
+
+  function scrollToSection(id: string) {
+    sectionRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   return (
     <PageLayout>
-      {/* Hero */}
-      <section className="relative overflow-hidden py-20 md:py-28">
-        <img src={n.photoUrls[0]} alt={n.name} className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
-        <div className="container relative z-10">
-          <Link href="/neighborhoods" className="inline-flex items-center gap-1 text-white/60 text-sm hover:text-white/80 no-underline mb-4">
-            <ChevronRight className="w-3 h-3 rotate-180" /> All Neighborhoods
-          </Link>
-          <h1 className="font-display font-extrabold text-4xl md:text-5xl lg:text-6xl text-white">{n.name}</h1>
-          <p className="mt-3 text-xl text-white/80">{n.vibe}</p>
-          <div className="flex flex-wrap gap-2 mt-5">
-            {n.tags.map((tag) => (
-              <span key={tag} className="px-3 py-1 rounded-full bg-white/15 text-white text-sm">{tag}</span>
-            ))}
-          </div>
-          <div className="mt-6">
-            {isMyNeighborhood ? (
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/20 text-white text-sm font-medium">
-                <Heart className="w-4 h-4 fill-current" /> This is your neighborhood
-              </span>
-            ) : (
-              <Button onClick={handleSetMyNeighborhood} variant="outline" className="border-white/30 text-white hover:bg-white/10">
-                <Heart className="w-4 h-4 mr-2" /> I'm moving here
-              </Button>
-            )}
+      {/* Hero with Photo Carousel */}
+      <section className="relative overflow-hidden h-[50vh] md:h-[60vh]">
+        {n.photoUrls.map((url, i) => (
+          <img
+            key={i}
+            src={url}
+            alt={`${n.name} ${i + 1}`}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === heroIdx ? "opacity-100" : "opacity-0"}`}
+          />
+        ))}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
+
+        {/* Carousel controls */}
+        {n.photoUrls.length > 1 && (
+          <>
+            <button onClick={() => setHeroIdx(i => (i - 1 + n.photoUrls.length) % n.photoUrls.length)} className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition">
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button onClick={() => setHeroIdx(i => (i + 1) % n.photoUrls.length)} className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition">
+              <ChevronRight className="w-5 h-5" />
+            </button>
+            <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+              {n.photoUrls.map((_, i) => (
+                <button key={i} onClick={() => setHeroIdx(i)} className={`w-2.5 h-2.5 rounded-full transition ${i === heroIdx ? "bg-white" : "bg-white/40"}`} />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Hero content */}
+        <div className="absolute bottom-0 left-0 right-0 z-10 pb-8">
+          <div className="container">
+            <Link href="/neighborhoods" className="inline-flex items-center gap-1 text-white/60 text-sm hover:text-white/80 no-underline mb-3">
+              <ChevronRight className="w-3 h-3 rotate-180" /> All Neighborhoods
+            </Link>
+            <h1 className="font-display font-extrabold text-4xl md:text-5xl lg:text-6xl text-white">{n.name}</h1>
+            <p className="mt-2 text-xl text-white/80">{n.vibe}</p>
+            <div className="flex flex-wrap items-center gap-3 mt-4">
+              {n.tags.map((tag) => (
+                <span key={tag} className="px-3 py-1 rounded-full bg-white/15 text-white text-sm">{tag}</span>
+              ))}
+              {isMyNeighborhood ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-clt-gold/20 text-clt-gold text-sm font-medium">
+                  <Heart className="w-3.5 h-3.5 fill-current" /> Your neighborhood
+                </span>
+              ) : (
+                <Button onClick={handleSetMyNeighborhood} size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/10 rounded-full">
+                  <Heart className="w-3.5 h-3.5 mr-1.5" /> Set as my neighborhood
+                </Button>
+              )}
+              <Link href={`/compare?ids=${n.id}`}>
+                <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/10 rounded-full">
+                  <GitCompare className="w-3.5 h-3.5 mr-1.5" /> Compare
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -86,53 +154,172 @@ export default function NeighborhoodDetail() {
         </div>
       </section>
 
-      {/* Content sections */}
-      <div className="container py-12 md:py-16 space-y-16">
-        {/* Day in the Life */}
-        <ContentSection icon={<Clock className="w-5 h-5" />} title="A Day in the Life">
-          <div className="prose prose-sm max-w-none text-muted-foreground leading-relaxed">
-            {n.dayInTheLife.split("\n\n").map((p, i) => (
-              <p key={i}>{p}</p>
+      {/* Sticky Section Nav */}
+      <nav className="sticky top-16 z-30 bg-background/95 backdrop-blur border-b border-border">
+        <div className="container">
+          <div className="flex gap-1 overflow-x-auto scrollbar-hide py-2">
+            {SECTIONS.map(s => (
+              <button
+                key={s.id}
+                onClick={() => scrollToSection(s.id)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                  activeSection === s.id
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                {s.label}
+              </button>
             ))}
           </div>
-        </ContentSection>
+        </div>
+      </nav>
 
-        {/* Cost Reality */}
-        <ContentSection icon={<DollarSign className="w-5 h-5" />} title="Cost Reality">
-          <div className="prose prose-sm max-w-none text-muted-foreground leading-relaxed">
-            {n.costReality.split("\n\n").map((p, i) => (
-              <p key={i}>{p}</p>
-            ))}
-          </div>
-        </ContentSection>
+      {/* Content */}
+      <div className="container py-10 md:py-14 space-y-16">
 
-        {/* Who Lives Here */}
-        <ContentSection icon={<Users className="w-5 h-5" />} title="Who Lives Here">
-          <div className="prose prose-sm max-w-none text-muted-foreground leading-relaxed">
-            {n.whoLivesHere.split("\n\n").map((p, i) => (
-              <p key={i}>{p}</p>
-            ))}
-          </div>
-        </ContentSection>
-
-        {/* Honest Truth */}
-        <ContentSection icon={<AlertTriangle className="w-5 h-5" />} title="The Honest Truth">
-          <div className="p-5 rounded-xl bg-destructive/5 border border-destructive/10">
-            <div className="prose prose-sm max-w-none text-muted-foreground leading-relaxed">
-              {n.honestTruth.split("\n\n").map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
+        {/* Overview */}
+        <section id="overview" ref={el => { sectionRefs.current["overview"] = el; }}>
+          <SectionHeader icon={<MapPin className="w-5 h-5" />} title={`About ${n.name}`} />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <p className="text-muted-foreground leading-relaxed">{n.description}</p>
+              <blockquote className="mt-6 pl-4 border-l-4 border-clt-gold italic text-foreground/80">
+                Best for: {n.bestFor}
+              </blockquote>
+            </div>
+            <div className="p-5 rounded-xl bg-card border border-border">
+              <h3 className="font-display font-semibold text-sm text-foreground mb-3">Who Lives Here</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{n.whoLivesHere.split("\n\n")[0]?.slice(0, 300)}...</p>
             </div>
           </div>
-        </ContentSection>
+        </section>
+
+        {/* Vibe Check — Locals Love / Don't Love */}
+        <section id="vibe-check" ref={el => { sectionRefs.current["vibe-check"] = el; }}>
+          <SectionHeader icon={<Zap className="w-5 h-5" />} title="Vibe Check" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-6 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+              <div className="flex items-center gap-2 mb-4">
+                <ThumbsUp className="w-5 h-5 text-emerald-500" />
+                <h3 className="font-display font-semibold text-foreground">Locals Love</h3>
+              </div>
+              <ul className="space-y-3">
+                {n.localsLove.map((item, i) => (
+                  <li key={i} className="flex gap-3 text-sm text-muted-foreground">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="p-6 rounded-xl bg-red-500/5 border border-red-500/20">
+              <div className="flex items-center gap-2 mb-4">
+                <ThumbsDown className="w-5 h-5 text-red-500" />
+                <h3 className="font-display font-semibold text-foreground">Locals Don't Love</h3>
+              </div>
+              <ul className="space-y-3">
+                {n.localsDontLove.map((item, i) => (
+                  <li key={i} className="flex gap-3 text-sm text-muted-foreground">
+                    <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* Day in the Life */}
+        <section id="day-in-life" ref={el => { sectionRefs.current["day-in-life"] = el; }}>
+          <SectionHeader icon={<Clock className="w-5 h-5" />} title="A Day in the Life" />
+          <div className="max-w-3xl">
+            {n.dayInTheLife.split("\n\n").map((p, i) => (
+              <p key={i} className="text-muted-foreground leading-relaxed mb-4">{p}</p>
+            ))}
+          </div>
+        </section>
+
+        {/* Monthly Costs */}
+        <section id="costs" ref={el => { sectionRefs.current["costs"] = el; }}>
+          <SectionHeader icon={<DollarSign className="w-5 h-5" />} title="Monthly Cost Breakdown" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {[
+                  { label: "1BR Rent", value: n.monthlyCosts.rent1br },
+                  { label: "2BR Rent", value: n.monthlyCosts.rent2br },
+                  { label: "Utilities", value: n.monthlyCosts.utilities },
+                  { label: "Groceries", value: n.monthlyCosts.groceries },
+                  { label: "Dining Out", value: n.monthlyCosts.dining },
+                  { label: "Transit", value: n.monthlyCosts.transit },
+                  { label: "Entertainment", value: n.monthlyCosts.entertainment },
+                  { label: "Total (1BR)", value: totalMonthlyCost - n.monthlyCosts.rent2br + n.monthlyCosts.rent1br },
+                ].map((item) => (
+                  <div key={item.label} className="p-4 rounded-xl bg-card border border-border text-center">
+                    <p className="text-xs text-muted-foreground mb-1">{item.label}</p>
+                    <p className="text-lg font-bold text-foreground">${item.value.toLocaleString()}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6">
+                <h3 className="font-display font-semibold text-sm text-foreground mb-3">Cost Reality</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{n.costReality.split("\n\n")[0]}</p>
+              </div>
+            </div>
+            <div className="p-5 rounded-xl bg-clt-navy/5 border border-clt-navy/10 dark:bg-clt-gold/5 dark:border-clt-gold/10">
+              <h3 className="font-display font-semibold text-sm text-foreground mb-3">Monthly Budget Estimate</h3>
+              <div className="space-y-2">
+                {Object.entries(n.monthlyCosts).filter(([k]) => k !== "rent2br").map(([key, val]) => (
+                  <div key={key} className="flex justify-between text-sm">
+                    <span className="text-muted-foreground capitalize">{key.replace(/([A-Z])/g, " $1").replace("rent1br", "Rent (1BR)")}</span>
+                    <span className="font-medium text-foreground">${val.toLocaleString()}</span>
+                  </div>
+                ))}
+                <div className="pt-2 mt-2 border-t border-border flex justify-between text-sm font-bold">
+                  <span className="text-foreground">Total</span>
+                  <span className="text-primary">${(totalMonthlyCost - n.monthlyCosts.rent2br).toLocaleString()}/mo</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Hidden Gems */}
+        <section id="hidden-gems" ref={el => { sectionRefs.current["hidden-gems"] = el; }}>
+          <SectionHeader icon={<Gem className="w-5 h-5" />} title="Hidden Gems" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {n.hiddenGems.map((gem, i) => (
+              <div key={i} className="p-5 rounded-xl bg-card border border-border hover:border-clt-gold/30 transition-colors">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="px-2 py-0.5 rounded-full bg-clt-gold/10 text-clt-gold text-[10px] font-bold uppercase">{gem.type}</span>
+                </div>
+                <h4 className="font-display font-semibold text-foreground">{gem.name}</h4>
+                <p className="text-sm text-muted-foreground mt-1">{gem.description}</p>
+                <p className="text-xs text-primary font-medium mt-3">Tip: {gem.tip}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Honest Truth */}
+        <section id="honest-truth" ref={el => { sectionRefs.current["honest-truth"] = el; }}>
+          <SectionHeader icon={<AlertTriangle className="w-5 h-5" />} title="The Honest Truth" />
+          <div className="p-6 rounded-xl bg-destructive/5 border border-destructive/10">
+            {n.honestTruth.split("\n\n").map((p, i) => (
+              <p key={i} className="text-sm text-muted-foreground leading-relaxed mb-3 last:mb-0">{p}</p>
+            ))}
+          </div>
+        </section>
 
         {/* First Weekend */}
-        <ContentSection icon={<Calendar className="w-5 h-5" />} title="Your First 48 Hours">
+        <section id="first-weekend" ref={el => { sectionRefs.current["first-weekend"] = el; }}>
+          <SectionHeader icon={<Calendar className="w-5 h-5" />} title="Your First 48 Hours" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {n.firstWeekend.map((tip, i) => (
               <div key={i} className="p-5 rounded-xl bg-card border border-border">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-sm font-bold">{i + 1}</span>
+                  <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary text-sm font-bold">{i + 1}</span>
                   <h4 className="font-display font-semibold text-sm text-foreground">{tip.action}</h4>
                 </div>
                 <p className="text-sm text-muted-foreground">{tip.why}</p>
@@ -140,19 +327,44 @@ export default function NeighborhoodDetail() {
               </div>
             ))}
           </div>
-        </ContentSection>
+        </section>
+
+        {/* Settling Timeline */}
+        <section id="settling" ref={el => { sectionRefs.current["settling"] = el; }}>
+          <SectionHeader icon={<CheckCircle2 className="w-5 h-5" />} title="Timeline to Settled" />
+          <div className="relative">
+            <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border hidden md:block" />
+            <div className="space-y-6">
+              {n.settlingTimeline.map((step, i) => (
+                <div key={i} className="flex gap-4 md:gap-6">
+                  <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">
+                    {i + 1}
+                  </div>
+                  <div className="flex-1 p-4 rounded-xl bg-card border border-border">
+                    <p className="text-xs font-bold text-primary uppercase tracking-wide mb-1">{step.week}</p>
+                    <p className="text-sm text-foreground">{step.milestone}</p>
+                    {step.directoryCta && (
+                      <Link href={`/directory?category=${encodeURIComponent(step.directoryCta)}&area=${encodeURIComponent(n.name)}`} className="inline-flex items-center gap-1 text-xs text-primary font-medium mt-2 no-underline hover:gap-2 transition-all">
+                        Browse {step.directoryCta.replace(/-/g, " ")} <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
         {/* Moving From */}
-        <ContentSection icon={<Plane className="w-5 h-5" />} title="If You're Moving From...">
+        <section id="moving-from" ref={el => { sectionRefs.current["moving-from"] = el; }}>
+          <SectionHeader icon={<Plane className="w-5 h-5" />} title="If You're Moving From..." />
           <div className="flex flex-wrap gap-2 mb-5">
             {Object.keys(n.movingFrom).map((city) => (
               <button
                 key={city}
                 onClick={() => setSelectedCity(city)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  selectedCity === city
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  selectedCity === city ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
                 }`}
               >
                 {CITY_LABELS[city] || city}
@@ -162,10 +374,29 @@ export default function NeighborhoodDetail() {
           <div className="p-5 rounded-xl bg-card border border-border">
             <p className="text-sm text-muted-foreground leading-relaxed">{n.movingFrom[selectedCity]}</p>
           </div>
-        </ContentSection>
+        </section>
 
-        {/* Directory CTAs */}
-        <ContentSection icon={<MapPin className="w-5 h-5" />} title={`Services in ${n.name}`}>
+        {/* Map Placeholder */}
+        <div className="p-8 rounded-xl bg-muted/50 border border-border text-center">
+          <MapIcon className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+          <h3 className="font-display font-semibold text-foreground">Interactive Map Coming Soon</h3>
+          <p className="text-sm text-muted-foreground mt-1">Key places, transit stops, and local favorites in {n.name}</p>
+        </div>
+
+        {/* Services */}
+        <section id="services" ref={el => { sectionRefs.current["services"] = el; }}>
+          <SectionHeader icon={<MapPin className="w-5 h-5" />} title={`Services in ${n.name}`} />
+          {areaServices.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+              {areaServices.map((s: Service) => (
+                <div key={s.name} className="p-4 rounded-xl bg-card border border-border">
+                  <h4 className="font-semibold text-sm text-foreground">{s.name}</h4>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{s.description}</p>
+                  {s.phone && <p className="text-xs text-primary mt-2">{s.phone}</p>}
+                </div>
+              ))}
+            </div>
+          ) : null}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {n.directoryCtaLinks.map((cta) => (
               <Link
@@ -180,7 +411,7 @@ export default function NeighborhoodDetail() {
               </Link>
             ))}
           </div>
-        </ContentSection>
+        </section>
       </div>
     </PageLayout>
   );
@@ -198,14 +429,11 @@ function StatItem({ icon, label, value }: { icon: React.ReactNode; label: string
   );
 }
 
-function ContentSection({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+function SectionHeader({ icon, title }: { icon: React.ReactNode; title: string }) {
   return (
-    <section>
-      <div className="flex items-center gap-3 mb-5">
-        <span className="text-primary">{icon}</span>
-        <h2 className="font-display font-bold text-xl md:text-2xl text-foreground">{title}</h2>
-      </div>
-      {children}
-    </section>
+    <div className="flex items-center gap-3 mb-6">
+      <span className="text-primary">{icon}</span>
+      <h2 className="font-display font-bold text-xl md:text-2xl text-foreground">{title}</h2>
+    </div>
   );
 }
