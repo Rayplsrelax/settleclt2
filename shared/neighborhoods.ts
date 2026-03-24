@@ -212,7 +212,7 @@ export const neighborhoods: Neighborhood[] = [
     tags: ['🏡 Historic Homes', '🌳 Latta Park', '👨‍👩‍👧 Families', '🍽️ East Blvd'],
     bestFor: 'Families and professionals who love historic character',
     nearbyAreas: ['South End', 'Myers Park', 'Sedgefield'],
-    featured: false,
+    featured: true,
     photoUrls: [
       'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=1200&q=80',
       'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80',

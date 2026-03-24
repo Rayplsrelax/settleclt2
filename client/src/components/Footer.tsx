@@ -31,8 +31,8 @@ export default function Footer() {
           <div>
             <h4 className="font-display font-semibold text-sm text-foreground mb-3">Get Started</h4>
             <div className="flex flex-col gap-2">
-              <Link href="/#quote" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Get Moving Quotes</Link>
               <Link href="/neighborhoods" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Find Your Neighborhood</Link>
+              <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Moving Guides</Link>
             </div>
           </div>
         </div>

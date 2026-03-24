@@ -20,3 +20,11 @@
 - [x] Navigation: top nav with links to all sections
 - [x] Vitest tests for backend endpoints
 - [x] Final checkpoint and delivery
+- [x] Remove "Get Free Moving Quotes" section from home page
+- [x] Remove "Get Moving Quotes" link from footer
+- [x] Add real Unsplash photos to neighborhood cards on home page
+- [x] Add Charlotte skyline hero image behind headline
+- [x] Replace quotes section with newsletter signup
+- [x] Add "How Settle CLT Works" explainer section
+- [x] Show 4 featured neighborhoods instead of 3
+- [x] Add real images to blog preview cards (code supports images; data uses gradients as fallback)

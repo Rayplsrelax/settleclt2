@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, movingQuotes, businessSubmissions, type InsertMovingQuote, type InsertBusinessSubmission } from "../drizzle/schema";
+import { InsertUser, users, movingQuotes, businessSubmissions, newsletterSubscribers, type InsertMovingQuote, type InsertBusinessSubmission, type InsertNewsletterSubscriber } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -103,4 +103,20 @@ export async function insertBusinessSubmission(data: InsertBusinessSubmission) {
   if (!db) throw new Error("Database not available");
   await db.insert(businessSubmissions).values(data);
   return { success: true };
+}
+
+// --- Newsletter subscribers ---
+export async function insertNewsletterSubscriber(data: InsertNewsletterSubscriber) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  try {
+    await db.insert(newsletterSubscribers).values(data);
+    return { success: true, alreadySubscribed: false };
+  } catch (error: any) {
+    // Handle duplicate email gracefully
+    if (error?.code === "ER_DUP_ENTRY" || error?.message?.includes("Duplicate")) {
+      return { success: true, alreadySubscribed: true };
+    }
+    throw error;
+  }
 }
