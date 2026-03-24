@@ -28,3 +28,4 @@
 - [x] Add "How Settle CLT Works" explainer section
 - [x] Show 4 featured neighborhoods instead of 3
 - [x] Add real images to blog preview cards (code supports images; data uses gradients as fallback)
+- [x] Replace all generic Unsplash neighborhood photos with authentic Charlotte NC neighborhood-specific photos

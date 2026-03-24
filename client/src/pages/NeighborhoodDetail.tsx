@@ -41,8 +41,9 @@ export default function NeighborhoodDetail() {
   return (
     <PageLayout>
       {/* Hero */}
-      <section className="relative overflow-hidden py-20 md:py-28" style={{ background: n.gradient }}>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+      <section className="relative overflow-hidden py-20 md:py-28">
+        <img src={n.photoUrls[0]} alt={n.name} className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
         <div className="container relative z-10">
           <Link href="/neighborhoods" className="inline-flex items-center gap-1 text-white/60 text-sm hover:text-white/80 no-underline mb-4">
             <ChevronRight className="w-3 h-3 rotate-180" /> All Neighborhoods

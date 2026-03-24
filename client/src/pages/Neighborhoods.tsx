@@ -36,7 +36,8 @@ export default function Neighborhoods() {
             {neighborhoods.map((n) => (
               <Link key={n.id} href={`/neighborhood/${n.id}`} className="no-underline group">
                 <div className="relative rounded-xl overflow-hidden border border-border bg-card hover:shadow-xl transition-all h-full">
-                  <div className="h-48 relative" style={{ background: n.gradient }}>
+                  <div className="h-48 relative">
+                    <img src={n.photoUrls[0]} alt={n.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     <div className="absolute bottom-4 left-5 right-5">
                       <div className="flex items-center gap-2 mb-2">
