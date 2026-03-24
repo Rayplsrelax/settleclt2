@@ -53,3 +53,4 @@
 - [x] Remove "Your First 48 Hours" section from all neighborhood detail pages (redundant with Timeline to Settled)
 - [x] Transform stats bar into an easy-to-read visual graphic (radar chart with stat cards)
 - [x] Add interactive Google Map to neighborhood detail pages with key places markers and legend
+- [x] Fix: Google Maps JavaScript API loaded multiple times on neighborhood detail pages
