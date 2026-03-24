@@ -57,3 +57,8 @@
 - [x] Fix: Cannot unfavorite a neighborhood (Set as my neighborhood button doesn't toggle off)
 - [x] Audit all directory business listings for broken website links and closed businesses
 - [x] Remove invalid/closed businesses from services data (63 removed: 54 DNS dead + 9 parked domains)
+- [x] Add metro Charlotte areas to neighborhoods page, visually distinguished from core neighborhoods
+- [x] Add interactive map to the directory page showing business locations
+- [x] Clean up junk area values in services data (Online, Anywhere, Expanding, etc. → Charlotte Metro)
+- [x] Group directory area dropdown into Core Neighborhoods and Metro Charlotte optgroups
+- [x] Add services data integrity tests (24 tests passing)

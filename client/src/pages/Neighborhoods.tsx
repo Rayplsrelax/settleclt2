@@ -1,9 +1,11 @@
 import PageLayout from "@/components/PageLayout";
 import { Link, useLocation } from "wouter";
 import { neighborhoods, type Neighborhood } from "@shared/neighborhoods";
+import { metroAreas, type MetroArea } from "@shared/metroAreas";
 import {
   MapPin, ArrowRight, Home, TrendingUp, Train, DollarSign,
-  GraduationCap, Moon, Heart, Baby, GitCompare, SlidersHorizontal, X
+  GraduationCap, Moon, Heart, Baby, GitCompare, SlidersHorizontal, X,
+  Building2, TreePine, Globe
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
@@ -48,6 +50,12 @@ function StatCell({ icon, label, value }: { icon: React.ReactNode; label: string
   );
 }
 
+const TYPE_CONFIG: Record<MetroArea["type"], { label: string; color: string; icon: React.ReactNode }> = {
+  "inner-ring": { label: "Inner Ring", color: "bg-clt-teal/15 text-clt-teal border-clt-teal/30", icon: <Building2 className="w-3 h-3" /> },
+  "suburb": { label: "Suburb", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30", icon: <TreePine className="w-3 h-3" /> },
+  "exurb": { label: "Exurb", color: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30", icon: <Globe className="w-3 h-3" /> },
+};
+
 export default function Neighborhoods() {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [compareIds, setCompareIds] = useState<string[]>([]);
@@ -58,7 +66,7 @@ export default function Neighborhoods() {
   function toggleCompare(id: string) {
     setCompareIds(prev => {
       if (prev.includes(id)) return prev.filter(x => x !== id);
-      if (prev.length >= 3) return prev; // max 3
+      if (prev.length >= 3) return prev;
       return [...prev, id];
     });
   }
@@ -80,7 +88,7 @@ export default function Neighborhoods() {
               Charlotte Neighborhoods
             </h1>
             <p className="mt-4 text-lg text-white/70 leading-relaxed">
-              Eight neighborhoods, eight completely different vibes. Filter by what matters to you, compare side-by-side, and find your fit.
+              Eight core neighborhoods with full guides, plus the wider metro Charlotte area. Filter by what matters to you, compare side-by-side, and find your fit.
             </p>
           </div>
         </div>
@@ -140,9 +148,17 @@ export default function Neighborhoods() {
         </div>
       )}
 
-      {/* Grid */}
-      <section className={`py-10 md:py-14 ${compareIds.length > 0 ? "pb-28" : ""}`}>
+      {/* Core Neighborhoods Grid */}
+      <section className={`py-10 md:py-14 ${compareIds.length > 0 ? "pb-8" : ""}`}>
         <div className="container">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="h-8 w-1 rounded-full bg-clt-gold" />
+            <div>
+              <h2 className="font-display font-bold text-xl text-foreground">Core Neighborhoods</h2>
+              <p className="text-sm text-muted-foreground">Full guides with insider tips, costs, and local intel</p>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filtered.map((n) => {
               const isComparing = compareIds.includes(n.id);
@@ -203,6 +219,82 @@ export default function Neighborhoods() {
                     </div>
                   </Link>
                 </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Metro Charlotte Areas */}
+      <section className={`py-10 md:py-14 bg-muted/30 border-t border-border ${compareIds.length > 0 ? "pb-28" : ""}`}>
+        <div className="container">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="h-8 w-1 rounded-full bg-clt-teal" />
+            <div>
+              <h2 className="font-display font-bold text-xl text-foreground">Metro Charlotte</h2>
+              <p className="text-sm text-muted-foreground">The wider Charlotte area — suburbs, exurbs, and emerging neighborhoods</p>
+            </div>
+          </div>
+
+          {/* Type legend */}
+          <div className="flex flex-wrap gap-3 mb-8 ml-4">
+            {(["inner-ring", "suburb", "exurb"] as const).map(type => {
+              const cfg = TYPE_CONFIG[type];
+              return (
+                <span key={type} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${cfg.color}`}>
+                  {cfg.icon} {cfg.label}
+                </span>
+              );
+            })}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {metroAreas.map((area) => {
+              const cfg = TYPE_CONFIG[area.type];
+              return (
+                <Link
+                  key={area.id}
+                  href={`/directory?area=${encodeURIComponent(area.name)}`}
+                  className="no-underline group"
+                >
+                  <div className="p-4 rounded-xl border border-border bg-card hover:shadow-lg hover:border-clt-teal/40 transition-all h-full">
+                    {/* Header */}
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h3 className="font-display font-bold text-base text-foreground group-hover:text-clt-teal transition-colors">
+                        {area.name}
+                      </h3>
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 ${cfg.color}`}>
+                        {cfg.icon} {cfg.label}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-muted-foreground leading-relaxed">{area.vibe}</p>
+
+                    {/* Quick stats */}
+                    <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border">
+                      <div className="text-center">
+                        <p className="text-[10px] text-muted-foreground uppercase">Rent</p>
+                        <p className="text-xs font-semibold text-foreground">{area.avgRent}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-[10px] text-muted-foreground uppercase">Distance</p>
+                        <p className="text-xs font-semibold text-foreground">{area.distance}</p>
+                      </div>
+                    </div>
+
+                    {/* Highlights */}
+                    <div className="flex flex-wrap gap-1 mt-3">
+                      {area.highlights.map(h => (
+                        <span key={h} className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-[10px]">{h}</span>
+                      ))}
+                    </div>
+
+                    {/* CTA */}
+                    <div className="mt-3 flex items-center gap-1 text-xs font-medium text-clt-teal group-hover:gap-2 transition-all">
+                      Browse services <ArrowRight className="w-3 h-3" />
+                    </div>
+                  </div>
+                </Link>
               );
             })}
           </div>
