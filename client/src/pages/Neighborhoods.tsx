@@ -1,7 +1,6 @@
 import PageLayout from "@/components/PageLayout";
 import { Link, useLocation } from "wouter";
-import { neighborhoods, type Neighborhood } from "@shared/neighborhoods";
-import { metroAreas, type MetroArea } from "@shared/metroAreas";
+import { allNeighborhoods, neighborhoods, type Neighborhood } from "@shared/neighborhoods";
 import {
   MapPin, ArrowRight, Home, TrendingUp, Train, DollarSign,
   GraduationCap, Moon, Heart, Baby, GitCompare, SlidersHorizontal, X,
@@ -50,18 +49,102 @@ function StatCell({ icon, label, value }: { icon: React.ReactNode; label: string
   );
 }
 
-const TYPE_CONFIG: Record<MetroArea["type"], { label: string; color: string; icon: React.ReactNode }> = {
+type MetroType = "core" | "inner-ring" | "suburb" | "exurb";
+
+const TYPE_CONFIG: Record<Exclude<MetroType, 'core'>, { label: string; color: string; icon: React.ReactNode }> = {
   "inner-ring": { label: "Inner Ring", color: "bg-clt-teal/15 text-clt-teal border-clt-teal/30", icon: <Building2 className="w-3 h-3" /> },
   "suburb": { label: "Suburb", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30", icon: <TreePine className="w-3 h-3" /> },
   "exurb": { label: "Exurb", color: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30", icon: <Globe className="w-3 h-3" /> },
 };
+
+function NeighborhoodCard({ n, isComparing, onToggleCompare }: {
+  n: Neighborhood;
+  isComparing: boolean;
+  onToggleCompare: (id: string) => void;
+}) {
+  const metroType = n.metroType;
+  const isMetro = metroType && metroType !== "core";
+  const typeCfg = isMetro ? TYPE_CONFIG[metroType as Exclude<MetroType, 'core'>] : null;
+
+  return (
+    <div className={`relative rounded-xl overflow-hidden border bg-card hover:shadow-xl transition-all h-full ${isComparing ? "border-clt-gold ring-2 ring-clt-gold/30" : "border-border"}`}>
+      {/* Compare checkbox */}
+      <button
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onToggleCompare(n.id); }}
+        className={`absolute top-4 left-4 z-20 w-7 h-7 rounded-md flex items-center justify-center transition-all ${
+          isComparing
+            ? "bg-clt-gold text-clt-navy"
+            : "bg-black/40 text-white/70 hover:bg-black/60 hover:text-white"
+        }`}
+        title={isComparing ? "Remove from comparison" : "Add to comparison"}
+      >
+        <GitCompare className="w-3.5 h-3.5" />
+      </button>
+
+      <Link href={`/neighborhood/${n.id}`} className="no-underline group block">
+        {/* Image */}
+        <div className="h-48 relative">
+          <img src={n.photoUrls[0]} alt={n.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+          <div className="absolute bottom-4 left-5 right-5">
+            <div className="flex items-center gap-2">
+              <h2 className="font-display font-bold text-xl text-white group-hover:text-clt-gold transition-colors">{n.name}</h2>
+              {typeCfg && (
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 ${typeCfg.color}`}>
+                  {typeCfg.icon} {typeCfg.label}
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-white/80 mt-0.5">{n.vibe}</p>
+          </div>
+          {n.featured && (
+            <span className="absolute top-4 right-4 px-2 py-0.5 rounded-full bg-clt-gold/90 text-clt-navy text-xs font-bold">Popular</span>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="p-5">
+          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">{n.description}</p>
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-1.5 mt-4">
+            {n.tags.map((tag) => (
+              <span key={tag} className="px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs">{tag}</span>
+            ))}
+          </div>
+
+          {/* Stats Grid — 6 stats */}
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-5 pt-4 border-t border-border">
+            <StatCell icon={<Home className="w-3.5 h-3.5" />} label="Rent" value={n.stats.avgRent} />
+            <StatCell icon={<TrendingUp className="w-3.5 h-3.5" />} label="Walk" value={n.stats.walkScore} />
+            <StatCell icon={<Train className="w-3.5 h-3.5" />} label="Uptown" value={n.stats.commuteToUptown} />
+            <StatCell icon={<GraduationCap className="w-3.5 h-3.5" />} label="Schools" value={n.stats.schoolTier} />
+            <StatCell icon={<Moon className="w-3.5 h-3.5" />} label="Nightlife" value={n.stats.nightlifeLevel} />
+            <StatCell icon={<Heart className="w-3.5 h-3.5" />} label="Family" value={`${n.stats.familyScore}/5`} />
+          </div>
+
+          {/* CTA */}
+          <div className="mt-4 flex items-center gap-1 text-sm font-medium text-primary group-hover:gap-2 transition-all">
+            View full guide <ArrowRight className="w-4 h-4" />
+          </div>
+        </div>
+      </Link>
+    </div>
+  );
+}
 
 export default function Neighborhoods() {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [, navigate] = useLocation();
 
-  const filtered = useMemo(() => filterNeighborhoods(neighborhoods, filter), [filter]);
+  // Split into core and metro, then filter each
+  const coreIds = useMemo(() => new Set(neighborhoods.map(n => n.id)), []);
+  const coreList = useMemo(() => allNeighborhoods.filter(n => coreIds.has(n.id)), [coreIds]);
+  const metroList = useMemo(() => allNeighborhoods.filter(n => !coreIds.has(n.id)), [coreIds]);
+
+  const filteredCore = useMemo(() => filterNeighborhoods(coreList, filter), [coreList, filter]);
+  const filteredMetro = useMemo(() => filterNeighborhoods(metroList, filter), [metroList, filter]);
 
   function toggleCompare(id: string) {
     setCompareIds(prev => {
@@ -88,7 +171,7 @@ export default function Neighborhoods() {
               Charlotte Neighborhoods
             </h1>
             <p className="mt-4 text-lg text-white/70 leading-relaxed">
-              Eight core neighborhoods with full guides, plus the wider metro Charlotte area. Filter by what matters to you, compare side-by-side, and find your fit.
+              {allNeighborhoods.length} neighborhoods across the Charlotte metro. Full guides with insider tips, costs, and local intel. Filter by what matters to you, compare side-by-side, and find your fit.
             </p>
           </div>
         </div>
@@ -124,7 +207,7 @@ export default function Neighborhoods() {
               <GitCompare className="w-5 h-5 text-clt-gold shrink-0" />
               <div className="flex gap-2 overflow-x-auto">
                 {compareIds.map(id => {
-                  const n = neighborhoods.find(x => x.id === id);
+                  const n = allNeighborhoods.find(x => x.id === id);
                   return (
                     <span key={id} className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white text-sm whitespace-nowrap">
                       {n?.name}
@@ -149,157 +232,68 @@ export default function Neighborhoods() {
       )}
 
       {/* Core Neighborhoods Grid */}
-      <section className={`py-10 md:py-14 ${compareIds.length > 0 ? "pb-8" : ""}`}>
-        <div className="container">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="h-8 w-1 rounded-full bg-clt-gold" />
-            <div>
-              <h2 className="font-display font-bold text-xl text-foreground">Core Neighborhoods</h2>
-              <p className="text-sm text-muted-foreground">Full guides with insider tips, costs, and local intel</p>
+      {filteredCore.length > 0 && (
+        <section className={`py-10 md:py-14 ${compareIds.length > 0 ? "pb-8" : ""}`}>
+          <div className="container">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-8 w-1 rounded-full bg-clt-gold" />
+              <div>
+                <h2 className="font-display font-bold text-xl text-foreground">Core Charlotte</h2>
+                <p className="text-sm text-muted-foreground">{filteredCore.length} neighborhoods with full guides, insider tips, costs, and local intel</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredCore.map((n) => (
+                <NeighborhoodCard
+                  key={n.id}
+                  n={n}
+                  isComparing={compareIds.includes(n.id)}
+                  onToggleCompare={toggleCompare}
+                />
+              ))}
             </div>
           </div>
+        </section>
+      )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filtered.map((n) => {
-              const isComparing = compareIds.includes(n.id);
-              return (
-                <div key={n.id} className={`relative rounded-xl overflow-hidden border bg-card hover:shadow-xl transition-all h-full ${isComparing ? "border-clt-gold ring-2 ring-clt-gold/30" : "border-border"}`}>
-                  {/* Compare checkbox */}
-                  <button
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleCompare(n.id); }}
-                    className={`absolute top-4 left-4 z-20 w-7 h-7 rounded-md flex items-center justify-center transition-all ${
-                      isComparing
-                        ? "bg-clt-gold text-clt-navy"
-                        : "bg-black/40 text-white/70 hover:bg-black/60 hover:text-white"
-                    }`}
-                    title={isComparing ? "Remove from comparison" : "Add to comparison"}
-                  >
-                    <GitCompare className="w-3.5 h-3.5" />
-                  </button>
+      {/* Metro Charlotte Neighborhoods */}
+      {filteredMetro.length > 0 && (
+        <section className={`py-10 md:py-14 bg-muted/30 border-t border-border ${compareIds.length > 0 ? "pb-28" : ""}`}>
+          <div className="container">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-8 w-1 rounded-full bg-clt-teal" />
+              <div>
+                <h2 className="font-display font-bold text-xl text-foreground">Metro Charlotte</h2>
+                <p className="text-sm text-muted-foreground">{filteredMetro.length} surrounding communities — suburbs, inner-ring towns, and exurbs</p>
+              </div>
+            </div>
 
-                  <Link href={`/neighborhood/${n.id}`} className="no-underline group block">
-                    {/* Image */}
-                    <div className="h-48 relative">
-                      <img src={n.photoUrls[0]} alt={n.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                      <div className="absolute bottom-4 left-5 right-5">
-                        <h2 className="font-display font-bold text-xl text-white group-hover:text-clt-gold transition-colors">{n.name}</h2>
-                        <p className="text-sm text-white/80 mt-0.5">{n.vibe}</p>
-                      </div>
-                      {n.featured && (
-                        <span className="absolute top-4 right-4 px-2 py-0.5 rounded-full bg-clt-gold/90 text-clt-navy text-xs font-bold">Popular</span>
-                      )}
-                    </div>
+            {/* Type legend */}
+            <div className="flex flex-wrap gap-3 mb-8 ml-4">
+              {(["inner-ring", "suburb", "exurb"] as const).map(type => {
+                const cfg = TYPE_CONFIG[type];
+                return (
+                  <span key={type} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${cfg.color}`}>
+                    {cfg.icon} {cfg.label}
+                  </span>
+                );
+              })}
+            </div>
 
-                    {/* Content */}
-                    <div className="p-5">
-                      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">{n.description}</p>
-
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-1.5 mt-4">
-                        {n.tags.map((tag) => (
-                          <span key={tag} className="px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs">{tag}</span>
-                        ))}
-                      </div>
-
-                      {/* Stats Grid — 6 stats */}
-                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-5 pt-4 border-t border-border">
-                        <StatCell icon={<Home className="w-3.5 h-3.5" />} label="Rent" value={n.stats.avgRent} />
-                        <StatCell icon={<TrendingUp className="w-3.5 h-3.5" />} label="Walk" value={n.stats.walkScore} />
-                        <StatCell icon={<Train className="w-3.5 h-3.5" />} label="Uptown" value={n.stats.commuteToUptown} />
-                        <StatCell icon={<GraduationCap className="w-3.5 h-3.5" />} label="Schools" value={n.stats.schoolTier} />
-                        <StatCell icon={<Moon className="w-3.5 h-3.5" />} label="Nightlife" value={n.stats.nightlifeLevel} />
-                        <StatCell icon={<Heart className="w-3.5 h-3.5" />} label="Family" value={`${n.stats.familyScore}/5`} />
-                      </div>
-
-                      {/* CTA */}
-                      <div className="mt-4 flex items-center gap-1 text-sm font-medium text-primary group-hover:gap-2 transition-all">
-                        View full guide <ArrowRight className="w-4 h-4" />
-                      </div>
-                    </div>
-                  </Link>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Metro Charlotte Areas */}
-      <section className={`py-10 md:py-14 bg-muted/30 border-t border-border ${compareIds.length > 0 ? "pb-28" : ""}`}>
-        <div className="container">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="h-8 w-1 rounded-full bg-clt-teal" />
-            <div>
-              <h2 className="font-display font-bold text-xl text-foreground">Metro Charlotte</h2>
-              <p className="text-sm text-muted-foreground">The wider Charlotte area — suburbs, exurbs, and emerging neighborhoods</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredMetro.map((n) => (
+                <NeighborhoodCard
+                  key={n.id}
+                  n={n}
+                  isComparing={compareIds.includes(n.id)}
+                  onToggleCompare={toggleCompare}
+                />
+              ))}
             </div>
           </div>
-
-          {/* Type legend */}
-          <div className="flex flex-wrap gap-3 mb-8 ml-4">
-            {(["inner-ring", "suburb", "exurb"] as const).map(type => {
-              const cfg = TYPE_CONFIG[type];
-              return (
-                <span key={type} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${cfg.color}`}>
-                  {cfg.icon} {cfg.label}
-                </span>
-              );
-            })}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {metroAreas.map((area) => {
-              const cfg = TYPE_CONFIG[area.type];
-              return (
-                <Link
-                  key={area.id}
-                  href={`/directory?area=${encodeURIComponent(area.name)}`}
-                  className="no-underline group"
-                >
-                  <div className="p-4 rounded-xl border border-border bg-card hover:shadow-lg hover:border-clt-teal/40 transition-all h-full">
-                    {/* Header */}
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <h3 className="font-display font-bold text-base text-foreground group-hover:text-clt-teal transition-colors">
-                        {area.name}
-                      </h3>
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 ${cfg.color}`}>
-                        {cfg.icon} {cfg.label}
-                      </span>
-                    </div>
-
-                    <p className="text-xs text-muted-foreground leading-relaxed">{area.vibe}</p>
-
-                    {/* Quick stats */}
-                    <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border">
-                      <div className="text-center">
-                        <p className="text-[10px] text-muted-foreground uppercase">Rent</p>
-                        <p className="text-xs font-semibold text-foreground">{area.avgRent}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-[10px] text-muted-foreground uppercase">Distance</p>
-                        <p className="text-xs font-semibold text-foreground">{area.distance}</p>
-                      </div>
-                    </div>
-
-                    {/* Highlights */}
-                    <div className="flex flex-wrap gap-1 mt-3">
-                      {area.highlights.map(h => (
-                        <span key={h} className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground text-[10px]">{h}</span>
-                      ))}
-                    </div>
-
-                    {/* CTA */}
-                    <div className="mt-3 flex items-center gap-1 text-xs font-medium text-clt-teal group-hover:gap-2 transition-all">
-                      Browse services <ArrowRight className="w-3 h-3" />
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
     </PageLayout>
   );
 }

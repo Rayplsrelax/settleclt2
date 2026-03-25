@@ -1,7 +1,9 @@
-/* ============================================/* ============================================
+/* ============================================
    SETTLE CLT — Neighborhood Data (TypeScript)
-   8 Charlotte Neighborhoods — Expanded Model
+   Charlotte Neighborhoods — Expanded Model
    ============================================ */
+
+import { metroNeighborhoods } from './metroNeighborhoods';
 
 export interface NeighborhoodStats {
   avgRent: string;
@@ -36,6 +38,7 @@ export interface Neighborhood {
   vibe: string;
   description: string;
   gradient: string;
+  metroType?: 'core' | 'inner-ring' | 'suburb' | 'exurb';
   stats: NeighborhoodStats;
   tags: string[];
   bestFor: string;
@@ -893,6 +896,15 @@ export const neighborhoods: Neighborhood[] = [
 
   }
 ];
+
+// Mark core neighborhoods
+const coreNeighborhoods: Neighborhood[] = neighborhoods.map(n => ({ ...n, metroType: 'core' as const }));
+
+// Merge: core first, then metro (excluding any duplicates by id)
+const coreIds = new Set(coreNeighborhoods.map(n => n.id));
+const uniqueMetro = metroNeighborhoods.filter(n => !coreIds.has(n.id));
+
+export const allNeighborhoods: Neighborhood[] = [...coreNeighborhoods, ...uniqueMetro];
 
 // Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { SERVICES, SERVICE_CATEGORIES, SERVICE_SUPER_GROUPS } from "../shared/services";
-import { CORE_NEIGHBORHOOD_NAMES, metroAreas } from "../shared/metroAreas";
+import { CORE_NEIGHBORHOOD_NAMES, METRO_AREA_NAMES } from "../shared/metroAreas";
+import { neighborhoods, allNeighborhoods, type Neighborhood } from "../shared/neighborhoods";
+import { metroNeighborhoods } from "../shared/metroNeighborhoods";
 
 const JUNK_AREA_VALUES = [
   "Anywhere", "Online", "Expanding", "Select Areas", "Rural Areas",
@@ -9,7 +11,7 @@ const JUNK_AREA_VALUES = [
 
 const VALID_AREAS = [
   ...CORE_NEIGHBORHOOD_NAMES,
-  "Charlotte", "Charlotte Metro", "Concord", "East Charlotte", "Elizabeth",
+  "Camp North End", "Charlotte", "Charlotte Metro", "Concord", "East Charlotte", "Elizabeth",
   "Fort Mill", "Huntersville", "Lake Norman", "LoSo", "Matthews",
   "Mecklenburg County", "Pineville", "South Charlotte", "SouthPark",
   "University Area", "West Charlotte",
@@ -69,31 +71,79 @@ describe("Area values cleanup", () => {
   });
 });
 
-describe("Metro areas data", () => {
+describe("Neighborhood data model", () => {
   it("has 8 core neighborhoods", () => {
+    expect(neighborhoods.length).toBe(8);
     expect(CORE_NEIGHBORHOOD_NAMES.length).toBe(8);
   });
 
-  it("has 14 metro areas", () => {
-    expect(metroAreas.length).toBe(14);
+  it("has 12 metro neighborhoods", () => {
+    expect(metroNeighborhoods.length).toBe(12);
   });
 
-  it("every metro area has required fields", () => {
-    for (const area of metroAreas) {
-      expect(area.id).toBeTruthy();
-      expect(area.name).toBeTruthy();
-      expect(area.type).toBeTruthy();
-      expect(area.vibe).toBeTruthy();
-      expect(area.distance).toBeTruthy();
-      expect(area.avgRent).toBeTruthy();
-      expect(area.highlights.length).toBeGreaterThan(0);
+  it("has 20 total neighborhoods in allNeighborhoods", () => {
+    expect(allNeighborhoods.length).toBe(20);
+  });
+
+  it("no duplicate IDs in allNeighborhoods", () => {
+    const ids = allNeighborhoods.map(n => n.id);
+    const uniqueIds = new Set(ids);
+    expect(uniqueIds.size).toBe(ids.length);
+  });
+
+  it("core neighborhoods have metroType 'core'", () => {
+    const coreIds = new Set(neighborhoods.map(n => n.id));
+    for (const n of allNeighborhoods) {
+      if (coreIds.has(n.id)) {
+        expect(n.metroType).toBe("core");
+      }
     }
   });
 
-  it("metro area types are valid", () => {
+  it("metro neighborhoods have valid metroType", () => {
     const validTypes = new Set(["inner-ring", "suburb", "exurb"]);
-    for (const area of metroAreas) {
-      expect(validTypes.has(area.type)).toBe(true);
+    for (const n of metroNeighborhoods) {
+      expect(n.metroType).toBeTruthy();
+      expect(validTypes.has(n.metroType!)).toBe(true);
     }
+  });
+
+  it("every neighborhood has required fields", () => {
+    for (const n of allNeighborhoods) {
+      expect(n.id).toBeTruthy();
+      expect(n.name).toBeTruthy();
+      expect(n.vibe).toBeTruthy();
+      expect(n.description).toBeTruthy();
+      expect(n.photoUrls.length).toBeGreaterThan(0);
+      expect(n.tags.length).toBeGreaterThan(0);
+      expect(n.stats.avgRent).toBeTruthy();
+      expect(n.stats.walkScore).toBeGreaterThanOrEqual(0);
+      expect(n.monthlyCosts.rent1br).toBeGreaterThan(0);
+      expect(n.hiddenGems.length).toBeGreaterThan(0);
+      expect(n.keyPlaces.length).toBeGreaterThan(0);
+      expect(n.settlingTimeline.length).toBeGreaterThan(0);
+      expect(n.localsLove.length).toBeGreaterThan(0);
+      expect(n.localsDontLove.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("every neighborhood has valid photo URLs", () => {
+    for (const n of allNeighborhoods) {
+      for (const url of n.photoUrls) {
+        expect(url).toMatch(/^https?:\/\//);
+      }
+    }
+  });
+
+  it("University City is only in core, not in metro", () => {
+    const coreIds = neighborhoods.map(n => n.id);
+    const metroIds = metroNeighborhoods.map(n => n.id);
+    expect(coreIds).toContain("university-city");
+    expect(metroIds).not.toContain("university-city");
+  });
+
+  it("Mecklenburg County is not in any neighborhood list", () => {
+    const allIds = allNeighborhoods.map(n => n.id);
+    expect(allIds).not.toContain("mecklenburg-county");
   });
 });

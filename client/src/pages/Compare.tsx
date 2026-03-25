@@ -1,5 +1,5 @@
 import PageLayout from "@/components/PageLayout";
-import { neighborhoods, type Neighborhood } from "@shared/neighborhoods";
+import { allNeighborhoods, type Neighborhood } from "@shared/neighborhoods";
 import { useLocation, useSearch, Link } from "wouter";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
@@ -42,7 +42,7 @@ export default function Compare() {
   const [showPicker, setShowPicker] = useState(initialIds.length < 2);
 
   const selected = useMemo(() =>
-    selectedIds.map(id => neighborhoods.find(n => n.id === id)).filter(Boolean) as Neighborhood[],
+    selectedIds.map(id => allNeighborhoods.find(n => n.id === id)).filter(Boolean) as Neighborhood[],
     [selectedIds]
   );
 
@@ -60,7 +60,7 @@ export default function Compare() {
     navigate(`/compare?ids=${next.join(",")}`, { replace: true });
   }
 
-  const available = neighborhoods.filter(n => !selectedIds.includes(n.id));
+  const available = allNeighborhoods.filter(n => !selectedIds.includes(n.id));
 
   // Find the lowest cost for highlighting
   function lowestCost(key: keyof Neighborhood["monthlyCosts"]): number {

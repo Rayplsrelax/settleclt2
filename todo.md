@@ -62,3 +62,9 @@
 - [x] Clean up junk area values in services data (Online, Anywhere, Expanding, etc. → Charlotte Metro)
 - [x] Group directory area dropdown into Core Neighborhoods and Metro Charlotte optgroups
 - [x] Add services data integrity tests (24 tests passing)
+- [x] Remove duplicate neighborhoods between core and metro sections (University City kept in core only, Mecklenburg County removed)
+- [x] Upgrade metro Charlotte areas to match core neighborhood card design (photos, stats, tags, descriptions)
+- [x] Add rich data models for 12 metro areas (same Neighborhood interface as core: stats, costs, hidden gems, day-in-life, etc.)
+- [x] Find and upload 36 authentic photos for all 12 metro areas to CDN
+- [x] Unified detail pages: metro areas use same NeighborhoodDetail component with full guides
+- [x] Updated Compare tool, Directory, and Home page to use allNeighborhoods (20 total)

@@ -1,6 +1,6 @@
 import PageLayout from "@/components/PageLayout";
 import { Link, useParams, useLocation } from "wouter";
-import { neighborhoods } from "@shared/neighborhoods";
+import { allNeighborhoods } from "@shared/neighborhoods";
 import { SERVICES, type Service } from "@shared/services";
 import { useMyNeighborhood } from "@/hooks/useMyNeighborhood";
 import { MapView } from "@/components/Map";
@@ -51,7 +51,7 @@ const PIN_COLORS: Record<string, string> = {
 export default function NeighborhoodDetail() {
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
-  const n = neighborhoods.find((nb) => nb.id === params.id);
+  const n = allNeighborhoods.find((nb) => nb.id === params.id);
   const { myNeighborhood, setMyNeighborhood, clearMyNeighborhood } = useMyNeighborhood();
   const [selectedCity, setSelectedCity] = useState<string>("nyc");
   const [activeSection, setActiveSection] = useState("overview");

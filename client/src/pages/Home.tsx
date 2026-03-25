@@ -49,7 +49,7 @@ function Hero() {
             <span className="block text-clt-gold">settling in Charlotte</span>
           </h1>
           <p className="mt-5 text-lg md:text-xl text-white/80 leading-relaxed max-w-xl">
-            Explore 8 neighborhoods, discover 400+ local services, and get
+            Explore 20 neighborhoods, discover 400+ local services, and get
             honest advice from people who actually live here.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -76,7 +76,7 @@ function Hero() {
           {/* Quick stats bar */}
           <div className="mt-10 flex flex-wrap gap-6 md:gap-10">
             {[
-              { value: "8", label: "Neighborhoods" },
+              { value: "20", label: "Neighborhoods" },
               { value: "400+", label: "Local Services" },
               { value: "40", label: "Categories" },
             ].map((stat) => (
@@ -102,7 +102,7 @@ function HowItWorks() {
       icon: <Compass className="w-7 h-7" />,
       title: "Pick Your Neighborhood",
       description:
-        "Browse 8 Charlotte neighborhoods with honest reviews, cost breakdowns, and day-in-the-life stories from real residents.",
+        "Browse 20 Charlotte neighborhoods with honest reviews, cost breakdowns, and day-in-the-life stories from real residents.",
     },
     {
       icon: <Search className="w-7 h-7" />,
@@ -174,7 +174,7 @@ function FeaturedNeighborhoods() {
             href="/neighborhoods"
             className="hidden sm:flex items-center gap-1 text-sm font-medium text-primary hover:underline no-underline"
           >
-            View all 8 <ChevronRight className="w-4 h-4" />
+            View all 20 <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -216,7 +216,7 @@ function FeaturedNeighborhoods() {
           href="/neighborhoods"
           className="sm:hidden flex items-center justify-center gap-1 mt-6 text-sm font-medium text-primary no-underline"
         >
-          View all 8 neighborhoods <ChevronRight className="w-4 h-4" />
+          View all 20 neighborhoods <ChevronRight className="w-4 h-4" />
         </Link>
       </div>
     </section>
