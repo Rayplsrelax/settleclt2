@@ -14,6 +14,9 @@ const Blog = lazy(() => import("./pages/Blog"));
 const ListYourBusiness = lazy(() => import("./pages/ListYourBusiness"));
 const Compare = lazy(() => import("./pages/Compare"));
 const Quiz = lazy(() => import("./pages/Quiz"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Passport = lazy(() => import("./pages/Passport"));
+const Wishlist = lazy(() => import("./pages/Wishlist"));
 
 function PageLoader() {
   return (
@@ -35,6 +38,9 @@ function Router() {
         <Route path="/list-your-business" component={ListYourBusiness} />
         <Route path="/compare" component={Compare} />
         <Route path="/quiz" component={Quiz} />
+        <Route path="/profile" component={Profile} />
+        <Route path="/passport" component={Passport} />
+        <Route path="/wishlist" component={Wishlist} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>

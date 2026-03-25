@@ -81,3 +81,15 @@
 - [x] Populate sportsRec data for all 20 neighborhoods + Ballantyne fix
 - [x] Build Sports & Recreation section in NeighborhoodDetail page with sticky nav tab
 - [x] Write tests for sports data integrity (7 tests, 57 total passing)
+- [x] Phase 1: Auth UI — Add login button to navigation bar (visible when logged out)
+- [x] Phase 1: Auth UI — Add user avatar dropdown menu (visible when logged in) with profile link and logout
+- [x] Phase 1: Auth UI — Build user profile page showing name, avatar, and account info
+- [x] Phase 1: Auth UI — Create reusable AuthGate component (prompts login when accessing protected features)
+- [x] Phase 1: Auth UI — Add /profile, /passport, /wishlist routes to App.tsx
+- [x] Phase 1: Auth UI — All existing pages remain fully public; protected features use AuthGate
+- [ ] Future: Admin blog editor (Option 1) for creating/editing posts in-browser
+- [ ] Future: Google Places admin enrichment tool (Option A)
+- [ ] Future: CLT Passport — track visited places with stamps
+- [ ] Future: Bingo cards — themed challenge boards
+- [ ] Future: Wishlist — save places with notes
+- [ ] Future: Reddit-style comments on neighborhoods and businesses

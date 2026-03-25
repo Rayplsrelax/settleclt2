@@ -1,7 +1,17 @@
 import { Link, useLocation } from "wouter";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { getLoginUrl } from "@/const";
 import { useState } from "react";
-import { Sun, Moon, Menu, X } from "lucide-react";
+import { Sun, Moon, Menu, X, LogIn, User, LogOut, Heart, Stamp, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -10,10 +20,78 @@ const navLinks = [
   { href: "/blog", label: "Blog" },
 ];
 
+function getInitials(name: string | null | undefined): string {
+  if (!name) return "U";
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+function UserMenu() {
+  const { user, logout } = useAuth();
+  const [, navigate] = useLocation();
+
+  if (!user) return null;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-muted transition-colors outline-none">
+          <Avatar className="h-7 w-7">
+            <AvatarFallback className="bg-primary/15 text-primary text-xs font-semibold">
+              {getInitials(user.name)}
+            </AvatarFallback>
+          </Avatar>
+          <span className="text-sm font-medium text-foreground hidden lg:inline max-w-[100px] truncate">
+            {user.name || "User"}
+          </span>
+          <ChevronDown className="w-3.5 h-3.5 text-muted-foreground hidden lg:inline" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-52">
+        <div className="px-3 py-2">
+          <p className="text-sm font-medium text-foreground truncate">{user.name || "User"}</p>
+          <p className="text-xs text-muted-foreground truncate">{user.email || ""}</p>
+        </div>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigate("/profile")}>
+          <User className="w-4 h-4 mr-2" />
+          My Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/passport")}>
+          <Stamp className="w-4 h-4 mr-2" />
+          CLT Passport
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/wishlist")}>
+          <Heart className="w-4 h-4 mr-2" />
+          My Wishlist
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => logout()}
+          className="text-destructive focus:text-destructive"
+        >
+          <LogOut className="w-4 h-4 mr-2" />
+          Sign Out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export default function Navbar() {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const { theme, toggleTheme } = useTheme();
+  const { user, loading } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleLogin = () => {
+    window.location.href = getLoginUrl();
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
@@ -45,9 +123,29 @@ export default function Navbar() {
           >
             List Your Business
           </Link>
+
+          {/* Auth section */}
+          {!loading && (
+            <>
+              {user ? (
+                <div className="ml-2">
+                  <UserMenu />
+                </div>
+              ) : (
+                <button
+                  onClick={handleLogin}
+                  className="ml-2 flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Sign In
+                </button>
+              )}
+            </>
+          )}
+
           <button
             onClick={toggleTheme}
-            className="ml-2 p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+            className="ml-1 p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
             aria-label="Toggle theme"
           >
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -55,7 +153,10 @@ export default function Navbar() {
         </div>
 
         {/* Mobile controls */}
-        <div className="flex md:hidden items-center gap-2">
+        <div className="flex md:hidden items-center gap-1">
+          {!loading && user && (
+            <UserMenu />
+          )}
           <button
             onClick={toggleTheme}
             className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground"
@@ -98,6 +199,18 @@ export default function Navbar() {
             >
               List Your Business
             </Link>
+            {!loading && !user && (
+              <button
+                onClick={() => {
+                  setMobileOpen(false);
+                  handleLogin();
+                }}
+                className="mt-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors"
+              >
+                <LogIn className="w-4 h-4" />
+                Sign In
+              </button>
+            )}
           </div>
         </div>
       )}
