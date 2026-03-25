@@ -156,6 +156,39 @@ function HowItWorks() {
   );
 }
 
+function QuizCTA() {
+  return (
+    <section className="py-14 md:py-18">
+      <div className="container">
+        <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-clt-navy via-clt-navy to-clt-teal-dark p-8 md:p-12">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-clt-gold rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-clt-teal rounded-full blur-3xl" />
+          </div>
+          <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
+            <div className="flex-1 text-center md:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-clt-gold text-xs font-semibold mb-4">
+                <Sparkles className="w-3.5 h-3.5" /> 2-Minute Quiz
+              </div>
+              <h2 className="font-display font-bold text-2xl md:text-3xl text-white mb-3">
+                Not sure where to live?
+              </h2>
+              <p className="text-white/70 max-w-md">
+                Answer 6 quick questions about your budget, lifestyle, and priorities — we'll match you with the best Charlotte neighborhoods.
+              </p>
+            </div>
+            <Link href="/quiz">
+              <Button size="lg" className="bg-clt-gold hover:bg-clt-gold/90 text-clt-navy font-bold text-base px-8 py-6 rounded-xl shadow-lg gap-2 whitespace-nowrap">
+                Take the Quiz <ArrowRight className="w-5 h-5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function FeaturedNeighborhoods() {
   const featured = neighborhoods.filter((n) => n.featured).slice(0, 4);
   return (
@@ -461,6 +494,7 @@ export default function Home() {
     <PageLayout>
       <Hero />
       <HowItWorks />
+      <QuizCTA />
       <FeaturedNeighborhoods />
       <DirectoryPreview />
       <CTABanner />

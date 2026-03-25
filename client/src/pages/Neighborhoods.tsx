@@ -4,7 +4,7 @@ import { allNeighborhoods, neighborhoods, type Neighborhood } from "@shared/neig
 import {
   MapPin, ArrowRight, Home, TrendingUp, Train, DollarSign,
   GraduationCap, Moon, Heart, Baby, GitCompare, SlidersHorizontal, X,
-  Building2, TreePine, Globe
+  Building2, TreePine, Globe, Sparkles
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
@@ -173,6 +173,11 @@ export default function Neighborhoods() {
             <p className="mt-4 text-lg text-white/70 leading-relaxed">
               {allNeighborhoods.length} neighborhoods across the Charlotte metro. Full guides with insider tips, costs, and local intel. Filter by what matters to you, compare side-by-side, and find your fit.
             </p>
+            <Link href="/quiz">
+              <Button className="mt-6 bg-clt-gold hover:bg-clt-gold/90 text-clt-navy font-bold gap-2 rounded-xl">
+                <Sparkles className="w-4 h-4" /> Take the Quiz — Find Your Match
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

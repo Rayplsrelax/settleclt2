@@ -70,3 +70,9 @@
 - [x] Updated Compare tool, Directory, and Home page to use allNeighborhoods (20 total)
 - [x] Fix: Remove University City from METRO_AREA_NAMES dropdown (already in core; was never duplicated in metro data)
 - [x] Fix: Remove Mecklenburg County from services area values (7 entries → Charlotte Metro)
+- [x] Build "Find Your Neighborhood" quiz page with step-by-step questions
+- [x] Design scoring algorithm mapping quiz answers to all 20 neighborhoods
+- [x] Build results page with top 3 ranked matches, scores, and CTAs
+- [x] Add quiz route to App.tsx and navigation links
+- [x] Add quiz entry points on Home page and Neighborhoods page
+- [x] Write vitest tests for the quiz scoring algorithm (20 tests)
