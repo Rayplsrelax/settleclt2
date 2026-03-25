@@ -8,6 +8,7 @@ import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { Search, ExternalLink, Phone, X, MapPin, Star, Filter, Map, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
+import WishlistButton from "@/components/WishlistButton";
 
 // Generate a slug key from service name
 function toSlug(name: string): string {
@@ -486,7 +487,10 @@ export default function Directory() {
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">{s.description}</p>
                         </div>
-                        {cat && <span className="text-lg flex-shrink-0">{cat.icon}</span>}
+                        <div className="flex items-center gap-1 shrink-0">
+                          <WishlistButton serviceKey={toSlug(s.name)} />
+                          {cat && <span className="text-lg">{cat.icon}</span>}
+                        </div>
                       </div>
                       {/* Enrichment data: rating + reviews */}
                       {(() => {

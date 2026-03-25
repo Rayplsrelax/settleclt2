@@ -1,22 +1,27 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router, adminProcedure } from "./_core/trpc";
+import { publicProcedure, protectedProcedure, router, adminProcedure } from "./_core/trpc";
 import { z } from "zod";
-import { insertMovingQuote, insertBusinessSubmission, insertNewsletterSubscriber, upsertEnrichedService, getEnrichedService, getAllEnrichedServices } from "./db";
+import {
+  insertMovingQuote, insertBusinessSubmission, insertNewsletterSubscriber,
+  upsertEnrichedService, getEnrichedService, getAllEnrichedServices,
+  addPassportEntry, getPassportEntries, deletePassportEntry,
+  getActiveBingoCards, getBingoProgress, upsertBingoProgress,
+  addWishlistEntry, removeWishlistEntry, getWishlistEntries, updateWishlistNotes,
+  addComment, getComments, deleteComment, voteComment, getUserVotes,
+  createBlogPost, updateBlogPost, deleteBlogPost, getPublishedBlogPosts, getAllBlogPosts, getBlogPostBySlug,
+} from "./db";
 import { makeRequest, type PlacesSearchResult, type PlaceDetailsResult } from "./_core/map";
 
 export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      return {
-        success: true,
-      } as const;
+      return { success: true } as const;
     }),
   }),
 
@@ -66,7 +71,7 @@ export const appRouter = router({
     searchPlaces: adminProcedure
       .input(z.object({
         query: z.string().min(1),
-        location: z.string().optional(), // "35.2271,-80.8431" for Charlotte center
+        location: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         const params: Record<string, unknown> = {
@@ -94,9 +99,7 @@ export const appRouter = router({
       }),
 
     getPlaceDetails: adminProcedure
-      .input(z.object({
-        placeId: z.string().min(1),
-      }))
+      .input(z.object({ placeId: z.string().min(1) }))
       .mutation(async ({ input }) => {
         const result = await makeRequest<PlaceDetailsResult>(
           "/maps/api/place/details/json",
@@ -160,9 +163,74 @@ export const appRouter = router({
         return getEnrichedService(input.serviceKey) ?? null;
       }),
 
-    getAllEnrichments: adminProcedure
-      .query(async () => {
-        return getAllEnrichedServices();
+    getAllEnrichments: adminProcedure.query(async () => {
+      return getAllEnrichedServices();
+    }),
+
+    // Admin blog management
+    getAllBlogPosts: adminProcedure.query(async () => {
+      return getAllBlogPosts();
+    }),
+
+    createBlogPost: adminProcedure
+      .input(z.object({
+        title: z.string().min(1),
+        slug: z.string().min(1),
+        excerpt: z.string().optional(),
+        content: z.string().min(1),
+        category: z.string().optional(),
+        coverImage: z.string().optional(),
+        status: z.enum(['draft', 'published']).optional(),
+        readTime: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return createBlogPost({
+          title: input.title,
+          slug: input.slug,
+          excerpt: input.excerpt ?? null,
+          content: input.content,
+          category: input.category ?? null,
+          coverImage: input.coverImage ?? null,
+          authorId: ctx.user.id,
+          status: input.status ?? 'draft',
+          readTime: input.readTime ?? null,
+          publishedAt: input.status === 'published' ? new Date() : null,
+        });
+      }),
+
+    updateBlogPost: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().optional(),
+        slug: z.string().optional(),
+        excerpt: z.string().optional(),
+        content: z.string().optional(),
+        category: z.string().optional(),
+        coverImage: z.string().optional(),
+        status: z.enum(['draft', 'published']).optional(),
+        readTime: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        const updateData: Record<string, any> = {};
+        if (data.title !== undefined) updateData.title = data.title;
+        if (data.slug !== undefined) updateData.slug = data.slug;
+        if (data.excerpt !== undefined) updateData.excerpt = data.excerpt;
+        if (data.content !== undefined) updateData.content = data.content;
+        if (data.category !== undefined) updateData.category = data.category;
+        if (data.coverImage !== undefined) updateData.coverImage = data.coverImage;
+        if (data.status !== undefined) {
+          updateData.status = data.status;
+          if (data.status === 'published') updateData.publishedAt = new Date();
+        }
+        if (data.readTime !== undefined) updateData.readTime = data.readTime;
+        return updateBlogPost(id, updateData);
+      }),
+
+    deleteBlogPost: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return deleteBlogPost(input.id);
       }),
   }),
 
@@ -175,6 +243,147 @@ export const appRouter = router({
       .input(z.object({ serviceKey: z.string() }))
       .query(async ({ input }) => {
         return getEnrichedService(input.serviceKey) ?? null;
+      }),
+  }),
+
+  // --- Passport (protected) ---
+  passport: router({
+    getEntries: protectedProcedure.query(async ({ ctx }) => {
+      return getPassportEntries(ctx.user.id);
+    }),
+    addEntry: protectedProcedure
+      .input(z.object({
+        serviceKey: z.string().optional(),
+        customPlaceName: z.string().optional(),
+        neighborhoodId: z.string().optional(),
+        notes: z.string().optional(),
+        visitedAt: z.date().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return addPassportEntry({
+          userId: ctx.user.id,
+          serviceKey: input.serviceKey ?? null,
+          customPlaceName: input.customPlaceName ?? null,
+          neighborhoodId: input.neighborhoodId ?? null,
+          notes: input.notes ?? null,
+          visitedAt: input.visitedAt ?? new Date(),
+        });
+      }),
+    deleteEntry: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        return deletePassportEntry(input.id, ctx.user.id);
+      }),
+  }),
+
+  // --- Bingo (public read, protected write) ---
+  bingo: router({
+    getCards: publicProcedure.query(async () => {
+      return getActiveBingoCards();
+    }),
+    getProgress: protectedProcedure.query(async ({ ctx }) => {
+      return getBingoProgress(ctx.user.id);
+    }),
+    updateProgress: protectedProcedure
+      .input(z.object({
+        cardId: z.number(),
+        completedSquaresJson: z.string(),
+        completedAt: z.date().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return upsertBingoProgress({
+          userId: ctx.user.id,
+          cardId: input.cardId,
+          completedSquaresJson: input.completedSquaresJson,
+          completedAt: input.completedAt ?? null,
+        });
+      }),
+  }),
+
+  // --- Wishlist (protected) ---
+  wishlist: router({
+    getEntries: protectedProcedure.query(async ({ ctx }) => {
+      return getWishlistEntries(ctx.user.id);
+    }),
+    add: protectedProcedure
+      .input(z.object({
+        serviceKey: z.string().min(1),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return addWishlistEntry({
+          userId: ctx.user.id,
+          serviceKey: input.serviceKey,
+          notes: input.notes ?? null,
+        });
+      }),
+    remove: protectedProcedure
+      .input(z.object({ serviceKey: z.string().min(1) }))
+      .mutation(async ({ input, ctx }) => {
+        return removeWishlistEntry(input.serviceKey, ctx.user.id);
+      }),
+    updateNotes: protectedProcedure
+      .input(z.object({ id: z.number(), notes: z.string() }))
+      .mutation(async ({ input, ctx }) => {
+        return updateWishlistNotes(input.id, ctx.user.id, input.notes);
+      }),
+  }),
+
+  // --- Comments (public read, protected write) ---
+  comments: router({
+    getByTarget: publicProcedure
+      .input(z.object({
+        targetType: z.string(),
+        targetId: z.string(),
+      }))
+      .query(async ({ input }) => {
+        return getComments(input.targetType, input.targetId);
+      }),
+    getUserVotes: protectedProcedure
+      .input(z.object({ commentIds: z.array(z.number()) }))
+      .query(async ({ input, ctx }) => {
+        return getUserVotes(ctx.user.id, input.commentIds);
+      }),
+    add: protectedProcedure
+      .input(z.object({
+        targetType: z.string(),
+        targetId: z.string(),
+        parentId: z.number().optional(),
+        content: z.string().min(1).max(2000),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return addComment({
+          userId: ctx.user.id,
+          targetType: input.targetType,
+          targetId: input.targetId,
+          parentId: input.parentId ?? null,
+          content: input.content,
+        });
+      }),
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        return deleteComment(input.id, ctx.user.id);
+      }),
+    vote: protectedProcedure
+      .input(z.object({
+        commentId: z.number(),
+        voteType: z.enum(['up', 'down']),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return voteComment(ctx.user.id, input.commentId, input.voteType);
+      }),
+  }),
+
+  // --- Blog (public read) ---
+  blog: router({
+    getPublished: publicProcedure.query(async () => {
+      return getPublishedBlogPosts();
+    }),
+    getBySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => {
+        return getBlogPostBySlug(input.slug) ?? null;
       }),
   }),
 

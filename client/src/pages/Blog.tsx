@@ -1,12 +1,71 @@
 import PageLayout from "@/components/PageLayout";
 import { articles, blogCategories } from "@shared/articles";
-import { useState } from "react";
+import { trpc } from "@/lib/trpc";
+import { useState, useMemo } from "react";
+import { Link } from "wouter";
 import { BookOpen, Clock, Calendar } from "lucide-react";
+
+interface UnifiedArticle {
+  id: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  date: string;
+  readTime: string;
+  gradient?: string;
+  coverImage?: string | null;
+  featured?: boolean;
+  slug?: string;
+  source: "static" | "db";
+}
 
 export default function Blog() {
   const [activeCategory, setActiveCategory] = useState("All");
 
-  const filtered = activeCategory === "All" ? articles : articles.filter((a) => a.category === activeCategory);
+  const { data: dbPosts = [] } = trpc.blog.getPublished.useQuery();
+
+  // Merge static articles with DB posts
+  const allArticles = useMemo(() => {
+    const staticItems: UnifiedArticle[] = articles.map(a => ({
+      id: a.id,
+      title: a.title,
+      excerpt: a.excerpt,
+      category: a.category,
+      date: a.date,
+      readTime: a.readTime,
+      gradient: a.gradient,
+      featured: a.featured,
+      source: "static" as const,
+    }));
+
+    const dbItems: UnifiedArticle[] = dbPosts.map(p => ({
+      id: `db-${p.id}`,
+      title: p.title,
+      excerpt: p.excerpt || p.content.slice(0, 150) + "...",
+      category: p.category || "General",
+      date: p.publishedAt
+        ? new Date(p.publishedAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+        : new Date(p.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }),
+      readTime: p.readTime || "3 min read",
+      coverImage: p.coverImage,
+      slug: p.slug,
+      source: "db" as const,
+    }));
+
+    // DB posts first (newest), then static
+    return [...dbItems, ...staticItems];
+  }, [dbPosts]);
+
+  // Collect all categories
+  const allCategories = useMemo(() => {
+    const cats = new Set(["All", ...blogCategories]);
+    dbPosts.forEach(p => { if (p.category) cats.add(p.category); });
+    return Array.from(cats);
+  }, [dbPosts]);
+
+  const filtered = activeCategory === "All"
+    ? allArticles
+    : allArticles.filter(a => a.category === activeCategory);
 
   return (
     <PageLayout>
@@ -22,7 +81,7 @@ export default function Blog() {
         <div className="container">
           {/* Category filter */}
           <div className="flex flex-wrap gap-2 mb-8">
-            {blogCategories.map((cat) => (
+            {allCategories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
@@ -39,27 +98,47 @@ export default function Blog() {
 
           {/* Articles grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((a) => (
-              <article key={a.id} id={a.id} className="rounded-xl overflow-hidden border border-border bg-card hover:shadow-md transition-all group">
-                <div className="h-40 relative" style={{ background: a.gradient }}>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <BookOpen className="w-10 h-10 text-white/30" />
+            {filtered.map((a) => {
+              const inner = (
+                <article className="rounded-xl overflow-hidden border border-border bg-card hover:shadow-md transition-all group h-full">
+                  <div className="h-40 relative" style={a.coverImage ? {} : { background: a.gradient || "linear-gradient(135deg, #1a365d, #2d9c95)" }}>
+                    {a.coverImage ? (
+                      <img src={a.coverImage} alt={a.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <BookOpen className="w-10 h-10 text-white/30" />
+                      </div>
+                    )}
+                    {a.featured && (
+                      <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-clt-gold/90 text-clt-navy text-xs font-bold">Featured</span>
+                    )}
+                    {a.source === "db" && (
+                      <span className="absolute top-3 left-3 px-2 py-0.5 rounded-full bg-primary/90 text-primary-foreground text-xs font-bold">New</span>
+                    )}
                   </div>
-                  {a.featured && (
-                    <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-clt-gold/90 text-clt-navy text-xs font-bold">Featured</span>
-                  )}
-                </div>
-                <div className="p-5">
-                  <span className="text-xs font-medium text-primary">{a.category}</span>
-                  <h2 className="font-display font-semibold text-foreground mt-1 group-hover:text-primary transition-colors">{a.title}</h2>
-                  <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{a.excerpt}</p>
-                  <div className="flex items-center gap-4 mt-4 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {a.date}</span>
-                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {a.readTime}</span>
+                  <div className="p-5">
+                    <span className="text-xs font-medium text-primary">{a.category}</span>
+                    <h2 className="font-display font-semibold text-foreground mt-1 group-hover:text-primary transition-colors">{a.title}</h2>
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{a.excerpt}</p>
+                    <div className="flex items-center gap-4 mt-4 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {a.date}</span>
+                      <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {a.readTime}</span>
+                    </div>
                   </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+
+              if (a.source === "db" && a.slug) {
+                return (
+                  <Link key={a.id} href={`/blog/${a.slug}`} className="no-underline">
+                    {inner}
+                  </Link>
+                );
+              }
+
+              // Static articles — no detail page yet, just show in-place
+              return <div key={a.id}>{inner}</div>;
+            })}
           </div>
 
           {filtered.length === 0 && (

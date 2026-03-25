@@ -18,6 +18,8 @@ const Profile = lazy(() => import("./pages/Profile"));
 const Passport = lazy(() => import("./pages/Passport"));
 const Wishlist = lazy(() => import("./pages/Wishlist"));
 const AdminEnrich = lazy(() => import("./pages/AdminEnrich"));
+const AdminBlog = lazy(() => import("./pages/AdminBlog"));
+const BlogArticle = lazy(() => import("./pages/BlogArticle"));
 
 function PageLoader() {
   return (
@@ -43,6 +45,8 @@ function Router() {
         <Route path="/passport" component={Passport} />
         <Route path="/wishlist" component={Wishlist} />
         <Route path="/admin/enrich" component={AdminEnrich} />
+        <Route path="/admin/blog" component={AdminBlog} />
+        <Route path="/blog/:slug" component={BlogArticle} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>

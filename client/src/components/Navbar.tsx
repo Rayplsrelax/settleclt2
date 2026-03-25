@@ -77,6 +77,10 @@ function UserMenu() {
               <Shield className="w-4 h-4 mr-2" />
               Admin: Enrich Directory
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/admin/blog")}>
+              <Shield className="w-4 h-4 mr-2" />
+              Admin: Blog Editor
+            </DropdownMenuItem>
           </>
         )}
         <DropdownMenuSeparator />

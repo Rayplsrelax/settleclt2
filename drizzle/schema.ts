@@ -99,3 +99,117 @@ export const enrichedServices = mysqlTable("enriched_services", {
 
 export type EnrichedService = typeof enrichedServices.$inferSelect;
 export type InsertEnrichedService = typeof enrichedServices.$inferInsert;
+
+// --- CLT Passport: visited places stamps ---
+export const passportEntries = mysqlTable("passport_entries", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  /** Service key from shared/services.ts or custom place name */
+  serviceKey: varchar("serviceKey", { length: 255 }),
+  customPlaceName: varchar("customPlaceName", { length: 255 }),
+  neighborhoodId: varchar("neighborhoodId", { length: 128 }),
+  visitedAt: timestamp("visitedAt").defaultNow().notNull(),
+  notes: text("notes"),
+  photoUrl: varchar("photoUrl", { length: 1024 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PassportEntry = typeof passportEntries.$inferSelect;
+export type InsertPassportEntry = typeof passportEntries.$inferInsert;
+
+// --- Bingo cards: themed challenge boards ---
+export const bingoCards = mysqlTable("bingo_cards", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  theme: varchar("theme", { length: 128 }).notNull(),
+  /** JSON array of 25 square objects: { id, label, serviceKey?, category? } */
+  squaresJson: text("squaresJson").notNull(),
+  coverImage: varchar("coverImage", { length: 1024 }),
+  active: mysqlEnum("active", ["yes", "no"]).default("yes").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type BingoCard = typeof bingoCards.$inferSelect;
+export type InsertBingoCard = typeof bingoCards.$inferInsert;
+
+// --- Bingo progress: user completion tracking ---
+export const bingoProgress = mysqlTable("bingo_progress", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  cardId: int("cardId").notNull(),
+  /** JSON array of completed square IDs */
+  completedSquaresJson: text("completedSquaresJson"),
+  completedAt: timestamp("completedAt"),
+  startedAt: timestamp("startedAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BingoProgressRow = typeof bingoProgress.$inferSelect;
+export type InsertBingoProgress = typeof bingoProgress.$inferInsert;
+
+// --- Wishlists: saved places ---
+export const wishlists = mysqlTable("wishlists", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  serviceKey: varchar("serviceKey", { length: 255 }).notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type WishlistEntry = typeof wishlists.$inferSelect;
+export type InsertWishlistEntry = typeof wishlists.$inferInsert;
+
+// --- Comments: threaded discussions ---
+export const comments = mysqlTable("comments", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  /** 'neighborhood' or 'service' */
+  targetType: varchar("targetType", { length: 32 }).notNull(),
+  /** neighborhood id or service key */
+  targetId: varchar("targetId", { length: 255 }).notNull(),
+  /** null for top-level comments, parent comment id for replies */
+  parentId: int("parentId"),
+  content: text("content").notNull(),
+  upvotes: int("upvotes").default(0).notNull(),
+  downvotes: int("downvotes").default(0).notNull(),
+  deleted: mysqlEnum("deleted", ["yes", "no"]).default("no").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Comment = typeof comments.$inferSelect;
+export type InsertComment = typeof comments.$inferInsert;
+
+// --- Comment votes: track who voted ---
+export const commentVotes = mysqlTable("comment_votes", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  commentId: int("commentId").notNull(),
+  /** 'up' or 'down' */
+  voteType: mysqlEnum("voteType", ["up", "down"]).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type CommentVote = typeof commentVotes.$inferSelect;
+export type InsertCommentVote = typeof commentVotes.$inferInsert;
+
+// --- Blog posts: admin-managed articles ---
+export const blogPosts = mysqlTable("blog_posts", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 512 }).notNull(),
+  slug: varchar("slug", { length: 512 }).notNull().unique(),
+  excerpt: text("excerpt"),
+  content: text("content").notNull(),
+  category: varchar("category", { length: 128 }),
+  coverImage: varchar("coverImage", { length: 1024 }),
+  authorId: int("authorId").notNull(),
+  status: mysqlEnum("status", ["draft", "published"]).default("draft").notNull(),
+  readTime: varchar("readTime", { length: 32 }),
+  publishedAt: timestamp("publishedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BlogPost = typeof blogPosts.$inferSelect;
+export type InsertBlogPost = typeof blogPosts.$inferInsert;

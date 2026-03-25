@@ -87,12 +87,12 @@
 - [x] Phase 1: Auth UI — Create reusable AuthGate component (prompts login when accessing protected features)
 - [x] Phase 1: Auth UI — Add /profile, /passport, /wishlist routes to App.tsx
 - [x] Phase 1: Auth UI — All existing pages remain fully public; protected features use AuthGate
-- [ ] Future: Admin blog editor (Option 1) for creating/editing posts in-browser
+- [x] Phase 5: Admin blog editor for creating/editing posts in-browser
 - [x] Phase 2: Google Places admin enrichment tool (Option A) — COMPLETED
-- [ ] Future: CLT Passport — track visited places with stamps
-- [ ] Future: Bingo cards — themed challenge boards
-- [ ] Future: Wishlist — save places with notes
-- [ ] Future: Reddit-style comments on neighborhoods and businesses
+- [x] Phase 3: CLT Passport — track visited places with stamps
+- [x] Phase 3: Bingo cards — themed challenge boards
+- [x] Phase 3: Wishlist — save places with notes
+- [x] Phase 4: Reddit-style comments on neighborhoods and businesses
 - [x] Phase 2: Create enriched_services database table (service_key, google_place_id, rating, review_count, hours, address, phone, photos)
 - [x] Phase 2: Build admin-only tRPC procedures for Google Places text search + details + apply
 - [x] Phase 2: Build admin-only tRPC procedure to save enrichment data to DB
@@ -100,3 +100,22 @@
 - [x] Phase 2: Add admin route (/admin/enrich) and admin nav link in user dropdown
 - [x] Phase 2: Display enriched data (Google rating, review count, price level) on directory listing cards
 - [x] Phase 2: Write vitest tests for enrichment (8 tests, 72 total passing)
+- [x] Phase 3: CLT Passport — create passport_entries DB table
+- [x] Phase 3: CLT Passport — create bingo_cards and bingo_progress DB tables
+- [x] Phase 3: Wishlist — create wishlists DB table
+- [x] Phase 3: Build tRPC procedures for passport check-in, wishlist add/remove, bingo progress
+- [x] Phase 3: Build Passport page UI with stamp collection, stats, and bingo cards
+- [x] Phase 3: Build Wishlist page UI with saved places and notes
+- [x] Phase 3: Add heart/save buttons to directory listing cards (WishlistButton component)
+- [x] Phase 3: Add check-in button to directory listing cards for passport stamps
+- [x] Phase 4: Comments — create comments DB table
+- [x] Phase 4: Comments — create comment_votes DB table
+- [x] Phase 4: Build tRPC procedures for comments CRUD, voting, and threaded replies
+- [x] Phase 4: Build threaded CommentSection component with upvotes/downvotes and replies
+- [x] Phase 4: Add comment sections to neighborhood detail pages (Community tab)
+- [x] Phase 4: Comment sections available on neighborhood pages
+- [x] Phase 5: Blog — create blog_posts DB table
+- [x] Phase 5: Build tRPC procedures for blog CRUD (admin-only create/edit/delete, public read)
+- [x] Phase 5: Build admin blog editor page with markdown editing and preview
+- [x] Phase 5: Update blog listing to show DB posts alongside static articles, add BlogArticle detail page
+- [x] Phase 5: Write vitest tests for all community features (22 tests, 94 total passing)

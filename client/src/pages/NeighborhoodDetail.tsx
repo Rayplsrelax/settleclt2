@@ -13,6 +13,7 @@ import {
   CheckCircle2, GitCompare, Zap, AlertTriangle, Trophy, TreePine, Dumbbell, Bike
 } from "lucide-react";
 import { NEIGHBORHOOD_SPORTS_REC, CHARLOTTE_VENUES, type SportsRec } from "@shared/sportsRec";
+import CommentSection from "@/components/CommentSection";
 import { useState, useRef, useEffect, useMemo } from "react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
@@ -34,6 +35,7 @@ const SECTIONS = [
   { id: "sports-rec", label: "Sports & Rec" },
   { id: "map", label: "Map" },
   { id: "services", label: "Services" },
+  { id: "community", label: "Community" },
 ];
 
 // Map pin colors by type
@@ -629,6 +631,11 @@ export default function NeighborhoodDetail() {
               </Link>
             ))}
           </div>
+        </section>
+
+        {/* Community Experiences */}
+        <section id="community" ref={el => { sectionRefs.current["community"] = el; }}>
+          <CommentSection targetType="neighborhood" targetId={n.id} />
         </section>
       </div>
     </PageLayout>
