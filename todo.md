@@ -119,3 +119,8 @@
 - [x] Phase 5: Build admin blog editor page with markdown editing and preview
 - [x] Phase 5: Update blog listing to show DB posts alongside static articles, add BlogArticle detail page
 - [x] Phase 5: Write vitest tests for all community features (22 tests, 94 total passing)
+- [x] Enrich 20-30 top directory listings via Google Places API (ratings, reviews, hours)
+- [x] Write and publish 3-5 blog articles (Moving to Charlotte Checklist, Best Brunch Spots, Charlotte vs Raleigh, etc.)
+- [x] Create 3-4 themed bingo cards for CLT Passport (Brewery Tour, Best Coffee, Date Night, etc.)
+- [x] Wire up email notifications for business submissions, newsletter signups, and bingo completions
+- [x] Write vitest tests for notification triggers (7 tests, 101 total passing)

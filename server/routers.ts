@@ -13,6 +13,7 @@ import {
   createBlogPost, updateBlogPost, deleteBlogPost, getPublishedBlogPosts, getAllBlogPosts, getBlogPostBySlug,
 } from "./db";
 import { makeRequest, type PlacesSearchResult, type PlaceDetailsResult } from "./_core/map";
+import { notifyOwner } from "./_core/notification";
 
 export const appRouter = router({
   system: systemRouter,
@@ -34,12 +35,18 @@ export const appRouter = router({
         moveDate: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        return insertMovingQuote({
+        const result = await insertMovingQuote({
           name: input.name,
           email: input.email,
           fromCity: input.fromCity ?? null,
           moveDate: input.moveDate ?? null,
         });
+        // Notify owner of new moving quote
+        notifyOwner({
+          title: "📦 New Moving Quote Request",
+          content: `${input.name} (${input.email}) submitted a moving quote.${input.fromCity ? ` Moving from: ${input.fromCity}.` : ''}${input.moveDate ? ` Target date: ${input.moveDate}.` : ''}`,
+        }).catch(() => {}); // fire-and-forget
+        return result;
       }),
     submitBusiness: publicProcedure
       .input(z.object({
@@ -53,7 +60,7 @@ export const appRouter = router({
         description: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        return insertBusinessSubmission({
+        const result = await insertBusinessSubmission({
           name: input.name,
           email: input.email,
           businessName: input.businessName,
@@ -63,6 +70,12 @@ export const appRouter = router({
           area: input.area ?? null,
           description: input.description ?? null,
         });
+        // Notify owner of new business submission
+        notifyOwner({
+          title: "🏪 New Business Listing Submitted",
+          content: `${input.name} (${input.email}) submitted "${input.businessName}" in ${input.category}.${input.area ? ` Area: ${input.area}.` : ''}${input.website ? ` Website: ${input.website}` : ''}`,
+        }).catch(() => {}); // fire-and-forget
+        return result;
       }),
   }),
 
@@ -291,12 +304,20 @@ export const appRouter = router({
         completedAt: z.date().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
-        return upsertBingoProgress({
+        const result = await upsertBingoProgress({
           userId: ctx.user.id,
           cardId: input.cardId,
           completedSquaresJson: input.completedSquaresJson,
           completedAt: input.completedAt ?? null,
         });
+        // Notify owner when a bingo card is completed
+        if (input.completedAt) {
+          notifyOwner({
+            title: "🎰 Bingo Card Completed!",
+            content: `User ${ctx.user.name ?? ctx.user.id} completed bingo card #${input.cardId}! Time to celebrate a CLT explorer!`,
+          }).catch(() => {}); // fire-and-forget
+        }
+        return result;
       }),
   }),
 
@@ -394,10 +415,16 @@ export const appRouter = router({
         source: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        return insertNewsletterSubscriber({
+        const result = await insertNewsletterSubscriber({
           email: input.email,
           source: input.source ?? "homepage",
         });
+        // Notify owner of new newsletter subscriber
+        notifyOwner({
+          title: "📬 New Newsletter Subscriber",
+          content: `New subscriber: ${input.email} (source: ${input.source ?? 'homepage'})`,
+        }).catch(() => {}); // fire-and-forget
+        return result;
       }),
   }),
 });
