@@ -3,7 +3,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { useState } from "react";
-import { Sun, Moon, Menu, X, LogIn, User, LogOut, Heart, Stamp, ChevronDown } from "lucide-react";
+import { Sun, Moon, Menu, X, LogIn, User, LogOut, Heart, Stamp, ChevronDown, Shield } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,6 +70,15 @@ function UserMenu() {
           <Heart className="w-4 h-4 mr-2" />
           My Wishlist
         </DropdownMenuItem>
+        {user.role === 'admin' && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => navigate("/admin/enrich")}>
+              <Shield className="w-4 h-4 mr-2" />
+              Admin: Enrich Directory
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => logout()}

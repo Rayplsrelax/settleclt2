@@ -17,6 +17,7 @@ const Quiz = lazy(() => import("./pages/Quiz"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Passport = lazy(() => import("./pages/Passport"));
 const Wishlist = lazy(() => import("./pages/Wishlist"));
+const AdminEnrich = lazy(() => import("./pages/AdminEnrich"));
 
 function PageLoader() {
   return (
@@ -41,6 +42,7 @@ function Router() {
         <Route path="/profile" component={Profile} />
         <Route path="/passport" component={Passport} />
         <Route path="/wishlist" component={Wishlist} />
+        <Route path="/admin/enrich" component={AdminEnrich} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>

@@ -4,9 +4,15 @@ import { neighborhoods } from "@shared/neighborhoods";
 import { CORE_NEIGHBORHOOD_NAMES } from "@shared/metroAreas";
 import { useMyNeighborhood } from "@/hooks/useMyNeighborhood";
 import { MapView } from "@/components/Map";
-import { useState, useMemo, useRef, useCallback } from "react";
+import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { Search, ExternalLink, Phone, X, MapPin, Star, Filter, Map, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { trpc } from "@/lib/trpc";
+
+// Generate a slug key from service name
+function toSlug(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
 
 function getUrlParams() {
   if (typeof window === "undefined") return {};
@@ -72,6 +78,18 @@ export default function Directory() {
   const [activeArea, setActiveArea] = useState(urlParams.area || "");
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
+
+  // Fetch enrichment data for all services
+  const enrichmentQuery = trpc.enrichment.getAll.useQuery();
+  const enrichmentMap = useMemo(() => {
+    const m: Record<string, { googleRating: string | null; reviewCount: number | null; verifiedAddress: string | null; verifiedPhone: string | null; hoursJson: string | null; priceLevel: number | null }> = {};
+    if (enrichmentQuery.data) {
+      for (const e of enrichmentQuery.data) {
+        m[e.serviceKey] = e;
+      }
+    }
+    return m;
+  }, [enrichmentQuery.data]);
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
@@ -470,6 +488,29 @@ export default function Directory() {
                         </div>
                         {cat && <span className="text-lg flex-shrink-0">{cat.icon}</span>}
                       </div>
+                      {/* Enrichment data: rating + reviews */}
+                      {(() => {
+                        const enriched = enrichmentMap[toSlug(s.name)];
+                        if (!enriched?.googleRating) return null;
+                        return (
+                          <div className="flex items-center gap-2 mt-2">
+                            <div className="flex items-center gap-1">
+                              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                              <span className="text-xs font-semibold text-foreground">{enriched.googleRating}</span>
+                            </div>
+                            {enriched.reviewCount && (
+                              <span className="text-xs text-muted-foreground">
+                                ({enriched.reviewCount.toLocaleString()} reviews)
+                              </span>
+                            )}
+                            {enriched.priceLevel != null && enriched.priceLevel > 0 && (
+                              <span className="text-xs text-muted-foreground ml-auto">
+                                {'$'.repeat(enriched.priceLevel)}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })()}
                       <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                           <MapPin className="w-3 h-3" /> {s.area}

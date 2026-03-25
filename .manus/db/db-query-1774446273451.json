@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `enriched_services` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`serviceKey` varchar(255) NOT NULL,\n\t`googlePlaceId` varchar(512),\n\t`googleRating` varchar(8),\n\t`reviewCount` int,\n\t`verifiedAddress` text,\n\t`verifiedPhone` varchar(32),\n\t`hoursJson` text,\n\t`photosJson` text,\n\t`googleTypes` text,\n\t`priceLevel` int,\n\t`verified` enum('pending','verified','rejected') NOT NULL DEFAULT 'pending',\n\t`enrichedBy` int,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `enriched_services_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `enriched_services_serviceKey_unique` UNIQUE(`serviceKey`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute CREATE TABLE `enriched_services` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`serviceKey` varchar(255) NOT NULL,\n\t`googlePlaceId` varchar(512),\n\t`googleRating` varchar(8),\n\t`reviewCount` int,\n\t`verifiedAddress` text,\n\t`verifiedPhone` varchar(32),\n\t`hoursJson` text,\n\t`photosJson` text,\n\t`googleTypes` text,\n\t`priceLevel` int,\n\t`verified` enum('pending','verified','rejected') NOT NULL DEFAULT 'pending',\n\t`enrichedBy` int,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `enriched_services_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `enriched_services_serviceKey_unique` UNIQUE(`serviceKey`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 325
+}

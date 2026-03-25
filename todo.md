@@ -88,8 +88,15 @@
 - [x] Phase 1: Auth UI — Add /profile, /passport, /wishlist routes to App.tsx
 - [x] Phase 1: Auth UI — All existing pages remain fully public; protected features use AuthGate
 - [ ] Future: Admin blog editor (Option 1) for creating/editing posts in-browser
-- [ ] Future: Google Places admin enrichment tool (Option A)
+- [x] Phase 2: Google Places admin enrichment tool (Option A) — COMPLETED
 - [ ] Future: CLT Passport — track visited places with stamps
 - [ ] Future: Bingo cards — themed challenge boards
 - [ ] Future: Wishlist — save places with notes
 - [ ] Future: Reddit-style comments on neighborhoods and businesses
+- [x] Phase 2: Create enriched_services database table (service_key, google_place_id, rating, review_count, hours, address, phone, photos)
+- [x] Phase 2: Build admin-only tRPC procedures for Google Places text search + details + apply
+- [x] Phase 2: Build admin-only tRPC procedure to save enrichment data to DB
+- [x] Phase 2: Build admin enrichment page UI with search, preview cards, and apply button
+- [x] Phase 2: Add admin route (/admin/enrich) and admin nav link in user dropdown
+- [x] Phase 2: Display enriched data (Google rating, review count, price level) on directory listing cards
+- [x] Phase 2: Write vitest tests for enrichment (8 tests, 72 total passing)

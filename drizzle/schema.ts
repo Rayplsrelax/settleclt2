@@ -65,3 +65,37 @@ export const newsletterSubscribers = mysqlTable("newsletter_subscribers", {
 
 export type NewsletterSubscriber = typeof newsletterSubscribers.$inferSelect;
 export type InsertNewsletterSubscriber = typeof newsletterSubscribers.$inferInsert;
+
+// Google Places enrichment data for directory listings
+export const enrichedServices = mysqlTable("enriched_services", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Key matching the service in shared/services.ts (e.g. 'amelies-french-bakery') */
+  serviceKey: varchar("serviceKey", { length: 255 }).notNull().unique(),
+  /** Google Place ID for linking back to Google Maps */
+  googlePlaceId: varchar("googlePlaceId", { length: 512 }),
+  /** Google rating (1.0 - 5.0) */
+  googleRating: varchar("googleRating", { length: 8 }),
+  /** Number of Google reviews */
+  reviewCount: int("reviewCount"),
+  /** Verified street address from Google */
+  verifiedAddress: text("verifiedAddress"),
+  /** Verified phone number from Google */
+  verifiedPhone: varchar("verifiedPhone", { length: 32 }),
+  /** Business hours as JSON string */
+  hoursJson: text("hoursJson"),
+  /** Google photo references as JSON array of URLs */
+  photosJson: text("photosJson"),
+  /** Google business types/categories */
+  googleTypes: text("googleTypes"),
+  /** Price level from Google (0-4) */
+  priceLevel: int("priceLevel"),
+  /** Whether this enrichment has been verified by admin */
+  verified: mysqlEnum("verified", ["pending", "verified", "rejected"]).default("pending").notNull(),
+  /** Admin who applied this enrichment */
+  enrichedBy: int("enrichedBy"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type EnrichedService = typeof enrichedServices.$inferSelect;
+export type InsertEnrichedService = typeof enrichedServices.$inferInsert;

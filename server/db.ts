@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, movingQuotes, businessSubmissions, newsletterSubscribers, type InsertMovingQuote, type InsertBusinessSubmission, type InsertNewsletterSubscriber } from "../drizzle/schema";
+import { InsertUser, users, movingQuotes, businessSubmissions, newsletterSubscribers, enrichedServices, type InsertMovingQuote, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -103,6 +103,44 @@ export async function insertBusinessSubmission(data: InsertBusinessSubmission) {
   if (!db) throw new Error("Database not available");
   await db.insert(businessSubmissions).values(data);
   return { success: true };
+}
+
+// --- Enriched services (Google Places data) ---
+export async function upsertEnrichedService(data: InsertEnrichedService) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await db.select().from(enrichedServices).where(eq(enrichedServices.serviceKey, data.serviceKey)).limit(1);
+  if (existing.length > 0) {
+    await db.update(enrichedServices).set({
+      googlePlaceId: data.googlePlaceId,
+      googleRating: data.googleRating,
+      reviewCount: data.reviewCount,
+      verifiedAddress: data.verifiedAddress,
+      verifiedPhone: data.verifiedPhone,
+      hoursJson: data.hoursJson,
+      photosJson: data.photosJson,
+      googleTypes: data.googleTypes,
+      priceLevel: data.priceLevel,
+      verified: data.verified ?? 'verified',
+      enrichedBy: data.enrichedBy,
+    }).where(eq(enrichedServices.serviceKey, data.serviceKey));
+    return { success: true, updated: true };
+  }
+  await db.insert(enrichedServices).values(data);
+  return { success: true, updated: false };
+}
+
+export async function getEnrichedService(serviceKey: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(enrichedServices).where(eq(enrichedServices.serviceKey, serviceKey)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getAllEnrichedServices() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(enrichedServices);
 }
 
 // --- Newsletter subscribers ---
