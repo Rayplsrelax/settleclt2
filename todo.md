@@ -76,3 +76,8 @@
 - [x] Add quiz route to App.tsx and navigation links
 - [x] Add quiz entry points on Home page and Neighborhoods page
 - [x] Write vitest tests for the quiz scoring algorithm (20 tests)
+- [x] Create shared sportsVenues data model for Charlotte teams and venues (7 venues)
+- [x] Add sportsRec data model (nearby venues, fan culture, rec highlights, parks, fitness, youth sports)
+- [x] Populate sportsRec data for all 20 neighborhoods + Ballantyne fix
+- [x] Build Sports & Recreation section in NeighborhoodDetail page with sticky nav tab
+- [x] Write tests for sports data integrity (7 tests, 57 total passing)

@@ -10,8 +10,9 @@ import {
   MapPin, Home, TrendingUp, Train, Shield, Dog, Moon, Baby, GraduationCap,
   ArrowRight, ChevronRight, ChevronLeft, Heart, Clock, DollarSign, Users,
   Calendar, Plane, ThumbsUp, ThumbsDown, Gem, Map as MapIcon,
-  CheckCircle2, GitCompare, Zap, AlertTriangle
+  CheckCircle2, GitCompare, Zap, AlertTriangle, Trophy, TreePine, Dumbbell, Bike
 } from "lucide-react";
+import { NEIGHBORHOOD_SPORTS_REC, CHARLOTTE_VENUES, type SportsRec } from "@shared/sportsRec";
 import { useState, useRef, useEffect, useMemo } from "react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
@@ -30,6 +31,7 @@ const SECTIONS = [
   { id: "hidden-gems", label: "Hidden Gems" },
   { id: "settling", label: "Get Settled" },
   { id: "moving-from", label: "Moving From" },
+  { id: "sports-rec", label: "Sports & Rec" },
   { id: "map", label: "Map" },
   { id: "services", label: "Services" },
 ];
@@ -419,6 +421,114 @@ export default function NeighborhoodDetail() {
             <p className="text-sm text-muted-foreground leading-relaxed">{n.movingFrom[selectedCity]}</p>
           </div>
         </section>
+
+        {/* Sports & Recreation */}
+        {(() => {
+          const sportsData = NEIGHBORHOOD_SPORTS_REC[n.id];
+          if (!sportsData) return null;
+          return (
+            <section id="sports-rec" ref={el => { sectionRefs.current["sports-rec"] = el; }}>
+              <SectionHeader icon={<Trophy className="w-5 h-5" />} title="Sports & Recreation" />
+
+              {/* Fan Culture */}
+              <div className="p-5 rounded-xl bg-card border border-border mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-lg">🏟️</span>
+                  <h3 className="font-semibold text-foreground">Game Day Culture</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">{sportsData.fanCulture}</p>
+              </div>
+
+              {/* Nearby Venues */}
+              {sportsData.nearbyVenues.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-primary" /> Nearby Venues
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {sportsData.nearbyVenues.map((venue) => {
+                      const venueInfo = CHARLOTTE_VENUES.find(v => v.name === venue.venueName);
+                      return (
+                        <div key={venue.venueName + venue.distance} className="p-4 rounded-xl bg-card border border-border hover:border-primary/20 transition-colors">
+                          <h4 className="font-semibold text-sm text-foreground">{venue.venueName}</h4>
+                          {venueInfo && (
+                            <p className="text-xs text-primary mt-0.5">
+                              {venueInfo.team} · {venueInfo.league}
+                            </p>
+                          )}
+                          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-3 h-3" /> {venue.distance}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Train className="w-3 h-3" /> {venue.access}
+                            </span>
+                          </div>
+                          {venueInfo && (
+                            <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                              <span>🎟️ {venueInfo.avgTicket}</span>
+                              <span>📅 {venueInfo.season}</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Recreation & Fitness - Two Column Layout */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* Fitness Scene */}
+                <div className="p-5 rounded-xl bg-card border border-border">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Dumbbell className="w-4 h-4 text-primary" />
+                    <h3 className="font-semibold text-foreground">Fitness Scene</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{sportsData.fitnessScene}</p>
+                </div>
+
+                {/* Youth Sports */}
+                <div className="p-5 rounded-xl bg-card border border-border">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Users className="w-4 h-4 text-primary" />
+                    <h3 className="font-semibold text-foreground">Youth Sports</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{sportsData.youthSports}</p>
+                </div>
+              </div>
+
+              {/* Recreation Highlights */}
+              <div className="mb-6">
+                <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <Bike className="w-4 h-4 text-primary" /> Recreation Highlights
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {sportsData.recHighlights.map((highlight, i) => (
+                    <div key={i} className="flex items-start gap-2 p-3 rounded-lg bg-muted/50">
+                      <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <span className="text-sm text-muted-foreground">{highlight}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Parks & Trails */}
+              <div>
+                <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <TreePine className="w-4 h-4 text-primary" /> Parks & Trails
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {sportsData.parkTrails.map((park) => (
+                    <span key={park} className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                      {park}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </section>
+          );
+        })()}
 
         {/* Interactive Map */}
         <section id="map" ref={el => { sectionRefs.current["map"] = el; }}>
