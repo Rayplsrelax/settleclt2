@@ -346,3 +346,69 @@ export async function insertNewsletterSubscriber(data: InsertNewsletterSubscribe
     throw error;
   }
 }
+
+// --- Leaderboard queries ---
+
+/**
+ * Get top explorers by passport stamps count.
+ * Returns user id, name, and stamp count, ordered by most stamps.
+ */
+export async function getLeaderboardByStamps(limit = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      userId: passportEntries.userId,
+      userName: users.name,
+      stampCount: sql<number>`COUNT(*)`.as("stampCount"),
+    })
+    .from(passportEntries)
+    .innerJoin(users, eq(passportEntries.userId, users.id))
+    .groupBy(passportEntries.userId, users.name)
+    .orderBy(sql`stampCount DESC`)
+    .limit(limit);
+  return rows;
+}
+
+/**
+ * Get top explorers by completed bingo cards.
+ * Returns user id, name, completed card count, and total squares checked.
+ */
+export async function getLeaderboardByBingo(limit = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      userId: bingoProgress.userId,
+      userName: users.name,
+      completedCards: sql<number>`SUM(CASE WHEN ${bingoProgress.completedAt} IS NOT NULL THEN 1 ELSE 0 END)`.as("completedCards"),
+      totalSquaresChecked: sql<number>`COUNT(*)`.as("totalEntries"),
+    })
+    .from(bingoProgress)
+    .innerJoin(users, eq(bingoProgress.userId, users.id))
+    .groupBy(bingoProgress.userId, users.name)
+    .orderBy(sql`completedCards DESC`)
+    .limit(limit);
+  return rows;
+}
+
+/**
+ * Get unique neighborhoods visited per user for the leaderboard.
+ */
+export async function getLeaderboardByNeighborhoods(limit = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      userId: passportEntries.userId,
+      userName: users.name,
+      neighborhoodCount: sql<number>`COUNT(DISTINCT ${passportEntries.neighborhoodId})`.as("neighborhoodCount"),
+    })
+    .from(passportEntries)
+    .innerJoin(users, eq(passportEntries.userId, users.id))
+    .where(sql`${passportEntries.neighborhoodId} IS NOT NULL AND ${passportEntries.neighborhoodId} != ''`)
+    .groupBy(passportEntries.userId, users.name)
+    .orderBy(sql`neighborhoodCount DESC`)
+    .limit(limit);
+  return rows;
+}

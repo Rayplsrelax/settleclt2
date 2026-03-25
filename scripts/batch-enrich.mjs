@@ -101,7 +101,7 @@ async function upsertEnrichment(data) {
 // --- Batch processing ---
 
 const BUSINESSES = JSON.parse(
-  (await import('fs')).readFileSync('/tmp/enrichment_batch.json', 'utf-8')
+  (await import('fs')).readFileSync(process.env.ENRICHMENT_FILE || '/tmp/enrichment_batch.json', 'utf-8')
 );
 
 const BATCH_SIZE = 5; // Process 5 at a time to avoid rate limits

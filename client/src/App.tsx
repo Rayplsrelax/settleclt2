@@ -21,6 +21,7 @@ const AdminEnrich = lazy(() => import("./pages/AdminEnrich"));
 const AdminBlog = lazy(() => import("./pages/AdminBlog"));
 const BingoCards = lazy(() => import("./pages/BingoCards"));
 const BlogArticle = lazy(() => import("./pages/BlogArticle"));
+const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 
 function PageLoader() {
   return (
@@ -46,6 +47,7 @@ function Router() {
         <Route path="/passport" component={Passport} />
         <Route path="/wishlist" component={Wishlist} />
         <Route path="/bingo" component={BingoCards} />
+        <Route path="/leaderboard" component={Leaderboard} />
         <Route path="/admin/enrich" component={AdminEnrich} />
         <Route path="/admin/blog" component={AdminBlog} />
         <Route path="/blog/:slug" component={BlogArticle} />

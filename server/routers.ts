@@ -11,6 +11,7 @@ import {
   addWishlistEntry, removeWishlistEntry, getWishlistEntries, updateWishlistNotes,
   addComment, getComments, deleteComment, voteComment, getUserVotes,
   createBlogPost, updateBlogPost, deleteBlogPost, getPublishedBlogPosts, getAllBlogPosts, getBlogPostBySlug,
+  getLeaderboardByStamps, getLeaderboardByBingo, getLeaderboardByNeighborhoods,
 } from "./db";
 import { makeRequest, type PlacesSearchResult, type PlaceDetailsResult } from "./_core/map";
 import { notifyOwner } from "./_core/notification";
@@ -406,6 +407,19 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return getBlogPostBySlug(input.slug) ?? null;
       }),
+  }),
+
+  // --- Leaderboard (public) ---
+  leaderboard: router({
+    byStamps: publicProcedure.query(async () => {
+      return getLeaderboardByStamps(20);
+    }),
+    byBingo: publicProcedure.query(async () => {
+      return getLeaderboardByBingo(20);
+    }),
+    byNeighborhoods: publicProcedure.query(async () => {
+      return getLeaderboardByNeighborhoods(20);
+    }),
   }),
 
   newsletter: router({

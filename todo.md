@@ -129,3 +129,8 @@
 - [x] Write vitest tests for bingo cards API and enrichment (6 tests, 107 total passing)
 - [x] Add BingoCards page with interactive grid, progress tracking, and share card generation
 - [x] Add /bingo route and navigation links (Navbar dropdown + Profile page)
+- [x] Batch-enrich remaining ~200 directory listings via Google Places API (184/197 enriched — 308/322 total, 96% coverage)
+- [x] Build leaderboard page showing top CLT explorers by bingo completions and passport stamps
+- [x] Add leaderboard tRPC procedures (public read — byStamps, byBingo, byNeighborhoods)
+- [x] Add /leaderboard route and navigation links (Navbar dropdown + Profile page)
+- [x] Write vitest tests for leaderboard feature (6 tests, 113 total passing)

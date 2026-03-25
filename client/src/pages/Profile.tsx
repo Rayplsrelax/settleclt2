@@ -12,6 +12,7 @@ import {
   Calendar,
   Shield,
   Grid3X3,
+  Trophy,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -59,6 +60,14 @@ const featureLinks = [
     description: "Complete themed challenges and share your progress",
     color: "text-purple-500",
     bgColor: "bg-purple-500/10",
+  },
+  {
+    href: "/leaderboard",
+    icon: Trophy,
+    label: "Leaderboard",
+    description: "See who's exploring Charlotte the most",
+    color: "text-amber-500",
+    bgColor: "bg-amber-500/10",
   },
   {
     href: "/directory",
