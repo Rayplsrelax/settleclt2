@@ -68,3 +68,5 @@
 - [x] Find and upload 36 authentic photos for all 12 metro areas to CDN
 - [x] Unified detail pages: metro areas use same NeighborhoodDetail component with full guides
 - [x] Updated Compare tool, Directory, and Home page to use allNeighborhoods (20 total)
+- [x] Fix: Remove University City from METRO_AREA_NAMES dropdown (already in core; was never duplicated in metro data)
+- [x] Fix: Remove Mecklenburg County from services area values (7 entries → Charlotte Metro)

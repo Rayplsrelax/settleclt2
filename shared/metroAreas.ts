@@ -7,7 +7,7 @@ export const CORE_NEIGHBORHOOD_NAMES = [
 // Metro area names for directory area grouping
 export const METRO_AREA_NAMES = [
   "SouthPark", "Elizabeth", "LoSo (Lower South End)", "East Charlotte",
-  "South Charlotte", "West Charlotte", "University City",
+  "South Charlotte", "West Charlotte",
   "Huntersville", "Lake Norman", "Matthews", "Concord",
   "Fort Mill, SC", "Pineville"
 ];

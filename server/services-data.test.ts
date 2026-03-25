@@ -7,13 +7,14 @@ import { metroNeighborhoods } from "../shared/metroNeighborhoods";
 const JUNK_AREA_VALUES = [
   "Anywhere", "Online", "Expanding", "Select Areas", "Rural Areas",
   "North Carolina", "Yorkmont Rd", "Suburbs", "SouthPark Mall", "Shalom Park",
+  "Mecklenburg County",
 ];
 
 const VALID_AREAS = [
   ...CORE_NEIGHBORHOOD_NAMES,
   "Camp North End", "Charlotte", "Charlotte Metro", "Concord", "East Charlotte", "Elizabeth",
   "Fort Mill", "Huntersville", "Lake Norman", "LoSo", "Matthews",
-  "Mecklenburg County", "Pineville", "South Charlotte", "SouthPark",
+  "Pineville", "South Charlotte", "SouthPark",
   "University Area", "West Charlotte",
 ];
 
