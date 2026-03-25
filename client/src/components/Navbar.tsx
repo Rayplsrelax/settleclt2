@@ -3,7 +3,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { useState } from "react";
-import { Sun, Moon, Menu, X, LogIn, User, LogOut, Heart, Stamp, ChevronDown, Shield } from "lucide-react";
+import { Sun, Moon, Menu, X, LogIn, User, LogOut, Heart, Stamp, ChevronDown, Shield, Grid3X3 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -69,6 +69,10 @@ function UserMenu() {
         <DropdownMenuItem onClick={() => navigate("/wishlist")}>
           <Heart className="w-4 h-4 mr-2" />
           My Wishlist
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/bingo")}>
+          <Grid3X3 className="w-4 h-4 mr-2" />
+          CLT Bingo
         </DropdownMenuItem>
         {user.role === 'admin' && (
           <>

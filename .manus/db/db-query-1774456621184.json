@@ -1,0 +1,43 @@
+{
+  "query": "SELECT serviceKey FROM enriched_services WHERE serviceKey > 'mighty-dog-roofing-charlotte' ORDER BY serviceKey;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute SELECT serviceKey FROM enriched_services WHERE serviceKey > 'mighty-dog-roofing-charlotte' ORDER BY serviceKey;",
+  "rows": [
+    {
+      "serviceKey": "mister-sparky-charlotte"
+    },
+    {
+      "serviceKey": "molly-maid-charlotte"
+    },
+    {
+      "serviceKey": "morris-jenkins"
+    },
+    {
+      "serviceKey": "morris-jenkins-hvac"
+    },
+    {
+      "serviceKey": "mr-handyman-south-charlotte"
+    },
+    {
+      "serviceKey": "nc-dmv-charlotte"
+    },
+    {
+      "serviceKey": "shootshare-charlotte"
+    },
+    {
+      "serviceKey": "spectrum"
+    },
+    {
+      "serviceKey": "terminix-charlotte"
+    },
+    {
+      "serviceKey": "trugreen-charlotte"
+    },
+    {
+      "serviceKey": "ulta-beauty-salon"
+    }
+  ],
+  "messages": [],
+  "stdout": "serviceKey\nmister-sparky-charlotte\nmolly-maid-charlotte\nmorris-jenkins\nmorris-jenkins-hvac\nmr-handyman-south-charlotte\nnc-dmv-charlotte\nshootshare-charlotte\nspectrum\nterminix-charlotte\ntrugreen-charlotte\nulta-beauty-salon\n",
+  "stderr": "",
+  "execution_time_ms": 49
+}

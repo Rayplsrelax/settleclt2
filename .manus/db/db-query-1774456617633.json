@@ -1,0 +1,165 @@
+{
+  "query": "SELECT serviceKey, googleRating, reviewCount FROM enriched_services ORDER BY serviceKey;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute SELECT serviceKey, googleRating, reviewCount FROM enriched_services ORDER BY serviceKey;",
+  "rows": [
+    {
+      "serviceKey": "bank-of-america",
+      "googleRating": "2.1",
+      "reviewCount": "182"
+    },
+    {
+      "serviceKey": "bartlett-tree-experts",
+      "googleRating": "4.9",
+      "reviewCount": "179"
+    },
+    {
+      "serviceKey": "budget-dumpster-charlotte",
+      "googleRating": "5",
+      "reviewCount": "24"
+    },
+    {
+      "serviceKey": "charlotte-city-hall",
+      "googleRating": "3.6",
+      "reviewCount": "17"
+    },
+    {
+      "serviceKey": "chef-alyssa-s-kitchen",
+      "googleRating": "4.6",
+      "reviewCount": "145"
+    },
+    {
+      "serviceKey": "clt-pressure-washing",
+      "googleRating": "5",
+      "reviewCount": "12"
+    },
+    {
+      "serviceKey": "craig-preston-insurance",
+      "googleRating": "4.2",
+      "reviewCount": "5"
+    },
+    {
+      "serviceKey": "cubesmart-self-storage",
+      "googleRating": "4.6",
+      "reviewCount": "201"
+    },
+    {
+      "serviceKey": "duke-energy",
+      "googleRating": "1.6",
+      "reviewCount": "81"
+    },
+    {
+      "serviceKey": "gentle-giant-moving",
+      "googleRating": "5",
+      "reviewCount": "605"
+    },
+    {
+      "serviceKey": "h-r-block-charlotte",
+      "googleRating": "4.4",
+      "reviewCount": "136"
+    },
+    {
+      "serviceKey": "harris-teeter",
+      "googleRating": "4.3",
+      "reviewCount": "2971"
+    },
+    {
+      "serviceKey": "hellotech-charlotte",
+      "googleRating": "5",
+      "reviewCount": "203"
+    },
+    {
+      "serviceKey": "home-depot-fencing",
+      "googleRating": "4.1",
+      "reviewCount": "2106"
+    },
+    {
+      "serviceKey": "hornet-moving",
+      "googleRating": "4.9",
+      "reviewCount": "5611"
+    },
+    {
+      "serviceKey": "keller-williams-southpark",
+      "googleRating": "4",
+      "reviewCount": "81"
+    },
+    {
+      "serviceKey": "legal-aid-of-nc-charlotte",
+      "googleRating": "3.4",
+      "reviewCount": "163"
+    },
+    {
+      "serviceKey": "mac-cosmetics-charlotte",
+      "googleRating": "3.7",
+      "reviewCount": "69"
+    },
+    {
+      "serviceKey": "major-league-barbers-clt",
+      "googleRating": "4.6",
+      "reviewCount": "49"
+    },
+    {
+      "serviceKey": "mighty-dog-roofing-charlotte",
+      "googleRating": "4.7",
+      "reviewCount": "195"
+    },
+    {
+      "serviceKey": "mister-sparky-charlotte",
+      "googleRating": "4.8",
+      "reviewCount": "2377"
+    },
+    {
+      "serviceKey": "molly-maid-charlotte",
+      "googleRating": "4.8",
+      "reviewCount": "654"
+    },
+    {
+      "serviceKey": "morris-jenkins",
+      "googleRating": "4.9",
+      "reviewCount": "34277"
+    },
+    {
+      "serviceKey": "morris-jenkins-hvac",
+      "googleRating": "4.9",
+      "reviewCount": "34277"
+    },
+    {
+      "serviceKey": "mr-handyman-south-charlotte",
+      "googleRating": "4.8",
+      "reviewCount": "431"
+    },
+    {
+      "serviceKey": "nc-dmv-charlotte",
+      "googleRating": "3.4",
+      "reviewCount": "950"
+    },
+    {
+      "serviceKey": "shootshare-charlotte",
+      "googleRating": "5",
+      "reviewCount": "2"
+    },
+    {
+      "serviceKey": "spectrum",
+      "googleRating": "3.1",
+      "reviewCount": "1673"
+    },
+    {
+      "serviceKey": "terminix-charlotte",
+      "googleRating": "4.9",
+      "reviewCount": "306"
+    },
+    {
+      "serviceKey": "trugreen-charlotte",
+      "googleRating": "3.8",
+      "reviewCount": "861"
+    },
+    {
+      "serviceKey": "ulta-beauty-salon",
+      "googleRating": "4",
+      "reviewCount": "463"
+    }
+  ],
+  "messages": [],
+  "stdout": "serviceKey\tgoogleRating\treviewCount\nbank-of-america\t2.1\t182\nbartlett-tree-experts\t4.9\t179\nbudget-dumpster-charlotte\t5\t24\ncharlotte-city-hall\t3.6\t17\nchef-alyssa-s-kitchen\t4.6\t145\nclt-pressure-washing\t5\t12\ncraig-preston-insurance\t4.2\t5\ncubesmart-self-storage\t4.6\t201\nduke-energy\t1.6\t81\ngentle-giant-moving\t5\t605\nh-r-block-charlotte\t4.4\t136\nharris-teeter\t4.3\t2971\nhellotech-charlotte\t5\t203\nhome-depot-fencing\t4.1\t2106\nhornet-moving\t4.9\t5611\nkeller-williams-southpark\t4\t81\nlegal-aid-of-nc-charlotte\t3.4\t163\nmac-cosmetics-charlotte\t3.7\t69\nmajor-league-barbers-clt\t4.6\t49\nmighty-dog-roofing-charlotte\t4.7\t195\nmister-sparky-charlotte\t4.8\t2377\nmolly-maid-charlotte\t4.8\t654\nmorris-jenkins\t4.9\t34277\nmorris-jenkins-hvac\t4.9\t34277\nmr-handyman-south-charlotte\t4.8\t431\nnc-dmv-charlotte\t3.4\t950\nshootshare-charlotte\t5\t2\nspectrum\t3.1\t1673\nterminix-charlotte\t4.9\t306\ntrugreen-charlotte\t3.8\t861\nulta-beauty-salon\t4\t463\n",
+  "stderr": "",
+  "execution_time_ms": 195
+}

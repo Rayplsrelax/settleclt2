@@ -1,0 +1,8 @@
+{
+  "query": "SELECT service_key, rating, review_count FROM enriched_services ORDER BY service_key;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute SELECT service_key, rating, review_count FROM enriched_services ORDER BY service_key;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'service_key' in 'field list'"
+  ]
+}

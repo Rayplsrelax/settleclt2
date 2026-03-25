@@ -11,6 +11,7 @@ import {
   LogIn,
   Calendar,
   Shield,
+  Grid3X3,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -50,6 +51,14 @@ const featureLinks = [
     description: "Save places you want to visit with notes",
     color: "text-rose-500",
     bgColor: "bg-rose-500/10",
+  },
+  {
+    href: "/bingo",
+    icon: Grid3X3,
+    label: "CLT Bingo",
+    description: "Complete themed challenges and share your progress",
+    color: "text-purple-500",
+    bgColor: "bg-purple-500/10",
   },
   {
     href: "/directory",

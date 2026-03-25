@@ -19,6 +19,7 @@ const Passport = lazy(() => import("./pages/Passport"));
 const Wishlist = lazy(() => import("./pages/Wishlist"));
 const AdminEnrich = lazy(() => import("./pages/AdminEnrich"));
 const AdminBlog = lazy(() => import("./pages/AdminBlog"));
+const BingoCards = lazy(() => import("./pages/BingoCards"));
 const BlogArticle = lazy(() => import("./pages/BlogArticle"));
 
 function PageLoader() {
@@ -44,6 +45,7 @@ function Router() {
         <Route path="/profile" component={Profile} />
         <Route path="/passport" component={Passport} />
         <Route path="/wishlist" component={Wishlist} />
+        <Route path="/bingo" component={BingoCards} />
         <Route path="/admin/enrich" component={AdminEnrich} />
         <Route path="/admin/blog" component={AdminBlog} />
         <Route path="/blog/:slug" component={BlogArticle} />

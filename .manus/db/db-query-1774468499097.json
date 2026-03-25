@@ -1,0 +1,30 @@
+{
+  "query": "SELECT id, title, theme FROM bingo_cards LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute SELECT id, title, theme FROM bingo_cards LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "Charlotte Brewery Tour",
+      "theme": "food-drink"
+    },
+    {
+      "id": "2",
+      "title": "Best Coffee in CLT",
+      "theme": "food-drink"
+    },
+    {
+      "id": "3",
+      "title": "Date Night in Charlotte",
+      "theme": "experiences"
+    },
+    {
+      "id": "4",
+      "title": "Charlotte Newcomer Challenge",
+      "theme": "newcomer"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\ttheme\n1\tCharlotte Brewery Tour\tfood-drink\n2\tBest Coffee in CLT\tfood-drink\n3\tDate Night in Charlotte\texperiences\n4\tCharlotte Newcomer Challenge\tnewcomer\n",
+  "stderr": "",
+  "execution_time_ms": 56
+}

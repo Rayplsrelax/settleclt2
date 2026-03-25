@@ -124,3 +124,8 @@
 - [x] Create 3-4 themed bingo cards for CLT Passport (Brewery Tour, Best Coffee, Date Night, etc.)
 - [x] Wire up email notifications for business submissions, newsletter signups, and bingo completions
 - [x] Write vitest tests for notification triggers (7 tests, 101 total passing)
+- [x] Batch-enrich 50+ more directory listings via Google Places API (93/95 enriched — restaurants, breweries, attractions, fitness, grocery, healthcare, coworking, childcare, pets, auto, salons, barbers)
+- [x] Build shareable CLT Passport card — social-media-ready image for bingo card completions
+- [x] Write vitest tests for bingo cards API and enrichment (6 tests, 107 total passing)
+- [x] Add BingoCards page with interactive grid, progress tracking, and share card generation
+- [x] Add /bingo route and navigation links (Navbar dropdown + Profile page)
