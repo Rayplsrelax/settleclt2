@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import GlobalSearch from "@/components/GlobalSearch";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -18,6 +19,7 @@ const navLinks = [
   { href: "/directory", label: "Directory" },
   { href: "/events", label: "Events" },
   { href: "/blog", label: "Blog" },
+  { href: "/passport", label: "CLT Passport" },
 ];
 
 function getInitials(name: string | null | undefined): string {
@@ -141,6 +143,9 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+          <div className="ml-2">
+            <GlobalSearch />
+          </div>
           <Link
             href="/list-your-business"
             className="ml-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity no-underline"
@@ -170,7 +175,8 @@ export default function Navbar() {
         </div>
 
         {/* Mobile controls */}
-        <div className="flex md:hidden items-center gap-1">
+        <div className="flex md:hidden items-center gap-2">
+          <GlobalSearch />
           {!loading && user && (
             <UserMenu />
           )}

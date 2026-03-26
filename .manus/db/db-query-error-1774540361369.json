@@ -1,0 +1,8 @@
+{
+  "query": "SELECT id, title, LEFT(content, 50) as content_preview FROM blog_articles LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute SELECT id, title, LEFT(content, 50) as content_preview FROM blog_articles LIMIT 10;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1146 (42S02) at line 1: Table 'kbchydcpfi8ejnxdbyusci.blog_articles' doesn't exist"
+  ]
+}

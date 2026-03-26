@@ -1,7 +1,7 @@
 import PageLayout from "@/components/PageLayout";
 import { Link, useParams, useLocation } from "wouter";
 import { allNeighborhoods } from "@shared/neighborhoods";
-import { SERVICES, type Service } from "@shared/services";
+import { SERVICES, SERVICE_CATEGORIES, type Service } from "@shared/services";
 import { useMyNeighborhood } from "@/hooks/useMyNeighborhood";
 import { MapView } from "@/components/Map";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { NEIGHBORHOOD_SPORTS_REC, CHARLOTTE_VENUES, type SportsRec } from "@shared/sportsRec";
 import CommentSection from "@/components/CommentSection";
+import { trpc } from "@/lib/trpc";
 import { useState, useRef, useEffect, useMemo } from "react";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
@@ -87,9 +88,38 @@ export default function NeighborhoodDetail() {
   };
 
   // Get real services for this neighborhood
-  const areaServices = SERVICES.filter((s: Service) =>
+  const areaServices = useMemo(() => SERVICES.filter((s: Service) =>
     s.area.toLowerCase().includes(n.name.toLowerCase()) || n.name.toLowerCase().includes(s.area.toLowerCase())
-  ).slice(0, 6);
+  ), [n.name]);
+
+  // Enrichment data for ratings
+  const enrichmentQuery = trpc.enrichment.getAll.useQuery();
+  const enrichmentMap = useMemo(() => {
+    const m: Record<string, { googleRating: string | null; reviewCount: number | null; priceLevel: number | null }> = {};
+    if (enrichmentQuery.data) {
+      for (const e of enrichmentQuery.data) {
+        m[e.serviceKey] = e;
+      }
+    }
+    return m;
+  }, [enrichmentQuery.data]);
+
+  // Group services by category for the neighborhood
+  const servicesByCategory = useMemo(() => {
+    const groups: Record<string, { catName: string; catIcon: string; services: Service[] }> = {};
+    for (const s of areaServices) {
+      const cat = SERVICE_CATEGORIES.find(c => c.id === s.category);
+      const key = s.category;
+      if (!groups[key]) groups[key] = { catName: cat?.name ?? s.category, catIcon: cat?.icon ?? '📍', services: [] };
+      groups[key].services.push(s);
+    }
+    // Sort by number of services descending
+    return Object.entries(groups).sort((a, b) => b[1].services.length - a[1].services.length);
+  }, [areaServices]);
+
+  function toSlug(name: string): string {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
 
   const totalMonthlyCost = Object.values(n.monthlyCosts).reduce((a, b) => a + b, 0);
 
@@ -603,33 +633,98 @@ export default function NeighborhoodDetail() {
           </div>
         </section>
 
-        {/* Services */}
+        {/* Local Businesses */}
         <section id="services" ref={el => { sectionRefs.current["services"] = el; }}>
-          <SectionHeader icon={<MapPin className="w-5 h-5" />} title={`Services in ${n.name}`} />
-          {areaServices.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-              {areaServices.map((s: Service) => (
-                <div key={s.name} className="p-4 rounded-xl bg-card border border-border">
-                  <h4 className="font-semibold text-sm text-foreground">{s.name}</h4>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{s.description}</p>
-                  {s.phone && <p className="text-xs text-primary mt-2">{s.phone}</p>}
-                </div>
+          <SectionHeader icon={<MapPin className="w-5 h-5" />} title={`Local Businesses in ${n.name}`} />
+          <p className="text-sm text-muted-foreground mb-6 -mt-3">
+            {areaServices.length} businesses serving the {n.name} area
+          </p>
+
+          {servicesByCategory.slice(0, 4).map(([catId, group]) => (
+            <div key={catId} className="mb-8">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <span>{group.catIcon}</span> {group.catName}
+                  <span className="text-xs font-normal text-muted-foreground">({group.services.length})</span>
+                </h4>
+                <Link
+                  href={`/directory?category=${encodeURIComponent(catId)}&area=${encodeURIComponent(n.name)}`}
+                  className="text-xs text-primary font-medium no-underline hover:underline flex items-center gap-1"
+                >
+                  View all <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {group.services.slice(0, 6).map((s: Service) => {
+                  const enriched = enrichmentMap[toSlug(s.name)];
+                  return (
+                    <div key={s.name} className="p-4 rounded-xl bg-card border border-border hover:shadow-sm transition-all">
+                      <div className="flex items-start justify-between gap-2">
+                        <h5 className="font-semibold text-sm text-foreground leading-tight">{s.name}</h5>
+                        {s.featured && (
+                          <span className="px-1.5 py-0.5 rounded bg-clt-gold/20 text-clt-gold text-[10px] font-bold uppercase shrink-0">Featured</span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{s.description}</p>
+                      {enriched?.googleRating && (
+                        <div className="flex items-center gap-2 mt-2">
+                          <div className="flex items-center gap-1">
+                            <span className="text-amber-400 text-xs">★</span>
+                            <span className="text-xs font-semibold text-foreground">{enriched.googleRating}</span>
+                          </div>
+                          {enriched.reviewCount && (
+                            <span className="text-xs text-muted-foreground">({enriched.reviewCount.toLocaleString()} reviews)</span>
+                          )}
+                          {enriched.priceLevel != null && enriched.priceLevel > 0 && (
+                            <span className="text-xs text-muted-foreground ml-auto">{'$'.repeat(enriched.priceLevel)}</span>
+                          )}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 mt-3 pt-2 border-t border-border">
+                        {s.phone && (
+                          <a href={`tel:${s.phone}`} className="text-xs text-muted-foreground hover:text-foreground no-underline">{s.phone}</a>
+                        )}
+                        {s.website && (
+                          <a href={s.website} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline no-underline ml-auto">Visit →</a>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+
+          {servicesByCategory.length > 4 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
+              {servicesByCategory.slice(4).map(([catId, group]) => (
+                <Link
+                  key={catId}
+                  href={`/directory?category=${encodeURIComponent(catId)}&area=${encodeURIComponent(n.name)}`}
+                  className="no-underline"
+                >
+                  <div className="flex items-center gap-2 p-3 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-sm transition-all group">
+                    <span>{group.catIcon}</span>
+                    <div>
+                      <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{group.catName}</span>
+                      <span className="text-xs text-muted-foreground block">{group.services.length} listings</span>
+                    </div>
+                  </div>
+                </Link>
               ))}
             </div>
-          ) : null}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {n.directoryCtaLinks.map((cta) => (
-              <Link
-                key={cta.label}
-                href={`/directory?category=${encodeURIComponent(cta.category)}&area=${encodeURIComponent(cta.area)}&neighborhood=${encodeURIComponent(n.name)}`}
-                className="no-underline"
-              >
-                <div className="flex items-center justify-between p-4 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-sm transition-all group">
-                  <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{cta.label}</span>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                </div>
-              </Link>
-            ))}
+          )}
+
+          <div className="mt-6">
+            <Link
+              href={`/directory?area=${encodeURIComponent(n.name)}`}
+              className="no-underline"
+            >
+              <div className="flex items-center justify-center gap-2 p-4 rounded-xl bg-primary/5 border border-primary/20 hover:bg-primary/10 transition-all group">
+                <span className="text-sm font-semibold text-primary">Browse all businesses in {n.name}</span>
+                <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-0.5 transition-transform" />
+              </div>
+            </Link>
           </div>
         </section>
 

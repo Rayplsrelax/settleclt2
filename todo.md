@@ -151,3 +151,14 @@
 - [x] Seed initial Charlotte events data (52 events seeded — March through June 2026)
 - [x] Add /events to main navigation (Navbar + Footer + admin dropdown)
 - [x] Write vitest tests for events and tags (10 tests, 117 total passing)
+
+## Strategic Plan — Phase 2: Content Velocity & Discovery
+- [x] Build global search bar in navbar (search across neighborhoods, directory, events, blog)
+- [x] Build search results page with grouped results by content type (using cmdk CommandDialog)
+- [x] Add directory listings section to neighborhood detail pages ("Local Businesses in X") with enriched ratings
+- [x] Add neighborhood tag/badge to directory listing cards (category grouping + "Browse all" CTA)
+- [x] Promote CLT Passport to main navigation (visible to all users)
+- [x] Build public CLT Passport landing page (hero, how it works, features, CTA — shows for non-logged-in users)
+- [x] Write 4 new blog articles: This Weekend in CLT, NoDa Deep Dive, Charlotte Summer Survival Guide, Date Night Guide
+- [x] Tag existing content with the tagging system (24 tags, 92 content-tag associations across events + blog posts)
+- [x] Write vitest tests for Phase 2 features (10 tests, 127 total passing across 14 test files)

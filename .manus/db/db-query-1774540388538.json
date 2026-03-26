@@ -1,0 +1,48 @@
+{
+  "query": "SELECT id, slug, title, status, LEFT(content, 50) as content_preview FROM blog_posts ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute SELECT id, slug, title, status, LEFT(content, 50) as content_preview FROM blog_posts ORDER BY id;",
+  "rows": [
+    {
+      "id": "1",
+      "slug": "moving-to-charlotte-checklist",
+      "title": "The Ultimate Moving to Charlotte Checklist",
+      "status": "published",
+      "content_preview": "# The Ultimate Moving to Charlotte Checklist"
+    },
+    {
+      "id": "2",
+      "slug": "best-brunch-spots-by-neighborhood",
+      "title": "Best Brunch Spots by Neighborhood",
+      "status": "published",
+      "content_preview": "# Best Brunch Spots by Neighborhood"
+    },
+    {
+      "id": "3",
+      "slug": "charlotte-vs-raleigh",
+      "title": "Charlotte vs. Raleigh: Which City is Right for You?",
+      "status": "published",
+      "content_preview": "# Charlotte vs. Raleigh: Which City is Right for Y"
+    },
+    {
+      "id": "4",
+      "slug": "first-30-days-in-charlotte",
+      "title": "First 30 Days in Charlotte: A Local's Survival Guide",
+      "status": "published",
+      "content_preview": "# First 30 Days in Charlotte: A Local's Survival G"
+    },
+    {
+      "id": "5",
+      "slug": "charlotte-hidden-gems",
+      "title": "Charlotte's Hidden Gems: 15 Places Locals Don't Want You to Know About",
+      "status": "published",
+      "content_preview": "# Charlotte's Hidden Gems: 15 Places Locals Don't "
+    }
+  ],
+  "messages": [
+    "Movi",
+    "Charlotte's b"
+  ],
+  "stdout": "id\tslug\ttitle\tstatus\tcontent_preview\n1\tmoving-to-charlotte-checklist\tThe Ultimate Moving to Charlotte Checklist\tpublished\t# The Ultimate Moving to Charlotte Checklist\n\nMovi\n2\tbest-brunch-spots-by-neighborhood\tBest Brunch Spots by Neighborhood\tpublished\t# Best Brunch Spots by Neighborhood\n\nCharlotte's b\n3\tcharlotte-vs-raleigh\tCharlotte vs. Raleigh: Which City is Right for You?\tpublished\t# Charlotte vs. Raleigh: Which City is Right for Y\n4\tfirst-30-days-in-charlotte\tFirst 30 Days in Charlotte: A Local's Survival Guide\tpublished\t# First 30 Days in Charlotte: A Local's Survival G\n5\tcharlotte-hidden-gems\tCharlotte's Hidden Gems: 15 Places Locals Don't Want You to Know About\tpublished\t# Charlotte's Hidden Gems: 15 Places Locals Don't \n",
+  "stderr": "",
+  "execution_time_ms": 50
+}
