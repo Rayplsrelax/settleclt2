@@ -9,6 +9,7 @@ import { Search, ExternalLink, Phone, X, MapPin, Star, Filter, Map, List } from 
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import WishlistButton from "@/components/WishlistButton";
+import ShareButtons from "@/components/ShareButtons";
 
 // Generate a slug key from service name
 function toSlug(name: string): string {
@@ -282,8 +283,13 @@ export default function Directory() {
       {/* Hero */}
       <section className="bg-gradient-to-br from-clt-navy to-clt-teal-dark py-10 md:py-14">
         <div className="container">
-          <h1 className="font-display font-extrabold text-3xl md:text-4xl text-white">Services Directory</h1>
-          <p className="mt-2 text-white/70">{SERVICES.length}+ Charlotte businesses across {SERVICE_CATEGORIES.length} categories</p>
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="font-display font-extrabold text-3xl md:text-4xl text-white">Services Directory</h1>
+              <p className="mt-2 text-white/70">{SERVICES.length}+ Charlotte businesses across {SERVICE_CATEGORIES.length} categories</p>
+            </div>
+            <ShareButtons compact title="Charlotte Services Directory - Settle CLT" description="Discover 400+ local businesses in Charlotte" className="text-white hover:text-white/80" />
+          </div>
 
           {/* Neighborhood banner */}
           {urlParams.neighborhood && (

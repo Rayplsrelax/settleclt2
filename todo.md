@@ -167,5 +167,5 @@
 - [x] Add events to CLT Passport (stamp events attended, eventSlug column, tabbed UI with All/Places/Events filters)
 - [x] Build user-submitted events feature (submit form at /submit-event, draft status, admin approval, owner notification, CTA on Events page)
 - [x] Build live activity feed (recent stamps, comments, bingo progress — auto-refreshes every 30s, homepage section + reusable component)
-- [x] Add social sharing buttons across all pages (Events, BlogArticle, NeighborhoodDetail, Passport, BingoCards, Leaderboard — Twitter/X, Facebook, Email, Copy Link, native share)
+- [x] Add social sharing buttons across all pages (Events, BlogArticle, NeighborhoodDetail, Passport, BingoCards, Leaderboard, Directory, Compare, Quiz results, TagPage — Twitter/X, Facebook, Email, Copy Link, native share)
 - [x] Write vitest tests for Phase 3 features (7 tests, 134 total passing across 15 test files)

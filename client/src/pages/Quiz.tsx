@@ -10,6 +10,7 @@ import {
   Sparkles, Home as HomeIcon, GitCompare, CheckCircle2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ShareButtons from "@/components/ShareButtons";
 
 // ─── Progress Bar ─────────────────────────────────────────────────
 function ProgressBar({ current, total }: { current: number; total: number }) {
@@ -310,6 +311,9 @@ function ResultsScreen({ results, onRetake }: { results: NeighborhoodScore[]; on
         <p className="text-muted-foreground max-w-md mx-auto">
           Based on your answers, here are the Charlotte neighborhoods that fit you best.
         </p>
+        <div className="mt-4 flex justify-center">
+          <ShareButtons title={`My top Charlotte neighborhood match: ${top3[0]?.neighborhood.name || 'Charlotte'}`} description="Take the quiz and find your perfect Charlotte neighborhood!" />
+        </div>
       </div>
 
       {/* Top 3 cards */}

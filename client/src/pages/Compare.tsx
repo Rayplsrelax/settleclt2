@@ -8,6 +8,7 @@ import {
   Moon, Heart, Dog, Baby, Shield, Home, CheckCircle2, AlertTriangle,
   ThumbsUp, ThumbsDown, ArrowRight
 } from "lucide-react";
+import ShareButtons from "@/components/ShareButtons";
 
 const STAT_ROWS: { key: string; label: string; icon: React.ReactNode; format: (n: Neighborhood) => string; higher: "better" | "worse" | "neutral" }[] = [
   { key: "avgRent", label: "Avg Rent (1BR)", icon: <DollarSign className="w-4 h-4" />, format: n => n.stats.avgRent, higher: "worse" },
@@ -73,13 +74,18 @@ export default function Compare() {
       {/* Hero */}
       <section className="bg-gradient-to-br from-clt-navy via-clt-navy/95 to-clt-teal-dark py-12 md:py-16">
         <div className="container">
-          <div className="flex items-center gap-3 mb-4">
-            <GitCompare className="w-8 h-8 text-clt-gold" />
-            <h1 className="font-display font-extrabold text-3xl md:text-4xl text-white">Compare Neighborhoods</h1>
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <GitCompare className="w-8 h-8 text-clt-gold" />
+                <h1 className="font-display font-extrabold text-3xl md:text-4xl text-white">Compare Neighborhoods</h1>
+              </div>
+              <p className="text-white/70 max-w-2xl">
+                Select up to 3 neighborhoods to compare side-by-side across stats, costs, vibes, and more.
+              </p>
+            </div>
+            <ShareButtons compact title="Compare Charlotte Neighborhoods - Settle CLT" className="text-white hover:text-white/80" />
           </div>
-          <p className="text-white/70 max-w-2xl">
-            Select up to 3 neighborhoods to compare side-by-side across stats, costs, vibes, and more.
-          </p>
         </div>
       </section>
 

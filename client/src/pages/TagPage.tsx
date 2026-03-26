@@ -4,6 +4,7 @@ import PageLayout from "@/components/PageLayout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tag, Calendar, BookOpen, MapPin, Building2, ArrowLeft, ChevronRight } from "lucide-react";
+import ShareButtons from "@/components/ShareButtons";
 
 const CONTENT_TYPE_ICONS: Record<string, { icon: typeof Tag; label: string }> = {
   event: { icon: Calendar, label: "Events" },
@@ -99,12 +100,17 @@ export default function TagPage() {
                 {tag.category}
               </Badge>
             </div>
-            <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-foreground">
-              {tag.name}
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              {totalItems} item{totalItems !== 1 ? "s" : ""} tagged with "{tag.name}"
-            </p>
+            <div className="flex items-start justify-between">
+              <div>
+                <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-foreground">
+                  {tag.name}
+                </h1>
+                <p className="mt-2 text-muted-foreground">
+                  {totalItems} item{totalItems !== 1 ? "s" : ""} tagged with "{tag.name}"
+                </p>
+              </div>
+              <ShareButtons compact title={`${tag.name} - Settle CLT`} description={`Discover Charlotte content tagged with ${tag.name}`} />
+            </div>
           </div>
         </section>
 
