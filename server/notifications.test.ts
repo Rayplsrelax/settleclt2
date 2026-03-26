@@ -10,7 +10,6 @@ vi.mock("./_core/notification", () => ({
 
 // Mock the db module
 vi.mock("./db", () => ({
-  insertMovingQuote: vi.fn().mockResolvedValue({ success: true }),
   insertBusinessSubmission: vi.fn().mockResolvedValue({ success: true }),
   insertNewsletterSubscriber: vi.fn().mockResolvedValue({ success: true }),
   upsertBingoProgress: vi.fn().mockResolvedValue({ success: true }),
@@ -80,56 +79,6 @@ beforeEach(() => {
   mockNotifyOwner.mockClear();
 });
 
-describe("Notifications - Moving Quote Submission", () => {
-  it("sends notification when a moving quote is submitted", async () => {
-    const ctx = createPublicContext();
-    const caller = appRouter.createCaller(ctx);
-
-    await caller.leads.submitQuote({
-      name: "Jane Smith",
-      email: "jane@example.com",
-      fromCity: "New York",
-      moveDate: "2026-06-01",
-    });
-
-    // Wait for fire-and-forget notification
-    await new Promise((r) => setTimeout(r, 50));
-
-    expect(mockNotifyOwner).toHaveBeenCalledTimes(1);
-    expect(mockNotifyOwner).toHaveBeenCalledWith({
-      title: "📦 New Moving Quote Request",
-      content: expect.stringContaining("Jane Smith"),
-    });
-    expect(mockNotifyOwner).toHaveBeenCalledWith({
-      title: "📦 New Moving Quote Request",
-      content: expect.stringContaining("jane@example.com"),
-    });
-  });
-
-  it("includes fromCity and moveDate in notification when provided", async () => {
-    const ctx = createPublicContext();
-    const caller = appRouter.createCaller(ctx);
-
-    await caller.leads.submitQuote({
-      name: "John Doe",
-      email: "john@example.com",
-      fromCity: "Atlanta",
-      moveDate: "2026-09-15",
-    });
-
-    await new Promise((r) => setTimeout(r, 50));
-
-    expect(mockNotifyOwner).toHaveBeenCalledWith({
-      title: "📦 New Moving Quote Request",
-      content: expect.stringContaining("Atlanta"),
-    });
-    expect(mockNotifyOwner).toHaveBeenCalledWith({
-      title: "📦 New Moving Quote Request",
-      content: expect.stringContaining("2026-09-15"),
-    });
-  });
-});
-
 describe("Notifications - Business Submission", () => {
   it("sends notification when a business is submitted", async () => {
     const ctx = createPublicContext();
@@ -148,11 +97,11 @@ describe("Notifications - Business Submission", () => {
 
     expect(mockNotifyOwner).toHaveBeenCalledTimes(1);
     expect(mockNotifyOwner).toHaveBeenCalledWith({
-      title: "🏪 New Business Listing Submitted",
+      title: "\ud83c\udfea New Business Listing Submitted",
       content: expect.stringContaining("Charlotte Movers"),
     });
     expect(mockNotifyOwner).toHaveBeenCalledWith({
-      title: "🏪 New Business Listing Submitted",
+      title: "\ud83c\udfea New Business Listing Submitted",
       content: expect.stringContaining("South End"),
     });
   });
@@ -172,11 +121,11 @@ describe("Notifications - Newsletter Signup", () => {
 
     expect(mockNotifyOwner).toHaveBeenCalledTimes(1);
     expect(mockNotifyOwner).toHaveBeenCalledWith({
-      title: "📬 New Newsletter Subscriber",
+      title: "\ud83d\udcec New Newsletter Subscriber",
       content: expect.stringContaining("subscriber@example.com"),
     });
     expect(mockNotifyOwner).toHaveBeenCalledWith({
-      title: "📬 New Newsletter Subscriber",
+      title: "\ud83d\udcec New Newsletter Subscriber",
       content: expect.stringContaining("homepage"),
     });
   });
@@ -197,7 +146,7 @@ describe("Notifications - Bingo Card Completion", () => {
 
     expect(mockNotifyOwner).toHaveBeenCalledTimes(1);
     expect(mockNotifyOwner).toHaveBeenCalledWith({
-      title: "🎰 Bingo Card Completed!",
+      title: "\ud83c\udfb0 Bingo Card Completed!",
       content: expect.stringContaining("Test User"),
     });
   });

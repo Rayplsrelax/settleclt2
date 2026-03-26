@@ -1,9 +1,8 @@
 import { Link, useLocation } from "wouter";
-import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { useState } from "react";
-import { Sun, Moon, Menu, X, LogIn, User, LogOut, Heart, Stamp, ChevronDown, Shield, Grid3X3, Trophy } from "lucide-react";
+import { Menu, X, LogIn, User, LogOut, Heart, Stamp, ChevronDown, Shield, Grid3X3, Trophy } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -106,7 +105,6 @@ function UserMenu() {
 
 export default function Navbar() {
   const [location, navigate] = useLocation();
-  const { theme, toggleTheme } = useTheme();
   const { user, loading } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -164,13 +162,6 @@ export default function Navbar() {
             </>
           )}
 
-          <button
-            onClick={toggleTheme}
-            className="ml-1 p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-            aria-label="Toggle theme"
-          >
-            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
         </div>
 
         {/* Mobile controls */}
@@ -178,13 +169,6 @@ export default function Navbar() {
           {!loading && user && (
             <UserMenu />
           )}
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground"
-            aria-label="Toggle theme"
-          >
-            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="p-2 rounded-lg hover:bg-muted transition-colors text-foreground"

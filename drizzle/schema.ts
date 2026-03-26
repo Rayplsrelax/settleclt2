@@ -25,19 +25,6 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// Lead capture — moving quote requests
-export const movingQuotes = mysqlTable("moving_quotes", {
-  id: int("id").autoincrement().primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  email: varchar("email", { length: 320 }).notNull(),
-  fromCity: varchar("fromCity", { length: 255 }),
-  moveDate: varchar("moveDate", { length: 32 }),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
-
-export type MovingQuote = typeof movingQuotes.$inferSelect;
-export type InsertMovingQuote = typeof movingQuotes.$inferInsert;
-
 // Business listing submissions
 export const businessSubmissions = mysqlTable("business_submissions", {
   id: int("id").autoincrement().primaryKey(),

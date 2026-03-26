@@ -1,6 +1,6 @@
 import { eq, and, desc, asc, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, movingQuotes, businessSubmissions, newsletterSubscribers, enrichedServices, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, type InsertMovingQuote, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost } from "../drizzle/schema";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -87,14 +87,6 @@ export async function getUserByOpenId(openId: string) {
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
 
   return result.length > 0 ? result[0] : undefined;
-}
-
-// --- Lead capture: moving quotes ---
-export async function insertMovingQuote(data: InsertMovingQuote) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  await db.insert(movingQuotes).values(data);
-  return { success: true };
 }
 
 // --- Business listing submissions ---

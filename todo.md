@@ -134,3 +134,6 @@
 - [x] Add leaderboard tRPC procedures (public read — byStamps, byBingo, byNeighborhoods)
 - [x] Add /leaderboard route and navigation links (Navbar dropdown + Profile page)
 - [x] Write vitest tests for leaderboard feature (6 tests, 113 total passing)
+- [x] Remove moving quote request form (backend routes, db helper, schema, tests, notifications)
+- [x] Remove "How It Works" section from homepage
+- [x] Remove dark mode toggle and lock to light theme (Navbar, App.tsx ThemeProvider)

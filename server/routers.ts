@@ -4,7 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router, adminProcedure } from "./_core/trpc";
 import { z } from "zod";
 import {
-  insertMovingQuote, insertBusinessSubmission, insertNewsletterSubscriber,
+  insertBusinessSubmission, insertNewsletterSubscriber,
   upsertEnrichedService, getEnrichedService, getAllEnrichedServices,
   addPassportEntry, getPassportEntries, deletePassportEntry,
   getActiveBingoCards, getBingoProgress, upsertBingoProgress,
@@ -28,27 +28,6 @@ export const appRouter = router({
   }),
 
   leads: router({
-    submitQuote: publicProcedure
-      .input(z.object({
-        name: z.string().min(1),
-        email: z.string().email(),
-        fromCity: z.string().optional(),
-        moveDate: z.string().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        const result = await insertMovingQuote({
-          name: input.name,
-          email: input.email,
-          fromCity: input.fromCity ?? null,
-          moveDate: input.moveDate ?? null,
-        });
-        // Notify owner of new moving quote
-        notifyOwner({
-          title: "📦 New Moving Quote Request",
-          content: `${input.name} (${input.email}) submitted a moving quote.${input.fromCity ? ` Moving from: ${input.fromCity}.` : ''}${input.moveDate ? ` Target date: ${input.moveDate}.` : ''}`,
-        }).catch(() => {}); // fire-and-forget
-        return result;
-      }),
     submitBusiness: publicProcedure
       .input(z.object({
         name: z.string().min(1),

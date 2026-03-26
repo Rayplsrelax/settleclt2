@@ -11,8 +11,6 @@ import {
   BookOpen,
   ChevronRight,
   Map,
-  Compass,
-  CheckCircle2,
   Mail,
   Sparkles,
 } from "lucide-react";
@@ -90,66 +88,6 @@ function Hero() {
               </div>
             ))}
           </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function HowItWorks() {
-  const steps = [
-    {
-      icon: <Compass className="w-7 h-7" />,
-      title: "Pick Your Neighborhood",
-      description:
-        "Browse 20 Charlotte neighborhoods with honest reviews, cost breakdowns, and day-in-the-life stories from real residents.",
-    },
-    {
-      icon: <Search className="w-7 h-7" />,
-      title: "Find Local Services",
-      description:
-        "Search 400+ vetted Charlotte businesses — from movers and realtors to breweries and dog parks — filtered by your area.",
-    },
-    {
-      icon: <CheckCircle2 className="w-7 h-7" />,
-      title: "Get Settled",
-      description:
-        "Use our guides to set up utilities, transfer your license, find schools, and discover your new favorite spots.",
-    },
-  ];
-
-  return (
-    <section className="py-16 md:py-20">
-      <div className="container">
-        <div className="text-center mb-12">
-          <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">
-            How Settle CLT Works
-          </h2>
-          <p className="mt-2 text-muted-foreground max-w-lg mx-auto">
-            Everything you need to move to Charlotte, in three steps
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {steps.map((step, i) => (
-            <div key={step.title} className="relative text-center group">
-              {/* Step number connector */}
-              {i < steps.length - 1 && (
-                <div className="hidden md:block absolute top-10 left-[60%] w-[80%] h-px border-t-2 border-dashed border-border" />
-              )}
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mb-5 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                {step.icon}
-              </div>
-              <div className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold absolute top-0 right-[calc(50%-40px)]">
-                {i + 1}
-              </div>
-              <h3 className="font-display font-semibold text-lg text-foreground">
-                {step.title}
-              </h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
-                {step.description}
-              </p>
-            </div>
-          ))}
         </div>
       </div>
     </section>
@@ -493,7 +431,6 @@ export default function Home() {
   return (
     <PageLayout>
       <Hero />
-      <HowItWorks />
       <QuizCTA />
       <FeaturedNeighborhoods />
       <DirectoryPreview />
