@@ -562,3 +562,115 @@ export async function bulkAddContentTags(items: InsertContentTag[]) {
   await db.insert(contentTags).values(items);
   return { success: true };
 }
+
+// --- Activity Feed ---
+export async function getRecentActivity(limit = 20) {
+  const db = await getDb();
+  if (!db) return [];
+
+  // Fetch recent passport stamps with user info
+  const recentStamps = await db
+    .select({
+      id: passportEntries.id,
+      userId: passportEntries.userId,
+      userName: users.name,
+      serviceKey: passportEntries.serviceKey,
+      customPlaceName: passportEntries.customPlaceName,
+      eventSlug: passportEntries.eventSlug,
+      neighborhoodId: passportEntries.neighborhoodId,
+      createdAt: passportEntries.createdAt,
+    })
+    .from(passportEntries)
+    .leftJoin(users, eq(passportEntries.userId, users.id))
+    .orderBy(desc(passportEntries.createdAt))
+    .limit(limit);
+
+  // Fetch recent comments with user info
+  const recentComments = await db
+    .select({
+      id: comments.id,
+      userId: comments.userId,
+      userName: users.name,
+      targetType: comments.targetType,
+      targetId: comments.targetId,
+      content: comments.content,
+      createdAt: comments.createdAt,
+    })
+    .from(comments)
+    .leftJoin(users, eq(comments.userId, users.id))
+    .where(eq(comments.deleted, "no"))
+    .orderBy(desc(comments.createdAt))
+    .limit(limit);
+
+  // Fetch recent bingo completions
+  const recentBingo = await db
+    .select({
+      id: bingoProgress.id,
+      userId: bingoProgress.userId,
+      userName: users.name,
+      cardId: bingoProgress.cardId,
+      cardTitle: bingoCards.title,
+      completedAt: bingoProgress.completedAt,
+      updatedAt: bingoProgress.updatedAt,
+    })
+    .from(bingoProgress)
+    .leftJoin(users, eq(bingoProgress.userId, users.id))
+    .leftJoin(bingoCards, eq(bingoProgress.cardId, bingoCards.id))
+    .orderBy(desc(bingoProgress.updatedAt))
+    .limit(limit);
+
+  // Merge and sort all activities
+  type ActivityItem = {
+    type: 'stamp' | 'comment' | 'bingo';
+    id: number;
+    userId: number;
+    userName: string | null;
+    description: string;
+    detail: string | null;
+    timestamp: Date;
+  };
+
+  const activities: ActivityItem[] = [];
+
+  for (const s of recentStamps) {
+    const placeName = s.customPlaceName || s.serviceKey || s.eventSlug || 'a place';
+    activities.push({
+      type: 'stamp',
+      id: s.id,
+      userId: s.userId,
+      userName: s.userName,
+      description: s.eventSlug ? `attended ${placeName}` : `stamped ${placeName}`,
+      detail: s.neighborhoodId || null,
+      timestamp: s.createdAt,
+    });
+  }
+
+  for (const c of recentComments) {
+    const preview = (c.content ?? '').slice(0, 80) + ((c.content ?? '').length > 80 ? '...' : '');
+    activities.push({
+      type: 'comment',
+      id: c.id,
+      userId: c.userId,
+      userName: c.userName,
+      description: `commented on ${c.targetType} ${c.targetId}`,
+      detail: preview,
+      timestamp: c.createdAt,
+    });
+  }
+
+  for (const b of recentBingo) {
+    activities.push({
+      type: 'bingo',
+      id: b.id,
+      userId: b.userId,
+      userName: b.userName,
+      description: b.cardTitle ? `made progress on "${b.cardTitle}"` : 'made bingo progress',
+      detail: b.completedAt ? 'Completed!' : null,
+      timestamp: b.updatedAt,
+    });
+  }
+
+  // Sort by timestamp descending and return top N
+  activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  return activities.slice(0, limit);
+}

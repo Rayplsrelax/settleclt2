@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import ShareablePassportCard from "@/components/ShareablePassportCard";
+import ShareButtons from "@/components/ShareButtons";
 
 interface BingoSquare {
   id: number;
@@ -125,6 +126,9 @@ function BingoContent() {
           Explore Charlotte through themed challenges. Check off spots as you visit them and
           share your completed cards on social media!
         </p>
+        <div className="mt-3">
+          <ShareButtons title="CLT Bingo Cards" description="Explore Charlotte through themed challenges" />
+        </div>
       </div>
 
       {/* Cards */}

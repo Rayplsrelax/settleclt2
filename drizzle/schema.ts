@@ -94,6 +94,8 @@ export const passportEntries = mysqlTable("passport_entries", {
   /** Service key from shared/services.ts or custom place name */
   serviceKey: varchar("serviceKey", { length: 255 }),
   customPlaceName: varchar("customPlaceName", { length: 255 }),
+  /** Event slug for event stamps */
+  eventSlug: varchar("eventSlug", { length: 255 }),
   neighborhoodId: varchar("neighborhoodId", { length: 128 }),
   visitedAt: timestamp("visitedAt").defaultNow().notNull(),
   notes: text("notes"),

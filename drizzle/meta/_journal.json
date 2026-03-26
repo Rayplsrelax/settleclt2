@@ -43,6 +43,13 @@
       "when": 1774537567570,
       "tag": "0005_panoramic_scarlet_spider",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1774543878316,
+      "tag": "0006_good_titanium_man",
+      "breakpoints": true
     }
   ]
 }

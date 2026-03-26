@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Calendar, MapPin, ExternalLink, Clock, Filter, Sparkles, Tag } from "lucide-react";
+import { Calendar, CalendarPlus, MapPin, ExternalLink, Clock, Filter, Sparkles, Tag } from "lucide-react";
+import ShareButtons from "@/components/ShareButtons";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -216,6 +217,15 @@ export default function Events() {
               Concerts, food festivals, art shows, sports, and more. Discover
               what makes the Queen City come alive.
             </p>
+            <div className="mt-6 flex items-center gap-3">
+              <Link href="/submit-event">
+                <Button className="bg-primary text-primary-foreground font-semibold">
+                  <CalendarPlus className="w-4 h-4 mr-2" />
+                  Submit an Event
+                </Button>
+              </Link>
+              <ShareButtons title="Charlotte Events - Settle CLT" description="Discover what's happening in Charlotte" />
+            </div>
           </div>
         </div>
       </section>

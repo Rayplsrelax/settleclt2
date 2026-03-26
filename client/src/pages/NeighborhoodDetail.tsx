@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { NEIGHBORHOOD_SPORTS_REC, CHARLOTTE_VENUES, type SportsRec } from "@shared/sportsRec";
 import CommentSection from "@/components/CommentSection";
+import ShareButtons from "@/components/ShareButtons";
 import { trpc } from "@/lib/trpc";
 import { useState, useRef, useEffect, useMemo } from "react";
 import {
@@ -213,6 +214,7 @@ export default function NeighborhoodDetail() {
                   <GitCompare className="w-3.5 h-3.5 mr-1.5" /> Compare
                 </Button>
               </Link>
+              <ShareButtons compact title={`${n.name} - Charlotte Neighborhood`} description={n.vibe} className="text-white hover:text-white/80" />
             </div>
           </div>
         </div>

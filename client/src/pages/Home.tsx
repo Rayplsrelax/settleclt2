@@ -15,12 +15,14 @@ import {
   Sparkles,
   Calendar,
   Clock,
+  Activity,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import ActivityFeed from "@/components/ActivityFeed";
 
 const HERO_IMAGE =
   "https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/charlotte-skyline-hero_b8e3deb7.jpg";
@@ -511,6 +513,29 @@ function ThisWeekInCLT() {
   );
 }
 
+function CommunityActivity() {
+  return (
+    <section className="py-14 md:py-18 bg-muted/30">
+      <div className="container">
+        <div className="flex items-end justify-between mb-6">
+          <div>
+            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground flex items-center gap-2">
+              <Activity className="w-6 h-6 text-primary" />
+              Community Activity
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              See what Charlotte explorers are up to right now
+            </p>
+          </div>
+        </div>
+        <div className="max-w-2xl">
+          <ActivityFeed limit={8} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function CTABanner() {
   return (
     <section className="py-16 md:py-20">
@@ -547,6 +572,7 @@ export default function Home() {
       <FeaturedNeighborhoods />
       <DirectoryPreview />
       <CTABanner />
+      <CommunityActivity />
       <NewsletterSignup />
       <BlogPreview />
     </PageLayout>

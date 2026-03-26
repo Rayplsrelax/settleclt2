@@ -162,3 +162,10 @@
 - [x] Write 4 new blog articles: This Weekend in CLT, NoDa Deep Dive, Charlotte Summer Survival Guide, Date Night Guide
 - [x] Tag existing content with the tagging system (24 tags, 92 content-tag associations across events + blog posts)
 - [x] Write vitest tests for Phase 2 features (10 tests, 127 total passing across 14 test files)
+
+## CLT Passport Events + Strategic Plan Phase 3
+- [x] Add events to CLT Passport (stamp events attended, eventSlug column, tabbed UI with All/Places/Events filters)
+- [x] Build user-submitted events feature (submit form at /submit-event, draft status, admin approval, owner notification, CTA on Events page)
+- [x] Build live activity feed (recent stamps, comments, bingo progress — auto-refreshes every 30s, homepage section + reusable component)
+- [x] Add social sharing buttons across all pages (Events, BlogArticle, NeighborhoodDetail, Passport, BingoCards, Leaderboard — Twitter/X, Facebook, Email, Copy Link, native share)
+- [x] Write vitest tests for Phase 3 features (7 tests, 134 total passing across 15 test files)

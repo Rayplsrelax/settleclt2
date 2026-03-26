@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import ShareButtons from "@/components/ShareButtons";
 
 type Tab = "stamps" | "bingo" | "neighborhoods";
 
@@ -149,6 +150,9 @@ export default function Leaderboard() {
             See who's exploring Charlotte the most. Earn stamps, complete bingo cards,
             and visit neighborhoods to climb the ranks!
           </p>
+          <div className="mt-3">
+            <ShareButtons title="CLT Explorer Leaderboard" description="See who's exploring Charlotte the most" />
+          </div>
         </div>
 
         {/* Tabs */}

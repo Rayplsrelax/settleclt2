@@ -7,26 +7,31 @@ import { Link } from "wouter";
 import {
   Stamp, MapPin, Plus, Trash2, Calendar, StickyNote,
   Trophy, Map, Star, ChevronDown, ChevronUp, X, LogIn,
-  Grid3X3, Award, Target, ArrowRight
+  Grid3X3, Award, Target, ArrowRight, CalendarDays, Ticket
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SERVICES, type Service } from "@shared/services";
 import { allNeighborhoods } from "@shared/neighborhoods";
 import { toast } from "sonner";
+import ShareButtons from "@/components/ShareButtons";
 
 function slugify(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
+type StampType = "places" | "events";
+
 function PassportContent() {
   const utils = trpc.useUtils();
   const { data: entries = [], isLoading } = trpc.passport.getEntries.useQuery();
+  const { data: publishedEvents = [] } = trpc.events.getPublished.useQuery();
   const addEntry = trpc.passport.addEntry.useMutation({
     onSuccess: () => {
       utils.passport.getEntries.invalidate();
       setShowAdd(false);
       setSelectedService("");
+      setSelectedEvent("");
       setCustomPlace("");
       setNotes("");
       toast.success("Stamp collected! Added to your CLT Passport.");
@@ -40,11 +45,23 @@ function PassportContent() {
   });
 
   const [showAdd, setShowAdd] = useState(false);
+  const [addType, setAddType] = useState<StampType>("places");
   const [selectedService, setSelectedService] = useState("");
+  const [selectedEvent, setSelectedEvent] = useState("");
   const [customPlace, setCustomPlace] = useState("");
   const [notes, setNotes] = useState("");
   const [visitDate, setVisitDate] = useState(new Date().toISOString().split("T")[0]);
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<"all" | "places" | "events">("all");
+
+  // Separate entries
+  const placeEntries = useMemo(() => entries.filter(e => !e.eventSlug), [entries]);
+  const eventEntries = useMemo(() => entries.filter(e => !!e.eventSlug), [entries]);
+  const filteredEntries = useMemo(() => {
+    if (activeTab === "places") return placeEntries;
+    if (activeTab === "events") return eventEntries;
+    return entries;
+  }, [entries, placeEntries, eventEntries, activeTab]);
 
   // Stats
   const uniqueNeighborhoods = useMemo(() => {
@@ -68,26 +85,51 @@ function PassportContent() {
     return m;
   }, []);
 
+  // Event lookup
+  const eventMap = useMemo(() => {
+    const m: Record<string, typeof publishedEvents[0]> = {};
+    publishedEvents.forEach(e => { m[e.slug] = e; });
+    return m;
+  }, [publishedEvents]);
+
   const neighborhoodMap = useMemo(() => {
     const m: Record<string, string> = {};
     allNeighborhoods.forEach(n => { m[n.id] = n.name; });
     return m;
   }, []);
 
-  function handleAdd() {
-    const serviceKey = selectedService || undefined;
-    const svc = serviceKey ? serviceMap[serviceKey] : undefined;
-    const neighborhoodId = svc
-      ? allNeighborhoods.find(n => n.name === svc.area)?.id
-      : undefined;
+  // Already-stamped event slugs
+  const stampedEventSlugs = useMemo(() => {
+    return new Set(eventEntries.map(e => e.eventSlug).filter(Boolean));
+  }, [eventEntries]);
 
-    addEntry.mutate({
-      serviceKey,
-      customPlaceName: customPlace || undefined,
-      neighborhoodId,
-      notes: notes || undefined,
-      visitedAt: new Date(visitDate),
-    });
+  function handleAdd() {
+    if (addType === "events") {
+      if (!selectedEvent) return;
+      const evt = eventMap[selectedEvent];
+      const neighborhoodId = evt?.neighborhood
+        ? allNeighborhoods.find(n => n.name === evt.neighborhood)?.id
+        : undefined;
+      addEntry.mutate({
+        eventSlug: selectedEvent,
+        neighborhoodId,
+        notes: notes || undefined,
+        visitedAt: new Date(visitDate),
+      });
+    } else {
+      const serviceKey = selectedService || undefined;
+      const svc = serviceKey ? serviceMap[serviceKey] : undefined;
+      const neighborhoodId = svc
+        ? allNeighborhoods.find(n => n.name === svc.area)?.id
+        : undefined;
+      addEntry.mutate({
+        serviceKey,
+        customPlaceName: customPlace || undefined,
+        neighborhoodId,
+        notes: notes || undefined,
+        visitedAt: new Date(visitDate),
+      });
+    }
   }
 
   if (isLoading) {
@@ -95,8 +137,8 @@ function PassportContent() {
       <div className="container py-12 max-w-4xl">
         <div className="animate-pulse space-y-4">
           <div className="h-8 w-48 bg-muted rounded" />
-          <div className="grid grid-cols-3 gap-4">
-            {[1, 2, 3].map(i => <div key={i} className="h-24 bg-muted rounded-lg" />)}
+          <div className="grid grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map(i => <div key={i} className="h-24 bg-muted rounded-lg" />)}
           </div>
           <div className="h-64 bg-muted rounded-lg" />
         </div>
@@ -118,22 +160,32 @@ function PassportContent() {
             </h1>
           </div>
           <p className="text-muted-foreground max-w-xl">
-            Collect stamps for every place you visit in Charlotte. Track your exploration journey.
+            Collect stamps for every place you visit and event you attend in Charlotte.
           </p>
         </div>
-        <Button onClick={() => setShowAdd(!showAdd)} className="gap-2">
-          {showAdd ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          {showAdd ? "Cancel" : "Add Stamp"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <ShareButtons compact title="My CLT Passport" description="Tracking my Charlotte exploration journey" />
+          <Button onClick={() => setShowAdd(!showAdd)} className="gap-2">
+            {showAdd ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            {showAdd ? "Cancel" : "Add Stamp"}
+          </Button>
+        </div>
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-4 gap-4 mb-8">
         <Card>
           <CardContent className="py-4 text-center">
             <Trophy className="w-6 h-6 text-amber-500 mx-auto mb-1" />
             <div className="text-2xl font-bold text-foreground">{entries.length}</div>
             <div className="text-xs text-muted-foreground">Total Stamps</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="py-4 text-center">
+            <Ticket className="w-6 h-6 text-purple-500 mx-auto mb-1" />
+            <div className="text-2xl font-bold text-foreground">{eventEntries.length}</div>
+            <div className="text-xs text-muted-foreground">Events</div>
           </CardContent>
         </Card>
         <Card>
@@ -145,7 +197,7 @@ function PassportContent() {
         </Card>
         <Card>
           <CardContent className="py-4 text-center">
-            <Star className="w-6 h-6 text-purple-500 mx-auto mb-1" />
+            <Star className="w-6 h-6 text-orange-500 mx-auto mb-1" />
             <div className="text-2xl font-bold text-foreground">{thisMonthCount}</div>
             <div className="text-xs text-muted-foreground">This Month</div>
           </CardContent>
@@ -159,40 +211,95 @@ function PassportContent() {
             <CardTitle className="text-lg">Add a Stamp</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-foreground block mb-1">
-                Select from Directory
-              </label>
-              <select
-                value={selectedService}
-                onChange={e => setSelectedService(e.target.value)}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+            {/* Type toggle */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setAddType("places")}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  addType === "places"
+                    ? "bg-amber-600 text-white"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                }`}
               >
-                <option value="">-- Choose a place --</option>
-                {SERVICES.map(s => (
-                  <option key={slugify(s.name)} value={slugify(s.name)}>
-                    {s.name} ({s.area})
-                  </option>
-                ))}
-              </select>
+                <MapPin className="w-4 h-4" />
+                Place
+              </button>
+              <button
+                onClick={() => setAddType("events")}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  addType === "events"
+                    ? "bg-purple-600 text-white"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                }`}
+              >
+                <CalendarDays className="w-4 h-4" />
+                Event
+              </button>
             </div>
-            <div className="text-center text-xs text-muted-foreground">— or —</div>
-            <div>
-              <label className="text-sm font-medium text-foreground block mb-1">
-                Custom Place Name
-              </label>
-              <input
-                type="text"
-                value={customPlace}
-                onChange={e => setCustomPlace(e.target.value)}
-                placeholder="e.g., That amazing taco truck on Trade St"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
-              />
-            </div>
+
+            {addType === "events" ? (
+              <div>
+                <label className="text-sm font-medium text-foreground block mb-1">
+                  Select Event
+                </label>
+                <select
+                  value={selectedEvent}
+                  onChange={e => setSelectedEvent(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+                >
+                  <option value="">-- Choose an event --</option>
+                  {publishedEvents.map(evt => (
+                    <option
+                      key={evt.slug}
+                      value={evt.slug}
+                      disabled={stampedEventSlugs.has(evt.slug)}
+                    >
+                      {evt.title}
+                      {evt.neighborhood ? ` (${evt.neighborhood})` : ""}
+                      {stampedEventSlugs.has(evt.slug) ? " ✓ Already stamped" : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <>
+                <div>
+                  <label className="text-sm font-medium text-foreground block mb-1">
+                    Select from Directory
+                  </label>
+                  <select
+                    value={selectedService}
+                    onChange={e => setSelectedService(e.target.value)}
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+                  >
+                    <option value="">-- Choose a place --</option>
+                    {SERVICES.map(s => (
+                      <option key={slugify(s.name)} value={slugify(s.name)}>
+                        {s.name} ({s.area})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="text-center text-xs text-muted-foreground">— or —</div>
+                <div>
+                  <label className="text-sm font-medium text-foreground block mb-1">
+                    Custom Place Name
+                  </label>
+                  <input
+                    type="text"
+                    value={customPlace}
+                    onChange={e => setCustomPlace(e.target.value)}
+                    placeholder="e.g., That amazing taco truck on Trade St"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+                  />
+                </div>
+              </>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-foreground block mb-1">
-                  Date Visited
+                  {addType === "events" ? "Date Attended" : "Date Visited"}
                 </label>
                 <input
                   type="date"
@@ -209,14 +316,18 @@ function PassportContent() {
                   type="text"
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
-                  placeholder="What did you think?"
+                  placeholder={addType === "events" ? "How was the event?" : "What did you think?"}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
                 />
               </div>
             </div>
             <Button
               onClick={handleAdd}
-              disabled={(!selectedService && !customPlace) || addEntry.isPending}
+              disabled={
+                addType === "events"
+                  ? !selectedEvent || addEntry.isPending
+                  : (!selectedService && !customPlace) || addEntry.isPending
+              }
               className="w-full"
             >
               {addEntry.isPending ? "Adding..." : "Collect Stamp"}
@@ -225,53 +336,129 @@ function PassportContent() {
         </Card>
       )}
 
+      {/* Filter tabs */}
+      <div className="flex items-center gap-1 mb-6 border-b border-border">
+        {(["all", "places", "events"] as const).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === tab
+                ? "border-primary text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {tab === "all" && `All (${entries.length})`}
+            {tab === "places" && (
+              <span className="flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5" />
+                Places ({placeEntries.length})
+              </span>
+            )}
+            {tab === "events" && (
+              <span className="flex items-center gap-1.5">
+                <CalendarDays className="w-3.5 h-3.5" />
+                Events ({eventEntries.length})
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
       {/* Entries list */}
-      {entries.length === 0 ? (
+      {filteredEntries.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="py-16 text-center">
-            <MapPin className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              Your passport is empty
-            </h3>
-            <p className="text-sm text-muted-foreground max-w-md mx-auto mb-4">
-              Start exploring Charlotte! Click "Add Stamp" above or visit places from the
-              directory and mark them as visited.
-            </p>
-            <a
-              href="/directory"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity no-underline"
-            >
-              Browse Directory
-            </a>
+            {activeTab === "events" ? (
+              <>
+                <CalendarDays className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  No event stamps yet
+                </h3>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto mb-4">
+                  Attend Charlotte events and stamp them here! Click "Add Stamp" and choose the Event tab.
+                </p>
+                <Link
+                  href="/events"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-purple-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity no-underline"
+                >
+                  Browse Events
+                </Link>
+              </>
+            ) : (
+              <>
+                <MapPin className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  {activeTab === "places" ? "No place stamps yet" : "Your passport is empty"}
+                </h3>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto mb-4">
+                  Start exploring Charlotte! Click "Add Stamp" above to log places you've visited or events you've attended.
+                </p>
+                <div className="flex items-center justify-center gap-3">
+                  <Link
+                    href="/directory"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity no-underline"
+                  >
+                    Browse Directory
+                  </Link>
+                  <Link
+                    href="/events"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-purple-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity no-underline"
+                  >
+                    Browse Events
+                  </Link>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-foreground">
-            Your Stamps ({entries.length})
-          </h2>
-          {entries.map(entry => {
-            const svc = entry.serviceKey ? serviceMap[entry.serviceKey] : null;
-            const placeName = svc?.name ?? entry.customPlaceName ?? "Unknown Place";
+          {filteredEntries.map(entry => {
+            const isEvent = !!entry.eventSlug;
+            const evt = isEvent && entry.eventSlug ? eventMap[entry.eventSlug] : null;
+            const svc = !isEvent && entry.serviceKey ? serviceMap[entry.serviceKey] : null;
+            const placeName = isEvent
+              ? (evt?.title ?? entry.eventSlug ?? "Unknown Event")
+              : (svc?.name ?? entry.customPlaceName ?? "Unknown Place");
             const neighborhood = entry.neighborhoodId
               ? neighborhoodMap[entry.neighborhoodId]
-              : svc?.area ?? null;
+              : isEvent
+                ? evt?.neighborhood ?? null
+                : svc?.area ?? null;
             const expanded = expandedId === entry.id;
 
             return (
               <Card
                 key={entry.id}
-                className="overflow-hidden hover:border-amber-500/30 transition-colors cursor-pointer"
+                className={`overflow-hidden transition-colors cursor-pointer ${
+                  isEvent
+                    ? "hover:border-purple-500/30"
+                    : "hover:border-amber-500/30"
+                }`}
                 onClick={() => setExpandedId(expanded ? null : entry.id)}
               >
                 <CardContent className="py-3 px-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
-                      <Stamp className="w-5 h-5 text-amber-500" />
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+                      isEvent ? "bg-purple-500/10" : "bg-amber-500/10"
+                    }`}>
+                      {isEvent ? (
+                        <CalendarDays className="w-5 h-5 text-purple-500" />
+                      ) : (
+                        <Stamp className="w-5 h-5 text-amber-500" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-foreground truncate">
-                        {placeName}
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-foreground truncate">
+                          {placeName}
+                        </span>
+                        {isEvent && (
+                          <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600">
+                            EVENT
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground">
                         {neighborhood && (
@@ -284,6 +471,9 @@ function PassportContent() {
                           <Calendar className="w-3 h-3" />
                           {new Date(entry.visitedAt).toLocaleDateString()}
                         </span>
+                        {isEvent && evt?.category && (
+                          <span className="capitalize">{evt.category.replace("-", " ")}</span>
+                        )}
                       </div>
                     </div>
                     {expanded ? (
@@ -300,23 +490,42 @@ function PassportContent() {
                           <p className="text-sm text-muted-foreground">{entry.notes}</p>
                         </div>
                       )}
-                      {svc && (
+                      {isEvent && evt && (
+                        <div className="text-xs text-muted-foreground mb-3">
+                          {evt.venueName && <>Venue: {evt.venueName} &middot; </>}
+                          {evt.neighborhood ?? "Charlotte"}
+                          {evt.startDate && (
+                            <> &middot; Event Date: {new Date(evt.startDate).toLocaleDateString()}</>
+                          )}
+                        </div>
+                      )}
+                      {!isEvent && svc && (
                         <div className="text-xs text-muted-foreground mb-3">
                           Category: {svc.category} &middot; {svc.area}
                         </div>
                       )}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-destructive hover:text-destructive gap-1"
-                        onClick={e => {
-                          e.stopPropagation();
-                          deleteEntry.mutate({ id: entry.id });
-                        }}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        Remove
-                      </Button>
+                      <div className="flex items-center gap-2">
+                        {isEvent && evt && (
+                          <Link href={`/events/${evt.slug}`}>
+                            <Button variant="outline" size="sm" className="gap-1">
+                              <ArrowRight className="w-3.5 h-3.5" />
+                              View Event
+                            </Button>
+                          </Link>
+                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-destructive hover:text-destructive gap-1"
+                          onClick={e => {
+                            e.stopPropagation();
+                            deleteEntry.mutate({ id: entry.id });
+                          }}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Remove
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </CardContent>
@@ -325,6 +534,24 @@ function PassportContent() {
           })}
         </div>
       )}
+
+      {/* Quick links */}
+      <div className="mt-8 flex items-center justify-center gap-4">
+        <Link href="/bingo" className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline flex items-center gap-1.5">
+          <Grid3X3 className="w-4 h-4" />
+          CLT Bingo
+        </Link>
+        <span className="text-muted-foreground/30">|</span>
+        <Link href="/leaderboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline flex items-center gap-1.5">
+          <Trophy className="w-4 h-4" />
+          Leaderboard
+        </Link>
+        <span className="text-muted-foreground/30">|</span>
+        <Link href="/events" className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline flex items-center gap-1.5">
+          <CalendarDays className="w-4 h-4" />
+          Browse Events
+        </Link>
+      </div>
     </div>
   );
 }
@@ -351,7 +578,7 @@ function PassportLanding() {
               <span className="text-amber-600">Collect Every Stamp.</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-              The CLT Passport tracks every place you visit in Charlotte. Collect stamps, complete bingo challenges, climb the leaderboard, and discover the Queen City like a local.
+              The CLT Passport tracks every place you visit and event you attend in Charlotte. Collect stamps, complete bingo challenges, climb the leaderboard, and discover the Queen City like a local.
             </p>
             <div className="flex items-center justify-center gap-4">
               <a
@@ -361,8 +588,8 @@ function PassportLanding() {
                 <LogIn className="w-4 h-4" />
                 Start Your Passport
               </a>
-              <Link href="/directory" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border bg-background text-foreground font-semibold hover:bg-muted transition-colors no-underline">
-                Browse Directory
+              <Link href="/events" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border bg-background text-foreground font-semibold hover:bg-muted transition-colors no-underline">
+                Browse Events
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -374,14 +601,23 @@ function PassportLanding() {
       <section className="py-16 bg-background">
         <div className="container max-w-5xl">
           <h2 className="text-2xl font-display font-bold text-foreground text-center mb-12">How It Works</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="text-center">
               <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
                 <MapPin className="w-7 h-7 text-amber-600" />
               </div>
               <h3 className="font-semibold text-foreground mb-2">Visit Places</h3>
               <p className="text-sm text-muted-foreground">
-                Explore Charlotte's restaurants, breweries, parks, shops, and hidden gems across 20 neighborhoods.
+                Explore Charlotte's restaurants, breweries, parks, and hidden gems across 20 neighborhoods.
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center mx-auto mb-4">
+                <CalendarDays className="w-7 h-7 text-purple-600" />
+              </div>
+              <h3 className="font-semibold text-foreground mb-2">Attend Events</h3>
+              <p className="text-sm text-muted-foreground">
+                From food festivals to concerts, stamp every Charlotte event you experience.
               </p>
             </div>
             <div className="text-center">
@@ -390,7 +626,7 @@ function PassportLanding() {
               </div>
               <h3 className="font-semibold text-foreground mb-2">Collect Stamps</h3>
               <p className="text-sm text-muted-foreground">
-                Log each visit to earn stamps. Add notes, dates, and track which neighborhoods you've explored.
+                Log each visit to earn stamps. Add notes, dates, and track your exploration journey.
               </p>
             </div>
             <div className="text-center">
@@ -399,7 +635,7 @@ function PassportLanding() {
               </div>
               <h3 className="font-semibold text-foreground mb-2">Earn Achievements</h3>
               <p className="text-sm text-muted-foreground">
-                Complete bingo challenges, climb the leaderboard, and share your progress with friends.
+                Complete bingo challenges, climb the leaderboard, and share your progress.
               </p>
             </div>
           </div>
@@ -418,8 +654,21 @@ function PassportLanding() {
                     <Stamp className="w-5 h-5 text-amber-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground mb-1">Stamp Collection</h3>
-                    <p className="text-sm text-muted-foreground">Track every place you visit with dates, notes, and neighborhood tags. Watch your collection grow.</p>
+                    <h3 className="font-semibold text-foreground mb-1">Place Stamps</h3>
+                    <p className="text-sm text-muted-foreground">Track every restaurant, brewery, park, and shop you visit with dates, notes, and neighborhood tags.</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+                    <CalendarDays className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground mb-1">Event Stamps</h3>
+                    <p className="text-sm text-muted-foreground">Log festivals, concerts, food events, and community gatherings. Never forget the events that made Charlotte special.</p>
                   </div>
                 </div>
               </CardContent>
@@ -446,19 +695,6 @@ function PassportLanding() {
                   <div>
                     <h3 className="font-semibold text-foreground mb-1">Leaderboard</h3>
                     <p className="text-sm text-muted-foreground">See how you rank among other CLT explorers. Top collectors earn bragging rights.</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
-                    <Award className="w-5 h-5 text-purple-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground mb-1">Shareable Cards</h3>
-                    <p className="text-sm text-muted-foreground">Generate social-media-ready images of your bingo progress to share with friends.</p>
                   </div>
                 </div>
               </CardContent>

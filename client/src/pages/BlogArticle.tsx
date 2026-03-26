@@ -2,6 +2,7 @@ import PageLayout from "@/components/PageLayout";
 import { trpc } from "@/lib/trpc";
 import { useParams, Link } from "wouter";
 import { ArrowLeft, Calendar, Clock, User, BookOpen } from "lucide-react";
+import ShareButtons from "@/components/ShareButtons";
 import { Button } from "@/components/ui/button";
 import CommentSection from "@/components/CommentSection";
 
@@ -119,6 +120,9 @@ export default function BlogArticle() {
                 {post.readTime}
               </span>
             )}
+          </div>
+          <div className="mt-4">
+            <ShareButtons title={post.title} description={post.excerpt || undefined} />
           </div>
         </div>
 

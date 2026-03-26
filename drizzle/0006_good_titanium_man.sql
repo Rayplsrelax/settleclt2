@@ -1,0 +1,1 @@
+ALTER TABLE `passport_entries` ADD `eventSlug` varchar(255);

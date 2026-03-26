@@ -14,6 +14,7 @@ import {
   getLeaderboardByStamps, getLeaderboardByBingo, getLeaderboardByNeighborhoods,
   createEvent, updateEvent, deleteEvent, getPublishedEvents, getAllEvents, getEventBySlug, getEventById,
   createTag, getAllTags, getTagBySlug, addContentTag, removeContentTag, getContentTags, getContentByTag, bulkAddContentTags,
+  getRecentActivity,
 } from "./db";
 import { makeRequest, type PlacesSearchResult, type PlaceDetailsResult } from "./_core/map";
 import { notifyOwner } from "./_core/notification";
@@ -368,6 +369,7 @@ export const appRouter = router({
       .input(z.object({
         serviceKey: z.string().optional(),
         customPlaceName: z.string().optional(),
+        eventSlug: z.string().optional(),
         neighborhoodId: z.string().optional(),
         notes: z.string().optional(),
         visitedAt: z.date().optional(),
@@ -377,6 +379,7 @@ export const appRouter = router({
           userId: ctx.user.id,
           serviceKey: input.serviceKey ?? null,
           customPlaceName: input.customPlaceName ?? null,
+          eventSlug: input.eventSlug ?? null,
           neighborhoodId: input.neighborhoodId ?? null,
           notes: input.notes ?? null,
           visitedAt: input.visitedAt ?? new Date(),
@@ -551,6 +554,54 @@ export const appRouter = router({
       endOfWeek.setHours(23, 59, 59, 999);
       return getPublishedEvents({ fromDate: startOfWeek, toDate: endOfWeek, limit: 6 });
     }),
+    submitEvent: protectedProcedure
+      .input(z.object({
+        title: z.string().min(1).max(255),
+        description: z.string().min(10).max(5000),
+        startDate: z.date(),
+        endDate: z.date().optional(),
+        venueName: z.string().min(1).max(255),
+        venueAddress: z.string().max(500).optional(),
+        neighborhood: z.string().max(100).optional(),
+        externalUrl: z.string().url().max(500).optional(),
+        category: z.enum(['concerts', 'food-drink', 'sports', 'arts-culture', 'festivals', 'family', 'nightlife', 'free', 'markets', 'community']),
+        isRecurring: z.enum(['yes', 'no']).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const slug = input.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString(36);
+        await createEvent({
+          title: input.title,
+          slug,
+          description: input.description ?? null,
+          startDate: input.startDate,
+          endDate: input.endDate ?? null,
+          venueName: input.venueName ?? null,
+          venueAddress: input.venueAddress ?? null,
+          neighborhood: input.neighborhood ?? null,
+          externalUrl: input.externalUrl ?? null,
+          imageUrl: null,
+          category: input.category,
+          isFeatured: 'no',
+          isRecurring: input.isRecurring ?? 'no',
+          status: 'draft', // requires admin approval
+          submittedBy: ctx.user.id,
+        });
+        // Notify owner of new event submission
+        notifyOwner({
+          title: '📅 New Event Submitted',
+          content: `${ctx.user.name ?? 'A user'} submitted event "${input.title}" at ${input.venueName}${input.neighborhood ? ` in ${input.neighborhood}` : ''}. Category: ${input.category}. Review in admin panel.`,
+        }).catch(() => {}); // fire-and-forget
+        return { success: true };
+      }),
+  }),
+
+  // --- Activity Feed ---
+  activity: router({
+    recent: publicProcedure
+      .input(z.object({ limit: z.number().min(1).max(50).optional() }).optional())
+      .query(async ({ input }) => {
+        return getRecentActivity(input?.limit ?? 20);
+      }),
   }),
 
   // --- Tags (public read, admin write) ---
