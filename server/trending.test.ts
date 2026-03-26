@@ -2,35 +2,6 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
 
-type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
-
-function createAdminContext(): { ctx: TrpcContext } {
-  const user: AuthenticatedUser = {
-    id: 1,
-    openId: "admin-user",
-    email: "admin@example.com",
-    name: "Admin User",
-    loginMethod: "manus",
-    role: "admin",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    lastSignedIn: new Date(),
-  };
-
-  const ctx: TrpcContext = {
-    user,
-    req: {
-      protocol: "https",
-      headers: {},
-    } as TrpcContext["req"],
-    res: {
-      clearCookie: vi.fn(),
-    } as unknown as TrpcContext["res"],
-  };
-
-  return { ctx };
-}
-
 function createPublicContext(): { ctx: TrpcContext } {
   const ctx: TrpcContext = {
     user: null,
@@ -46,53 +17,8 @@ function createPublicContext(): { ctx: TrpcContext } {
   return { ctx };
 }
 
-function createUserContext(): { ctx: TrpcContext } {
-  const user: AuthenticatedUser = {
-    id: 2,
-    openId: "regular-user",
-    email: "user@example.com",
-    name: "Regular User",
-    loginMethod: "manus",
-    role: "user",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    lastSignedIn: new Date(),
-  };
-
-  const ctx: TrpcContext = {
-    user,
-    req: {
-      protocol: "https",
-      headers: {},
-    } as TrpcContext["req"],
-    res: {
-      clearCookie: vi.fn(),
-    } as unknown as TrpcContext["res"],
-  };
-
-  return { ctx };
-}
-
 // Mock the db module
 vi.mock("./db", () => ({
-  createBlogResearchIdea: vi.fn().mockResolvedValue({ insertId: 1 }),
-  getAllBlogResearchIdeas: vi.fn().mockResolvedValue([
-    {
-      id: 1,
-      title: "Best Brunch Spots in South End",
-      description: "A guide to the top brunch restaurants",
-      outline: "## Introduction\n## Top 5 Spots\n## Conclusion",
-      source: "Charlotte Agenda",
-      category: "food-drink",
-      keywords: "brunch, south end, charlotte",
-      status: "idea",
-      createdBy: 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ]),
-  updateBlogResearchIdea: vi.fn().mockResolvedValue({ success: true }),
-  deleteBlogResearchIdea: vi.fn().mockResolvedValue({ success: true }),
   trackTagEngagement: vi.fn().mockResolvedValue({ insertId: 1 }),
   getTrendingTags: vi.fn().mockResolvedValue([
     { tagId: 1, tagName: "South End", tagSlug: "south-end", tagCategory: "neighborhood", engagementCount: 42 },
@@ -153,28 +79,6 @@ vi.mock("./db", () => ({
   updateUserNewsletter: vi.fn(),
 }));
 
-// Mock the LLM module
-vi.mock("./_core/llm", () => ({
-  invokeLLM: vi.fn().mockResolvedValue({
-    choices: [{
-      message: {
-        content: JSON.stringify({
-          ideas: [
-            {
-              title: "10 Best Brunch Spots in South End Charlotte",
-              description: "A comprehensive guide to the best brunch restaurants in South End.",
-              outline: "## Introduction\n## Top 10 Spots\n## Price Comparison\n## Conclusion",
-              keywords: "brunch, south end, charlotte, restaurants",
-              category: "food-drink",
-              source: "Charlotte Agenda",
-            },
-          ],
-        }),
-      },
-    }],
-  }),
-}));
-
 // Mock map module
 vi.mock("./_core/map", () => ({
   makeRequest: vi.fn(),
@@ -184,84 +88,6 @@ vi.mock("./_core/map", () => ({
 vi.mock("./_core/notification", () => ({
   notifyOwner: vi.fn().mockResolvedValue(true),
 }));
-
-describe("research router", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("getAll returns saved research ideas for admin", async () => {
-    const { ctx } = createAdminContext();
-    const caller = appRouter.createCaller(ctx);
-
-    const result = await caller.research.getAll();
-    expect(result).toHaveLength(1);
-    expect(result[0].title).toBe("Best Brunch Spots in South End");
-  });
-
-  it("getAll rejects non-admin users", async () => {
-    const { ctx } = createUserContext();
-    const caller = appRouter.createCaller(ctx);
-
-    await expect(caller.research.getAll()).rejects.toThrow();
-  });
-
-  it("generate creates AI blog ideas and saves them", async () => {
-    const { ctx } = createAdminContext();
-    const caller = appRouter.createCaller(ctx);
-
-    const result = await caller.research.generate({
-      topic: "best brunch spots",
-      category: "food-drink",
-    });
-
-    expect(result.ideas).toHaveLength(1);
-    expect(result.ideas[0].title).toContain("Brunch");
-    expect(result.savedCount).toBe(1);
-  });
-
-  it("generate rejects empty topic", async () => {
-    const { ctx } = createAdminContext();
-    const caller = appRouter.createCaller(ctx);
-
-    await expect(
-      caller.research.generate({ topic: "" })
-    ).rejects.toThrow();
-  });
-
-  it("save creates a manual research idea", async () => {
-    const { ctx } = createAdminContext();
-    const caller = appRouter.createCaller(ctx);
-
-    const result = await caller.research.save({
-      title: "Manual Idea: NoDa Art Walk",
-      description: "Guide to the NoDa art walk experience",
-      category: "lifestyle",
-    });
-
-    expect(result).toBeTruthy();
-  });
-
-  it("update changes idea status", async () => {
-    const { ctx } = createAdminContext();
-    const caller = appRouter.createCaller(ctx);
-
-    const result = await caller.research.update({
-      id: 1,
-      status: "researching",
-    });
-
-    expect(result).toEqual({ success: true });
-  });
-
-  it("delete removes an idea", async () => {
-    const { ctx } = createAdminContext();
-    const caller = appRouter.createCaller(ctx);
-
-    const result = await caller.research.delete({ id: 1 });
-    expect(result).toEqual({ success: true });
-  });
-});
 
 describe("trending router", () => {
   beforeEach(() => {

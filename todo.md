@@ -176,3 +176,13 @@
 - [x] Add newsletter toggle to user profile settings (Profile page Preferences section)
 - [x] Build blog research skill (AI-powered admin tool at /admin/research — generates ideas from Charlotte sources, creates outlines, drafts full posts)
 - [x] Implement trending tags: tag_engagement table, trending router, "Trending in CLT" homepage section, auto-tracking on tag page views and clicks
+
+## Blog Research → Manus Skill Migration
+- [x] Remove Blog Research Lab page from website (/admin/research route, AdminResearch.tsx)
+- [x] Remove Blog Research navbar link from admin dropdown
+- [x] Remove blog research router procedures from routers.ts
+- [x] Remove blog research db helpers from db.ts
+- [x] Remove blog_research_ideas schema from drizzle/schema.ts
+- [x] Drop blog_research_ideas table from database
+- [x] Remove blog research test file
+- [x] Build standalone Manus skill for blog research (SKILL.md + scripts + references)

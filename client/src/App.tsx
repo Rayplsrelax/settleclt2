@@ -26,7 +26,6 @@ const Events = lazy(() => import("./pages/Events"));
 const AdminEvents = lazy(() => import("./pages/AdminEvents"));
 const TagPage = lazy(() => import("./pages/TagPage"));
 const SubmitEvent = lazy(() => import("./pages/SubmitEvent"));
-const AdminResearch = lazy(() => import("./pages/AdminResearch"));
 
 function PageLoader() {
   return (
@@ -57,7 +56,6 @@ function Router() {
         <Route path="/admin/enrich" component={AdminEnrich} />
         <Route path="/admin/blog" component={AdminBlog} />
         <Route path="/admin/events" component={AdminEvents} />
-        <Route path="/admin/research" component={AdminResearch} />
         <Route path="/submit-event" component={SubmitEvent} />
         <Route path="/tag/:slug" component={TagPage} />
         <Route path="/blog/:slug" component={BlogArticle} />

@@ -717,42 +717,8 @@ export async function updateUserNewsletter(userId: number, optIn: boolean) {
   await db.update(users).set({ newsletterOptIn: optIn }).where(eq(users.id, userId));
 }
 
-// --- Blog Research Ideas ---
-import { blogResearchIdeas, tagEngagement, type InsertBlogResearchIdea, type InsertTagEngagement } from "../drizzle/schema";
-
-export async function createBlogResearchIdea(data: InsertBlogResearchIdea) {
-  const db = await getDb();
-  if (!db) return null;
-  const [result] = await db.insert(blogResearchIdeas).values(data);
-  return result;
-}
-
-export async function getAllBlogResearchIdeas(statusFilter?: string) {
-  const db = await getDb();
-  if (!db) return [];
-  if (statusFilter) {
-    return db.select().from(blogResearchIdeas)
-      .where(eq(blogResearchIdeas.status, statusFilter as any))
-      .orderBy(desc(blogResearchIdeas.createdAt));
-  }
-  return db.select().from(blogResearchIdeas).orderBy(desc(blogResearchIdeas.createdAt));
-}
-
-export async function updateBlogResearchIdea(id: number, data: Partial<InsertBlogResearchIdea>) {
-  const db = await getDb();
-  if (!db) return null;
-  await db.update(blogResearchIdeas).set(data).where(eq(blogResearchIdeas.id, id));
-  return { success: true };
-}
-
-export async function deleteBlogResearchIdea(id: number) {
-  const db = await getDb();
-  if (!db) return null;
-  await db.delete(blogResearchIdeas).where(eq(blogResearchIdeas.id, id));
-  return { success: true };
-}
-
 // --- Tag Engagement ---
+import { tagEngagement, type InsertTagEngagement } from "../drizzle/schema";
 export async function trackTagEngagement(data: InsertTagEngagement) {
   const db = await getDb();
   if (!db) return null;

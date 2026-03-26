@@ -324,31 +324,6 @@ export const contentTags = mysqlTable("content_tags", {
 export type ContentTag = typeof contentTags.$inferSelect;
 export type InsertContentTag = typeof contentTags.$inferInsert;
 
-// --- Blog research ideas: AI-generated content ideas ---
-export const blogResearchIdeas = mysqlTable("blog_research_ideas", {
-  id: int("id").autoincrement().primaryKey(),
-  /** Topic title */
-  title: varchar("title", { length: 512 }).notNull(),
-  /** Brief description of the topic */
-  description: text("description"),
-  /** AI-generated outline (markdown) */
-  outline: text("outline"),
-  /** Source inspiration (competitor article, trending topic, etc.) */
-  source: varchar("source", { length: 512 }),
-  /** Category: neighborhood-guide, food-drink, events, lifestyle, moving-tips, real-estate */
-  category: varchar("category", { length: 128 }),
-  /** SEO keywords (comma-separated) */
-  keywords: text("keywords"),
-  /** Status: idea, researching, drafted, published, dismissed */
-  status: mysqlEnum("status", ["idea", "researching", "drafted", "published", "dismissed"]).default("idea").notNull(),
-  /** Admin who created/saved this idea */
-  createdBy: int("createdBy"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
-
-export type BlogResearchIdea = typeof blogResearchIdeas.$inferSelect;
-export type InsertBlogResearchIdea = typeof blogResearchIdeas.$inferInsert;
 
 // --- Tag engagement: track views/clicks for trending ---
 export const tagEngagement = mysqlTable("tag_engagement", {
