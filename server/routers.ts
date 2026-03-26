@@ -15,9 +15,14 @@ import {
   createEvent, updateEvent, deleteEvent, getPublishedEvents, getAllEvents, getEventBySlug, getEventById,
   createTag, getAllTags, getTagBySlug, addContentTag, removeContentTag, getContentTags, getContentByTag, bulkAddContentTags,
   getRecentActivity,
+  addDirectoryListing, getDirectoryListings, getAllDirectoryListings, updateDirectoryListing, deleteDirectoryListing,
+  updateUserNewsletter,
+  createBlogResearchIdea, getAllBlogResearchIdeas, updateBlogResearchIdea, deleteBlogResearchIdea,
+  trackTagEngagement, getTrendingTags, bulkTrackTagEngagement,
 } from "./db";
 import { makeRequest, type PlacesSearchResult, type PlaceDetailsResult } from "./_core/map";
 import { notifyOwner } from "./_core/notification";
+import { invokeLLM } from "./_core/llm";
 
 export const appRouter = router({
   system: systemRouter,
@@ -162,6 +167,74 @@ export const appRouter = router({
     getAllEnrichments: adminProcedure.query(async () => {
       return getAllEnrichedServices();
     }),
+
+    // Admin directory listing management (add new businesses via Google Places)
+    addNewListing: adminProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        category: z.string().min(1),
+        description: z.string().optional(),
+        area: z.string().default("Charlotte Metro"),
+        phone: z.string().optional(),
+        website: z.string().optional(),
+        googlePlaceId: z.string().optional(),
+        googleRating: z.string().optional(),
+        reviewCount: z.number().optional(),
+        verifiedAddress: z.string().optional(),
+        hoursJson: z.string().optional(),
+        googleTypes: z.string().optional(),
+        priceLevel: z.number().optional(),
+        featured: z.boolean().default(false),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const serviceKey = input.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const result = await addDirectoryListing({
+          serviceKey,
+          name: input.name,
+          category: input.category,
+          description: input.description ?? null,
+          area: input.area,
+          phone: input.phone ?? null,
+          website: input.website ?? null,
+          googlePlaceId: input.googlePlaceId ?? null,
+          googleRating: input.googleRating ?? null,
+          reviewCount: input.reviewCount ?? null,
+          verifiedAddress: input.verifiedAddress ?? null,
+          hoursJson: input.hoursJson ?? null,
+          googleTypes: input.googleTypes ?? null,
+          priceLevel: input.priceLevel ?? null,
+          featured: input.featured,
+          addedBy: ctx.user.id,
+        });
+        return { success: true, serviceKey };
+      }),
+
+    getDirectoryListings: adminProcedure.query(async () => {
+      return getAllDirectoryListings();
+    }),
+
+    updateListing: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        category: z.string().optional(),
+        description: z.string().optional(),
+        area: z.string().optional(),
+        phone: z.string().optional(),
+        website: z.string().optional(),
+        featured: z.boolean().optional(),
+        active: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return updateDirectoryListing(id, data);
+      }),
+
+    deleteListing: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return deleteDirectoryListing(input.id);
+      }),
 
     // Admin blog management
     getAllBlogPosts: adminProcedure.query(async () => {
@@ -645,6 +718,247 @@ export const appRouter = router({
           content: `New subscriber: ${input.email} (source: ${input.source ?? 'homepage'})`,
         }).catch(() => {}); // fire-and-forget
         return result;
+      }),
+    toggleOptIn: protectedProcedure
+      .input(z.object({ optIn: z.boolean() }))
+      .mutation(async ({ ctx, input }) => {
+        await updateUserNewsletter(ctx.user.id, input.optIn);
+        // If opting in, also add to newsletter_subscribers table
+        if (input.optIn && ctx.user.email) {
+          await insertNewsletterSubscriber({ email: ctx.user.email, source: "profile" }).catch(() => {});
+        }
+        return { success: true };
+      }),
+  }),
+
+  // --- Blog Research (admin) ---
+  research: router({
+    getAll: adminProcedure
+      .input(z.object({ status: z.string().optional() }).optional())
+      .query(async ({ input }) => {
+        return getAllBlogResearchIdeas(input?.status);
+      }),
+
+    generate: adminProcedure
+      .input(z.object({
+        topic: z.string().min(1).max(500),
+        category: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Use LLM to generate blog topic ideas based on Charlotte local content
+        const result = await invokeLLM({
+          messages: [
+            {
+              role: "system",
+              content: `You are a Charlotte, NC local content strategist for Settle CLT, a city guide and relocation platform. Generate blog post ideas that would appeal to people moving to or exploring Charlotte. Focus on:
+- Neighborhood guides and comparisons
+- Local food, drink, and restaurant scenes
+- Events and things to do
+- Moving tips and relocation advice
+- Real estate market insights
+- Hidden gems and local secrets
+- Seasonal activities and guides
+
+For each idea, provide:
+1. A compelling title (SEO-friendly)
+2. A brief description (2-3 sentences)
+3. A detailed outline with 5-7 sections
+4. 5-8 SEO keywords
+5. The best category from: neighborhood-guide, food-drink, events, lifestyle, moving-tips, real-estate
+6. Potential source inspiration (Charlotte Agenda, Axios Charlotte, Charlotte Observer, etc.)
+
+Respond in JSON format.`,
+            },
+            {
+              role: "user",
+              content: `Generate 3 blog post ideas related to: "${input.topic}"${input.category ? ` in the category: ${input.category}` : ''}. Make them specific to Charlotte, NC and highly actionable for readers.`,
+            },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "blog_ideas",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  ideas: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        title: { type: "string" },
+                        description: { type: "string" },
+                        outline: { type: "string" },
+                        keywords: { type: "string" },
+                        category: { type: "string" },
+                        source: { type: "string" },
+                      },
+                      required: ["title", "description", "outline", "keywords", "category", "source"],
+                      additionalProperties: false,
+                    },
+                  },
+                },
+                required: ["ideas"],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+
+        const content = result.choices[0]?.message?.content;
+        const parsed = JSON.parse(typeof content === 'string' ? content : '');
+        
+        // Save all ideas to the database
+        const savedIds: number[] = [];
+        for (const idea of parsed.ideas) {
+          const res = await createBlogResearchIdea({
+            title: idea.title,
+            description: idea.description,
+            outline: idea.outline,
+            source: idea.source,
+            category: idea.category,
+            keywords: idea.keywords,
+            status: 'idea',
+            createdBy: ctx.user.id,
+          });
+          if (res) savedIds.push(res.insertId);
+        }
+
+        return { ideas: parsed.ideas, savedCount: savedIds.length };
+      }),
+
+    generateDraft: adminProcedure
+      .input(z.object({
+        ideaId: z.number(),
+        title: z.string(),
+        outline: z.string(),
+        keywords: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const result = await invokeLLM({
+          messages: [
+            {
+              role: "system",
+              content: `You are a skilled blog writer for Settle CLT, a Charlotte, NC city guide and relocation platform. Write engaging, informative blog posts that help people discover and settle into Charlotte. Use a friendly, knowledgeable tone. Include specific Charlotte locations, businesses, and neighborhoods. Format in Markdown with proper headings, bullet points, and sections. Target 800-1200 words.`,
+            },
+            {
+              role: "user",
+              content: `Write a complete blog post with the title: "${input.title}"
+
+Follow this outline:
+${input.outline}
+
+${input.keywords ? `Target these SEO keywords: ${input.keywords}` : ''}
+
+Write the full article in Markdown format.`,
+            },
+          ],
+        });
+
+        const draft = result.choices[0]?.message?.content;
+        const draftText = typeof draft === 'string' ? draft : '';
+
+        // Update the idea status to 'researching'
+        await updateBlogResearchIdea(input.ideaId, { status: 'researching' });
+
+        return { draft: draftText };
+      }),
+
+    save: adminProcedure
+      .input(z.object({
+        title: z.string().min(1),
+        description: z.string().optional(),
+        outline: z.string().optional(),
+        source: z.string().optional(),
+        category: z.string().optional(),
+        keywords: z.string().optional(),
+        status: z.enum(['idea', 'researching', 'drafted', 'published', 'dismissed']).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return createBlogResearchIdea({
+          ...input,
+          description: input.description ?? null,
+          outline: input.outline ?? null,
+          source: input.source ?? null,
+          category: input.category ?? null,
+          keywords: input.keywords ?? null,
+          status: input.status ?? 'idea',
+          createdBy: ctx.user.id,
+        });
+      }),
+
+    update: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().optional(),
+        description: z.string().optional(),
+        outline: z.string().optional(),
+        source: z.string().optional(),
+        category: z.string().optional(),
+        keywords: z.string().optional(),
+        status: z.enum(['idea', 'researching', 'drafted', 'published', 'dismissed']).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return updateBlogResearchIdea(id, data);
+      }),
+
+    delete: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return deleteBlogResearchIdea(input.id);
+      }),
+  }),
+
+  // --- Trending Tags (public read, public track) ---
+  trending: router({
+    getTrending: publicProcedure
+      .input(z.object({
+        limit: z.number().min(1).max(20).optional(),
+        days: z.number().min(1).max(90).optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return getTrendingTags(input?.limit ?? 10, input?.days ?? 7);
+      }),
+
+    track: publicProcedure
+      .input(z.object({
+        tagId: z.number(),
+        engagementType: z.enum(['view', 'click', 'stamp', 'share']),
+        contentType: z.string().optional(),
+        contentId: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        await trackTagEngagement({
+          tagId: input.tagId,
+          engagementType: input.engagementType,
+          userId: ctx.user?.id ?? null,
+          contentType: input.contentType ?? null,
+          contentId: input.contentId ?? null,
+        });
+        return { success: true };
+      }),
+
+    trackBatch: publicProcedure
+      .input(z.object({
+        entries: z.array(z.object({
+          tagId: z.number(),
+          engagementType: z.enum(['view', 'click', 'stamp', 'share']),
+          contentType: z.string().optional(),
+          contentId: z.string().optional(),
+        })),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const entries = input.entries.map(e => ({
+          tagId: e.tagId,
+          engagementType: e.engagementType,
+          userId: ctx.user?.id ?? null,
+          contentType: e.contentType ?? null,
+          contentId: e.contentId ?? null,
+        }));
+        await bulkTrackTagEngagement(entries);
+        return { success: true };
       }),
   }),
 });

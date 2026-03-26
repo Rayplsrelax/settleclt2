@@ -95,6 +95,10 @@ function UserMenu() {
               <Shield className="w-4 h-4 mr-2" />
               Admin: Events Manager
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/admin/research")}>
+              <Shield className="w-4 h-4 mr-2" />
+              Admin: Blog Research
+            </DropdownMenuItem>
           </>
         )}
         <DropdownMenuSeparator />

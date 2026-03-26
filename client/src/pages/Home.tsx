@@ -1,4 +1,5 @@
 import PageLayout from "@/components/PageLayout";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
 import { neighborhoods } from "@shared/neighborhoods";
 import { SERVICE_SUPER_GROUPS, SERVICE_CATEGORIES } from "@shared/services";
@@ -16,6 +17,8 @@ import {
   Calendar,
   Clock,
   Activity,
+  TrendingUp,
+  Hash,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -252,6 +255,7 @@ function DirectoryPreview() {
 }
 
 function NewsletterSignup() {
+  const { user } = useAuth();
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
@@ -513,6 +517,64 @@ function ThisWeekInCLT() {
   );
 }
 
+function TrendingInCLT() {
+  const { data: trending, isLoading } = trpc.trending.getTrending.useQuery({ limit: 8, days: 30 });
+  const { data: allTags } = trpc.tags.getAll.useQuery();
+  const trackEngagement = trpc.trending.track.useMutation();
+
+  // If no engagement data yet, show popular tags from the tags table as fallback
+  const displayTags = trending && trending.length > 0
+    ? trending.map(t => ({ id: t.tagId, name: t.tagName, slug: t.tagSlug, category: t.tagCategory, count: t.engagementCount }))
+    : (allTags || []).slice(0, 8).map(t => ({ id: t.id, name: t.name, slug: t.slug, category: t.category, count: 0 }));
+
+  if (isLoading || displayTags.length === 0) return null;
+
+  return (
+    <section className="py-12 md:py-16">
+      <div className="container">
+        <div className="flex items-end justify-between mb-6">
+          <div>
+            <h2 className="font-display font-bold text-xl md:text-2xl text-foreground flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-primary" />
+              Trending in CLT
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Popular topics and tags people are exploring
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {displayTags.map((tag) => (
+            <Link
+              key={tag.id}
+              href={`/tag/${tag.slug}`}
+              className="no-underline"
+              onClick={() => {
+                trackEngagement.mutate({
+                  tagId: tag.id,
+                  engagementType: 'click',
+                });
+              }}
+            >
+              <div className="group flex items-center gap-1.5 px-3 py-2 rounded-full border border-border bg-card hover:border-primary/30 hover:bg-primary/5 transition-all cursor-pointer">
+                <Hash className="w-3.5 h-3.5 text-primary" />
+                <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                  {tag.name}
+                </span>
+                {tag.count > 0 && (
+                  <span className="text-[10px] font-bold text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">
+                    {tag.count}
+                  </span>
+                )}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function CommunityActivity() {
   return (
     <section className="py-14 md:py-18 bg-muted/30">
@@ -568,6 +630,7 @@ export default function Home() {
     <PageLayout>
       <Hero />
       <ThisWeekInCLT />
+      <TrendingInCLT />
       <QuizCTA />
       <FeaturedNeighborhoods />
       <DirectoryPreview />

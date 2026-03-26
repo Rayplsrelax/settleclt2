@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `newsletterOptIn` boolean DEFAULT true NOT NULL;

@@ -1,6 +1,6 @@
-import { eq, and, desc, asc, sql } from "drizzle-orm";
+import { eq, and, desc, asc, sql, gte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag } from "../drizzle/schema";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -673,4 +673,121 @@ export async function getRecentActivity(limit = 20) {
   // Sort by timestamp descending and return top N
   activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   return activities.slice(0, limit);
+}
+
+// ── Directory Listings (dynamic, admin-added) ──────────────────────────
+
+export async function addDirectoryListing(data: InsertDirectoryListing) {
+  const db = await getDb();
+  if (!db) return null;
+  const [result] = await db.insert(directoryListings).values(data);
+  return result;
+}
+
+export async function getDirectoryListings() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(directoryListings).where(eq(directoryListings.active, true)).orderBy(desc(directoryListings.createdAt));
+}
+
+export async function getAllDirectoryListings() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(directoryListings).orderBy(desc(directoryListings.createdAt));
+}
+
+export async function updateDirectoryListing(id: number, data: Partial<InsertDirectoryListing>) {
+  const db = await getDb();
+  if (!db) return null;
+  await db.update(directoryListings).set(data).where(eq(directoryListings.id, id));
+  return { success: true };
+}
+
+export async function deleteDirectoryListing(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  await db.delete(directoryListings).where(eq(directoryListings.id, id));
+  return { success: true };
+}
+
+// Update user newsletter opt-in preference
+export async function updateUserNewsletter(userId: number, optIn: boolean) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ newsletterOptIn: optIn }).where(eq(users.id, userId));
+}
+
+// --- Blog Research Ideas ---
+import { blogResearchIdeas, tagEngagement, type InsertBlogResearchIdea, type InsertTagEngagement } from "../drizzle/schema";
+
+export async function createBlogResearchIdea(data: InsertBlogResearchIdea) {
+  const db = await getDb();
+  if (!db) return null;
+  const [result] = await db.insert(blogResearchIdeas).values(data);
+  return result;
+}
+
+export async function getAllBlogResearchIdeas(statusFilter?: string) {
+  const db = await getDb();
+  if (!db) return [];
+  if (statusFilter) {
+    return db.select().from(blogResearchIdeas)
+      .where(eq(blogResearchIdeas.status, statusFilter as any))
+      .orderBy(desc(blogResearchIdeas.createdAt));
+  }
+  return db.select().from(blogResearchIdeas).orderBy(desc(blogResearchIdeas.createdAt));
+}
+
+export async function updateBlogResearchIdea(id: number, data: Partial<InsertBlogResearchIdea>) {
+  const db = await getDb();
+  if (!db) return null;
+  await db.update(blogResearchIdeas).set(data).where(eq(blogResearchIdeas.id, id));
+  return { success: true };
+}
+
+export async function deleteBlogResearchIdea(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  await db.delete(blogResearchIdeas).where(eq(blogResearchIdeas.id, id));
+  return { success: true };
+}
+
+// --- Tag Engagement ---
+export async function trackTagEngagement(data: InsertTagEngagement) {
+  const db = await getDb();
+  if (!db) return null;
+  const [result] = await db.insert(tagEngagement).values(data);
+  return result;
+}
+
+export async function getTrendingTags(limit: number = 10, days: number = 7) {
+  const db = await getDb();
+  if (!db) return [];
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  
+  // Get tag engagement counts grouped by tag, joined with tag info
+  const results = await db.select({
+    tagId: tagEngagement.tagId,
+    tagName: tags.name,
+    tagSlug: tags.slug,
+    tagCategory: tags.category,
+    engagementCount: sql<number>`COUNT(*)`,
+  })
+    .from(tagEngagement)
+    .innerJoin(tags, eq(tagEngagement.tagId, tags.id))
+    .where(gte(tagEngagement.createdAt, cutoff))
+    .groupBy(tagEngagement.tagId, tags.name, tags.slug, tags.category)
+    .orderBy(sql`COUNT(*) DESC`)
+    .limit(limit);
+  
+  return results;
+}
+
+export async function bulkTrackTagEngagement(entries: InsertTagEngagement[]) {
+  const db = await getDb();
+  if (!db) return null;
+  if (entries.length === 0) return null;
+  await db.insert(tagEngagement).values(entries);
+  return { success: true };
 }

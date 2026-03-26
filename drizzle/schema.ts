@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -20,6 +20,7 @@ export const users = mysqlTable("users", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
+  newsletterOptIn: boolean("newsletterOptIn").default(true).notNull(),
 });
 
 export type User = typeof users.$inferSelect;
@@ -86,6 +87,50 @@ export const enrichedServices = mysqlTable("enriched_services", {
 
 export type EnrichedService = typeof enrichedServices.$inferSelect;
 export type InsertEnrichedService = typeof enrichedServices.$inferInsert;
+
+// Dynamic directory listings (admin-added via Google Places search)
+export const directoryListings = mysqlTable("directory_listings", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Unique slug key for this listing */
+  serviceKey: varchar("serviceKey", { length: 255 }).notNull().unique(),
+  /** Business name */
+  name: varchar("name", { length: 255 }).notNull(),
+  /** Category ID matching SERVICE_CATEGORIES */
+  category: varchar("category", { length: 128 }).notNull(),
+  /** Short description */
+  description: text("description"),
+  /** Area / neighborhood */
+  area: varchar("area", { length: 128 }).notNull().default("Charlotte Metro"),
+  /** Phone number */
+  phone: varchar("phone", { length: 32 }),
+  /** Website URL */
+  website: text("website"),
+  /** Google Place ID */
+  googlePlaceId: varchar("googlePlaceId", { length: 512 }),
+  /** Google rating */
+  googleRating: varchar("googleRating", { length: 8 }),
+  /** Google review count */
+  reviewCount: int("reviewCount"),
+  /** Verified address from Google */
+  verifiedAddress: text("verifiedAddress"),
+  /** Business hours JSON */
+  hoursJson: text("hoursJson"),
+  /** Google types JSON */
+  googleTypes: text("googleTypes"),
+  /** Price level 0-4 */
+  priceLevel: int("priceLevel"),
+  /** Featured listing flag */
+  featured: boolean("featured").default(false).notNull(),
+  /** Active flag */
+  active: boolean("active").default(true).notNull(),
+  /** Admin who added this listing */
+  addedBy: int("addedBy"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type DirectoryListing = typeof directoryListings.$inferSelect;
+export type InsertDirectoryListing = typeof directoryListings.$inferInsert;
 
 // --- CLT Passport: visited places stamps ---
 export const passportEntries = mysqlTable("passport_entries", {
@@ -278,3 +323,46 @@ export const contentTags = mysqlTable("content_tags", {
 
 export type ContentTag = typeof contentTags.$inferSelect;
 export type InsertContentTag = typeof contentTags.$inferInsert;
+
+// --- Blog research ideas: AI-generated content ideas ---
+export const blogResearchIdeas = mysqlTable("blog_research_ideas", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Topic title */
+  title: varchar("title", { length: 512 }).notNull(),
+  /** Brief description of the topic */
+  description: text("description"),
+  /** AI-generated outline (markdown) */
+  outline: text("outline"),
+  /** Source inspiration (competitor article, trending topic, etc.) */
+  source: varchar("source", { length: 512 }),
+  /** Category: neighborhood-guide, food-drink, events, lifestyle, moving-tips, real-estate */
+  category: varchar("category", { length: 128 }),
+  /** SEO keywords (comma-separated) */
+  keywords: text("keywords"),
+  /** Status: idea, researching, drafted, published, dismissed */
+  status: mysqlEnum("status", ["idea", "researching", "drafted", "published", "dismissed"]).default("idea").notNull(),
+  /** Admin who created/saved this idea */
+  createdBy: int("createdBy"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BlogResearchIdea = typeof blogResearchIdeas.$inferSelect;
+export type InsertBlogResearchIdea = typeof blogResearchIdeas.$inferInsert;
+
+// --- Tag engagement: track views/clicks for trending ---
+export const tagEngagement = mysqlTable("tag_engagement", {
+  id: int("id").autoincrement().primaryKey(),
+  tagId: int("tagId").notNull(),
+  /** Type of engagement: view, click, stamp, share */
+  engagementType: mysqlEnum("engagementType", ["view", "click", "stamp", "share"]).notNull(),
+  /** Optional user ID (null for anonymous) */
+  userId: int("userId"),
+  /** Optional content context */
+  contentType: varchar("contentType", { length: 64 }),
+  contentId: varchar("contentId", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type TagEngagement = typeof tagEngagement.$inferSelect;
+export type InsertTagEngagement = typeof tagEngagement.$inferInsert;

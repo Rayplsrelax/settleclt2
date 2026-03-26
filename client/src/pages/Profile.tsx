@@ -2,6 +2,7 @@ import PageLayout from "@/components/PageLayout";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { Link } from "wouter";
+import { useState } from "react";
 import {
   User,
   Stamp,
@@ -13,8 +14,11 @@ import {
   Shield,
   Grid3X3,
   Trophy,
+  Mail,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 function formatDate(date: string | Date | null | undefined): string {
   if (!date) return "—";
@@ -79,6 +83,42 @@ const featureLinks = [
     comingSoon: true,
   },
 ];
+
+function NewsletterToggle({ defaultOptIn }: { defaultOptIn: boolean }) {
+  const [optIn, setOptIn] = useState(defaultOptIn);
+  const [saving, setSaving] = useState(false);
+  const toggle = trpc.newsletter.toggleOptIn.useMutation();
+
+  const handleToggle = async () => {
+    const newVal = !optIn;
+    setSaving(true);
+    try {
+      await toggle.mutateAsync({ optIn: newVal });
+      setOptIn(newVal);
+      toast.success(newVal ? "Subscribed to newsletter" : "Unsubscribed from newsletter");
+    } catch {
+      toast.error("Failed to update preference");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleToggle}
+      disabled={saving}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+        optIn ? "bg-primary" : "bg-muted"
+      }`}
+    >
+      <span
+        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+          optIn ? "translate-x-6" : "translate-x-1"
+        }`}
+      />
+    </button>
+  );
+}
 
 export default function Profile() {
   const { user, loading, logout } = useAuth();
@@ -204,6 +244,25 @@ export default function Profile() {
             </Link>
           ))}
         </div>
+
+        {/* Newsletter preference */}
+        <h2 className="text-lg font-display font-semibold text-foreground mb-4">
+          Preferences
+        </h2>
+        <Card className="mb-10">
+          <CardContent className="flex items-center justify-between py-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-teal-500/10 flex items-center justify-center">
+                <Mail className="w-5 h-5 text-teal-500" />
+              </div>
+              <div>
+                <span className="text-sm font-semibold text-foreground">Charlotte Insider Newsletter</span>
+                <p className="text-xs text-muted-foreground mt-0.5">Weekly updates on events, new spots, and local tips</p>
+              </div>
+            </div>
+            <NewsletterToggle defaultOptIn={(user as any).newsletterOptIn ?? true} />
+          </CardContent>
+        </Card>
 
         {/* Sign out */}
         <button

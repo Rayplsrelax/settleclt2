@@ -50,6 +50,27 @@
       "when": 1774543878316,
       "tag": "0006_good_titanium_man",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1774551416427,
+      "tag": "0007_empty_slapstick",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1774552025230,
+      "tag": "0008_mushy_bug",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1774552667892,
+      "tag": "0009_perpetual_doctor_strange",
+      "breakpoints": true
     }
   ]
 }

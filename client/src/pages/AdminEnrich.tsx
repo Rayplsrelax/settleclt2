@@ -1,62 +1,66 @@
-import { useState, useMemo } from 'react';
-import { trpc } from '@/lib/trpc';
-import { useAuth } from '@/_core/hooks/useAuth';
-import { SERVICES } from '@shared/services';
-import { Link } from 'wouter';
-import { Search, Star, MapPin, Phone, Clock, Globe, ChevronDown, ChevronUp, Check, X, ArrowLeft, Loader2, Shield, ExternalLink } from 'lucide-react';
+import { useState, useMemo } from "react";
+import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { Search, Plus, Star, MapPin, Phone, Globe, Check, Trash2, Building2, RefreshCw, ArrowLeft, Shield, Loader2 } from "lucide-react";
+import { SERVICES, SERVICE_CATEGORIES } from "../../../shared/services";
+import { Link } from "wouter";
 
-// Generate a slug key from service name
 function toSlug(name: string): string {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-type PlaceResult = {
-  placeId: string;
-  name: string;
-  address: string;
-  rating?: number;
-  reviewCount?: number;
-  types: string[];
-  businessStatus?: string;
-  location?: { lat: number; lng: number };
-};
-
-type PlaceDetails = {
-  placeId: string;
-  name: string;
-  address: string;
-  phone?: string;
-  internationalPhone?: string;
-  website?: string;
-  rating?: number;
-  reviewCount?: number;
-  reviews?: Array<{ author_name: string; rating: number; text: string; time: number }>;
-  hours?: string[];
-  openNow?: boolean;
-  location?: { lat: number; lng: number };
-  priceLevel?: number;
-  types?: string[];
-  status: string;
-};
+function extractArea(address: string): string {
+  const parts = address.split(",").map(p => p.trim());
+  if (parts.length >= 3) return parts[1];
+  return "Charlotte Metro";
+}
 
 export default function AdminEnrich() {
   const { user, loading: authLoading } = useAuth();
-  const [selectedService, setSelectedService] = useState<typeof SERVICES[number] | null>(null);
-  const [serviceSearch, setServiceSearch] = useState('');
-  const [googleResults, setGoogleResults] = useState<PlaceResult[]>([]);
-  const [selectedPlace, setSelectedPlace] = useState<PlaceDetails | null>(null);
-  const [expandedResult, setExpandedResult] = useState<string | null>(null);
-  const [applySuccess, setApplySuccess] = useState<string | null>(null);
-  const [step, setStep] = useState<'select' | 'search' | 'details' | 'applied'>('select');
+
+  const [activeTab, setActiveTab] = useState("search");
+
+  // Google Places search for NEW businesses
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [selectedPlace, setSelectedPlace] = useState<any>(null);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+
+  // Existing enrichment
+  const [enrichServiceKey, setEnrichServiceKey] = useState("");
+  const [serviceSearch, setServiceSearch] = useState("");
 
   const searchPlaces = trpc.admin.searchPlaces.useMutation();
-  const getDetails = trpc.admin.getPlaceDetails.useMutation();
+  const getPlaceDetails = trpc.admin.getPlaceDetails.useMutation();
   const applyEnrichment = trpc.admin.applyEnrichment.useMutation();
+  const addNewListing = trpc.admin.addNewListing.useMutation();
+  const { data: existingListings, refetch: refetchListings } = trpc.admin.getDirectoryListings.useQuery(undefined, {
+    enabled: user?.role === "admin",
+  });
+  const updateListing = trpc.admin.updateListing.useMutation();
+  const deleteListing = trpc.admin.deleteListing.useMutation();
   const enrichments = trpc.admin.getAllEnrichments.useQuery(undefined, {
-    enabled: user?.role === 'admin',
+    enabled: user?.role === "admin",
   });
 
-  // Filter services by search
+  const enrichedKeys = useMemo(() => {
+    const set = new Set<string>();
+    if (enrichments.data) {
+      for (const e of enrichments.data) set.add(e.serviceKey);
+    }
+    return set;
+  }, [enrichments.data]);
+
   const filteredServices = useMemo(() => {
     if (!serviceSearch.trim()) return SERVICES.slice(0, 20);
     const q = serviceSearch.toLowerCase();
@@ -67,17 +71,6 @@ export default function AdminEnrich() {
     ).slice(0, 30);
   }, [serviceSearch]);
 
-  // Track which services are already enriched
-  const enrichedKeys = useMemo(() => {
-    const set = new Set<string>();
-    if (enrichments.data) {
-      for (const e of enrichments.data) {
-        set.add(e.serviceKey);
-      }
-    }
-    return set;
-  }, [enrichments.data]);
-
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -86,7 +79,7 @@ export default function AdminEnrich() {
     );
   }
 
-  if (!user || user.role !== 'admin') {
+  if (!user || user.role !== "admin") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -99,63 +92,117 @@ export default function AdminEnrich() {
     );
   }
 
-  const handleSelectService = (service: typeof SERVICES[number]) => {
-    setSelectedService(service);
-    setGoogleResults([]);
+  const handleGoogleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    setIsSearching(true);
+    setSearchResults([]);
     setSelectedPlace(null);
-    setApplySuccess(null);
-    setStep('search');
-    // Auto-search
-    searchPlaces.mutate({ query: service.name }, {
-      onSuccess: (data) => {
-        setGoogleResults(data.results);
-      },
-    });
+    try {
+      const results = await searchPlaces.mutateAsync({ query: searchQuery + " Charlotte NC" });
+      // The results come back with different shapes depending on the map proxy
+      const mapped = (Array.isArray(results) ? results : (results as any).results || []).map((r: any) => ({
+        name: r.name,
+        address: r.formatted_address || r.vicinity || r.address || "",
+        placeId: r.place_id || r.placeId,
+        rating: r.rating,
+        userRatingsTotal: r.user_ratings_total || r.reviewCount,
+        types: r.types || [],
+        priceLevel: r.price_level || r.priceLevel,
+      }));
+      setSearchResults(mapped);
+      if (mapped.length === 0) {
+        toast.error("No results — try a different search term.");
+      }
+    } catch (err: any) {
+      toast.error(`Search failed: ${err.message}`);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
-  const handleViewDetails = (placeId: string) => {
-    getDetails.mutate({ placeId }, {
-      onSuccess: (data) => {
-        setSelectedPlace(data);
-        setStep('details');
-      },
-    });
+  const handleSelectPlace = async (place: any) => {
+    setIsLoadingDetails(true);
+    try {
+      const details = await getPlaceDetails.mutateAsync({ placeId: place.placeId });
+      setSelectedPlace(details);
+    } catch (err: any) {
+      toast.error(`Failed to get details: ${err.message}`);
+    } finally {
+      setIsLoadingDetails(false);
+    }
   };
 
-  const handleApply = () => {
-    if (!selectedService || !selectedPlace) return;
-    const serviceKey = toSlug(selectedService.name);
-    applyEnrichment.mutate({
-      serviceKey,
-      googlePlaceId: selectedPlace.placeId,
-      googleRating: selectedPlace.rating?.toString(),
-      reviewCount: selectedPlace.reviewCount,
-      verifiedAddress: selectedPlace.address,
-      verifiedPhone: selectedPlace.phone ?? selectedPlace.internationalPhone,
-      hoursJson: selectedPlace.hours ? JSON.stringify(selectedPlace.hours) : undefined,
-      googleTypes: selectedPlace.types ? JSON.stringify(selectedPlace.types) : undefined,
-      priceLevel: selectedPlace.priceLevel,
-    }, {
-      onSuccess: () => {
-        setApplySuccess(selectedService.name);
-        setStep('applied');
-        enrichments.refetch();
-      },
-    });
+  const handleAddNewBusiness = async () => {
+    if (!selectedPlace || !selectedCategory) {
+      toast.error("Select a place and category first.");
+      return;
+    }
+    try {
+      const name = selectedPlace.name;
+      const address = selectedPlace.formatted_address || selectedPlace.address || "";
+      const phone = selectedPlace.phone || selectedPlace.internationalPhone;
+      const website = selectedPlace.website;
+      const rating = selectedPlace.rating;
+      const reviewCount = selectedPlace.reviewCount;
+      const hours = selectedPlace.hours;
+      const types = selectedPlace.types;
+      const priceLevel = selectedPlace.priceLevel;
+      const placeId = selectedPlace.placeId;
+
+      await addNewListing.mutateAsync({
+        name,
+        category: selectedCategory,
+        description: `${rating ? `${rating}★ rated on Google` : ""} ${(types || []).slice(0, 3).join(", ")}`.trim() || undefined,
+        area: extractArea(address),
+        phone: phone || undefined,
+        website: website || undefined,
+        googlePlaceId: placeId,
+        googleRating: rating?.toString() || undefined,
+        reviewCount: reviewCount || undefined,
+        verifiedAddress: address || undefined,
+        hoursJson: hours ? JSON.stringify(hours) : undefined,
+        googleTypes: types ? JSON.stringify(types) : undefined,
+        priceLevel: priceLevel ?? undefined,
+      });
+      toast.success(`${name} added to the directory!`);
+      setSelectedPlace(null);
+      setSearchResults([]);
+      setSearchQuery("");
+      setSelectedCategory("");
+      refetchListings();
+    } catch (err: any) {
+      toast.error(`Failed to add: ${err.message}`);
+    }
   };
 
-  const handleReset = () => {
-    setSelectedService(null);
-    setGoogleResults([]);
-    setSelectedPlace(null);
-    setApplySuccess(null);
-    setStep('select');
-    setServiceSearch('');
-  };
-
-  const priceLevelLabel = (level?: number) => {
-    if (level === undefined || level === null) return null;
-    return ['Free', '$', '$$', '$$$', '$$$$'][level] ?? null;
+  const handleEnrichExisting = async (serviceKey: string) => {
+    const service = SERVICES.find(s => toSlug(s.name) === serviceKey);
+    if (!service) return;
+    try {
+      const results = await searchPlaces.mutateAsync({ query: `${service.name} Charlotte NC` });
+      const resultsList = Array.isArray(results) ? results : (results as any).results || [];
+      if (resultsList.length === 0) {
+        toast.error("Google Places returned no results for this business.");
+        return;
+      }
+      const placeId = resultsList[0].place_id || resultsList[0].placeId;
+      const details = await getPlaceDetails.mutateAsync({ placeId });
+      await applyEnrichment.mutateAsync({
+        serviceKey,
+        googlePlaceId: placeId,
+        googleRating: details.rating?.toString(),
+        reviewCount: details.reviewCount,
+        verifiedAddress: details.address,
+        verifiedPhone: details.phone || details.internationalPhone,
+        hoursJson: details.hours ? JSON.stringify(details.hours) : undefined,
+        googleTypes: details.types ? JSON.stringify(details.types) : undefined,
+        priceLevel: details.priceLevel,
+      });
+      toast.success(`${service.name} enriched with Google Places data!`);
+      enrichments.refetch();
+    } catch (err: any) {
+      toast.error(`Enrichment failed: ${err.message}`);
+    }
   };
 
   return (
@@ -167,342 +214,322 @@ export default function AdminEnrich() {
             <Link href="/" className="text-muted-foreground hover:text-foreground">
               <ArrowLeft className="w-5 h-5" />
             </Link>
-            <h1 className="text-2xl font-bold">Directory Enrichment Tool</h1>
+            <h1 className="text-2xl font-bold">Directory Manager</h1>
           </div>
           <p className="text-muted-foreground">
-            Search Google Places to verify and enrich directory listings with ratings, hours, phone numbers, and addresses.
+            Search Google Places to add new businesses or enrich existing directory listings.
           </p>
-          <div className="mt-3 flex gap-4 text-sm">
+          <div className="mt-3 flex gap-4 text-sm flex-wrap">
             <span className="text-muted-foreground">
-              Total listings: <strong className="text-foreground">{SERVICES.length}</strong>
+              Static listings: <strong className="text-foreground">{SERVICES.length}</strong>
             </span>
             <span className="text-muted-foreground">
               Enriched: <strong className="text-emerald-500">{enrichedKeys.size}</strong>
             </span>
             <span className="text-muted-foreground">
-              Remaining: <strong className="text-amber-500">{SERVICES.length - enrichedKeys.size}</strong>
+              Custom added: <strong className="text-blue-500">{existingListings?.length || 0}</strong>
             </span>
           </div>
         </div>
       </div>
 
-      <div className="container py-8">
-        {/* Step indicator */}
-        <div className="flex items-center gap-2 mb-8 text-sm">
-          {['Select Business', 'Search Google', 'Review Details', 'Applied'].map((label, i) => {
-            const stepMap = ['select', 'search', 'details', 'applied'];
-            const isActive = stepMap.indexOf(step) >= i;
-            return (
-              <div key={label} className="flex items-center gap-2">
-                {i > 0 && <div className={`w-8 h-px ${isActive ? 'bg-primary' : 'bg-border'}`} />}
-                <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
-                  isActive ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
-                }`}>
-                  <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                    isActive ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/20'
-                  }`}>{i + 1}</span>
-                  {label}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      <div className="container py-8 max-w-5xl">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-6">
+            <TabsTrigger value="search"><Search className="w-4 h-4 mr-2" />Add New Business</TabsTrigger>
+            <TabsTrigger value="enrich"><RefreshCw className="w-4 h-4 mr-2" />Enrich Existing</TabsTrigger>
+            <TabsTrigger value="manage"><Building2 className="w-4 h-4 mr-2" />Manage Added ({existingListings?.length || 0})</TabsTrigger>
+          </TabsList>
 
-        {/* Step 1: Select a service */}
-        {step === 'select' && (
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Select a business to enrich</h2>
-            <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search by name, category, or area..."
-                value={serviceSearch}
-                onChange={e => setServiceSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-lg border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-              />
-            </div>
-            <div className="grid gap-2">
-              {filteredServices.map((service, i) => {
-                const key = toSlug(service.name);
-                const isEnriched = enrichedKeys.has(key);
-                return (
-                  <button
-                    key={`${service.name}-${i}`}
-                    onClick={() => handleSelectService(service)}
-                    className={`w-full text-left p-4 rounded-lg border transition-colors hover:border-primary/50 hover:bg-accent/50 ${
-                      isEnriched ? 'border-emerald-500/30 bg-emerald-500/5' : 'bg-card'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{service.name}</span>
-                          {isEnriched && (
-                            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500">
-                              ENRICHED
-                            </span>
+          {/* ── TAB 1: Search Google Places & Add New ── */}
+          <TabsContent value="search">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Plus className="w-5 h-5" /> Search Google Places
+                </CardTitle>
+                <CardDescription>Find any business in Charlotte and add it to your directory — not limited to existing listings.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Search for a business (e.g., 'Amelie's French Bakery', 'yoga studio NoDa', 'best pizza South End')"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleGoogleSearch()}
+                    className="flex-1"
+                  />
+                  <Button onClick={handleGoogleSearch} disabled={isSearching || !searchQuery.trim()}>
+                    {isSearching ? <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> : <Search className="w-4 h-4 mr-2" />}
+                    Search
+                  </Button>
+                </div>
+
+                {/* Search Results */}
+                {searchResults.length > 0 && !selectedPlace && (
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-sm text-muted-foreground">
+                      {searchResults.length} results found — click to select
+                    </h3>
+                    {searchResults.map((place: any) => (
+                      <Card
+                        key={place.placeId}
+                        className="cursor-pointer hover:border-primary/50 transition-colors"
+                        onClick={() => handleSelectPlace(place)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h4 className="font-semibold">{place.name}</h4>
+                              <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                                <MapPin className="w-3 h-3 shrink-0" /> {place.address}
+                              </p>
+                            </div>
+                            {place.rating && (
+                              <Badge variant="secondary" className="flex items-center gap-1 shrink-0 ml-2">
+                                <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
+                                {place.rating} ({place.userRatingsTotal || 0})
+                              </Badge>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+
+                {isLoadingDetails && (
+                  <div className="text-center py-8">
+                    <RefreshCw className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground mt-2">Loading business details...</p>
+                  </div>
+                )}
+
+                {/* Selected Place Details + Category Picker */}
+                {selectedPlace && (
+                  <Card className="border-primary/30 bg-primary/5">
+                    <CardContent className="p-6 space-y-4">
+                      <div className="flex items-start justify-between">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-lg font-bold">{selectedPlace.name}</h3>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                            <MapPin className="w-3 h-3 shrink-0" /> {selectedPlace.address}
+                          </p>
+                          {(selectedPlace.phone || selectedPlace.internationalPhone) && (
+                            <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                              <Phone className="w-3 h-3 shrink-0" /> {selectedPlace.phone || selectedPlace.internationalPhone}
+                            </p>
+                          )}
+                          {selectedPlace.website && (
+                            <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                              <Globe className="w-3 h-3 shrink-0" />
+                              <a href={selectedPlace.website} target="_blank" rel="noopener" className="underline truncate">
+                                {selectedPlace.website.replace(/^https?:\/\//, "").slice(0, 50)}
+                              </a>
+                            </p>
                           )}
                         </div>
-                        <div className="text-sm text-muted-foreground mt-0.5">
-                          {service.category} · {service.area}
-                        </div>
-                      </div>
-                      <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                  </button>
-                );
-              })}
-              {filteredServices.length === 0 && (
-                <p className="text-center text-muted-foreground py-8">No services match your search.</p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: Google search results */}
-        {step === 'search' && selectedService && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-lg font-semibold">Google Places results for "{selectedService.name}"</h2>
-                <p className="text-sm text-muted-foreground mt-1">Select the correct match to view details</p>
-              </div>
-              <button onClick={handleReset} className="text-sm text-muted-foreground hover:text-foreground">
-                ← Back to list
-              </button>
-            </div>
-
-            {searchPlaces.isPending && (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-6 h-6 animate-spin text-primary mr-2" />
-                <span className="text-muted-foreground">Searching Google Places...</span>
-              </div>
-            )}
-
-            {searchPlaces.isError && (
-              <div className="p-4 rounded-lg bg-destructive/10 text-destructive">
-                Error searching: {searchPlaces.error.message}
-              </div>
-            )}
-
-            {googleResults.length > 0 && (
-              <div className="grid gap-3">
-                {googleResults.map(result => (
-                  <div
-                    key={result.placeId}
-                    className="p-4 rounded-lg border bg-card hover:border-primary/50 transition-colors"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-medium">{result.name}</h3>
-                        <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <MapPin className="w-3.5 h-3.5" />
-                            {result.address}
-                          </span>
-                        </div>
-                        {result.rating && (
-                          <div className="flex items-center gap-2 mt-2">
-                            <div className="flex items-center gap-1">
-                              <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                              <span className="font-medium">{result.rating}</span>
+                        {(selectedPlace.rating) && (
+                          <div className="text-right shrink-0 ml-4">
+                            <div className="flex items-center gap-1 text-lg font-bold">
+                              <Star className="w-5 h-5 fill-yellow-500 text-yellow-500" />
+                              {selectedPlace.rating}
                             </div>
-                            <span className="text-sm text-muted-foreground">
-                              ({result.reviewCount?.toLocaleString()} reviews)
-                            </span>
+                            <p className="text-xs text-muted-foreground">
+                              {selectedPlace.reviewCount || 0} reviews
+                            </p>
                           </div>
                         )}
-                        {result.businessStatus && result.businessStatus !== 'OPERATIONAL' && (
-                          <span className="inline-block mt-2 text-xs font-medium px-2 py-0.5 rounded bg-destructive/10 text-destructive">
-                            {result.businessStatus}
-                          </span>
-                        )}
                       </div>
-                      <button
-                        onClick={() => handleViewDetails(result.placeId)}
-                        disabled={getDetails.isPending}
-                        className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
+
+                      {selectedPlace.hours && selectedPlace.hours.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-semibold mb-1">Hours</h4>
+                          <div className="text-xs text-muted-foreground space-y-0.5">
+                            {selectedPlace.hours.map((h: string, i: number) => (
+                              <p key={i}>{h}</p>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="border-t pt-4">
+                        <Label className="mb-2 block font-semibold">Assign a Category</Label>
+                        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Choose a directory category..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {SERVICE_CATEGORIES.map((cat) => (
+                              <SelectItem key={cat.id} value={cat.id}>
+                                {cat.icon} {cat.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <Button onClick={handleAddNewBusiness} disabled={!selectedCategory || addNewListing.isPending} className="flex-1">
+                          {addNewListing.isPending ? (
+                            <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Plus className="w-4 h-4 mr-2" />
+                          )}
+                          Add to Directory
+                        </Button>
+                        <Button variant="outline" onClick={() => { setSelectedPlace(null); setSelectedCategory(""); }}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ── TAB 2: Enrich Existing Static Listings ── */}
+          <TabsContent value="enrich">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <RefreshCw className="w-5 h-5" /> Enrich Existing Listings
+                </CardTitle>
+                <CardDescription>Add Google Places data (ratings, hours, address) to businesses already in the static directory.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by name, category, or area..."
+                    value={serviceSearch}
+                    onChange={(e) => setServiceSearch(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <div className="space-y-2 max-h-[500px] overflow-y-auto">
+                  {filteredServices.map((service, i) => {
+                    const key = toSlug(service.name);
+                    const isEnriched = enrichedKeys.has(key);
+                    return (
+                      <div
+                        key={`${service.name}-${i}`}
+                        className={`flex items-center justify-between p-3 rounded-lg border ${
+                          isEnriched ? "border-emerald-500/30 bg-emerald-500/5" : "bg-card"
+                        }`}
                       >
-                        {getDetails.isPending ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          'View Details'
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {!searchPlaces.isPending && googleResults.length === 0 && (
-              <p className="text-center text-muted-foreground py-8">No results found. Try a different business.</p>
-            )}
-          </div>
-        )}
-
-        {/* Step 3: Place details + apply */}
-        {step === 'details' && selectedPlace && selectedService && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-lg font-semibold">Review enrichment data</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Applying to: <strong>{selectedService.name}</strong>
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => setStep('search')} className="px-4 py-2 rounded-lg border text-sm hover:bg-accent">
-                  ← Back to results
-                </button>
-                <button
-                  onClick={handleApply}
-                  disabled={applyEnrichment.isPending}
-                  className="px-6 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 flex items-center gap-2"
-                >
-                  {applyEnrichment.isPending ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Check className="w-4 h-4" />
-                  )}
-                  Apply Enrichment
-                </button>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              {/* Current data */}
-              <div className="p-5 rounded-xl border bg-card">
-                <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-4">Current Directory Data</h3>
-                <div className="space-y-3">
-                  <div>
-                    <span className="text-xs text-muted-foreground">Name</span>
-                    <p className="font-medium">{selectedService.name}</p>
-                  </div>
-                  <div>
-                    <span className="text-xs text-muted-foreground">Category</span>
-                    <p>{selectedService.category}</p>
-                  </div>
-                  <div>
-                    <span className="text-xs text-muted-foreground">Area</span>
-                    <p>{selectedService.area}</p>
-                  </div>
-                  <div>
-                    <span className="text-xs text-muted-foreground">Phone</span>
-                    <p>{selectedService.phone || '—'}</p>
-                  </div>
-                  <div>
-                    <span className="text-xs text-muted-foreground">Website</span>
-                    <p className="truncate">{selectedService.website || '—'}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Google data */}
-              <div className="p-5 rounded-xl border-2 border-primary/30 bg-primary/5">
-                <h3 className="font-semibold text-sm text-primary uppercase tracking-wider mb-4">Google Places Data</h3>
-                <div className="space-y-3">
-                  <div>
-                    <span className="text-xs text-muted-foreground">Name</span>
-                    <p className="font-medium">{selectedPlace.name}</p>
-                  </div>
-                  <div>
-                    <span className="text-xs text-muted-foreground">Rating</span>
-                    <div className="flex items-center gap-2">
-                      <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                      <span className="font-medium">{selectedPlace.rating ?? '—'}</span>
-                      <span className="text-sm text-muted-foreground">
-                        ({selectedPlace.reviewCount?.toLocaleString() ?? 0} reviews)
-                      </span>
-                    </div>
-                  </div>
-                  {priceLevelLabel(selectedPlace.priceLevel) && (
-                    <div>
-                      <span className="text-xs text-muted-foreground">Price Level</span>
-                      <p className="font-medium">{priceLevelLabel(selectedPlace.priceLevel)}</p>
-                    </div>
-                  )}
-                  <div>
-                    <span className="text-xs text-muted-foreground">Address</span>
-                    <p className="flex items-start gap-1">
-                      <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                      {selectedPlace.address}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-xs text-muted-foreground">Phone</span>
-                    <p className="flex items-center gap-1">
-                      <Phone className="w-3.5 h-3.5" />
-                      {selectedPlace.phone || selectedPlace.internationalPhone || '—'}
-                    </p>
-                  </div>
-                  {selectedPlace.website && (
-                    <div>
-                      <span className="text-xs text-muted-foreground">Website</span>
-                      <a href={selectedPlace.website} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-primary hover:underline truncate">
-                        <Globe className="w-3.5 h-3.5 shrink-0" />
-                        {selectedPlace.website}
-                        <ExternalLink className="w-3 h-3 shrink-0" />
-                      </a>
-                    </div>
-                  )}
-                  {selectedPlace.hours && selectedPlace.hours.length > 0 && (
-                    <div>
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> Business Hours
-                      </span>
-                      <div className="mt-1 space-y-0.5 text-sm">
-                        {selectedPlace.hours.map((h, i) => (
-                          <p key={i} className="text-muted-foreground">{h}</p>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {selectedPlace.reviews && selectedPlace.reviews.length > 0 && (
-                    <div>
-                      <span className="text-xs text-muted-foreground">Top Reviews</span>
-                      <div className="mt-2 space-y-2">
-                        {selectedPlace.reviews.slice(0, 3).map((r, i) => (
-                          <div key={i} className="p-2 rounded bg-background/50 text-sm">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium text-xs">{r.author_name}</span>
-                              <span className="flex items-center gap-0.5 text-amber-500 text-xs">
-                                <Star className="w-3 h-3 fill-current" /> {r.rating}
-                              </span>
-                            </div>
-                            <p className="text-muted-foreground text-xs line-clamp-2">{r.text}</p>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium truncate">{service.name}</span>
+                            {isEnriched && (
+                              <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 shrink-0">
+                                <Check className="w-3 h-3 mr-1" /> Enriched
+                              </Badge>
+                            )}
                           </div>
-                        ))}
+                          <p className="text-sm text-muted-foreground">{service.category} · {service.area}</p>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="shrink-0 ml-2"
+                          disabled={searchPlaces.isPending}
+                          onClick={() => handleEnrichExisting(key)}
+                        >
+                          {searchPlaces.isPending ? <RefreshCw className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3 mr-1" />}
+                          {isEnriched ? "Re-enrich" : "Enrich"}
+                        </Button>
                       </div>
-                    </div>
+                    );
+                  })}
+                  {filteredServices.length === 0 && (
+                    <p className="text-center text-muted-foreground py-8">No services match your search.</p>
                   )}
                 </div>
-              </div>
-            </div>
-          </div>
-        )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        {/* Step 4: Success */}
-        {step === 'applied' && (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto mb-4">
-              <Check className="w-8 h-8 text-emerald-500" />
-            </div>
-            <h2 className="text-xl font-bold mb-2">Enrichment Applied!</h2>
-            <p className="text-muted-foreground mb-6">
-              <strong>{applySuccess}</strong> has been enriched with Google Places data.
-              The rating and review count will now appear on the directory listing.
-            </p>
-            <button
-              onClick={handleReset}
-              className="px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90"
-            >
-              Enrich Another Business
-            </button>
-          </div>
-        )}
+          {/* ── TAB 3: Manage Added Listings ── */}
+          <TabsContent value="manage">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Building2 className="w-5 h-5" /> Manage Added Businesses
+                </CardTitle>
+                <CardDescription>Businesses you've added via Google Places search. These appear alongside the static directory.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {!existingListings || existingListings.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-muted-foreground">No custom listings yet.</p>
+                    <p className="text-sm text-muted-foreground mt-1">Use the "Add New Business" tab to search Google Places and add businesses.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {existingListings.map((listing: any) => (
+                      <div key={listing.id} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-semibold truncate">{listing.name}</h4>
+                            {listing.featured && <Badge className="bg-yellow-500/10 text-yellow-600 border-yellow-500/20">Featured</Badge>}
+                            {!listing.active && <Badge variant="destructive">Inactive</Badge>}
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {SERVICE_CATEGORIES.find(c => c.id === listing.category)?.name || listing.category} · {listing.area}
+                          </p>
+                          {listing.googleRating && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                              <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" /> {listing.googleRating} ({listing.reviewCount || 0} reviews)
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex gap-2 ml-4 shrink-0">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={async () => {
+                              await updateListing.mutateAsync({ id: listing.id, featured: !listing.featured });
+                              refetchListings();
+                              toast.success(listing.featured ? "Unfeatured" : "Featured");
+                            }}
+                          >
+                            <Star className={`w-3 h-3 ${listing.featured ? "fill-yellow-500 text-yellow-500" : ""}`} />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={async () => {
+                              await updateListing.mutateAsync({ id: listing.id, active: !listing.active });
+                              refetchListings();
+                              toast.success(listing.active ? "Deactivated" : "Activated");
+                            }}
+                          >
+                            {listing.active ? "Deactivate" : "Activate"}
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={async () => {
+                              if (!confirm(`Delete ${listing.name}?`)) return;
+                              await deleteListing.mutateAsync({ id: listing.id });
+                              refetchListings();
+                              toast.success(`${listing.name} removed.`);
+                            }}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

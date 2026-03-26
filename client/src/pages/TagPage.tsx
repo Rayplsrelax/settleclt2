@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tag, Calendar, BookOpen, MapPin, Building2, ArrowLeft, ChevronRight } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
+import { useEffect, useRef } from "react";
 
 const CONTENT_TYPE_ICONS: Record<string, { icon: typeof Tag; label: string }> = {
   event: { icon: Calendar, label: "Events" },
@@ -26,6 +27,16 @@ export default function TagPage() {
     { tagId: tag?.id ?? 0 },
     { enabled: !!tag?.id }
   );
+
+  // Track tag page view for trending
+  const trackEngagement = trpc.trending.track.useMutation();
+  const trackedRef = useRef(false);
+  useEffect(() => {
+    if (tag?.id && !trackedRef.current) {
+      trackedRef.current = true;
+      trackEngagement.mutate({ tagId: tag.id, engagementType: 'view' });
+    }
+  }, [tag?.id]);
 
   const isLoading = tagLoading || contentLoading;
 

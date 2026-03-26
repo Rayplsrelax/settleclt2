@@ -169,3 +169,10 @@
 - [x] Build live activity feed (recent stamps, comments, bingo progress — auto-refreshes every 30s, homepage section + reusable component)
 - [x] Add social sharing buttons across all pages (Events, BlogArticle, NeighborhoodDetail, Passport, BingoCards, Leaderboard, Directory, Compare, Quiz results, TagPage — Twitter/X, Facebook, Email, Copy Link, native share)
 - [x] Write vitest tests for Phase 3 features (7 tests, 134 total passing across 15 test files)
+
+## Improvements Round
+- [x] Fix admin directory: rebuild to search Google Places for ANY Charlotte business and add to directory
+- [x] Merge newsletter subscription into site signup flow (newsletterOptIn column, default true on signup)
+- [x] Add newsletter toggle to user profile settings (Profile page Preferences section)
+- [x] Build blog research skill (AI-powered admin tool at /admin/research — generates ideas from Charlotte sources, creates outlines, drafts full posts)
+- [x] Implement trending tags: tag_engagement table, trending router, "Trending in CLT" homepage section, auto-tracking on tag page views and clicks
