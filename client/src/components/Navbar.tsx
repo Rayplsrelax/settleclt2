@@ -16,6 +16,7 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/neighborhoods", label: "Neighborhoods" },
   { href: "/directory", label: "Directory" },
+  { href: "/events", label: "Events" },
   { href: "/blog", label: "Blog" },
 ];
 
@@ -87,6 +88,10 @@ function UserMenu() {
             <DropdownMenuItem onClick={() => navigate("/admin/blog")}>
               <Shield className="w-4 h-4 mr-2" />
               Admin: Blog Editor
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/admin/events")}>
+              <Shield className="w-4 h-4 mr-2" />
+              Admin: Events Manager
             </DropdownMenuItem>
           </>
         )}

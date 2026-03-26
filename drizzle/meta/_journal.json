@@ -36,6 +36,13 @@
       "when": 1774447895293,
       "tag": "0004_curved_gwen_stacy",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1774537567570,
+      "tag": "0005_panoramic_scarlet_spider",
+      "breakpoints": true
     }
   ]
 }

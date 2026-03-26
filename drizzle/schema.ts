@@ -200,3 +200,79 @@ export const blogPosts = mysqlTable("blog_posts", {
 
 export type BlogPost = typeof blogPosts.$inferSelect;
 export type InsertBlogPost = typeof blogPosts.$inferInsert;
+
+// --- Events: Charlotte happenings ---
+export const events = mysqlTable("events", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  description: text("description"),
+  /** Event start as UTC ms timestamp */
+  startDate: timestamp("startDate").notNull(),
+  /** Event end (nullable for single-time events) */
+  endDate: timestamp("endDate"),
+  venueName: varchar("venueName", { length: 255 }),
+  venueAddress: varchar("venueAddress", { length: 500 }),
+  neighborhood: varchar("neighborhood", { length: 100 }),
+  externalUrl: varchar("externalUrl", { length: 500 }),
+  imageUrl: varchar("imageUrl", { length: 1024 }),
+  category: mysqlEnum("category", [
+    "concerts",
+    "food-drink",
+    "sports",
+    "arts-culture",
+    "festivals",
+    "family",
+    "nightlife",
+    "free",
+    "markets",
+    "community",
+  ]).notNull(),
+  isFeatured: mysqlEnum("isFeatured", ["yes", "no"]).default("no").notNull(),
+  isRecurring: mysqlEnum("isRecurring", ["yes", "no"]).default("no").notNull(),
+  submittedBy: int("submittedBy"),
+  status: mysqlEnum("status", ["draft", "published", "archived"]).default("draft").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Event = typeof events.$inferSelect;
+export type InsertEvent = typeof events.$inferInsert;
+
+// --- Tags: unified tagging system ---
+export const tags = mysqlTable("tags", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 128 }).notNull(),
+  slug: varchar("slug", { length: 128 }).notNull().unique(),
+  /** Tag category: neighborhood, activity, audience, season, content-type */
+  category: mysqlEnum("category", [
+    "neighborhood",
+    "activity",
+    "audience",
+    "season",
+    "content-type",
+  ]).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Tag = typeof tags.$inferSelect;
+export type InsertTag = typeof tags.$inferInsert;
+
+// --- Content tags: many-to-many join ---
+export const contentTags = mysqlTable("content_tags", {
+  id: int("id").autoincrement().primaryKey(),
+  tagId: int("tagId").notNull(),
+  /** Content type: event, directory, blog, neighborhood */
+  contentType: mysqlEnum("contentType", [
+    "event",
+    "directory",
+    "blog",
+    "neighborhood",
+  ]).notNull(),
+  /** Content identifier (event id, service key, blog slug, neighborhood id) */
+  contentId: varchar("contentId", { length: 255 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ContentTag = typeof contentTags.$inferSelect;
+export type InsertContentTag = typeof contentTags.$inferInsert;

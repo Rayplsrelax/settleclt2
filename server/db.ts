@@ -1,6 +1,6 @@
 import { eq, and, desc, asc, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost } from "../drizzle/schema";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -403,4 +403,162 @@ export async function getLeaderboardByNeighborhoods(limit = 20) {
     .orderBy(sql`neighborhoodCount DESC`)
     .limit(limit);
   return rows;
+}
+
+// =============================================
+// Events helpers
+// =============================================
+
+export async function createEvent(data: InsertEvent) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(events).values(data);
+  return { success: true };
+}
+
+export async function updateEvent(id: number, data: Partial<InsertEvent>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(events).set(data).where(eq(events.id, id));
+  return { success: true };
+}
+
+export async function deleteEvent(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Also remove associated content tags
+  await db.delete(contentTags).where(
+    and(eq(contentTags.contentType, "event"), eq(contentTags.contentId, String(id)))
+  );
+  await db.delete(events).where(eq(events.id, id));
+  return { success: true };
+}
+
+export async function getPublishedEvents(opts?: { category?: string; neighborhood?: string; fromDate?: Date; toDate?: Date; limit?: number; featured?: boolean }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const conditions = [eq(events.status, "published")];
+  if (opts?.category) conditions.push(eq(events.category, opts.category as any));
+  if (opts?.neighborhood) conditions.push(eq(events.neighborhood, opts.neighborhood));
+  if (opts?.featured) conditions.push(eq(events.isFeatured, "yes"));
+  if (opts?.fromDate) conditions.push(sql`${events.startDate} >= ${opts.fromDate}`);
+  if (opts?.toDate) conditions.push(sql`${events.startDate} <= ${opts.toDate}`);
+
+  const query = db.select().from(events).where(and(...conditions)).orderBy(asc(events.startDate));
+  if (opts?.limit) {
+    return await query.limit(opts.limit);
+  }
+  return await query;
+}
+
+export async function getAllEvents() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(events).orderBy(desc(events.startDate));
+}
+
+export async function getEventBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.select().from(events).where(eq(events.slug, slug)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function getEventById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.select().from(events).where(eq(events.id, id)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+// =============================================
+// Tags helpers
+// =============================================
+
+export async function createTag(data: InsertTag) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(tags).values(data);
+  return { success: true };
+}
+
+export async function getAllTags(category?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  if (category) {
+    return await db.select().from(tags).where(eq(tags.category, category as any)).orderBy(asc(tags.name));
+  }
+  return await db.select().from(tags).orderBy(asc(tags.name));
+}
+
+export async function getTagBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.select().from(tags).where(eq(tags.slug, slug)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function addContentTag(data: InsertContentTag) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Avoid duplicates
+  const existing = await db.select().from(contentTags).where(
+    and(
+      eq(contentTags.tagId, data.tagId),
+      eq(contentTags.contentType, data.contentType),
+      eq(contentTags.contentId, data.contentId),
+    )
+  ).limit(1);
+  if (existing.length > 0) return { success: true, duplicate: true };
+  await db.insert(contentTags).values(data);
+  return { success: true, duplicate: false };
+}
+
+export async function removeContentTag(tagId: number, contentType: string, contentId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(contentTags).where(
+    and(
+      eq(contentTags.tagId, tagId),
+      eq(contentTags.contentType, contentType as any),
+      eq(contentTags.contentId, contentId),
+    )
+  );
+  return { success: true };
+}
+
+export async function getContentTags(contentType: string, contentId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db
+    .select({ tagId: contentTags.tagId, tagName: tags.name, tagSlug: tags.slug, tagCategory: tags.category })
+    .from(contentTags)
+    .innerJoin(tags, eq(contentTags.tagId, tags.id))
+    .where(
+      and(
+        eq(contentTags.contentType, contentType as any),
+        eq(contentTags.contentId, contentId),
+      )
+    );
+  return result;
+}
+
+export async function getContentByTag(tagId: number, contentType?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const conditions = [eq(contentTags.tagId, tagId)];
+  if (contentType) conditions.push(eq(contentTags.contentType, contentType as any));
+  return await db
+    .select({ contentType: contentTags.contentType, contentId: contentTags.contentId })
+    .from(contentTags)
+    .where(and(...conditions));
+}
+
+export async function bulkAddContentTags(items: InsertContentTag[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  if (items.length === 0) return { success: true };
+  await db.insert(contentTags).values(items);
+  return { success: true };
 }

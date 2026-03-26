@@ -13,8 +13,11 @@ import {
   Map,
   Mail,
   Sparkles,
+  Calendar,
+  Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -400,6 +403,114 @@ function BlogPreview() {
   );
 }
 
+const CATEGORY_EMOJI: Record<string, string> = {
+  concerts: "🎵",
+  "food-drink": "🍽️",
+  sports: "⚽",
+  "arts-culture": "🎨",
+  festivals: "🎪",
+  family: "👨‍👩‍👧‍👦",
+  nightlife: "🌙",
+  free: "🆓",
+  markets: "🛍️",
+  community: "🤝",
+};
+
+function ThisWeekInCLT() {
+  const { data: events, isLoading } = trpc.events.getThisWeek.useQuery();
+
+  if (isLoading) {
+    return (
+      <section className="py-16 md:py-20">
+        <div className="container">
+          <div className="h-8 w-64 bg-muted rounded animate-pulse mb-8" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-48 bg-muted rounded-xl animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (!events || events.length === 0) return null;
+
+  return (
+    <section className="py-16 md:py-20 bg-gradient-to-b from-primary/5 to-background">
+      <div className="container">
+        <div className="flex items-end justify-between mb-8">
+          <div>
+            <Badge variant="outline" className="mb-3 text-primary border-primary/30">
+              <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+              Live Updates
+            </Badge>
+            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">
+              This Week in Charlotte
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              Don't miss what's happening around the Queen City
+            </p>
+          </div>
+          <Link
+            href="/events"
+            className="hidden sm:flex items-center gap-1 text-sm font-medium text-primary hover:underline no-underline"
+          >
+            All events <ChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {events.slice(0, 6).map((event) => {
+            const d = new Date(event.startDate);
+            const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
+            const monthDay = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+            const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+            return (
+              <Link key={event.id} href="/events" className="no-underline group">
+                <div className="flex gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition-all">
+                  <div className="flex flex-col items-center justify-center w-14 h-14 rounded-lg bg-primary/10 text-primary shrink-0">
+                    <span className="text-[10px] font-bold uppercase leading-none">{dayName}</span>
+                    <span className="text-lg font-extrabold leading-tight">{d.getDate()}</span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="text-sm">{CATEGORY_EMOJI[event.category] ?? "📅"}</span>
+                      <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+                        {event.category.replace("-", " ")}
+                      </span>
+                    </div>
+                    <h3 className="font-display font-semibold text-sm text-foreground group-hover:text-primary transition-colors line-clamp-1">
+                      {event.title}
+                    </h3>
+                    <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {time}
+                      </span>
+                      {event.venueName && (
+                        <span className="flex items-center gap-1 truncate">
+                          <MapPin className="w-3 h-3 shrink-0" />
+                          {event.venueName}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+        <Link
+          href="/events"
+          className="sm:hidden flex items-center justify-center gap-1 mt-6 text-sm font-medium text-primary no-underline"
+        >
+          View all events <ChevronRight className="w-4 h-4" />
+        </Link>
+      </div>
+    </section>
+  );
+}
+
 function CTABanner() {
   return (
     <section className="py-16 md:py-20">
@@ -431,6 +542,7 @@ export default function Home() {
   return (
     <PageLayout>
       <Hero />
+      <ThisWeekInCLT />
       <QuizCTA />
       <FeaturedNeighborhoods />
       <DirectoryPreview />

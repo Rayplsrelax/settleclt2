@@ -137,3 +137,17 @@
 - [x] Remove moving quote request form (backend routes, db helper, schema, tests, notifications)
 - [x] Remove "How It Works" section from homepage
 - [x] Remove dark mode toggle and lock to light theme (Navbar, App.tsx ThemeProvider)
+
+## Strategic Plan — Phase 1: Events & Tags
+- [x] Clean up Footer links (added Events, CLT Passport, Bingo, Leaderboard, Neighborhood Quiz)
+- [x] Build Events data model (schema, migration, db helpers)
+- [x] Build Tagging system data model (tags + content_tags tables)
+- [x] Build Events tRPC procedures (CRUD, public list, admin management)
+- [x] Build Tags tRPC procedures (tag pages, content aggregation)
+- [x] Build Events page frontend (list view, filters, event detail)
+- [x] Build admin event management page
+- [x] Build "This Week in CLT" homepage section
+- [x] Build Tag pages (aggregate content by tag) + /tag/:slug route
+- [x] Seed initial Charlotte events data (52 events seeded — March through June 2026)
+- [x] Add /events to main navigation (Navbar + Footer + admin dropdown)
+- [x] Write vitest tests for events and tags (10 tests, 117 total passing)

@@ -12,6 +12,8 @@ import {
   addComment, getComments, deleteComment, voteComment, getUserVotes,
   createBlogPost, updateBlogPost, deleteBlogPost, getPublishedBlogPosts, getAllBlogPosts, getBlogPostBySlug,
   getLeaderboardByStamps, getLeaderboardByBingo, getLeaderboardByNeighborhoods,
+  createEvent, updateEvent, deleteEvent, getPublishedEvents, getAllEvents, getEventBySlug, getEventById,
+  createTag, getAllTags, getTagBySlug, addContentTag, removeContentTag, getContentTags, getContentByTag, bulkAddContentTags,
 } from "./db";
 import { makeRequest, type PlacesSearchResult, type PlaceDetailsResult } from "./_core/map";
 import { notifyOwner } from "./_core/notification";
@@ -225,6 +227,124 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         return deleteBlogPost(input.id);
       }),
+
+    // Admin event management
+    getAllEvents: adminProcedure.query(async () => {
+      return getAllEvents();
+    }),
+
+    createEvent: adminProcedure
+      .input(z.object({
+        title: z.string().min(1),
+        slug: z.string().min(1),
+        description: z.string().optional(),
+        startDate: z.date(),
+        endDate: z.date().optional(),
+        venueName: z.string().optional(),
+        venueAddress: z.string().optional(),
+        neighborhood: z.string().optional(),
+        externalUrl: z.string().optional(),
+        imageUrl: z.string().optional(),
+        category: z.enum(['concerts', 'food-drink', 'sports', 'arts-culture', 'festivals', 'family', 'nightlife', 'free', 'markets', 'community']),
+        isFeatured: z.enum(['yes', 'no']).optional(),
+        isRecurring: z.enum(['yes', 'no']).optional(),
+        status: z.enum(['draft', 'published', 'archived']).optional(),
+        tagIds: z.array(z.number()).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const { tagIds, ...eventData } = input;
+        const result = await createEvent({
+          ...eventData,
+          description: eventData.description ?? null,
+          endDate: eventData.endDate ?? null,
+          venueName: eventData.venueName ?? null,
+          venueAddress: eventData.venueAddress ?? null,
+          neighborhood: eventData.neighborhood ?? null,
+          externalUrl: eventData.externalUrl ?? null,
+          imageUrl: eventData.imageUrl ?? null,
+          isFeatured: eventData.isFeatured ?? 'no',
+          isRecurring: eventData.isRecurring ?? 'no',
+          status: eventData.status ?? 'draft',
+          submittedBy: ctx.user.id,
+        });
+        return result;
+      }),
+
+    updateEvent: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().optional(),
+        slug: z.string().optional(),
+        description: z.string().optional(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+        venueName: z.string().optional(),
+        venueAddress: z.string().optional(),
+        neighborhood: z.string().optional(),
+        externalUrl: z.string().optional(),
+        imageUrl: z.string().optional(),
+        category: z.enum(['concerts', 'food-drink', 'sports', 'arts-culture', 'festivals', 'family', 'nightlife', 'free', 'markets', 'community']).optional(),
+        isFeatured: z.enum(['yes', 'no']).optional(),
+        isRecurring: z.enum(['yes', 'no']).optional(),
+        status: z.enum(['draft', 'published', 'archived']).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        const updateData: Record<string, any> = {};
+        for (const [key, val] of Object.entries(data)) {
+          if (val !== undefined) updateData[key] = val;
+        }
+        return updateEvent(id, updateData);
+      }),
+
+    deleteEvent: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return deleteEvent(input.id);
+      }),
+
+    // Admin tag management
+    createTag: adminProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        slug: z.string().min(1),
+        category: z.enum(['neighborhood', 'activity', 'audience', 'season', 'content-type']),
+      }))
+      .mutation(async ({ input }) => {
+        return createTag(input);
+      }),
+
+    addContentTag: adminProcedure
+      .input(z.object({
+        tagId: z.number(),
+        contentType: z.enum(['event', 'directory', 'blog', 'neighborhood']),
+        contentId: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        return addContentTag(input);
+      }),
+
+    removeContentTag: adminProcedure
+      .input(z.object({
+        tagId: z.number(),
+        contentType: z.string(),
+        contentId: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        return removeContentTag(input.tagId, input.contentType, input.contentId);
+      }),
+
+    bulkAddContentTags: adminProcedure
+      .input(z.object({
+        items: z.array(z.object({
+          tagId: z.number(),
+          contentType: z.enum(['event', 'directory', 'blog', 'neighborhood']),
+          contentId: z.string(),
+        })),
+      }))
+      .mutation(async ({ input }) => {
+        return bulkAddContentTags(input.items);
+      }),
   }),
 
   // --- Public: enrichment data for directory ---
@@ -399,6 +519,62 @@ export const appRouter = router({
     byNeighborhoods: publicProcedure.query(async () => {
       return getLeaderboardByNeighborhoods(20);
     }),
+  }),
+
+  // --- Events (public read, admin write) ---
+  events: router({
+    getPublished: publicProcedure
+      .input(z.object({
+        category: z.string().optional(),
+        neighborhood: z.string().optional(),
+        fromDate: z.date().optional(),
+        toDate: z.date().optional(),
+        limit: z.number().optional(),
+        featured: z.boolean().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return getPublishedEvents(input ?? undefined);
+      }),
+    getBySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => {
+        return getEventBySlug(input.slug);
+      }),
+    getThisWeek: publicProcedure.query(async () => {
+      const now = new Date();
+      const dayOfWeek = now.getDay();
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - dayOfWeek);
+      startOfWeek.setHours(0, 0, 0, 0);
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 7);
+      endOfWeek.setHours(23, 59, 59, 999);
+      return getPublishedEvents({ fromDate: startOfWeek, toDate: endOfWeek, limit: 6 });
+    }),
+  }),
+
+  // --- Tags (public read, admin write) ---
+  tags: router({
+    getAll: publicProcedure
+      .input(z.object({ category: z.string().optional() }).optional())
+      .query(async ({ input }) => {
+        return getAllTags(input?.category);
+      }),
+    getBySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => {
+        return getTagBySlug(input.slug);
+      }),
+    getContentTags: publicProcedure
+      .input(z.object({ contentType: z.string(), contentId: z.string() }))
+      .query(async ({ input }) => {
+        return getContentTags(input.contentType, input.contentId);
+      }),
+    getContentByTag: publicProcedure
+      .input(z.object({ tagId: z.number(), contentType: z.string().optional() }))
+      .query(async ({ input }) => {
+        return getContentByTag(input.tagId, input.contentType);
+      }),
   }),
 
   newsletter: router({
