@@ -11,6 +11,7 @@ import { trpc } from "@/lib/trpc";
 import WishlistButton from "@/components/WishlistButton";
 import ShareButtons from "@/components/ShareButtons";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
+import { ReviewStars } from "@/components/ReviewSection";
 
 // Generate a slug key from service name
 function toSlug(name: string): string {
@@ -523,6 +524,9 @@ export default function Directory() {
                           </div>
                         );
                       })()}
+                      <div className="mt-2">
+                        <ReviewStars targetType="directory" targetId={toSlug(s.name)} />
+                      </div>
                       <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                           <MapPin className="w-3 h-3" /> {s.area}

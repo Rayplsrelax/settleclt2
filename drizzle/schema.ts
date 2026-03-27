@@ -376,3 +376,27 @@ export const userTagPreferences = mysqlTable("user_tag_preferences", {
 
 export type UserTagPreference = typeof userTagPreferences.$inferSelect;
 export type InsertUserTagPreference = typeof userTagPreferences.$inferInsert;
+
+
+// --- Community Reviews: star ratings + tips for neighborhoods and directory ---
+export const reviews = mysqlTable("reviews", {
+  id: int("id").autoincrement().primaryKey(),
+  /** What is being reviewed: neighborhood or directory */
+  targetType: mysqlEnum("targetType", ["neighborhood", "directory"]).notNull(),
+  /** Identifier: neighborhood slug or directory listing id */
+  targetId: varchar("targetId", { length: 255 }).notNull(),
+  /** User who wrote the review */
+  userId: int("userId").notNull(),
+  /** Star rating 1-5 */
+  rating: int("rating").notNull(),
+  /** Short tip or review text (max 500 chars) */
+  tip: varchar("tip", { length: 500 }).notNull(),
+  /** Optional: what aspect (vibe, food, safety, transit, nightlife, cost) */
+  aspect: mysqlEnum("aspect", ["vibe", "food", "safety", "transit", "nightlife", "cost", "general"]).default("general").notNull(),
+  /** Admin can hide inappropriate reviews */
+  visible: mysqlEnum("visible", ["yes", "no"]).default("yes").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Review = typeof reviews.$inferSelect;
+export type InsertReview = typeof reviews.$inferInsert;

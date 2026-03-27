@@ -1,7 +1,8 @@
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
+import { identifyUser, resetUser } from "@/lib/mixpanel";
 import { TRPCClientError } from "@trpc/client";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 type UseAuthOptions = {
   redirectOnUnauthenticated?: boolean;
@@ -38,6 +39,7 @@ export function useAuth(options?: UseAuthOptions) {
     } finally {
       utils.auth.me.setData(undefined, null);
       await utils.auth.me.invalidate();
+      resetUser();
     }
   }, [logoutMutation, utils]);
 
@@ -59,6 +61,18 @@ export function useAuth(options?: UseAuthOptions) {
     logoutMutation.error,
     logoutMutation.isPending,
   ]);
+
+  // Identify user in Mixpanel when auth state resolves
+  const identifiedRef = useRef(false);
+  useEffect(() => {
+    if (state.user && !identifiedRef.current) {
+      identifyUser({ id: state.user.id, name: state.user.name, email: state.user.email, role: state.user.role });
+      identifiedRef.current = true;
+    }
+    if (!state.user && identifiedRef.current) {
+      identifiedRef.current = false;
+    }
+  }, [state.user]);
 
   useEffect(() => {
     if (!redirectOnUnauthenticated) return;

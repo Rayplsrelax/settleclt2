@@ -1,6 +1,6 @@
-import { eq, and, desc, asc, sql, gte } from "drizzle-orm";
+import { eq, and, desc, asc, sql, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference } from "../drizzle/schema";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -967,4 +967,154 @@ export async function getRecommendedContent(userId: number) {
   }));
 
   return { neighborhoods, events: eventContent, directory };
+}
+
+
+// ─── Monthly Digest Helpers ────────────────────────────────────
+
+/** Get new directory listings added in the past N days */
+export async function getNewListings(days: number = 30) {
+  const db = await getDb();
+  if (!db) return [];
+  const cutoff = new Date(Date.now() - days * 86400000);
+  return db.select().from(directoryListings)
+    .where(and(eq(directoryListings.active, true), gte(directoryListings.createdAt, cutoff)))
+    .orderBy(desc(directoryListings.createdAt));
+}
+
+/** Get published events starting in the next N days */
+export async function getUpcomingEvents(days: number = 30) {
+  const db = await getDb();
+  if (!db) return [];
+  const now = new Date();
+  const future = new Date(Date.now() + days * 86400000);
+  return db.select().from(events)
+    .where(and(
+      eq(events.status, "published"),
+      gte(events.startDate, now),
+      lte(events.startDate, future),
+    ))
+    .orderBy(events.startDate);
+}
+
+/** Get recently published blog posts */
+export async function getRecentBlogPosts(days: number = 30) {
+  const db = await getDb();
+  if (!db) return [];
+  const cutoff = new Date(Date.now() - days * 86400000);
+  return db.select().from(blogPosts)
+    .where(and(eq(blogPosts.status, "published"), gte(blogPosts.createdAt, cutoff)))
+    .orderBy(desc(blogPosts.createdAt));
+}
+
+/** Get newsletter subscribers (users who opted in + standalone subscribers) */
+export async function getNewsletterRecipients() {
+  const db = await getDb();
+  if (!db) return { users: [] as { email: string; name: string | null }[], subscribers: [] as { email: string }[] };
+  
+  const optedInUsers = await db.select({ email: users.email, name: users.name })
+    .from(users)
+    .where(and(eq(users.newsletterOptIn, true), sql`${users.email} IS NOT NULL`));
+  
+  const standaloneSubscribers = await db.select({ email: newsletterSubscribers.email })
+    .from(newsletterSubscribers);
+  
+  return { users: optedInUsers as { email: string; name: string | null }[], subscribers: standaloneSubscribers };
+}
+
+
+// ─── Community Reviews Helpers ─────────────────────────────────
+
+/** Create a new review */
+export async function createReview(data: InsertReview) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(reviews).values(data);
+}
+
+/** Get visible reviews for a target (neighborhood or directory listing) */
+export async function getReviews(targetType: "neighborhood" | "directory", targetId: string) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select({
+    id: reviews.id,
+    targetType: reviews.targetType,
+    targetId: reviews.targetId,
+    userId: reviews.userId,
+    rating: reviews.rating,
+    tip: reviews.tip,
+    aspect: reviews.aspect,
+    visible: reviews.visible,
+    createdAt: reviews.createdAt,
+    userName: users.name,
+  })
+    .from(reviews)
+    .leftJoin(users, eq(reviews.userId, users.id))
+    .where(and(
+      eq(reviews.targetType, targetType),
+      eq(reviews.targetId, targetId),
+      eq(reviews.visible, "yes"),
+    ))
+    .orderBy(desc(reviews.createdAt));
+  return rows;
+}
+
+/** Get average rating and count for a target */
+export async function getReviewStats(targetType: "neighborhood" | "directory", targetId: string) {
+  const db = await getDb();
+  if (!db) return { avgRating: 0, count: 0 };
+  const result = await db.select({
+    avgRating: sql<number>`COALESCE(AVG(${reviews.rating}), 0)`,
+    count: sql<number>`COUNT(*)`,
+  })
+    .from(reviews)
+    .where(and(
+      eq(reviews.targetType, targetType),
+      eq(reviews.targetId, targetId),
+      eq(reviews.visible, "yes"),
+    ));
+  return { avgRating: Number(result[0]?.avgRating ?? 0), count: Number(result[0]?.count ?? 0) };
+}
+
+/** Delete a review (by owner or admin) */
+export async function deleteReview(reviewId: number, userId: number, isAdmin: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  if (isAdmin) {
+    await db.delete(reviews).where(eq(reviews.id, reviewId));
+  } else {
+    await db.delete(reviews).where(and(eq(reviews.id, reviewId), eq(reviews.userId, userId)));
+  }
+}
+
+/** Toggle review visibility (admin only) */
+export async function toggleReviewVisibility(reviewId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await db.select({ visible: reviews.visible }).from(reviews).where(eq(reviews.id, reviewId));
+  if (!existing[0]) throw new Error("Review not found");
+  const newVisible = existing[0].visible === "yes" ? "no" : "yes";
+  await db.update(reviews).set({ visible: newVisible as "yes" | "no" }).where(eq(reviews.id, reviewId));
+}
+
+/** Get all reviews for admin moderation */
+export async function getAllReviews(limit = 50) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select({
+    id: reviews.id,
+    targetType: reviews.targetType,
+    targetId: reviews.targetId,
+    userId: reviews.userId,
+    rating: reviews.rating,
+    tip: reviews.tip,
+    aspect: reviews.aspect,
+    visible: reviews.visible,
+    createdAt: reviews.createdAt,
+    userName: users.name,
+  })
+    .from(reviews)
+    .leftJoin(users, eq(reviews.userId, users.id))
+    .orderBy(desc(reviews.createdAt))
+    .limit(limit);
 }

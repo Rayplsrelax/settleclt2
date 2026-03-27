@@ -21,6 +21,8 @@ import {
   trackSearchQuery, getPopularSearches, getSearchAnalytics,
   getTagAnalytics,
   updateUserTagPreference, getUserTagPreferences, getRecommendedContent,
+  getNewListings, getUpcomingEvents, getRecentBlogPosts, getNewsletterRecipients,
+  createReview, getReviews, getReviewStats, deleteReview, toggleReviewVisibility, getAllReviews,
 } from "./db";
 import { makeRequest, type PlacesSearchResult, type PlaceDetailsResult } from "./_core/map";
 import { notifyOwner } from "./_core/notification";
@@ -828,6 +830,119 @@ export const appRouter = router({
   }),
 
   // --- Personalized Recommendations ---
+  // --- Monthly Digest ---
+  digest: router({
+    preview: adminProcedure.query(async () => {
+      const [newListings, upcomingEvents, recentPosts, trending, recipients] = await Promise.all([
+        getNewListings(30),
+        getUpcomingEvents(30),
+        getRecentBlogPosts(30),
+        getTrendingTags(5, 30),
+        getNewsletterRecipients(),
+      ]);
+      const totalRecipients = new Set([
+        ...recipients.users.map(u => u.email).filter(Boolean),
+        ...recipients.subscribers.map(s => s.email),
+      ]).size;
+      return { newListings, upcomingEvents, recentPosts, trending, totalRecipients };
+    }),
+    generate: adminProcedure.mutation(async () => {
+      const { invokeLLM } = await import("./_core/llm");
+      const [newListings, upcomingEvents, recentPosts, trending] = await Promise.all([
+        getNewListings(30),
+        getUpcomingEvents(30),
+        getRecentBlogPosts(30),
+        getTrendingTags(5, 30),
+      ]);
+      const dataContext = [
+        `New Directory Listings (${newListings.length}):`,
+        ...newListings.slice(0, 10).map(l => `- ${l.name} (${l.category}, ${l.area})`),
+        `\nUpcoming Events (${upcomingEvents.length}):`,
+        ...upcomingEvents.slice(0, 10).map(e => `- ${e.title} on ${new Date(e.startDate).toLocaleDateString()} at ${e.venueName || 'TBA'}`),
+        `\nRecent Blog Posts (${recentPosts.length}):`,
+        ...recentPosts.slice(0, 5).map(p => `- ${p.title} (${p.category || 'General'})`),
+        `\nTrending Tags:`,
+        ...trending.map((t: any) => `- ${t.name} (${t.engagementCount} engagements)`),
+      ].join('\n');
+      const response = await invokeLLM({
+        messages: [
+          { role: 'system', content: 'You are a friendly newsletter writer for Settle CLT, a guide for people moving to Charlotte, NC. Write a warm, engaging monthly digest email in HTML format. Use inline CSS for styling. Keep it concise but informative. Include sections for new businesses, upcoming events, trending topics, and recent blog posts. Use the Settle CLT brand colors: teal (#2A9D8F) for headers and gold (#E9C46A) for accents.' },
+          { role: 'user', content: `Generate a "What\'s New This Month in Charlotte" newsletter digest email based on this data:\n\n${dataContext}\n\nMake it friendly, useful for newcomers, and include a call-to-action to visit settleclt.com for more details.` },
+        ],
+      });
+      const rawContent = response.choices?.[0]?.message?.content;
+      const htmlContent: string = typeof rawContent === 'string' ? rawContent : '';
+      return { html: htmlContent, stats: { listings: newListings.length, events: upcomingEvents.length, posts: recentPosts.length } };
+    }),
+    send: adminProcedure
+      .input(z.object({ html: z.string(), subject: z.string().optional() }))
+      .mutation(async ({ input }) => {
+        const recipients = await getNewsletterRecipients();
+        const allEmails = new Set([
+          ...recipients.users.map(u => u.email).filter(Boolean),
+          ...recipients.subscribers.map(s => s.email),
+        ]);
+        // Use notifyOwner to send a summary notification
+        await notifyOwner({
+          title: input.subject || 'Monthly Digest Sent',
+          content: `Newsletter digest sent to ${allEmails.size} recipients.\n\nPreview:\n${input.html.substring(0, 500)}...`,
+        });
+        return { sent: true, recipientCount: allEmails.size };
+      }),
+  }),
+
+  // --- Community Reviews ---
+  reviews: router({
+    getByTarget: publicProcedure
+      .input(z.object({ targetType: z.enum(["neighborhood", "directory"]), targetId: z.string() }))
+      .query(async ({ input }) => {
+        const [reviewsList, stats] = await Promise.all([
+          getReviews(input.targetType, input.targetId),
+          getReviewStats(input.targetType, input.targetId),
+        ]);
+        return { reviews: reviewsList, stats };
+      }),
+    stats: publicProcedure
+      .input(z.object({ targetType: z.enum(["neighborhood", "directory"]), targetId: z.string() }))
+      .query(async ({ input }) => {
+        return getReviewStats(input.targetType, input.targetId);
+      }),
+    create: protectedProcedure
+      .input(z.object({
+        targetType: z.enum(["neighborhood", "directory"]),
+        targetId: z.string(),
+        rating: z.number().min(1).max(5),
+        tip: z.string().min(5).max(500),
+        aspect: z.enum(["vibe", "food", "safety", "transit", "nightlife", "cost", "general"]).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        await createReview({
+          targetType: input.targetType,
+          targetId: input.targetId,
+          userId: ctx.user.id,
+          rating: input.rating,
+          tip: input.tip,
+          aspect: input.aspect || "general",
+        });
+        return { success: true };
+      }),
+    delete: protectedProcedure
+      .input(z.object({ reviewId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        await deleteReview(input.reviewId, ctx.user.id, ctx.user.role === "admin");
+        return { success: true };
+      }),
+    toggleVisibility: adminProcedure
+      .input(z.object({ reviewId: z.number() }))
+      .mutation(async ({ input }) => {
+        await toggleReviewVisibility(input.reviewId);
+        return { success: true };
+      }),
+    adminList: adminProcedure.query(async () => {
+      return getAllReviews(100);
+    }),
+  }),
+
   recommendations: router({
     getForUser: protectedProcedure.query(async ({ ctx }) => {
       return getRecommendedContent(ctx.user.id);

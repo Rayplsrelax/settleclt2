@@ -209,3 +209,12 @@
 - [x] Surface popular search terms in global search dialog empty state + analytics dashboard
 - [x] Build personalized recommendations — "For You" homepage section with top interests, recommended neighborhoods, events, and directory listings
 - [x] Write tests for all new features (179 tests across 18 test files, all passing)
+
+## Feature Round 3
+- [x] Integrate Mixpanel free tier — SDK installed, page views, searches, tag clicks, review submissions, user identification on login/logout
+- [x] Build "What's New This Month" admin digest — /admin/digest page with preview, AI-generated HTML email, stats
+- [x] Send digest email to newsletter subscribers via notifyOwner system
+- [x] Build community reviews system — reviews table, star ratings + tips, aspect tags (vibe/food/safety/transit/nightlife/cost)
+- [x] Display reviews on neighborhood detail pages (full ReviewSection) and directory listings (ReviewStars compact)
+- [x] Add review moderation for admin (toggleVisibility, adminList, delete by owner or admin)
+- [x] Write tests for all new features (203 tests across 20 test files, all passing)

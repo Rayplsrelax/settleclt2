@@ -5,6 +5,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { lazy, Suspense } from "react";
+import { useMixpanelPageView } from "@/hooks/useMixpanelPageView";
 
 const Home = lazy(() => import("./pages/Home"));
 const Neighborhoods = lazy(() => import("./pages/Neighborhoods"));
@@ -27,6 +28,7 @@ const AdminEvents = lazy(() => import("./pages/AdminEvents"));
 const TagPage = lazy(() => import("./pages/TagPage"));
 const SubmitEvent = lazy(() => import("./pages/SubmitEvent"));
 const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics"));
+const AdminDigest = lazy(() => import("./pages/AdminDigest"));
 
 function PageLoader() {
   return (
@@ -37,6 +39,7 @@ function PageLoader() {
 }
 
 function Router() {
+  useMixpanelPageView();
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
@@ -59,6 +62,7 @@ function Router() {
         <Route path="/admin/events" component={AdminEvents} />
         <Route path="/submit-event" component={SubmitEvent} />
         <Route path="/admin/analytics" component={AdminAnalytics} />
+        <Route path="/admin/digest" component={AdminDigest} />
         <Route path="/tag/:slug" component={TagPage} />
         <Route path="/blog/:slug" component={BlogArticle} />
         <Route path="/404" component={NotFound} />

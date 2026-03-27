@@ -7,6 +7,10 @@ import superjson from "superjson";
 import App from "./App";
 import { getLoginUrl } from "./const";
 import "./index.css";
+import { initMixpanel } from "@/lib/mixpanel";
+
+// Initialize Mixpanel analytics (no-ops if VITE_MIXPANEL_TOKEN not set)
+initMixpanel();
 
 const queryClient = new QueryClient();
 

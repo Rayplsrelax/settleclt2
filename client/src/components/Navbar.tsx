@@ -99,6 +99,10 @@ function UserMenu() {
               <Shield className="w-4 h-4 mr-2" />
               Admin: Analytics
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/admin/digest")}>
+              <Shield className="w-4 h-4 mr-2" />
+              Admin: Monthly Digest
+            </DropdownMenuItem>
           </>
         )}
         <DropdownMenuSeparator />

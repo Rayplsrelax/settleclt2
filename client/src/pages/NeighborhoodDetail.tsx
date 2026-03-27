@@ -15,6 +15,7 @@ import {
 import { NEIGHBORHOOD_SPORTS_REC, CHARLOTTE_VENUES, type SportsRec } from "@shared/sportsRec";
 import { neighborhoodDevelopments, STATUS_COLORS, TYPE_ICONS, type Development } from "@shared/neighborhoodDevelopments";
 import CommentSection from "@/components/CommentSection";
+import ReviewSection from "@/components/ReviewSection";
 import ShareButtons from "@/components/ShareButtons";
 import { trpc } from "@/lib/trpc";
 import { useState, useRef, useEffect, useMemo } from "react";
@@ -40,6 +41,7 @@ const SECTIONS = [
   { id: "whats-coming", label: "What's Coming" },
   { id: "map", label: "Map" },
   { id: "services", label: "Services" },
+  { id: "reviews", label: "Reviews" },
   { id: "community", label: "Community" },
 ];
 
@@ -789,6 +791,11 @@ export default function NeighborhoodDetail() {
               </div>
             </Link>
           </div>
+        </section>
+
+        {/* Community Reviews */}
+        <section id="reviews" ref={el => { sectionRefs.current["reviews"] = el; }}>
+          <ReviewSection targetType="neighborhood" targetId={n.id} />
         </section>
 
         {/* Community Experiences */}
