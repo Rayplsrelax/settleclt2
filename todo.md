@@ -186,3 +186,18 @@
 - [x] Drop blog_research_ideas table from database
 - [x] Remove blog research test file
 - [x] Build standalone Manus skill for blog research (SKILL.md + scripts + references)
+
+## GitHub & Trending Data
+- [x] Push settle-clt-blog-research skill to Rayplsrelax/clt GitHub repo (skills/settle-clt-blog-research/)
+- [x] Seed trending tag engagement data in the database (1,559 records across 24 tags, top 8 trending visible on homepage)
+
+## Tag Engagement Tracking Expansion
+- [x] Build reusable useTagTracking hook with TAG_SLUG_MAP for name-to-slug resolution
+- [x] Track tag clicks on Events page (category filter buttons, event card category/neighborhood badges)
+- [x] Track tag clicks on Blog page (category filter pills)
+- [x] Track tag clicks on Directory page (group chips, category chips, area dropdown)
+- [x] Track tag clicks on Neighborhood detail pages (hero tags)
+- [x] Track tag clicks on Home page (featured neighborhood tags, ThisWeekInCLT event categories)
+- [x] Track tag clicks on Neighborhoods listing page (core + metro card tags)
+- [x] Track tag views on TagPage (already existed)
+- [x] Write vitest tests for tag tracking (17 tests in tag-tracking.test.ts, all 158 tests pass)

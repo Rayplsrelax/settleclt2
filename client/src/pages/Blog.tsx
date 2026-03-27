@@ -4,6 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { useState, useMemo } from "react";
 import { Link } from "wouter";
 import { BookOpen, Clock, Calendar } from "lucide-react";
+import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 
 interface UnifiedArticle {
   id: string;
@@ -21,6 +22,7 @@ interface UnifiedArticle {
 
 export default function Blog() {
   const [activeCategory, setActiveCategory] = useState("All");
+  const { trackClickByName } = useTagTrackingWithLookup();
 
   const { data: dbPosts = [] } = trpc.blog.getPublished.useQuery();
 
@@ -84,7 +86,10 @@ export default function Blog() {
             {allCategories.map((cat) => (
               <button
                 key={cat}
-                onClick={() => setActiveCategory(cat)}
+                onClick={() => {
+                  setActiveCategory(cat);
+                  if (cat !== 'All') trackClickByName(cat, 'blog-filter');
+                }}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   activeCategory === cat
                     ? "bg-primary text-primary-foreground"

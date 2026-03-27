@@ -17,6 +17,7 @@ import CommentSection from "@/components/CommentSection";
 import ShareButtons from "@/components/ShareButtons";
 import { trpc } from "@/lib/trpc";
 import { useState, useRef, useEffect, useMemo } from "react";
+import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ResponsiveContainer
@@ -59,6 +60,7 @@ export default function NeighborhoodDetail() {
   const [, setLocation] = useLocation();
   const n = allNeighborhoods.find((nb) => nb.id === params.id);
   const { myNeighborhood, setMyNeighborhood, clearMyNeighborhood } = useMyNeighborhood();
+  const { trackClickByName } = useTagTrackingWithLookup();
   const [selectedCity, setSelectedCity] = useState<string>("nyc");
   const [activeSection, setActiveSection] = useState("overview");
   const [heroIdx, setHeroIdx] = useState(0);
@@ -187,7 +189,13 @@ export default function NeighborhoodDetail() {
             <p className="mt-2 text-xl text-white/80">{n.vibe}</p>
             <div className="flex flex-wrap items-center gap-3 mt-4">
               {n.tags.map((tag) => (
-                <span key={tag} className="px-3 py-1 rounded-full bg-white/15 text-white text-sm">{tag}</span>
+                <span
+                  key={tag}
+                  className="px-3 py-1 rounded-full bg-white/15 text-white text-sm hover:bg-white/25 cursor-pointer transition-colors"
+                  onClick={() => trackClickByName(tag.replace(/[^\w\s]/g, '').trim(), 'neighborhood-detail', n.id)}
+                >
+                  {tag}
+                </span>
               ))}
               <Button
                 onClick={() => {

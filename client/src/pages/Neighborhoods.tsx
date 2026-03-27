@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 
 type FilterKey = "all" | "budget" | "walkable" | "family" | "nightlife" | "transit";
 
@@ -57,10 +58,11 @@ const TYPE_CONFIG: Record<Exclude<MetroType, 'core'>, { label: string; color: st
   "exurb": { label: "Exurb", color: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30", icon: <Globe className="w-3 h-3" /> },
 };
 
-function NeighborhoodCard({ n, isComparing, onToggleCompare }: {
+function NeighborhoodCard({ n, isComparing, onToggleCompare, trackClickByName }: {
   n: Neighborhood;
   isComparing: boolean;
   onToggleCompare: (id: string) => void;
+  trackClickByName: (identifier: string, contentType?: string, contentId?: string) => void;
 }) {
   const metroType = n.metroType;
   const isMetro = metroType && metroType !== "core";
@@ -109,7 +111,17 @@ function NeighborhoodCard({ n, isComparing, onToggleCompare }: {
           {/* Tags */}
           <div className="flex flex-wrap gap-1.5 mt-4">
             {n.tags.map((tag) => (
-              <span key={tag} className="px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs">{tag}</span>
+              <span
+                key={tag}
+                className="px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs hover:bg-primary/10 hover:text-primary cursor-pointer transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  trackClickByName(tag.replace(/[^\w\s]/g, '').trim(), 'neighborhood-card', n.id);
+                }}
+              >
+                {tag}
+              </span>
             ))}
           </div>
 
@@ -137,6 +149,7 @@ export default function Neighborhoods() {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [, navigate] = useLocation();
+  const { trackClickByName } = useTagTrackingWithLookup();
 
   // Split into core and metro, then filter each
   const coreIds = useMemo(() => new Set(neighborhoods.map(n => n.id)), []);
@@ -255,6 +268,7 @@ export default function Neighborhoods() {
                   n={n}
                   isComparing={compareIds.includes(n.id)}
                   onToggleCompare={toggleCompare}
+                  trackClickByName={trackClickByName}
                 />
               ))}
             </div>
@@ -293,6 +307,7 @@ export default function Neighborhoods() {
                   n={n}
                   isComparing={compareIds.includes(n.id)}
                   onToggleCompare={toggleCompare}
+                  trackClickByName={trackClickByName}
                 />
               ))}
             </div>

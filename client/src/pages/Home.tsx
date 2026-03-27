@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import ActivityFeed from "@/components/ActivityFeed";
 
 const HERO_IMAGE =
@@ -136,6 +137,7 @@ function QuizCTA() {
 }
 
 function FeaturedNeighborhoods() {
+  const { trackClickByName } = useTagTrackingWithLookup();
   const featured = neighborhoods.filter((n) => n.featured).slice(0, 4);
   return (
     <section className="py-16 md:py-20 bg-muted/50">
@@ -180,7 +182,12 @@ function FeaturedNeighborhoods() {
                     {n.tags.slice(0, 3).map((tag) => (
                       <span
                         key={tag}
-                        className="px-2 py-0.5 rounded-full bg-white/15 backdrop-blur-sm text-white text-xs"
+                        className="px-2 py-0.5 rounded-full bg-white/15 backdrop-blur-sm text-white text-xs hover:bg-white/25 cursor-pointer transition-colors"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          trackClickByName(tag.replace(/[^\w\s]/g, '').trim(), 'home-neighborhood', n.id);
+                        }}
                       >
                         {tag}
                       </span>
@@ -423,6 +430,7 @@ const CATEGORY_EMOJI: Record<string, string> = {
 };
 
 function ThisWeekInCLT() {
+  const { trackClickByName } = useTagTrackingWithLookup();
   const { data: events, isLoading } = trpc.events.getThisWeek.useQuery();
 
   if (isLoading) {
@@ -479,7 +487,14 @@ function ThisWeekInCLT() {
                     <span className="text-lg font-extrabold leading-tight">{d.getDate()}</span>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 mb-1">
+                    <div
+                      className="flex items-center gap-1.5 mb-1 cursor-pointer hover:text-primary transition-colors"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        trackClickByName(event.category, 'home-event');
+                      }}
+                    >
                       <span className="text-sm">{CATEGORY_EMOJI[event.category] ?? "📅"}</span>
                       <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
                         {event.category.replace("-", " ")}

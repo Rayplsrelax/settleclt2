@@ -5,6 +5,7 @@ import { Calendar, CalendarPlus, MapPin, ExternalLink, Clock, Filter, Sparkles, 
 import ShareButtons from "@/components/ShareButtons";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import {
   Dialog,
   DialogContent,
@@ -101,7 +102,7 @@ type EventType = {
   isRecurring: string;
 };
 
-function EventCard({ event, onClick }: { event: EventType; onClick: () => void }) {
+function EventCard({ event, onClick, onCategoryClick, onNeighborhoodClick }: { event: EventType; onClick: () => void; onCategoryClick?: (category: string) => void; onNeighborhoodClick?: (neighborhood: string) => void }) {
   const isFeatured = event.isFeatured === "yes";
   return (
     <button
@@ -157,7 +158,13 @@ function EventCard({ event, onClick }: { event: EventType; onClick: () => void }
             </div>
           )}
           {event.neighborhood && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary cursor-pointer transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                onNeighborhoodClick?.(event.neighborhood!);
+              }}
+            >
               <Tag className="w-4 h-4 text-primary/70 shrink-0" />
               <span>{event.neighborhood}</span>
             </div>
@@ -177,6 +184,7 @@ function EventCard({ event, onClick }: { event: EventType; onClick: () => void }
 export default function Events() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
+  const { trackClickByName } = useTagTrackingWithLookup();
 
   const { data: allEvents, isLoading } = trpc.events.getPublished.useQuery(
     selectedCategory ? { category: selectedCategory } : undefined
@@ -238,7 +246,10 @@ export default function Events() {
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.value}
-                onClick={() => setSelectedCategory(cat.value)}
+                onClick={() => {
+                  setSelectedCategory(cat.value);
+                  if (cat.value) trackClickByName(cat.value, 'event-filter');
+                }}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                   selectedCategory === cat.value
                     ? "bg-primary text-primary-foreground"
@@ -298,6 +309,8 @@ export default function Events() {
                       key={event.id}
                       event={event as EventType}
                       onClick={() => setSelectedEvent(event as EventType)}
+                      onCategoryClick={(cat) => trackClickByName(cat, 'event-card')}
+                      onNeighborhoodClick={(n) => trackClickByName(n, 'event-card')}
                     />
                   ))}
                 </div>
@@ -319,6 +332,8 @@ export default function Events() {
                       key={event.id}
                       event={event as EventType}
                       onClick={() => setSelectedEvent(event as EventType)}
+                      onCategoryClick={(cat) => trackClickByName(cat, 'event-card')}
+                      onNeighborhoodClick={(n) => trackClickByName(n, 'event-card')}
                     />
                   ))}
                 </div>
@@ -337,6 +352,8 @@ export default function Events() {
                       key={event.id}
                       event={event as EventType}
                       onClick={() => setSelectedEvent(event as EventType)}
+                      onCategoryClick={(cat) => trackClickByName(cat, 'event-card')}
+                      onNeighborhoodClick={(n) => trackClickByName(n, 'event-card')}
                     />
                   ))}
                 </div>

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import WishlistButton from "@/components/WishlistButton";
 import ShareButtons from "@/components/ShareButtons";
+import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 
 // Generate a slug key from service name
 function toSlug(name: string): string {
@@ -78,6 +79,7 @@ export default function Directory() {
   const [activeGroup, setActiveGroup] = useState(urlParams.group || "");
   const [activeCategory, setActiveCategory] = useState(urlParams.category || "");
   const [activeArea, setActiveArea] = useState(urlParams.area || "");
+  const { trackClickByName } = useTagTrackingWithLookup();
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
 
@@ -374,7 +376,7 @@ export default function Directory() {
                   {SERVICE_SUPER_GROUPS.map((sg) => (
                     <button
                       key={sg.id}
-                      onClick={() => { setActiveGroup(sg.id); setActiveCategory(""); }}
+                      onClick={() => { setActiveGroup(sg.id); setActiveCategory(""); trackClickByName(sg.id, 'directory-group'); }}
                       className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                         activeGroup === sg.id ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
                       }`}
@@ -400,7 +402,7 @@ export default function Directory() {
                   {visibleCategories.map((cat) => (
                     <button
                       key={cat.id}
-                      onClick={() => setActiveCategory(cat.id)}
+                      onClick={() => { setActiveCategory(cat.id); trackClickByName(cat.id, 'directory-category'); }}
                       className={`px-2.5 py-1 rounded-full text-xs transition-colors ${
                         activeCategory === cat.id ? "bg-primary/10 text-primary font-medium" : "bg-muted text-muted-foreground hover:bg-muted/80"
                       }`}
@@ -416,7 +418,7 @@ export default function Directory() {
                 <label className="block text-xs font-medium text-muted-foreground mb-2">Area</label>
                 <select
                   value={activeArea}
-                  onChange={(e) => setActiveArea(e.target.value)}
+                  onChange={(e) => { setActiveArea(e.target.value); if (e.target.value) trackClickByName(e.target.value, 'directory-area'); }}
                   className="px-3 py-2 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring min-w-[200px]"
                 >
                   <option value="">All Areas</option>
