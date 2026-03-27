@@ -341,3 +341,38 @@ export const tagEngagement = mysqlTable("tag_engagement", {
 
 export type TagEngagement = typeof tagEngagement.$inferSelect;
 export type InsertTagEngagement = typeof tagEngagement.$inferInsert;
+
+
+// --- Search queries: track what users search for ---
+export const searchQueries = mysqlTable("search_queries", {
+  id: int("id").autoincrement().primaryKey(),
+  /** The search query text */
+  query: varchar("query", { length: 512 }).notNull(),
+  /** Normalized lowercase version for aggregation */
+  queryNormalized: varchar("queryNormalized", { length: 512 }).notNull(),
+  /** Number of results returned */
+  resultCount: int("resultCount").default(0).notNull(),
+  /** Optional user ID (null for anonymous) */
+  userId: int("userId"),
+  /** Source: global-search, directory, events, blog */
+  source: varchar("source", { length: 64 }).default("global-search").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SearchQuery = typeof searchQueries.$inferSelect;
+export type InsertSearchQuery = typeof searchQueries.$inferInsert;
+
+// --- User tag preferences: aggregated engagement for recommendations ---
+export const userTagPreferences = mysqlTable("user_tag_preferences", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  tagId: int("tagId").notNull(),
+  /** Aggregated engagement score (views=1, clicks=3, stamps=5, shares=2) */
+  score: int("score").default(0).notNull(),
+  /** Last engagement timestamp */
+  lastEngagedAt: timestamp("lastEngagedAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type UserTagPreference = typeof userTagPreferences.$inferSelect;
+export type InsertUserTagPreference = typeof userTagPreferences.$inferInsert;

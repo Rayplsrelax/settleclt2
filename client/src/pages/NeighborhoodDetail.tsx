@@ -13,6 +13,7 @@ import {
   CheckCircle2, GitCompare, Zap, AlertTriangle, Trophy, TreePine, Dumbbell, Bike
 } from "lucide-react";
 import { NEIGHBORHOOD_SPORTS_REC, CHARLOTTE_VENUES, type SportsRec } from "@shared/sportsRec";
+import { neighborhoodDevelopments, STATUS_COLORS, TYPE_ICONS, type Development } from "@shared/neighborhoodDevelopments";
 import CommentSection from "@/components/CommentSection";
 import ShareButtons from "@/components/ShareButtons";
 import { trpc } from "@/lib/trpc";
@@ -36,6 +37,7 @@ const SECTIONS = [
   { id: "settling", label: "Get Settled" },
   { id: "moving-from", label: "Moving From" },
   { id: "sports-rec", label: "Sports & Rec" },
+  { id: "whats-coming", label: "What's Coming" },
   { id: "map", label: "Map" },
   { id: "services", label: "Services" },
   { id: "community", label: "Community" },
@@ -567,6 +569,57 @@ export default function NeighborhoodDetail() {
                     </span>
                   ))}
                 </div>
+              </div>
+            </section>
+          );
+        })()}
+
+        {/* What's Coming */}
+        {(() => {
+          const developments = neighborhoodDevelopments[n.id] || [];
+          if (developments.length === 0) return null;
+          return (
+            <section id="whats-coming" ref={el => { sectionRefs.current["whats-coming"] = el; }}>
+              <SectionHeader icon={<Zap className="w-5 h-5" />} title={`What's Coming to ${n.name}`} />
+              <p className="text-sm text-muted-foreground mb-6 -mt-3">
+                Upcoming developments, new businesses, and infrastructure projects shaping the future of {n.name}.
+              </p>
+              <div className="space-y-4">
+                {developments.map((dev, i) => {
+                  const statusStyle = STATUS_COLORS[dev.status] || STATUS_COLORS['announced'];
+                  const typeIcon = TYPE_ICONS[dev.type] || '📍';
+                  return (
+                    <div key={i} className="p-5 rounded-xl bg-card border border-border hover:border-primary/20 transition-all">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3">
+                          <span className="text-xl mt-0.5">{typeIcon}</span>
+                          <div>
+                            <h3 className="font-semibold text-foreground">{dev.title}</h3>
+                            <p className="text-sm text-muted-foreground mt-1">{dev.description}</p>
+                          </div>
+                        </div>
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${statusStyle.bg} ${statusStyle.text}`}>
+                          {statusStyle.label}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span>{dev.timeline}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs text-primary">
+                          <TrendingUp className="w-3.5 h-3.5" />
+                          <span>{dev.impact}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/10">
+                <p className="text-xs text-muted-foreground">
+                  <strong className="text-foreground">Know about a development we're missing?</strong> Drop a comment below or reach out — we update this section as new projects are announced.
+                </p>
               </div>
             </section>
           );

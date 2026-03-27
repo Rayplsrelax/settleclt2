@@ -1,6 +1,6 @@
 import { eq, and, desc, asc, sql, gte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag } from "../drizzle/schema";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -756,4 +756,215 @@ export async function bulkTrackTagEngagement(entries: InsertTagEngagement[]) {
   if (entries.length === 0) return null;
   await db.insert(tagEngagement).values(entries);
   return { success: true };
+}
+
+
+// ========== SEARCH QUERY TRACKING ==========
+
+export async function trackSearchQuery(data: { query: string; resultCount: number; userId?: number; source?: string }) {
+  const db = await getDb();
+  if (!db) return null;
+  const [result] = await db.insert(searchQueries).values({
+    query: data.query,
+    queryNormalized: data.query.toLowerCase().trim(),
+    resultCount: data.resultCount,
+    userId: data.userId ?? null,
+    source: data.source ?? "global-search",
+  });
+  return result;
+}
+
+export async function getPopularSearches(limit: number = 10, days: number = 30) {
+  const db = await getDb();
+  if (!db) return [];
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  const results = await db.select({
+    query: searchQueries.queryNormalized,
+    searchCount: sql<number>`COUNT(*)`,
+    avgResults: sql<number>`ROUND(AVG(resultCount))`,
+  })
+    .from(searchQueries)
+    .where(gte(searchQueries.createdAt, cutoff))
+    .groupBy(searchQueries.queryNormalized)
+    .orderBy(sql`COUNT(*) DESC`)
+    .limit(limit);
+  return results;
+}
+
+export async function getSearchAnalytics(days: number = 30) {
+  const db = await getDb();
+  if (!db) return { totalSearches: 0, uniqueQueries: 0, zeroResultQueries: 0, dailySearches: [] };
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+
+  const [totals] = await db.select({
+    totalSearches: sql<number>`COUNT(*)`,
+    uniqueQueries: sql<number>`COUNT(DISTINCT queryNormalized)`,
+    zeroResultQueries: sql<number>`SUM(CASE WHEN resultCount = 0 THEN 1 ELSE 0 END)`,
+  }).from(searchQueries).where(gte(searchQueries.createdAt, cutoff));
+
+  const dailySearches = await db.select({
+    date: sql<string>`DATE(createdAt)`,
+    count: sql<number>`COUNT(*)`,
+  })
+    .from(searchQueries)
+    .where(gte(searchQueries.createdAt, cutoff))
+    .groupBy(sql`DATE(createdAt)`)
+    .orderBy(sql`DATE(createdAt)`);
+
+  return { ...totals, dailySearches };
+}
+
+// ========== TAG ANALYTICS ==========
+
+export async function getTagAnalytics(days: number = 30) {
+  const db = await getDb();
+  if (!db) return { topTags: [], engagementByType: [], dailyEngagement: [], velocityData: [] };
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+
+  // Top tags by engagement
+  const topTags = await db.select({
+    tagId: tagEngagement.tagId,
+    tagName: tags.name,
+    tagSlug: tags.slug,
+    tagCategory: tags.category,
+    total: sql<number>`COUNT(*)`,
+    views: sql<number>`SUM(CASE WHEN ${tagEngagement.engagementType} = 'view' THEN 1 ELSE 0 END)`,
+    clicks: sql<number>`SUM(CASE WHEN ${tagEngagement.engagementType} = 'click' THEN 1 ELSE 0 END)`,
+    stamps: sql<number>`SUM(CASE WHEN ${tagEngagement.engagementType} = 'stamp' THEN 1 ELSE 0 END)`,
+    shares: sql<number>`SUM(CASE WHEN ${tagEngagement.engagementType} = 'share' THEN 1 ELSE 0 END)`,
+  })
+    .from(tagEngagement)
+    .innerJoin(tags, eq(tagEngagement.tagId, tags.id))
+    .where(gte(tagEngagement.createdAt, cutoff))
+    .groupBy(tagEngagement.tagId, tags.name, tags.slug, tags.category)
+    .orderBy(sql`COUNT(*) DESC`)
+    .limit(20);
+
+  // Engagement by content type
+  const engagementByType = await db.select({
+    contentType: tagEngagement.contentType,
+    count: sql<number>`COUNT(*)`,
+  })
+    .from(tagEngagement)
+    .where(gte(tagEngagement.createdAt, cutoff))
+    .groupBy(tagEngagement.contentType)
+    .orderBy(sql`COUNT(*) DESC`);
+
+  // Daily engagement trend
+  const dailyEngagement = await db.select({
+    date: sql<string>`DATE(createdAt)`,
+    count: sql<number>`COUNT(*)`,
+  })
+    .from(tagEngagement)
+    .where(gte(tagEngagement.createdAt, cutoff))
+    .groupBy(sql`DATE(createdAt)`)
+    .orderBy(sql`DATE(createdAt)`);
+
+  // Velocity: compare this week vs last week for top tags
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  const twoWeeksAgo = new Date();
+  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+
+  const velocityData = await db.select({
+    tagId: tagEngagement.tagId,
+    tagName: tags.name,
+    thisWeek: sql<number>`SUM(CASE WHEN ${tagEngagement.createdAt} >= ${oneWeekAgo} THEN 1 ELSE 0 END)`,
+    lastWeek: sql<number>`SUM(CASE WHEN ${tagEngagement.createdAt} >= ${twoWeeksAgo} AND ${tagEngagement.createdAt} < ${oneWeekAgo} THEN 1 ELSE 0 END)`,
+  })
+    .from(tagEngagement)
+    .innerJoin(tags, eq(tagEngagement.tagId, tags.id))
+    .where(gte(tagEngagement.createdAt, twoWeeksAgo))
+    .groupBy(tagEngagement.tagId, tags.name)
+    .orderBy(sql`SUM(CASE WHEN ${tagEngagement.createdAt} >= ${oneWeekAgo} THEN 1 ELSE 0 END) DESC`)
+    .limit(15);
+
+  return { topTags, engagementByType, dailyEngagement, velocityData };
+}
+
+// ========== USER TAG PREFERENCES (for recommendations) ==========
+
+const ENGAGEMENT_WEIGHTS: Record<string, number> = {
+  view: 1,
+  click: 3,
+  stamp: 5,
+  share: 2,
+};
+
+export async function updateUserTagPreference(userId: number, tagId: number, engagementType: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const weight = ENGAGEMENT_WEIGHTS[engagementType] ?? 1;
+
+  // Upsert: insert or update score
+  await db.insert(userTagPreferences).values({
+    userId,
+    tagId,
+    score: weight,
+  }).onDuplicateKeyUpdate({
+    set: {
+      score: sql`score + ${weight}`,
+      lastEngagedAt: sql`NOW()`,
+    },
+  });
+  return { success: true };
+}
+
+export async function getUserTagPreferences(userId: number, limit: number = 10) {
+  const db = await getDb();
+  if (!db) return [];
+  const results = await db.select({
+    tagId: userTagPreferences.tagId,
+    tagName: tags.name,
+    tagSlug: tags.slug,
+    tagCategory: tags.category,
+    score: userTagPreferences.score,
+  })
+    .from(userTagPreferences)
+    .innerJoin(tags, eq(userTagPreferences.tagId, tags.id))
+    .where(eq(userTagPreferences.userId, userId))
+    .orderBy(desc(userTagPreferences.score))
+    .limit(limit);
+  return results;
+}
+
+export async function getRecommendedContent(userId: number) {
+  const db = await getDb();
+  if (!db) return { neighborhoods: [], events: [], directory: [] };
+
+  // Get user's top tag preferences
+  const prefs = await getUserTagPreferences(userId, 5);
+  if (prefs.length === 0) return { neighborhoods: [], events: [], directory: [] };
+
+  const topTagIds = prefs.map(p => p.tagId);
+
+  // Find content tagged with user's preferred tags
+  const taggedContent = await db.select({
+    contentType: contentTags.contentType,
+    contentId: contentTags.contentId,
+    tagId: contentTags.tagId,
+    tagName: tags.name,
+  })
+    .from(contentTags)
+    .innerJoin(tags, eq(contentTags.tagId, tags.id))
+    .where(sql`${contentTags.tagId} IN (${sql.join(topTagIds.map(id => sql`${id}`), sql`, `)})`)
+    .limit(50);
+
+  const neighborhoods = taggedContent.filter(c => c.contentType === "neighborhood").map(c => ({
+    id: c.contentId,
+    matchedTag: c.tagName,
+  }));
+  const eventContent = taggedContent.filter(c => c.contentType === "event").map(c => ({
+    id: c.contentId,
+    matchedTag: c.tagName,
+  }));
+  const directory = taggedContent.filter(c => c.contentType === "directory").map(c => ({
+    id: c.contentId,
+    matchedTag: c.tagName,
+  }));
+
+  return { neighborhoods, events: eventContent, directory };
 }

@@ -640,10 +640,127 @@ function CTABanner() {
   );
 }
 
+function ForYouSection() {
+  const { user } = useAuth();
+  const recommendations = trpc.recommendations.getForUser.useQuery(undefined, {
+    enabled: !!user,
+  });
+  const preferences = trpc.recommendations.myPreferences.useQuery(undefined, {
+    enabled: !!user,
+  });
+
+  if (!user) return null;
+  if (recommendations.isLoading) return null;
+
+  const data = recommendations.data;
+  if (!data) return null;
+
+  const hasContent = (data.neighborhoods?.length ?? 0) > 0 || (data.events?.length ?? 0) > 0 || (data.directory?.length ?? 0) > 0;
+  if (!hasContent && (!preferences.data || preferences.data.length === 0)) return null;
+
+  return (
+    <section className="py-12 md:py-16">
+      <div className="container">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="p-2 rounded-xl bg-primary/10">
+            <Sparkles className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h2 className="font-display font-bold text-xl md:text-2xl text-foreground">
+              For You, {user.name?.split(' ')[0] || 'Explorer'}
+            </h2>
+            <p className="text-sm text-muted-foreground">Based on your browsing and engagement</p>
+          </div>
+        </div>
+
+        {/* User's top interests */}
+        {preferences.data && preferences.data.length > 0 && (
+          <div className="mb-6">
+            <p className="text-xs text-muted-foreground mb-2">Your top interests</p>
+            <div className="flex flex-wrap gap-2">
+              {preferences.data.slice(0, 8).map((p, i) => (
+                <Link key={i} href={`/tag/${p.tagSlug}`}>
+                  <Badge variant="secondary" className="cursor-pointer hover:bg-accent">
+                    {p.tagName}
+                    <span className="ml-1 text-xs text-muted-foreground">({p.score})</span>
+                  </Badge>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Recommended Neighborhoods */}
+          {data.neighborhoods && data.neighborhoods.length > 0 && (
+            <div className="bg-card border border-border rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <MapPin className="w-4 h-4 text-primary" />
+                <h3 className="font-semibold text-foreground text-sm">Neighborhoods for You</h3>
+              </div>
+              <div className="space-y-2">
+                {data.neighborhoods.slice(0, 4).map((n, i) => (
+                  <Link key={i} href={`/neighborhood/${n.id}`}>
+                    <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer">
+                      <span className="text-sm font-medium text-foreground">{n.id.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                      <Badge variant="outline" className="text-[10px]">{n.matchedTag}</Badge>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Recommended Events */}
+          {data.events && data.events.length > 0 && (
+            <div className="bg-card border border-border rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <Calendar className="w-4 h-4 text-primary" />
+                <h3 className="font-semibold text-foreground text-sm">Events You'd Like</h3>
+              </div>
+              <div className="space-y-2">
+                {data.events.slice(0, 4).map((e, i) => (
+                  <Link key={i} href={`/events?event=${e.id}`}>
+                    <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer">
+                      <span className="text-sm font-medium text-foreground truncate">{e.id}</span>
+                      <Badge variant="outline" className="text-[10px]">{e.matchedTag}</Badge>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Recommended Directory */}
+          {data.directory && data.directory.length > 0 && (
+            <div className="bg-card border border-border rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <Building2 className="w-4 h-4 text-primary" />
+                <h3 className="font-semibold text-foreground text-sm">Places to Check Out</h3>
+              </div>
+              <div className="space-y-2">
+                {data.directory.slice(0, 4).map((d, i) => (
+                  <Link key={i} href={`/directory?search=${encodeURIComponent(d.id)}`}>
+                    <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer">
+                      <span className="text-sm font-medium text-foreground truncate">{d.id}</span>
+                      <Badge variant="outline" className="text-[10px]">{d.matchedTag}</Badge>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   return (
     <PageLayout>
       <Hero />
+      <ForYouSection />
       <ThisWeekInCLT />
       <TrendingInCLT />
       <QuizCTA />

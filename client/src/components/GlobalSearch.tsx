@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import { Search, MapPin, Store, Calendar, FileText, Compass } from "lucide-react";
 import {
@@ -29,10 +29,13 @@ export default function GlobalSearch() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [, navigate] = useLocation();
+  const trackSearch = trpc.search.track.useMutation();
+  const lastTrackedQuery = useRef("");
 
   // Fetch dynamic data
   const { data: dbBlogPosts } = trpc.blog.getPublished.useQuery(undefined, { enabled: open });
   const { data: dbEvents } = trpc.events.getPublished.useQuery(undefined, { enabled: open });
+  const { data: popularSearches } = trpc.search.popular.useQuery({ limit: 5, days: 30 }, { enabled: open });
 
   // Keyboard shortcut: Cmd+K or Ctrl+K
   useEffect(() => {
@@ -161,13 +164,43 @@ export default function GlobalSearch() {
     blog: "Blog",
   };
 
+  // Track search query with debounce on dialog close
+  const trackCurrentSearch = useCallback(() => {
+    const q = query.trim();
+    if (q && q.length >= 2 && q !== lastTrackedQuery.current) {
+      lastTrackedQuery.current = q;
+      trackSearch.mutate({
+        query: q,
+        resultCount: filteredResults.length,
+        source: "global-search",
+      });
+    }
+  }, [query, filteredResults.length, trackSearch]);
+
+  // Track when dialog closes with a query
+  useEffect(() => {
+    if (!open && query.trim().length >= 2) {
+      trackCurrentSearch();
+    }
+  }, [open]);
+
   const handleSelect = useCallback(
     (href: string) => {
+      // Track the search before navigating
+      const q = query.trim();
+      if (q && q.length >= 2 && q !== lastTrackedQuery.current) {
+        lastTrackedQuery.current = q;
+        trackSearch.mutate({
+          query: q,
+          resultCount: filteredResults.length,
+          source: "global-search",
+        });
+      }
       setOpen(false);
       setQuery("");
       navigate(href);
     },
-    [navigate]
+    [navigate, query, filteredResults.length, trackSearch]
   );
 
   return (
@@ -198,7 +231,7 @@ export default function GlobalSearch() {
         />
         <CommandList>
           {query.trim() === "" ? (
-            <div className="px-4 py-8 text-center">
+            <div className="px-4 py-6 text-center">
               <Compass className="w-10 h-10 mx-auto text-muted-foreground/40 mb-3" />
               <p className="text-sm text-muted-foreground">
                 Type to search across all of Settle CLT
@@ -206,6 +239,22 @@ export default function GlobalSearch() {
               <p className="text-xs text-muted-foreground/60 mt-1">
                 Neighborhoods, businesses, events, and blog articles
               </p>
+              {popularSearches && popularSearches.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-border">
+                  <p className="text-xs text-muted-foreground/60 mb-2">Popular searches</p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {popularSearches.map((s, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setQuery(s.query)}
+                        className="px-2.5 py-1 rounded-full bg-accent text-xs text-foreground hover:bg-accent/80 transition-colors"
+                      >
+                        {s.query}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <>

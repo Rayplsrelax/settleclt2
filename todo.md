@@ -201,3 +201,11 @@
 - [x] Track tag clicks on Neighborhoods listing page (core + metro card tags)
 - [x] Track tag views on TagPage (already existed)
 - [x] Write vitest tests for tag tracking (17 tests in tag-tracking.test.ts, all 158 tests pass)
+
+## Feature Round 2
+- [x] Add "What's Coming" sections to neighborhood detail pages (future developments for 10+ neighborhoods with real CLT data)
+- [x] Build Admin Analytics Dashboard (/admin/analytics) — stacked bar chart, pie chart, area chart, trending velocity, popular searches, CSV export
+- [x] Add search query tracking — tracks searches on dialog close and result selection, with result count and source
+- [x] Surface popular search terms in global search dialog empty state + analytics dashboard
+- [x] Build personalized recommendations — "For You" homepage section with top interests, recommended neighborhoods, events, and directory listings
+- [x] Write tests for all new features (179 tests across 18 test files, all passing)

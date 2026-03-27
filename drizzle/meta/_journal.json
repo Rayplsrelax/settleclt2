@@ -78,6 +78,13 @@
       "when": 1774553786374,
       "tag": "0010_glorious_saracen",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1774641573161,
+      "tag": "0011_steady_the_renegades",
+      "breakpoints": true
     }
   ]
 }

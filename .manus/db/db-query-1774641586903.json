@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `search_queries` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`query` varchar(512) NOT NULL,\n\t`queryNormalized` varchar(512) NOT NULL,\n\t`resultCount` int NOT NULL DEFAULT 0,\n\t`userId` int,\n\t`source` varchar(64) NOT NULL DEFAULT 'global-search',\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `search_queries_id` PRIMARY KEY(`id`)\n);\n\nCREATE TABLE `user_tag_preferences` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`tagId` int NOT NULL,\n\t`score` int NOT NULL DEFAULT 0,\n\t`lastEngagedAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `user_tag_preferences_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute CREATE TABLE `search_queries` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`query` varchar(512) NOT NULL,\n\t`queryNormalized` varchar(512) NOT NULL,\n\t`resultCount` int NOT NULL DEFAULT 0,\n\t`userId` int,\n\t`source` varchar(64) NOT NULL DEFAULT 'global-search',\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `search_queries_id` PRIMARY KEY(`id`)\n);\n\nCREATE TABLE `user_tag_preferences` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`tagId` int NOT NULL,\n\t`score` int NOT NULL DEFAULT 0,\n\t`lastEngagedAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `user_tag_preferences_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 256
+}

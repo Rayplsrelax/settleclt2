@@ -18,6 +18,9 @@ import {
   addDirectoryListing, getDirectoryListings, getAllDirectoryListings, updateDirectoryListing, deleteDirectoryListing,
   updateUserNewsletter,
   trackTagEngagement, getTrendingTags, bulkTrackTagEngagement,
+  trackSearchQuery, getPopularSearches, getSearchAnalytics,
+  getTagAnalytics,
+  updateUserTagPreference, getUserTagPreferences, getRecommendedContent,
 } from "./db";
 import { makeRequest, type PlacesSearchResult, type PlaceDetailsResult } from "./_core/map";
 import { notifyOwner } from "./_core/notification";
@@ -779,7 +782,68 @@ export const appRouter = router({
         await bulkTrackTagEngagement(entries);
         return { success: true };
       }),
+   }),
+
+  // --- Search Tracking ---
+  search: router({
+    track: publicProcedure
+      .input(z.object({
+        query: z.string().min(1).max(512),
+        resultCount: z.number().min(0),
+        source: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        await trackSearchQuery({
+          query: input.query,
+          resultCount: input.resultCount,
+          userId: ctx.user?.id,
+          source: input.source,
+        });
+        return { success: true };
+      }),
+    popular: publicProcedure
+      .input(z.object({ limit: z.number().min(1).max(50).optional(), days: z.number().min(1).max(365).optional() }).optional())
+      .query(async ({ input }) => {
+        return getPopularSearches(input?.limit ?? 10, input?.days ?? 30);
+      }),
+  }),
+
+  // --- Admin Analytics ---
+  analytics: router({
+    tags: adminProcedure
+      .input(z.object({ days: z.number().min(1).max(365).optional() }).optional())
+      .query(async ({ input }) => {
+        return getTagAnalytics(input?.days ?? 30);
+      }),
+    searches: adminProcedure
+      .input(z.object({ days: z.number().min(1).max(365).optional() }).optional())
+      .query(async ({ input }) => {
+        return getSearchAnalytics(input?.days ?? 30);
+      }),
+    popularSearches: adminProcedure
+      .input(z.object({ limit: z.number().min(1).max(100).optional(), days: z.number().min(1).max(365).optional() }).optional())
+      .query(async ({ input }) => {
+        return getPopularSearches(input?.limit ?? 20, input?.days ?? 30);
+      }),
+  }),
+
+  // --- Personalized Recommendations ---
+  recommendations: router({
+    getForUser: protectedProcedure.query(async ({ ctx }) => {
+      return getRecommendedContent(ctx.user.id);
+    }),
+    myPreferences: protectedProcedure.query(async ({ ctx }) => {
+      return getUserTagPreferences(ctx.user.id, 15);
+    }),
+    updatePreference: protectedProcedure
+      .input(z.object({
+        tagId: z.number(),
+        engagementType: z.enum(['view', 'click', 'stamp', 'share']),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        await updateUserTagPreference(ctx.user.id, input.tagId, input.engagementType);
+        return { success: true };
+      }),
   }),
 });
-
 export type AppRouter = typeof appRouter;
