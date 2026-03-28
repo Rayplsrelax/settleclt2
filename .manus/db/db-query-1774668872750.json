@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE events SET startDate = '2026-04-03 12:00:00', endDate = '2026-04-19 22:00:00' WHERE id = 11;\nUPDATE events SET startDate = '2026-06-05 11:00:00', endDate = '2026-06-07 18:00:00' WHERE id = 12;\nUPDATE events SET startDate = '2026-04-11 10:00:00', endDate = '2026-04-11 18:00:00', venueName = 'Independent Picture House' WHERE id = 15;\nUPDATE events SET startDate = '2026-04-11 12:00:00', endDate = '2026-04-11 18:00:00', venueName = 'Stumptown Park', neighborhood = 'Matthews' WHERE id = 16;\nUPDATE events SET startDate = '2026-04-12 12:00:00', endDate = '2026-04-12 17:00:00', venueName = 'First Ward Park', neighborhood = 'Uptown' WHERE id = 19;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute UPDATE events SET startDate = '2026-04-03 12:00:00', endDate = '2026-04-19 22:00:00' WHERE id = 11;\nUPDATE events SET startDate = '2026-06-05 11:00:00', endDate = '2026-06-07 18:00:00' WHERE id = 12;\nUPDATE events SET startDate = '2026-04-11 10:00:00', endDate = '2026-04-11 18:00:00', venueName = 'Independent Picture House' WHERE id = 15;\nUPDATE events SET startDate = '2026-04-11 12:00:00', endDate = '2026-04-11 18:00:00', venueName = 'Stumptown Park', neighborhood = 'Matthews' WHERE id = 16;\nUPDATE events SET startDate = '2026-04-12 12:00:00', endDate = '2026-04-12 17:00:00', venueName = 'First Ward Park', neighborhood = 'Uptown' WHERE id = 19;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 105
+}

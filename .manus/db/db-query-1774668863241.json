@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE events SET title = 'NoDa Culture Crawl', slug = 'noda-culture-crawl-apr-2026', startDate = '2026-04-16 17:00:00', endDate = '2026-04-16 20:30:00', venueName = 'NoDa Arts District' WHERE id = 2;\nUPDATE events SET startDate = '2026-03-27 19:04:00', endDate = '2026-03-27 22:04:00' WHERE id = 3;\nUPDATE events SET endDate = '2026-04-03 22:00:00' WHERE id = 8;\nUPDATE events SET startDate = '2026-04-04 11:00:00' WHERE id = 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute UPDATE events SET title = 'NoDa Culture Crawl', slug = 'noda-culture-crawl-apr-2026', startDate = '2026-04-16 17:00:00', endDate = '2026-04-16 20:30:00', venueName = 'NoDa Arts District' WHERE id = 2;\nUPDATE events SET startDate = '2026-03-27 19:04:00', endDate = '2026-03-27 22:04:00' WHERE id = 3;\nUPDATE events SET endDate = '2026-04-03 22:00:00' WHERE id = 8;\nUPDATE events SET startDate = '2026-04-04 11:00:00' WHERE id = 10;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 82
+}

@@ -1,0 +1,73 @@
+{
+  "query": "SELECT id, title, startDate, endDate, venueName, neighborhood, category FROM events WHERE id IN (9, 25, 31, 45, 46, 48, 51);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute SELECT id, title, startDate, endDate, venueName, neighborhood, category FROM events WHERE id IN (9, 25, 31, 45, 46, 48, 51);",
+  "rows": [
+    {
+      "id": "9",
+      "title": "Comedy Night at The Comedy Zone",
+      "startDate": "2026-04-04 20:00:00",
+      "endDate": "2026-04-04 22:30:00",
+      "venueName": "The Comedy Zone",
+      "neighborhood": "NoDa",
+      "category": "nightlife"
+    },
+    {
+      "id": "25",
+      "title": "Coca-Cola 600",
+      "startDate": "2026-05-24 18:00:00",
+      "endDate": "2026-05-24 23:00:00",
+      "venueName": "Charlotte Motor Speedway",
+      "neighborhood": "Huntersville",
+      "category": "sports"
+    },
+    {
+      "id": "31",
+      "title": "South End Brewery Crawl",
+      "startDate": "2026-05-23 13:00:00",
+      "endDate": "2026-05-23 20:00:00",
+      "venueName": "South End Breweries",
+      "neighborhood": "South End",
+      "category": "food-drink"
+    },
+    {
+      "id": "45",
+      "title": "Indian Trail Heritage Festival",
+      "startDate": "2026-06-27 10:00:00",
+      "endDate": "2026-06-27 18:00:00",
+      "venueName": "Crossing Paths Park",
+      "neighborhood": "Indian Trail",
+      "category": "community"
+    },
+    {
+      "id": "46",
+      "title": "Mooresville Independence Day Celebration",
+      "startDate": "2026-06-28 16:00:00",
+      "endDate": "2026-06-28 22:00:00",
+      "venueName": "Downtown Mooresville",
+      "neighborhood": "Mooresville",
+      "category": "family"
+    },
+    {
+      "id": "48",
+      "title": "Charlotte Hornets Draft Watch Party",
+      "startDate": "2026-06-25 19:00:00",
+      "endDate": "2026-06-25 23:00:00",
+      "venueName": "Spectrum Center",
+      "neighborhood": "Uptown",
+      "category": "sports"
+    },
+    {
+      "id": "51",
+      "title": "Free Yoga at Romare Bearden Park",
+      "startDate": "2026-04-04 09:00:00",
+      "endDate": "2026-04-04 10:00:00",
+      "venueName": "Romare Bearden Park",
+      "neighborhood": "Uptown",
+      "category": "free"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tstartDate\tendDate\tvenueName\tneighborhood\tcategory\n9\tComedy Night at The Comedy Zone\t2026-04-04 20:00:00\t2026-04-04 22:30:00\tThe Comedy Zone\tNoDa\tnightlife\n25\tCoca-Cola 600\t2026-05-24 18:00:00\t2026-05-24 23:00:00\tCharlotte Motor Speedway\tHuntersville\tsports\n31\tSouth End Brewery Crawl\t2026-05-23 13:00:00\t2026-05-23 20:00:00\tSouth End Breweries\tSouth End\tfood-drink\n45\tIndian Trail Heritage Festival\t2026-06-27 10:00:00\t2026-06-27 18:00:00\tCrossing Paths Park\tIndian Trail\tcommunity\n46\tMooresville Independence Day Celebration\t2026-06-28 16:00:00\t2026-06-28 22:00:00\tDowntown Mooresville\tMooresville\tfamily\n48\tCharlotte Hornets Draft Watch Party\t2026-06-25 19:00:00\t2026-06-25 23:00:00\tSpectrum Center\tUptown\tsports\n51\tFree Yoga at Romare Bearden Park\t2026-04-04 09:00:00\t2026-04-04 10:00:00\tRomare Bearden Park\tUptown\tfree\n",
+  "stderr": "",
+  "execution_time_ms": 49
+}

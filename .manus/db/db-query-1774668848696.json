@@ -1,0 +1,9 @@
+{
+  "query": "DELETE FROM events WHERE id IN (21, 22, 35, 41, 42, 7, 14, 18, 37, 49);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute DELETE FROM events WHERE id IN (21, 22, 35, 41, 42, 7, 14, 18, 37, 49);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 65
+}

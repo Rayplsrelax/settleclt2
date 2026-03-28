@@ -1,0 +1,9 @@
+{
+  "query": "DELETE FROM events WHERE id = 9;\nDELETE FROM events WHERE id = 51;\nUPDATE events SET title = 'South End Brewery Crawl', startDate = '2026-10-03 13:00:00', endDate = '2026-10-03 20:00:00' WHERE id = 31;\nUPDATE events SET title = 'Union County Heritage Festival', slug = 'union-county-heritage-fest-2026', startDate = '2026-09-12 10:00:00', endDate = '2026-09-12 15:00:00', venueName = 'Unionville', neighborhood = 'Indian Trail' WHERE id = 45;\nUPDATE events SET startDate = '2026-07-03 18:00:00', endDate = '2026-07-03 22:00:00' WHERE id = 46;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute DELETE FROM events WHERE id = 9;\nDELETE FROM events WHERE id = 51;\nUPDATE events SET title = 'South End Brewery Crawl', startDate = '2026-10-03 13:00:00', endDate = '2026-10-03 20:00:00' WHERE id = 31;\nUPDATE events SET title = 'Union County Heritage Festival', slug = 'union-county-heritage-fest-2026', startDate = '2026-09-12 10:00:00', endDate = '2026-09-12 15:00:00', venueName = 'Unionville', neighborhood = 'Indian Trail' WHERE id = 45;\nUPDATE events SET startDate = '2026-07-03 18:00:00', endDate = '2026-07-03 22:00:00' WHERE id = 46;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 88
+}

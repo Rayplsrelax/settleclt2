@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE events SET title = 'South End Wine & Hops Festival', slug = 'south-end-wine-hops-fest-2026', startDate = '2026-03-28 13:00:00', endDate = '2026-03-28 18:00:00', venueName = 'Lenny Boy Brewing' WHERE id = 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute UPDATE events SET title = 'South End Wine & Hops Festival', slug = 'south-end-wine-hops-fest-2026', startDate = '2026-03-28 13:00:00', endDate = '2026-03-28 18:00:00', venueName = 'Lenny Boy Brewing' WHERE id = 1;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 123
+}

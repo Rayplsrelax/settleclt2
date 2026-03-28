@@ -1,0 +1,170 @@
+{
+  "query": "SELECT id, title, startDate, endDate, venueName, neighborhood FROM events ORDER BY startDate ASC LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute SELECT id, title, startDate, endDate, venueName, neighborhood FROM events ORDER BY startDate ASC LIMIT 20;",
+  "rows": [
+    {
+      "id": "40",
+      "title": "University City Food Truck Fridays",
+      "startDate": "2026-03-27 17:00:00",
+      "endDate": "2026-03-27 21:00:00",
+      "venueName": "Armored Cow Brewing",
+      "neighborhood": "University City"
+    },
+    {
+      "id": "3",
+      "title": "Charlotte Knights vs Durham Bulls",
+      "startDate": "2026-03-27 19:04:00",
+      "endDate": "2026-03-27 22:04:00",
+      "venueName": "Truist Field",
+      "neighborhood": "Uptown"
+    },
+    {
+      "id": "4",
+      "title": "Uptown Farmers Market",
+      "startDate": "2026-03-28 08:00:00",
+      "endDate": "2026-03-28 12:30:00",
+      "venueName": "300 S Davidson St",
+      "neighborhood": "Uptown"
+    },
+    {
+      "id": "5",
+      "title": "Free Yoga in Romare Bearden Park",
+      "startDate": "2026-03-28 09:00:00",
+      "endDate": "2026-03-28 10:00:00",
+      "venueName": "Romare Bearden Park",
+      "neighborhood": "Uptown"
+    },
+    {
+      "id": "1",
+      "title": "South End Wine & Hops Festival",
+      "startDate": "2026-03-28 13:00:00",
+      "endDate": "2026-03-28 18:00:00",
+      "venueName": "Lenny Boy Brewing",
+      "neighborhood": "South End"
+    },
+    {
+      "id": "6",
+      "title": "Plaza Midwood Pub Run",
+      "startDate": "2026-03-28 14:00:00",
+      "endDate": "2026-03-28 18:00:00",
+      "venueName": "Thomas Street Tavern",
+      "neighborhood": "Plaza Midwood"
+    },
+    {
+      "id": "52",
+      "title": "Open Mic Night at Evening Muse",
+      "startDate": "2026-03-30 19:30:00",
+      "endDate": "2026-03-30 23:30:00",
+      "venueName": "Evening Muse",
+      "neighborhood": "NoDa"
+    },
+    {
+      "id": "50",
+      "title": "Trivia Night at Wooden Robot Brewery",
+      "startDate": "2026-03-31 19:00:00",
+      "endDate": "2026-03-31 21:00:00",
+      "venueName": "Wooden Robot Brewery",
+      "neighborhood": "South End"
+    },
+    {
+      "id": "11",
+      "title": "Charlotte SHOUT!",
+      "startDate": "2026-04-03 12:00:00",
+      "endDate": "2026-04-19 22:00:00",
+      "venueName": "Various Uptown Venues",
+      "neighborhood": "Uptown"
+    },
+    {
+      "id": "8",
+      "title": "Charlotte Food Truck Friday",
+      "startDate": "2026-04-03 17:00:00",
+      "endDate": "2026-04-03 22:00:00",
+      "venueName": "Sycamore Brewing",
+      "neighborhood": "South End"
+    },
+    {
+      "id": "51",
+      "title": "Free Yoga at Romare Bearden Park",
+      "startDate": "2026-04-04 09:00:00",
+      "endDate": "2026-04-04 10:00:00",
+      "venueName": "Romare Bearden Park",
+      "neighborhood": "Uptown"
+    },
+    {
+      "id": "28",
+      "title": "Davidson Farmer's Market Opening Day",
+      "startDate": "2026-04-04 09:00:00",
+      "endDate": "2026-04-04 12:00:00",
+      "venueName": "Davidson Farmers Market",
+      "neighborhood": "Davidson"
+    },
+    {
+      "id": "10",
+      "title": "Matthews Community Egg Hunt",
+      "startDate": "2026-04-04 11:00:00",
+      "endDate": "2026-04-04 13:00:00",
+      "venueName": "Stumptown Park",
+      "neighborhood": "Matthews"
+    },
+    {
+      "id": "9",
+      "title": "Comedy Night at The Comedy Zone",
+      "startDate": "2026-04-04 20:00:00",
+      "endDate": "2026-04-04 22:30:00",
+      "venueName": "The Comedy Zone",
+      "neighborhood": "NoDa"
+    },
+    {
+      "id": "15",
+      "title": "Charlotte Earth Day Festival",
+      "startDate": "2026-04-11 10:00:00",
+      "endDate": "2026-04-11 18:00:00",
+      "venueName": "Independent Picture House",
+      "neighborhood": "Dilworth"
+    },
+    {
+      "id": "16",
+      "title": "Regional Festival of India",
+      "startDate": "2026-04-11 12:00:00",
+      "endDate": "2026-04-11 18:00:00",
+      "venueName": "Stumptown Park",
+      "neighborhood": "Matthews"
+    },
+    {
+      "id": "19",
+      "title": "Charlotte StrEATs Festival",
+      "startDate": "2026-04-12 12:00:00",
+      "endDate": "2026-04-12 17:00:00",
+      "venueName": "First Ward Park",
+      "neighborhood": "Uptown"
+    },
+    {
+      "id": "2",
+      "title": "NoDa Culture Crawl",
+      "startDate": "2026-04-16 17:00:00",
+      "endDate": "2026-04-16 20:30:00",
+      "venueName": "NoDa Arts District",
+      "neighborhood": "NoDa"
+    },
+    {
+      "id": "33",
+      "title": "Nights @ NoDa Street Market",
+      "startDate": "2026-04-18 16:00:00",
+      "endDate": "2026-04-18 21:00:00",
+      "venueName": "NoDa Arts District",
+      "neighborhood": "NoDa"
+    },
+    {
+      "id": "13",
+      "title": "Carolina Open Air 2026",
+      "startDate": "2026-04-24 14:00:00",
+      "endDate": "2026-04-25 23:00:00",
+      "venueName": "PNC Music Pavilion",
+      "neighborhood": "University City"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tstartDate\tendDate\tvenueName\tneighborhood\n40\tUniversity City Food Truck Fridays\t2026-03-27 17:00:00\t2026-03-27 21:00:00\tArmored Cow Brewing\tUniversity City\n3\tCharlotte Knights vs Durham Bulls\t2026-03-27 19:04:00\t2026-03-27 22:04:00\tTruist Field\tUptown\n4\tUptown Farmers Market\t2026-03-28 08:00:00\t2026-03-28 12:30:00\t300 S Davidson St\tUptown\n5\tFree Yoga in Romare Bearden Park\t2026-03-28 09:00:00\t2026-03-28 10:00:00\tRomare Bearden Park\tUptown\n1\tSouth End Wine & Hops Festival\t2026-03-28 13:00:00\t2026-03-28 18:00:00\tLenny Boy Brewing\tSouth End\n6\tPlaza Midwood Pub Run\t2026-03-28 14:00:00\t2026-03-28 18:00:00\tThomas Street Tavern\tPlaza Midwood\n52\tOpen Mic Night at Evening Muse\t2026-03-30 19:30:00\t2026-03-30 23:30:00\tEvening Muse\tNoDa\n50\tTrivia Night at Wooden Robot Brewery\t2026-03-31 19:00:00\t2026-03-31 21:00:00\tWooden Robot Brewery\tSouth End\n11\tCharlotte SHOUT!\t2026-04-03 12:00:00\t2026-04-19 22:00:00\tVarious Uptown Venues\tUptown\n8\tCharlotte Food Truck Friday\t2026-04-03 17:00:00\t2026-04-03 22:00:00\tSycamore Brewing\tSouth End\n51\tFree Yoga at Romare Bearden Park\t2026-04-04 09:00:00\t2026-04-04 10:00:00\tRomare Bearden Park\tUptown\n28\tDavidson Farmer's Market Opening Day\t2026-04-04 09:00:00\t2026-04-04 12:00:00\tDavidson Farmers Market\tDavidson\n10\tMatthews Community Egg Hunt\t2026-04-04 11:00:00\t2026-04-04 13:00:00\tStumptown Park\tMatthews\n9\tComedy Night at The Comedy Zone\t2026-04-04 20:00:00\t2026-04-04 22:30:00\tThe Comedy Zone\tNoDa\n15\tCharlotte Earth Day Festival\t2026-04-11 10:00:00\t2026-04-11 18:00:00\tIndependent Picture House\tDilworth\n16\tRegional Festival of India\t2026-04-11 12:00:00\t2026-04-11 18:00:00\tStumptown Park\tMatthews\n19\tCharlotte StrEATs Festival\t2026-04-12 12:00:00\t2026-04-12 17:00:00\tFirst Ward Park\tUptown\n2\tNoDa Culture Crawl\t2026-04-16 17:00:00\t2026-04-16 20:30:00\tNoDa Arts District\tNoDa\n33\tNights @ NoDa Street Market\t2026-04-18 16:00:00\t2026-04-18 21:00:00\tNoDa Arts District\tNoDa\n13\tCarolina Open Air 2026\t2026-04-24 14:00:00\t2026-04-25 23:00:00\tPNC Music Pavilion\tUniversity City\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

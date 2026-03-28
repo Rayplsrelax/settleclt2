@@ -218,3 +218,8 @@
 - [x] Display reviews on neighborhood detail pages (full ReviewSection) and directory listings (ReviewStars compact)
 - [x] Add review moderation for admin (toggleVisibility, adminList, delete by owner or admin)
 - [x] Write tests for all new features (203 tests across 20 test files, all passing)
+
+## Bug Fixes
+- [x] Research correct 2026 dates for all 52 Charlotte events (researched all via parallel subtasks)
+- [x] Update events with verified dates in database (30+ events corrected — dates, times, venues, names)
+- [x] Remove fictional/unverifiable events from database (12 removed: 5 fictional, 4 past one-time, 1 duplicate, 2 unverifiable → 40 events remaining)

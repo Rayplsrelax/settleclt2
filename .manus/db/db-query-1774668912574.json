@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE events SET startDate = '2026-03-28 14:00:00', endDate = '2026-03-28 18:00:00' WHERE id = 6;\nUPDATE events SET startDate = '2026-03-31 19:00:00', endDate = '2026-03-31 21:00:00' WHERE id = 50;\nUPDATE events SET startDate = '2026-03-30 19:30:00', endDate = '2026-03-30 23:30:00' WHERE id = 52;\nUPDATE events SET title = 'Pineville Rockin'' & Reelin'' Concert Series', slug = 'pineville-rockin-reelin-jun-2026' WHERE id = 44;\nUPDATE events SET title = 'Uptown Farmers Market', slug = 'uptown-farmers-market-mar-2026', venueName = '300 S Davidson St' WHERE id = 4;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute UPDATE events SET startDate = '2026-03-28 14:00:00', endDate = '2026-03-28 18:00:00' WHERE id = 6;\nUPDATE events SET startDate = '2026-03-31 19:00:00', endDate = '2026-03-31 21:00:00' WHERE id = 50;\nUPDATE events SET startDate = '2026-03-30 19:30:00', endDate = '2026-03-30 23:30:00' WHERE id = 52;\nUPDATE events SET title = 'Pineville Rockin'' & Reelin'' Concert Series', slug = 'pineville-rockin-reelin-jun-2026' WHERE id = 44;\nUPDATE events SET title = 'Uptown Farmers Market', slug = 'uptown-farmers-market-mar-2026', venueName = '300 S Davidson St' WHERE id = 4;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 94
+}
