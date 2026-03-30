@@ -243,3 +243,8 @@
 - [x] Set up email notifications for new referral leads (notifyOwner already fires on every referral submission)
 - [x] Audit all links and buttons across the site for correct routing/redirects (20+ pages tested)
 - [x] Fix any broken links or buttons found during audit (AdminReferrals back arrow fixed → /)
+
+## SEO Fixes
+- [x] Home page: Set document.title to 30-60 characters (58 chars)
+- [x] Home page: Add meta description (50-160 characters) (152 chars)
+- [x] Home page: Add meta keywords tag (13 keywords)

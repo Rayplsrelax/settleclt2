@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
@@ -757,6 +757,33 @@ function ForYouSection() {
 }
 
 export default function Home() {
+  useEffect(() => {
+    document.title = "Settle CLT — Your Complete Guide to Living in Charlotte, NC";
+
+    const setMeta = (name: string, content: string) => {
+      let el = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
+      if (!el) {
+        el = document.createElement("meta");
+        el.name = name;
+        document.head.appendChild(el);
+      }
+      el.content = content;
+    };
+
+    setMeta(
+      "description",
+      "Explore 20 Charlotte neighborhoods, discover 400+ local businesses, find events, and get honest advice from locals. Your free relocation guide to CLT."
+    );
+    setMeta(
+      "keywords",
+      "Charlotte NC, moving to Charlotte, Charlotte neighborhoods, Charlotte restaurants, Charlotte events, CLT guide, Charlotte relocation, South End, NoDa, Uptown Charlotte, Charlotte food trucks, Charlotte breweries, Charlotte coffee shops"
+    );
+
+    return () => {
+      document.title = "Settle CLT";
+    };
+  }, []);
+
   return (
     <PageLayout>
       <Hero />
