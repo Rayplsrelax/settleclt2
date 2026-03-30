@@ -223,3 +223,17 @@
 - [x] Research correct 2026 dates for all 52 Charlotte events (researched all via parallel subtasks)
 - [x] Update events with verified dates in database (30+ events corrected — dates, times, venues, names)
 - [x] Remove fictional/unverifiable events from database (12 removed: 5 fictional, 4 past one-time, 1 duplicate, 2 unverifiable → 40 events remaining)
+
+## Previous Prompt — Remaining Items
+- [x] Passport UX: Add searchable typeahead for adding stamps (events + places)
+- [x] Passport UX: Remove "Browse Event" button from stamp expanded view (not needed)
+- [x] Events: Auto-expire events one month after end date on Events page (added filtering in router)
+- [x] Events: Keep expired events visible in CLT Passport (Passport passes includeExpired: true)
+- [x] Bingo: Verify all bingo card items exist in directory and fix slug mismatches
+- [x] Directory: Add Food Truck category and research real CLT food trucks to add
+- [x] Directory: Add Coffee Shops category with real CLT coffee shops
+- [x] Directory: Add service-based businesses (Booksy, StyleSeat, etc.)
+- [x] Fix phone UI overlapping text on passport and other pages (stats grid 2-col on mobile, responsive header)
+- [x] Build real estate referral collection system (FindRealtor page + AdminReferrals + tRPC procedures)
+- [x] Add "Find a Realtor" link to navbar and "Admin Referrals" to admin dropdown
+- [x] Passport UX: Add QuickStampButton to Directory and Event cards (like WishlistButton)

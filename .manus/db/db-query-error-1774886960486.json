@@ -1,0 +1,8 @@
+{
+  "query": "SELECT id, title, JSON_EXTRACT(squares, '$[0].serviceKey') as sample_key, JSON_LENGTH(squares) as sq_count FROM bingo_cards ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute SELECT id, title, JSON_EXTRACT(squares, '$[0].serviceKey') as sample_key, JSON_LENGTH(squares) as sq_count FROM bingo_cards ORDER BY id;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'squares' in 'field list'"
+  ]
+}

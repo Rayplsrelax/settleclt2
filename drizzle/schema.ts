@@ -400,3 +400,35 @@ export const reviews = mysqlTable("reviews", {
 
 export type Review = typeof reviews.$inferSelect;
 export type InsertReview = typeof reviews.$inferInsert;
+
+// --- Real Estate Referrals: capture leads for agent partners ---
+export const referrals = mysqlTable("referrals", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Contact info */
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  phone: varchar("phone", { length: 32 }),
+  /** What they need */
+  referralType: mysqlEnum("referralType", ["buying", "selling", "renting", "relocating", "investing"]).notNull(),
+  /** Budget range */
+  budget: varchar("budget", { length: 128 }),
+  /** Preferred neighborhoods */
+  neighborhoods: text("neighborhoods"),
+  /** Timeline */
+  timeline: varchar("timeline", { length: 128 }),
+  /** Additional notes */
+  notes: text("notes"),
+  /** Current city (for relocators) */
+  currentCity: varchar("currentCity", { length: 255 }),
+  /** Status tracking */
+  status: mysqlEnum("status", ["new", "contacted", "matched", "closed", "lost"]).default("new").notNull(),
+  /** Admin notes */
+  adminNotes: text("adminNotes"),
+  /** Logged-in user who submitted (optional) */
+  userId: int("userId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Referral = typeof referrals.$inferSelect;
+export type InsertReferral = typeof referrals.$inferInsert;

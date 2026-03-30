@@ -29,6 +29,8 @@ const TagPage = lazy(() => import("./pages/TagPage"));
 const SubmitEvent = lazy(() => import("./pages/SubmitEvent"));
 const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics"));
 const AdminDigest = lazy(() => import("./pages/AdminDigest"));
+const FindRealtor = lazy(() => import("./pages/FindRealtor"));
+const AdminReferrals = lazy(() => import("./pages/AdminReferrals"));
 
 function PageLoader() {
   return (
@@ -63,6 +65,8 @@ function Router() {
         <Route path="/submit-event" component={SubmitEvent} />
         <Route path="/admin/analytics" component={AdminAnalytics} />
         <Route path="/admin/digest" component={AdminDigest} />
+        <Route path="/admin/referrals" component={AdminReferrals} />
+        <Route path="/find-a-realtor" component={FindRealtor} />
         <Route path="/tag/:slug" component={TagPage} />
         <Route path="/blog/:slug" component={BlogArticle} />
         <Route path="/404" component={NotFound} />

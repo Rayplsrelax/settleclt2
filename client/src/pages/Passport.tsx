@@ -7,7 +7,8 @@ import { Link } from "wouter";
 import {
   Stamp, MapPin, Plus, Trash2, Calendar, StickyNote,
   Trophy, Map, Star, ChevronDown, ChevronUp, X, LogIn,
-  Grid3X3, Award, Target, ArrowRight, CalendarDays, Ticket
+  Grid3X3, Award, Target, ArrowRight, CalendarDays, Ticket,
+  Search
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,7 @@ type StampType = "places" | "events";
 function PassportContent() {
   const utils = trpc.useUtils();
   const { data: entries = [], isLoading } = trpc.passport.getEntries.useQuery();
-  const { data: publishedEvents = [] } = trpc.events.getPublished.useQuery();
+  const { data: publishedEvents = [] } = trpc.events.getPublished.useQuery({ includeExpired: true });
   const addEntry = trpc.passport.addEntry.useMutation({
     onSuccess: () => {
       utils.passport.getEntries.invalidate();
@@ -53,6 +54,10 @@ function PassportContent() {
   const [visitDate, setVisitDate] = useState(new Date().toISOString().split("T")[0]);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"all" | "places" | "events">("all");
+  const [placeSearch, setPlaceSearch] = useState("");
+  const [eventSearch, setEventSearch] = useState("");
+  const [showPlaceDropdown, setShowPlaceDropdown] = useState(false);
+  const [showEventDropdown, setShowEventDropdown] = useState(false);
 
   // Separate entries
   const placeEntries = useMemo(() => entries.filter(e => !e.eventSlug), [entries]);
@@ -149,31 +154,32 @@ function PassportContent() {
   return (
     <div className="container py-12 max-w-4xl">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
               <Stamp className="w-5 h-5 text-amber-500" />
             </div>
-            <h1 className="text-2xl font-display font-bold text-foreground">
+            <h1 className="text-xl sm:text-2xl font-display font-bold text-foreground">
               CLT Passport
             </h1>
           </div>
-          <p className="text-muted-foreground max-w-xl">
+          <p className="text-sm text-muted-foreground max-w-xl">
             Collect stamps for every place you visit and event you attend in Charlotte.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           <ShareButtons compact title="My CLT Passport" description="Tracking my Charlotte exploration journey" />
-          <Button onClick={() => setShowAdd(!showAdd)} className="gap-2">
+          <Button onClick={() => setShowAdd(!showAdd)} className="gap-2" size="sm">
             {showAdd ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-            {showAdd ? "Cancel" : "Add Stamp"}
+            <span className="hidden sm:inline">{showAdd ? "Cancel" : "Add Stamp"}</span>
+            <span className="sm:hidden">{showAdd ? "" : "Add"}</span>
           </Button>
         </div>
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
         <Card>
           <CardContent className="py-4 text-center">
             <Trophy className="w-6 h-6 text-amber-500 mx-auto mb-1" />
@@ -238,47 +244,100 @@ function PassportContent() {
             </div>
 
             {addType === "events" ? (
-              <div>
+              <div className="relative">
                 <label className="text-sm font-medium text-foreground block mb-1">
-                  Select Event
+                  Search Events
                 </label>
-                <select
-                  value={selectedEvent}
-                  onChange={e => setSelectedEvent(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
-                >
-                  <option value="">-- Choose an event --</option>
-                  {publishedEvents.map(evt => (
-                    <option
-                      key={evt.slug}
-                      value={evt.slug}
-                      disabled={stampedEventSlugs.has(evt.slug)}
-                    >
-                      {evt.title}
-                      {evt.neighborhood ? ` (${evt.neighborhood})` : ""}
-                      {stampedEventSlugs.has(evt.slug) ? " ✓ Already stamped" : ""}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={eventSearch}
+                    onChange={e => {
+                      setEventSearch(e.target.value);
+                      setShowEventDropdown(true);
+                      setSelectedEvent("");
+                    }}
+                    onFocus={() => setShowEventDropdown(true)}
+                    placeholder="Type to search events..."
+                    className="w-full rounded-lg border border-border bg-background pl-9 pr-3 py-2 text-sm text-foreground"
+                  />
+                </div>
+                {showEventDropdown && (
+                  <div className="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-border bg-background shadow-lg">
+                    {publishedEvents
+                      .filter(evt => !eventSearch || evt.title.toLowerCase().includes(eventSearch.toLowerCase()))
+                      .map(evt => (
+                        <button
+                          key={evt.slug}
+                          disabled={stampedEventSlugs.has(evt.slug)}
+                          onClick={() => {
+                            setSelectedEvent(evt.slug);
+                            setEventSearch(evt.title);
+                            setShowEventDropdown(false);
+                          }}
+                          className={`w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors ${
+                            stampedEventSlugs.has(evt.slug) ? "opacity-50 cursor-not-allowed" : ""
+                          } ${selectedEvent === evt.slug ? "bg-purple-500/10 text-purple-600" : "text-foreground"}`}
+                        >
+                          {evt.title}
+                          {evt.neighborhood ? ` (${evt.neighborhood})` : ""}
+                          {stampedEventSlugs.has(evt.slug) ? " ✓" : ""}
+                        </button>
+                      ))}
+                    {publishedEvents.filter(evt => !eventSearch || evt.title.toLowerCase().includes(eventSearch.toLowerCase())).length === 0 && (
+                      <div className="px-3 py-2 text-sm text-muted-foreground">No events found</div>
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
               <>
-                <div>
+                <div className="relative">
                   <label className="text-sm font-medium text-foreground block mb-1">
-                    Select from Directory
+                    Search Directory
                   </label>
-                  <select
-                    value={selectedService}
-                    onChange={e => setSelectedService(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
-                  >
-                    <option value="">-- Choose a place --</option>
-                    {SERVICES.map(s => (
-                      <option key={slugify(s.name)} value={slugify(s.name)}>
-                        {s.name} ({s.area})
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      value={placeSearch}
+                      onChange={e => {
+                        setPlaceSearch(e.target.value);
+                        setShowPlaceDropdown(true);
+                        setSelectedService("");
+                      }}
+                      onFocus={() => setShowPlaceDropdown(true)}
+                      placeholder="Type to search places..."
+                      className="w-full rounded-lg border border-border bg-background pl-9 pr-3 py-2 text-sm text-foreground"
+                    />
+                  </div>
+                  {showPlaceDropdown && placeSearch.length > 0 && (
+                    <div className="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-border bg-background shadow-lg">
+                      {SERVICES
+                        .filter(s => s.name.toLowerCase().includes(placeSearch.toLowerCase()) || s.category.toLowerCase().includes(placeSearch.toLowerCase()))
+                        .slice(0, 20)
+                        .map(s => (
+                          <button
+                            key={slugify(s.name)}
+                            onClick={() => {
+                              setSelectedService(slugify(s.name));
+                              setPlaceSearch(s.name);
+                              setShowPlaceDropdown(false);
+                              setCustomPlace("");
+                            }}
+                            className={`w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors ${
+                              selectedService === slugify(s.name) ? "bg-amber-500/10 text-amber-600" : "text-foreground"
+                            }`}
+                          >
+                            {s.name} <span className="text-muted-foreground">({s.area})</span>
+                          </button>
+                        ))}
+                      {SERVICES.filter(s => s.name.toLowerCase().includes(placeSearch.toLowerCase()) || s.category.toLowerCase().includes(placeSearch.toLowerCase())).length === 0 && (
+                        <div className="px-3 py-2 text-sm text-muted-foreground">No places found — use custom name below</div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="text-center text-xs text-muted-foreground">— or —</div>
                 <div>
@@ -288,7 +347,7 @@ function PassportContent() {
                   <input
                     type="text"
                     value={customPlace}
-                    onChange={e => setCustomPlace(e.target.value)}
+                    onChange={e => { setCustomPlace(e.target.value); setSelectedService(""); setPlaceSearch(""); }}
                     placeholder="e.g., That amazing taco truck on Trade St"
                     className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
                   />
@@ -505,14 +564,6 @@ function PassportContent() {
                         </div>
                       )}
                       <div className="flex items-center gap-2">
-                        {isEvent && evt && (
-                          <Link href={`/events/${evt.slug}`}>
-                            <Button variant="outline" size="sm" className="gap-1">
-                              <ArrowRight className="w-3.5 h-3.5" />
-                              View Event
-                            </Button>
-                          </Link>
-                        )}
                         <Button
                           variant="outline"
                           size="sm"

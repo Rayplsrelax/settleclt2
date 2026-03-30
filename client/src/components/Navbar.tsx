@@ -20,6 +20,7 @@ const navLinks = [
   { href: "/events", label: "Events" },
   { href: "/blog", label: "Blog" },
   { href: "/passport", label: "CLT Passport" },
+  { href: "/find-a-realtor", label: "Find a Realtor" },
 ];
 
 function getInitials(name: string | null | undefined): string {
@@ -102,6 +103,10 @@ function UserMenu() {
             <DropdownMenuItem onClick={() => navigate("/admin/digest")}>
               <Shield className="w-4 h-4 mr-2" />
               Admin: Monthly Digest
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/admin/referrals")}>
+              <Shield className="w-4 h-4 mr-2" />
+              Admin: Referrals
             </DropdownMenuItem>
           </>
         )}

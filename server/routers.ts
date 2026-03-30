@@ -23,6 +23,7 @@ import {
   updateUserTagPreference, getUserTagPreferences, getRecommendedContent,
   getNewListings, getUpcomingEvents, getRecentBlogPosts, getNewsletterRecipients,
   createReview, getReviews, getReviewStats, deleteReview, toggleReviewVisibility, getAllReviews,
+  submitReferral, getReferrals, updateReferralStatus, getReferralStats,
 } from "./db";
 import { makeRequest, type PlacesSearchResult, type PlaceDetailsResult } from "./_core/map";
 import { notifyOwner } from "./_core/notification";
@@ -610,9 +611,19 @@ export const appRouter = router({
         toDate: z.date().optional(),
         limit: z.number().optional(),
         featured: z.boolean().optional(),
+        includeExpired: z.boolean().optional(),
       }).optional())
       .query(async ({ input }) => {
-        return getPublishedEvents(input ?? undefined);
+        const allEvents = await getPublishedEvents(input ?? undefined);
+        // By default, filter out events whose end date (or start date if no end) is more than 1 month ago
+        if (input?.includeExpired) return allEvents;
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        return allEvents.filter(evt => {
+          const eventEnd = evt.endDate ? new Date(evt.endDate) : evt.startDate ? new Date(evt.startDate) : null;
+          if (!eventEnd) return true; // keep events with no dates
+          return eventEnd >= oneMonthAgo;
+        });
       }),
     getBySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
@@ -959,6 +970,54 @@ export const appRouter = router({
         await updateUserTagPreference(ctx.user.id, input.tagId, input.engagementType);
         return { success: true };
       }),
+  }),
+
+  // --- Referrals ---
+  referrals: router({
+    submit: publicProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        email: z.string().email(),
+        phone: z.string().optional(),
+        referralType: z.enum(['buying', 'selling', 'renting', 'relocating', 'investing']),
+        budget: z.string().optional(),
+        neighborhoods: z.string().optional(),
+        timeline: z.string().optional(),
+        notes: z.string().optional(),
+        currentCity: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const result = await submitReferral({
+          ...input,
+          userId: ctx.user?.id ?? null,
+        });
+        // Notify owner of new referral
+        await notifyOwner({
+          title: `New Real Estate Referral: ${input.name}`,
+          content: `Type: ${input.referralType}\nEmail: ${input.email}\nPhone: ${input.phone || 'N/A'}\nBudget: ${input.budget || 'N/A'}\nNeighborhoods: ${input.neighborhoods || 'N/A'}\nTimeline: ${input.timeline || 'N/A'}\nCurrent City: ${input.currentCity || 'N/A'}\nNotes: ${input.notes || 'N/A'}`,
+        });
+        return result;
+      }),
+    list: adminProcedure
+      .input(z.object({
+        status: z.string().optional(),
+        limit: z.number().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return getReferrals(input);
+      }),
+    updateStatus: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(['new', 'contacted', 'matched', 'closed', 'lost']),
+        adminNotes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return updateReferralStatus(input.id, input.status, input.adminNotes);
+      }),
+    stats: adminProcedure.query(async () => {
+      return getReferralStats();
+    }),
   }),
 });
 export type AppRouter = typeof appRouter;

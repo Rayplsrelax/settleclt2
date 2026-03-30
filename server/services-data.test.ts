@@ -16,15 +16,16 @@ const VALID_AREAS = [
   "Fort Mill", "Huntersville", "Lake Norman", "LoSo", "Matthews",
   "Pineville", "South Charlotte", "SouthPark",
   "University Area", "West Charlotte",
+  "Cornelius", "Davidson",
 ];
 
 describe("Services data integrity", () => {
-  it("has 322 verified businesses", () => {
-    expect(SERVICES.length).toBe(322);
+  it("has 393 verified businesses", () => {
+    expect(SERVICES.length).toBe(393);
   });
 
-  it("has 40 categories", () => {
-    expect(SERVICE_CATEGORIES.length).toBe(40);
+  it("has 43 categories", () => {
+    expect(SERVICE_CATEGORIES.length).toBe(43);
   });
 
   it("has 6 super groups", () => {

@@ -1,0 +1,30 @@
+{
+  "query": "SELECT id, title, LEFT(squaresJson, 500) as sq_preview FROM bingo_cards ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute SELECT id, title, LEFT(squaresJson, 500) as sq_preview FROM bingo_cards ORDER BY id;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "Charlotte Brewery Tour",
+      "sq_preview": "[{\"id\":1,\"label\":\"Wooden Robot Brewery\",\"serviceKey\":\"wooden-robot-brewery\"},{\"id\":2,\"label\":\"NoDa Brewing Company\",\"serviceKey\":\"noda-brewing-company\"},{\"id\":3,\"label\":\"Birdsong Brewing\",\"serviceKey\":\"birdsong-brewing-company\"},{\"id\":4,\"label\":\"Triple C Brewing\",\"serviceKey\":\"triple-c-brewing\"},{\"id\":5,\"label\":\"Sycamore Brewing\",\"serviceKey\":\"sycamore-brewing\"},{\"id\":6,\"label\":\"Olde Mecklenburg Brewery\",\"serviceKey\":\"olde-mecklenburg-brewery\"},{\"id\":7,\"label\":\"Legion Brewing\",\"serviceKey\":\"legi"
+    },
+    {
+      "id": "2",
+      "title": "Best Coffee in CLT",
+      "sq_preview": "[{\"id\":1,\"label\":\"Undercurrent Coffee\",\"serviceKey\":\"undercurrent-coffee\"},{\"id\":2,\"label\":\"Not Just Coffee\",\"serviceKey\":\"not-just-coffee\"},{\"id\":3,\"label\":\"Smelly Cat Coffeehouse\",\"serviceKey\":\"smelly-cat-coffeehouse\"},{\"id\":4,\"label\":\"Central Coffee Co.\",\"serviceKey\":\"central-coffee-co\"},{\"id\":5,\"label\":\"Magnolia Coffee\",\"serviceKey\":\"magnolia-coffee\"},{\"id\":6,\"label\":\"Brakeman's Coffee\",\"serviceKey\":\"brakeman-s-coffee\"},{\"id\":7,\"label\":\"Coco and the Director\",\"serviceKey\":\"coco-and-the-direc"
+    },
+    {
+      "id": "3",
+      "title": "Date Night in Charlotte",
+      "sq_preview": "[{\"id\":1,\"label\":\"Dinner at Leah & Louise\",\"serviceKey\":\"leah-and-louise\"},{\"id\":2,\"label\":\"Cocktails at The Cellar\",\"serviceKey\":\"the-cellar-duckworths\"},{\"id\":3,\"label\":\"Walk the Rail Trail at sunset\",\"serviceKey\":null,\"category\":\"outdoors\"},{\"id\":4,\"label\":\"Rooftop drinks at Aura\",\"serviceKey\":\"aura-rooftop\"},{\"id\":5,\"label\":\"Comedy show at Comedy Zone\",\"serviceKey\":\"comedy-zone-charlotte\"},{\"id\":6,\"label\":\"Cooking class at Chef Alyssa's\",\"serviceKey\":\"chef-alyssas-kitchen\"},{\"id\":7,\"label\":\""
+    },
+    {
+      "id": "4",
+      "title": "Charlotte Newcomer Challenge",
+      "sq_preview": "[{\"id\":1,\"label\":\"Get your NC driver's license\",\"serviceKey\":null,\"category\":\"official\"},{\"id\":2,\"label\":\"Ride the LYNX Blue Line end to end\",\"serviceKey\":null,\"category\":\"transit\"},{\"id\":3,\"label\":\"Eat at Optimist Hall\",\"serviceKey\":null,\"category\":\"food\"},{\"id\":4,\"label\":\"Visit the Whitewater Center\",\"serviceKey\":null,\"category\":\"outdoors\"},{\"id\":5,\"label\":\"Attend a Panthers/Hornets/FC game\",\"serviceKey\":null,\"category\":\"sports\"},{\"id\":6,\"label\":\"Walk through Camp North End\",\"serviceKey\":null,"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tsq_preview\n1\tCharlotte Brewery Tour\t[{\"id\":1,\"label\":\"Wooden Robot Brewery\",\"serviceKey\":\"wooden-robot-brewery\"},{\"id\":2,\"label\":\"NoDa Brewing Company\",\"serviceKey\":\"noda-brewing-company\"},{\"id\":3,\"label\":\"Birdsong Brewing\",\"serviceKey\":\"birdsong-brewing-company\"},{\"id\":4,\"label\":\"Triple C Brewing\",\"serviceKey\":\"triple-c-brewing\"},{\"id\":5,\"label\":\"Sycamore Brewing\",\"serviceKey\":\"sycamore-brewing\"},{\"id\":6,\"label\":\"Olde Mecklenburg Brewery\",\"serviceKey\":\"olde-mecklenburg-brewery\"},{\"id\":7,\"label\":\"Legion Brewing\",\"serviceKey\":\"legi\n2\tBest Coffee in CLT\t[{\"id\":1,\"label\":\"Undercurrent Coffee\",\"serviceKey\":\"undercurrent-coffee\"},{\"id\":2,\"label\":\"Not Just Coffee\",\"serviceKey\":\"not-just-coffee\"},{\"id\":3,\"label\":\"Smelly Cat Coffeehouse\",\"serviceKey\":\"smelly-cat-coffeehouse\"},{\"id\":4,\"label\":\"Central Coffee Co.\",\"serviceKey\":\"central-coffee-co\"},{\"id\":5,\"label\":\"Magnolia Coffee\",\"serviceKey\":\"magnolia-coffee\"},{\"id\":6,\"label\":\"Brakeman's Coffee\",\"serviceKey\":\"brakeman-s-coffee\"},{\"id\":7,\"label\":\"Coco and the Director\",\"serviceKey\":\"coco-and-the-direc\n3\tDate Night in Charlotte\t[{\"id\":1,\"label\":\"Dinner at Leah & Louise\",\"serviceKey\":\"leah-and-louise\"},{\"id\":2,\"label\":\"Cocktails at The Cellar\",\"serviceKey\":\"the-cellar-duckworths\"},{\"id\":3,\"label\":\"Walk the Rail Trail at sunset\",\"serviceKey\":null,\"category\":\"outdoors\"},{\"id\":4,\"label\":\"Rooftop drinks at Aura\",\"serviceKey\":\"aura-rooftop\"},{\"id\":5,\"label\":\"Comedy show at Comedy Zone\",\"serviceKey\":\"comedy-zone-charlotte\"},{\"id\":6,\"label\":\"Cooking class at Chef Alyssa's\",\"serviceKey\":\"chef-alyssas-kitchen\"},{\"id\":7,\"label\":\"\n4\tCharlotte Newcomer Challenge\t[{\"id\":1,\"label\":\"Get your NC driver's license\",\"serviceKey\":null,\"category\":\"official\"},{\"id\":2,\"label\":\"Ride the LYNX Blue Line end to end\",\"serviceKey\":null,\"category\":\"transit\"},{\"id\":3,\"label\":\"Eat at Optimist Hall\",\"serviceKey\":null,\"category\":\"food\"},{\"id\":4,\"label\":\"Visit the Whitewater Center\",\"serviceKey\":null,\"category\":\"outdoors\"},{\"id\":5,\"label\":\"Attend a Panthers/Hornets/FC game\",\"serviceKey\":null,\"category\":\"sports\"},{\"id\":6,\"label\":\"Walk through Camp North End\",\"serviceKey\":null,\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

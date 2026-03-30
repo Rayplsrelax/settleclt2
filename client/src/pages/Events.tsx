@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Calendar, CalendarPlus, MapPin, ExternalLink, Clock, Filter, Sparkles, Tag } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
+import QuickStampButton from "@/components/QuickStampButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
@@ -138,6 +139,7 @@ function EventCard({ event, onClick, onCategoryClick, onNeighborhoodClick }: { e
               </Badge>
             )}
           </div>
+          <QuickStampButton eventSlug={event.slug} area={event.neighborhood ?? undefined} />
         </div>
 
         <h3 className="font-display font-bold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-2">

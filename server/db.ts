@@ -1,6 +1,6 @@
 import { eq, and, desc, asc, sql, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview } from "../drizzle/schema";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -1117,4 +1117,48 @@ export async function getAllReviews(limit = 50) {
     .leftJoin(users, eq(reviews.userId, users.id))
     .orderBy(desc(reviews.createdAt))
     .limit(limit);
+}
+
+// --- Referrals ---
+export async function submitReferral(data: Omit<InsertReferral, "id" | "createdAt" | "updatedAt" | "status">) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(referrals).values(data);
+  return { id: result[0].insertId };
+}
+
+export async function getReferrals(opts?: { status?: string; limit?: number }) {
+  const db = await getDb();
+  if (!db) return [];
+  let q = db.select().from(referrals).orderBy(desc(referrals.createdAt)).$dynamic();
+  if (opts?.status) {
+    q = q.where(eq(referrals.status, opts.status as any));
+  }
+  if (opts?.limit) {
+    q = q.limit(opts.limit);
+  }
+  return q;
+}
+
+export async function updateReferralStatus(id: number, status: string, adminNotes?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(referrals)
+    .set({ status: status as any, ...(adminNotes !== undefined ? { adminNotes } : {}) })
+    .where(eq(referrals.id, id));
+  return { success: true };
+}
+
+export async function getReferralStats() {
+  const db = await getDb();
+  if (!db) return { total: 0, byStatus: {}, byType: {} };
+  const all = await db.select().from(referrals);
+  const total = all.length;
+  const byStatus: Record<string, number> = {};
+  const byType: Record<string, number> = {};
+  all.forEach(r => {
+    byStatus[r.status] = (byStatus[r.status] || 0) + 1;
+    byType[r.referralType] = (byType[r.referralType] || 0) + 1;
+  });
+  return { total, byStatus, byType };
 }

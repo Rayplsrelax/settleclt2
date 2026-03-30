@@ -9,6 +9,7 @@ import { Search, ExternalLink, Phone, X, MapPin, Star, Filter, Map, List } from 
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import WishlistButton from "@/components/WishlistButton";
+import QuickStampButton from "@/components/QuickStampButton";
 import ShareButtons from "@/components/ShareButtons";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import { ReviewStars } from "@/components/ReviewSection";
@@ -497,6 +498,7 @@ export default function Directory() {
                           <p className="text-xs text-muted-foreground mt-1">{s.description}</p>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
+                          <QuickStampButton serviceKey={toSlug(s.name)} area={s.area} />
                           <WishlistButton serviceKey={toSlug(s.name)} />
                           {cat && <span className="text-lg">{cat.icon}</span>}
                         </div>
