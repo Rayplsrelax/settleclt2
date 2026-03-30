@@ -1,0 +1,46 @@
+{
+  "query": "SELECT COUNT(*) as total FROM enriched_services; SELECT serviceKey FROM enriched_services ORDER BY id DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute SELECT COUNT(*) as total FROM enriched_services; SELECT serviceKey FROM enriched_services ORDER BY id DESC LIMIT 10;",
+  "rows": [
+    {
+      "total": "307"
+    },
+    {
+      "total": "serviceKey"
+    },
+    {
+      "total": "meetup-com-charlotte"
+    },
+    {
+      "total": "nextdoor-charlotte"
+    },
+    {
+      "total": "islamic-center-of-charlotte"
+    },
+    {
+      "total": "habitat-for-humanity-charlotte"
+    },
+    {
+      "total": "first-baptist-church-charlotte"
+    },
+    {
+      "total": "charlotte-jewish-community-center"
+    },
+    {
+      "total": "charlotte-rescue-mission"
+    },
+    {
+      "total": "hungry-for-good-catering"
+    },
+    {
+      "total": "forest-hill-church"
+    },
+    {
+      "total": "transformation-church-clt"
+    }
+  ],
+  "messages": [],
+  "stdout": "total\n307\nserviceKey\nmeetup-com-charlotte\nnextdoor-charlotte\nislamic-center-of-charlotte\nhabitat-for-humanity-charlotte\nfirst-baptist-church-charlotte\ncharlotte-jewish-community-center\ncharlotte-rescue-mission\nhungry-for-good-catering\nforest-hill-church\ntransformation-church-clt\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

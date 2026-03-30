@@ -63,7 +63,7 @@ export default function AdminReferrals() {
       <Navbar />
       <div className="container max-w-6xl py-8">
         <div className="flex items-center gap-3 mb-6">
-          <Link href="/profile">
+          <Link href="/">
             <Button variant="ghost" size="icon"><ArrowLeft className="w-4 h-4" /></Button>
           </Link>
           <div>

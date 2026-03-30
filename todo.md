@@ -237,3 +237,9 @@
 - [x] Build real estate referral collection system (FindRealtor page + AdminReferrals + tRPC procedures)
 - [x] Add "Find a Realtor" link to navbar and "Admin Referrals" to admin dropdown
 - [x] Passport UX: Add QuickStampButton to Directory and Event cards (like WishlistButton)
+
+## Enrichment, Referral Notifications & Link Audit
+- [x] Enrich new directory entries (food trucks, coffee shops, beauty services) via Google Places (52/56 enriched, 388/393 total)
+- [x] Set up email notifications for new referral leads (notifyOwner already fires on every referral submission)
+- [x] Audit all links and buttons across the site for correct routing/redirects (20+ pages tested)
+- [x] Fix any broken links or buttons found during audit (AdminReferrals back arrow fixed → /)
