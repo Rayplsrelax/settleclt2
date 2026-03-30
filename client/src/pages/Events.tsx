@@ -3,11 +3,12 @@ import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Calendar, CalendarPlus, MapPin, ExternalLink, Clock, Filter, Sparkles, Tag } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
+import PageLayout from "@/components/PageLayout";
 import QuickStampButton from "@/components/QuickStampButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
-import { useSEO } from "@/hooks/useSEO";
+import { useSEO, buildBreadcrumbs } from "@/hooks/useSEO";
 import {
   Dialog,
   DialogContent,
@@ -190,6 +191,10 @@ export default function Events() {
     description: "Find upcoming Charlotte events including festivals, food & drink, live music, sports, and community gatherings. Never miss what's happening in the Queen City.",
     keywords: "Charlotte events, things to do Charlotte NC, Charlotte festivals, Charlotte concerts, Charlotte food events, what to do in Charlotte this weekend",
     path: "/events",
+    jsonLd: buildBreadcrumbs([
+      { name: "Home", path: "/" },
+      { name: "Events", path: "/events" },
+    ]),
   });
 
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -218,6 +223,7 @@ export default function Events() {
   }, [events]);
 
   return (
+    <PageLayout>
     <div className="min-h-screen bg-background">
       {/* Hero */}
       <section className="relative bg-gradient-to-br from-primary/10 via-background to-primary/5 py-16 sm:py-20">
@@ -485,5 +491,6 @@ export default function Events() {
         </DialogContent>
       </Dialog>
     </div>
+    </PageLayout>
   );
 }

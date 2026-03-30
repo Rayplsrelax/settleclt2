@@ -267,3 +267,11 @@
 - [x] Add unique SEO to Compare page
 - [x] Generate XML sitemap with all public routes (42 URLs: 13 static + 20 neighborhoods + 9 blog articles)
 - [x] Add JSON-LD structured data for WebSite schema with SearchAction on home page
+
+## Google Search Console, OG Image, SEO Optimization & Events Nav Fix
+- [ ] Submit sitemap to Google Search Console for settleclt.com (skipped — requires user Google login)
+- [x] Add branded OG image (Charlotte skyline) for social media sharing previews
+- [x] Fix missing navigation on events page (added PageLayout with Navbar + Footer to Events and FindRealtor)
+- [x] Optimize SEO for neighborhood detail pages (Place + BreadcrumbList JSON-LD)
+- [x] Optimize SEO for directory listings (ItemList + BreadcrumbList JSON-LD)
+- [x] Optimize SEO for events pages (BreadcrumbList JSON-LD + Blog/Article/WebSite/Organization schemas across site)

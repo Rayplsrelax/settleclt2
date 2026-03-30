@@ -5,7 +5,7 @@ import { ArrowLeft, Calendar, Clock, User, BookOpen } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
 import { Button } from "@/components/ui/button";
 import CommentSection from "@/components/CommentSection";
-import { useSEO } from "@/hooks/useSEO";
+import { useSEO, buildBreadcrumbs } from "@/hooks/useSEO";
 
 function renderMarkdown(md: string): string {
   return md
@@ -40,6 +40,33 @@ export default function BlogArticle() {
     { enabled: !!slug }
   );
 
+  const articleJsonLd = post ? [
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: post.title,
+      description: post.excerpt,
+      datePublished: post.publishedAt ? new Date(post.publishedAt).toISOString() : undefined,
+      author: {
+        "@type": "Organization",
+        name: "Settle CLT",
+        url: "https://settleclt.com",
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "Settle CLT",
+        url: "https://settleclt.com",
+      },
+      mainEntityOfPage: `https://settleclt.com/blog/${slug}`,
+      ...(post.coverImage ? { image: post.coverImage } : {}),
+    },
+    buildBreadcrumbs([
+      { name: "Home", path: "/" },
+      { name: "Blog", path: "/blog" },
+      { name: post.title, path: `/blog/${slug}` },
+    ]),
+  ] : undefined;
+
   useSEO({
     title: post?.title || "Blog Article",
     description: post?.excerpt || "Read this article on Settle CLT — your guide to living in Charlotte, NC.",
@@ -47,6 +74,7 @@ export default function BlogArticle() {
     path: slug ? `/blog/${slug}` : "/blog",
     ogImage: post?.coverImage || undefined,
     ogType: "article",
+    jsonLd: articleJsonLd,
   });
 
   if (isLoading) {

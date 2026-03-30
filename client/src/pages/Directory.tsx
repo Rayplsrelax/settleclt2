@@ -13,7 +13,7 @@ import QuickStampButton from "@/components/QuickStampButton";
 import ShareButtons from "@/components/ShareButtons";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import { ReviewStars } from "@/components/ReviewSection";
-import { useSEO } from "@/hooks/useSEO";
+import { useSEO, buildBreadcrumbs } from "@/hooks/useSEO";
 
 // Generate a slug key from service name
 function toSlug(name: string): string {
@@ -79,6 +79,25 @@ export default function Directory() {
     description: "Discover 400+ Charlotte businesses across 40 categories including restaurants, breweries, coffee shops, food trucks, and services. Ratings, hours, and reviews.",
     keywords: "Charlotte restaurants, Charlotte breweries, Charlotte businesses, Charlotte food trucks, Charlotte coffee shops, local directory Charlotte NC, Charlotte services",
     path: "/directory",
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: "Charlotte NC Business Directory",
+        description: "Comprehensive directory of local businesses in Charlotte, North Carolina",
+        numberOfItems: 400,
+        itemListElement: SERVICE_CATEGORIES.slice(0, 10).map((cat, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: cat.name,
+          url: `https://settleclt.com/directory?category=${cat.id}`,
+        })),
+      },
+      buildBreadcrumbs([
+        { name: "Home", path: "/" },
+        { name: "Directory", path: "/directory" },
+      ]),
+    ],
   });
 
   const urlParams = getUrlParams();

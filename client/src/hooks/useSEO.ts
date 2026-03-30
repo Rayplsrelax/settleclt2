@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 const SITE_NAME = "Settle CLT";
 const DEFAULT_OG_IMAGE =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/charlotte-skyline-hero_b8e3deb7.jpg";
+  "https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/settle-clt-og-image-2rmCExERPkQkkG8w9YarRQ.png";
 const SITE_URL = "https://settleclt.com";
 
 interface SEOOptions {
@@ -20,6 +20,8 @@ interface SEOOptions {
   ogType?: string;
   /** If true, don't append " | Settle CLT" to the title */
   noSuffix?: boolean;
+  /** JSON-LD structured data object — will be injected as a script tag */
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 function setMeta(attr: string, key: string, content: string) {
@@ -46,6 +48,24 @@ function setLink(rel: string, href: string) {
   el.href = href;
 }
 
+const JSON_LD_ID = "settle-clt-jsonld";
+
+function setJsonLd(data: Record<string, unknown> | Record<string, unknown>[]) {
+  let el = document.getElementById(JSON_LD_ID) as HTMLScriptElement | null;
+  if (!el) {
+    el = document.createElement("script");
+    el.id = JSON_LD_ID;
+    el.type = "application/ld+json";
+    document.head.appendChild(el);
+  }
+  el.textContent = JSON.stringify(data);
+}
+
+function removeJsonLd() {
+  const el = document.getElementById(JSON_LD_ID);
+  if (el) el.remove();
+}
+
 export function useSEO({
   title,
   description,
@@ -54,6 +74,7 @@ export function useSEO({
   ogImage,
   ogType = "website",
   noSuffix = false,
+  jsonLd,
 }: SEOOptions) {
   useEffect(() => {
     const fullTitle = noSuffix ? title : `${title} | ${SITE_NAME}`;
@@ -83,8 +104,30 @@ export function useSEO({
     setMeta("name", "twitter:description", description);
     setMeta("name", "twitter:image", ogImage || DEFAULT_OG_IMAGE);
 
+    // JSON-LD Structured Data
+    if (jsonLd) {
+      setJsonLd(jsonLd);
+    }
+
     return () => {
       document.title = SITE_NAME;
+      removeJsonLd();
     };
-  }, [title, description, keywords, path, ogImage, ogType, noSuffix]);
+  }, [title, description, keywords, path, ogImage, ogType, noSuffix, jsonLd]);
+}
+
+/** Helper to build a BreadcrumbList JSON-LD object */
+export function buildBreadcrumbs(
+  items: { name: string; path: string }[]
+): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: item.name,
+      item: `${SITE_URL}${item.path}`,
+    })),
+  };
 }

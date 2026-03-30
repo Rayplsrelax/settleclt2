@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import PageLayout from "@/components/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -82,8 +81,8 @@ export default function FindRealtor() {
 
   if (submitted) {
     return (
+      <PageLayout>
       <div className="min-h-screen bg-background">
-        <Navbar />
         <div className="container max-w-2xl py-20 text-center">
           <div className="mx-auto w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
             <CheckCircle2 className="w-10 h-10 text-emerald-600" />
@@ -98,14 +97,14 @@ export default function FindRealtor() {
             Back to Home
           </Button>
         </div>
-        <Footer />
       </div>
+      </PageLayout>
     );
   }
 
   return (
+    <PageLayout>
     <div className="min-h-screen bg-background">
-      <Navbar />
 
       {/* Hero */}
       <section className="relative bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 py-16 md:py-24">
@@ -264,7 +263,7 @@ export default function FindRealtor() {
         </div>
       </section>
 
-      <Footer />
     </div>
+    </PageLayout>
   );
 }

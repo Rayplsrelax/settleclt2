@@ -5,7 +5,7 @@ import { useState, useMemo } from "react";
 import { Link } from "wouter";
 import { BookOpen, Clock, Calendar } from "lucide-react";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
-import { useSEO } from "@/hooks/useSEO";
+import { useSEO, buildBreadcrumbs } from "@/hooks/useSEO";
 
 interface UnifiedArticle {
   id: string;
@@ -27,6 +27,24 @@ export default function Blog() {
     description: "Read insider guides to Charlotte NC including neighborhood deep dives, best restaurants, weekend plans, moving tips, and local stories from people who live here.",
     keywords: "Charlotte blog, Charlotte NC tips, moving to Charlotte guide, Charlotte restaurants blog, Charlotte neighborhood guides, things to do Charlotte",
     path: "/blog",
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "Blog",
+        name: "Settle CLT Blog",
+        description: "Insider guides, tips, and stories about living in Charlotte, North Carolina",
+        url: "https://settleclt.com/blog",
+        publisher: {
+          "@type": "Organization",
+          name: "Settle CLT",
+          url: "https://settleclt.com",
+        },
+      },
+      buildBreadcrumbs([
+        { name: "Home", path: "/" },
+        { name: "Blog", path: "/blog" },
+      ]),
+    ],
   });
 
   const [activeCategory, setActiveCategory] = useState("All");

@@ -759,11 +759,33 @@ function ForYouSection() {
 
 export default function Home() {
   useSEO({
-    title: "Settle CLT \u2014 Your Complete Guide to Living in Charlotte, NC",
+    title: "Settle CLT — Your Complete Guide to Living in Charlotte, NC",
     description: "Explore 20 Charlotte neighborhoods, discover 400+ local businesses, find events, and get honest advice from locals. Your free relocation guide to CLT.",
     keywords: "Charlotte NC, moving to Charlotte, Charlotte neighborhoods, Charlotte restaurants, Charlotte events, CLT guide, Charlotte relocation, South End, NoDa, Uptown Charlotte, Charlotte food trucks, Charlotte breweries, Charlotte coffee shops",
     path: "/",
     noSuffix: true,
+    jsonLd: [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: "Settle CLT",
+        url: "https://settleclt.com",
+        description: "Your complete guide to living in Charlotte, North Carolina",
+        potentialAction: {
+          "@type": "SearchAction",
+          target: "https://settleclt.com/directory?q={search_term_string}",
+          "query-input": "required name=search_term_string",
+        },
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        name: "Settle CLT",
+        url: "https://settleclt.com",
+        sameAs: [],
+        description: "Settle CLT helps people discover Charlotte, NC neighborhoods, local businesses, events, and community resources.",
+      },
+    ],
   });
 
   return (
