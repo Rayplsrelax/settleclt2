@@ -13,6 +13,7 @@ import QuickStampButton from "@/components/QuickStampButton";
 import ShareButtons from "@/components/ShareButtons";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import { ReviewStars } from "@/components/ReviewSection";
+import { useSEO } from "@/hooks/useSEO";
 
 // Generate a slug key from service name
 function toSlug(name: string): string {
@@ -73,6 +74,13 @@ const GROUP_COLORS: Record<string, string> = {
 };
 
 export default function Directory() {
+  useSEO({
+    title: "Charlotte Business Directory — 400+ Local Businesses",
+    description: "Discover 400+ Charlotte businesses across 40 categories including restaurants, breweries, coffee shops, food trucks, and services. Ratings, hours, and reviews.",
+    keywords: "Charlotte restaurants, Charlotte breweries, Charlotte businesses, Charlotte food trucks, Charlotte coffee shops, local directory Charlotte NC, Charlotte services",
+    path: "/directory",
+  });
+
   const urlParams = getUrlParams();
   const { myNeighborhood } = useMyNeighborhood();
   const myNeighborhoodData = neighborhoods.find((n) => n.id === myNeighborhood);

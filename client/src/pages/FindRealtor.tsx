@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Home, MapPin, CheckCircle2, Building2, TrendingUp, Users } from "lucide-react";
+import { useSEO } from "@/hooks/useSEO";
 
 const BUDGET_RANGES = [
   "Under $200K",
@@ -30,6 +31,13 @@ const TIMELINES = [
 ];
 
 export default function FindRealtor() {
+  useSEO({
+    title: "Find a Charlotte Realtor — Free Matching Service",
+    description: "Get matched with a trusted Charlotte real estate agent for buying, selling, renting, or relocating. Free service — tell us what you need and we'll connect you.",
+    keywords: "Charlotte realtor, Charlotte real estate agent, buy house Charlotte NC, Charlotte homes for sale, Charlotte relocation agent, find realtor Charlotte",
+    path: "/find-a-realtor",
+  });
+
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
     name: "",

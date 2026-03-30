@@ -8,6 +8,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ShareButtons from "@/components/ShareButtons";
+import { useSEO } from "@/hooks/useSEO";
 
 type Tab = "stamps" | "bingo" | "neighborhoods";
 
@@ -126,6 +127,13 @@ function LeaderboardTable({
 }
 
 export default function Leaderboard() {
+  useSEO({
+    title: "CLT Leaderboard — Top Charlotte Explorers",
+    description: "See who's exploring Charlotte the most. Leaderboard rankings by passport stamps, bingo completions, and neighborhoods visited. Join the community and climb the ranks.",
+    keywords: "Charlotte leaderboard, CLT explorers, Charlotte community, Charlotte passport rankings, explore Charlotte NC",
+    path: "/leaderboard",
+  });
+
   const [activeTab, setActiveTab] = useState<Tab>("stamps");
   const { user } = useAuth();
 

@@ -7,6 +7,7 @@ import QuickStampButton from "@/components/QuickStampButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
+import { useSEO } from "@/hooks/useSEO";
 import {
   Dialog,
   DialogContent,
@@ -184,6 +185,13 @@ function EventCard({ event, onClick, onCategoryClick, onNeighborhoodClick }: { e
 }
 
 export default function Events() {
+  useSEO({
+    title: "Charlotte Events — What's Happening in CLT",
+    description: "Find upcoming Charlotte events including festivals, food & drink, live music, sports, and community gatherings. Never miss what's happening in the Queen City.",
+    keywords: "Charlotte events, things to do Charlotte NC, Charlotte festivals, Charlotte concerts, Charlotte food events, what to do in Charlotte this weekend",
+    path: "/events",
+  });
+
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
   const { trackClickByName } = useTagTrackingWithLookup();

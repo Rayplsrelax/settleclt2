@@ -9,6 +9,7 @@ import {
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
+import { useSEO } from "@/hooks/useSEO";
 
 type FilterKey = "all" | "budget" | "walkable" | "family" | "nightlife" | "transit";
 
@@ -146,6 +147,13 @@ function NeighborhoodCard({ n, isComparing, onToggleCompare, trackClickByName }:
 }
 
 export default function Neighborhoods() {
+  useSEO({
+    title: "Charlotte Neighborhoods Guide — Find Your Perfect Area",
+    description: "Explore 20 Charlotte neighborhoods with detailed guides, cost of living, local tips, and honest reviews. From South End to Ballantyne, find where you belong.",
+    keywords: "Charlotte neighborhoods, South End, NoDa, Plaza Midwood, Uptown Charlotte, Dilworth, Myers Park, best neighborhoods Charlotte NC, where to live Charlotte",
+    path: "/neighborhoods",
+  });
+
   const [filter, setFilter] = useState<FilterKey>("all");
   const [compareIds, setCompareIds] = useState<string[]>([]);
   const [, navigate] = useLocation();

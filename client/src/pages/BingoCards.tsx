@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import ShareablePassportCard from "@/components/ShareablePassportCard";
+import { useSEO } from "@/hooks/useSEO";
 import ShareButtons from "@/components/ShareButtons";
 
 interface BingoSquare {
@@ -305,6 +306,13 @@ function BingoContent() {
 }
 
 export default function BingoCards() {
+  useSEO({
+    title: "CLT Bingo — Charlotte Challenge Cards",
+    description: "Play CLT Bingo with themed challenge cards: Charlotte Brewery Tour, Best Coffee in CLT, Date Night, and Newcomer Challenge. Explore Charlotte one square at a time.",
+    keywords: "Charlotte bingo, CLT bingo, Charlotte brewery tour, Charlotte challenges, things to do Charlotte NC, Charlotte date night ideas",
+    path: "/bingo",
+  });
+
   return (
     <PageLayout>
       <AuthGate featureLabel="play CLT Bingo">

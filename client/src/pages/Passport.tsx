@@ -16,6 +16,7 @@ import { SERVICES, type Service } from "@shared/services";
 import { allNeighborhoods } from "@shared/neighborhoods";
 import { toast } from "sonner";
 import ShareButtons from "@/components/ShareButtons";
+import { useSEO } from "@/hooks/useSEO";
 
 function slugify(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -778,6 +779,13 @@ function PassportLanding() {
 }
 
 export default function Passport() {
+  useSEO({
+    title: "CLT Passport — Track Your Charlotte Adventures",
+    description: "Collect stamps for every Charlotte spot you visit. Explore local businesses, attend events, and build your CLT Passport. How well do you know the Queen City?",
+    keywords: "CLT Passport, Charlotte things to do, Charlotte exploration, Charlotte stamp collection, Charlotte local guide, explore Charlotte NC",
+    path: "/passport",
+  });
+
   const { user, loading } = useAuth();
 
   if (loading) {

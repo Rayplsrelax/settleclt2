@@ -5,6 +5,7 @@ import { useState, useMemo } from "react";
 import { Link } from "wouter";
 import { BookOpen, Clock, Calendar } from "lucide-react";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
+import { useSEO } from "@/hooks/useSEO";
 
 interface UnifiedArticle {
   id: string;
@@ -21,6 +22,13 @@ interface UnifiedArticle {
 }
 
 export default function Blog() {
+  useSEO({
+    title: "Charlotte Blog — Local Tips, Guides & Stories",
+    description: "Read insider guides to Charlotte NC including neighborhood deep dives, best restaurants, weekend plans, moving tips, and local stories from people who live here.",
+    keywords: "Charlotte blog, Charlotte NC tips, moving to Charlotte guide, Charlotte restaurants blog, Charlotte neighborhood guides, things to do Charlotte",
+    path: "/blog",
+  });
+
   const [activeCategory, setActiveCategory] = useState("All");
   const { trackClickByName } = useTagTrackingWithLookup();
 

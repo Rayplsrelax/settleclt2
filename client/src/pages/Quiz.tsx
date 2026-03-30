@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ShareButtons from "@/components/ShareButtons";
+import { useSEO } from "@/hooks/useSEO";
 
 // ─── Progress Bar ─────────────────────────────────────────────────
 function ProgressBar({ current, total }: { current: number; total: number }) {
@@ -372,6 +373,13 @@ function ResultsScreen({ results, onRetake }: { results: NeighborhoodScore[]; on
 
 // ─── Main Quiz Page ───────────────────────────────────────────────
 export default function Quiz() {
+  useSEO({
+    title: "Neighborhood Quiz — Which Charlotte Area Fits You?",
+    description: "Take our 2-minute quiz to find your perfect Charlotte neighborhood. Answer questions about budget, lifestyle, and priorities to get personalized recommendations.",
+    keywords: "Charlotte neighborhood quiz, which Charlotte neighborhood, best neighborhood Charlotte NC, Charlotte relocation quiz, where to live Charlotte",
+    path: "/quiz",
+  });
+
   const [phase, setPhase] = useState<'intro' | 'questions' | 'results'>('intro');
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswers>({});

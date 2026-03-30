@@ -5,6 +5,7 @@ import { ArrowLeft, Calendar, Clock, User, BookOpen } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
 import { Button } from "@/components/ui/button";
 import CommentSection from "@/components/CommentSection";
+import { useSEO } from "@/hooks/useSEO";
 
 function renderMarkdown(md: string): string {
   return md
@@ -38,6 +39,15 @@ export default function BlogArticle() {
     { slug: slug || "" },
     { enabled: !!slug }
   );
+
+  useSEO({
+    title: post?.title || "Blog Article",
+    description: post?.excerpt || "Read this article on Settle CLT — your guide to living in Charlotte, NC.",
+    keywords: post ? `${post.category}, Charlotte NC, ${post.title.split(' ').slice(0, 3).join(', ')}` : "Charlotte blog",
+    path: slug ? `/blog/${slug}` : "/blog",
+    ogImage: post?.coverImage || undefined,
+    ogType: "article",
+  });
 
   if (isLoading) {
     return (

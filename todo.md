@@ -248,3 +248,22 @@
 - [x] Home page: Set document.title to 30-60 characters (58 chars)
 - [x] Home page: Add meta description (50-160 characters) (152 chars)
 - [x] Home page: Add meta keywords tag (13 keywords)
+
+## SEO Enhancements — Full Site
+- [x] Create reusable useSEO hook (title, description, keywords, OG tags)
+- [x] Add OG meta tags to index.html as defaults (og:title, og:description, og:image, og:type, og:url)
+- [x] Add unique SEO to Home page (migrated to useSEO hook)
+- [x] Add unique SEO to Neighborhoods listing page
+- [x] Add unique SEO to Neighborhood detail pages (dynamic per neighborhood)
+- [x] Add unique SEO to Directory page
+- [x] Add unique SEO to Events page
+- [x] Add unique SEO to Blog listing page
+- [x] Add unique SEO to Blog article pages (dynamic per article)
+- [x] Add unique SEO to CLT Passport page
+- [x] Add unique SEO to Bingo page
+- [x] Add unique SEO to Leaderboard page
+- [x] Add unique SEO to Find a Realtor page
+- [x] Add unique SEO to Neighborhood Quiz page
+- [x] Add unique SEO to Compare page
+- [x] Generate XML sitemap with all public routes (42 URLs: 13 static + 20 neighborhoods + 9 blog articles)
+- [x] Add JSON-LD structured data for WebSite schema with SearchAction on home page

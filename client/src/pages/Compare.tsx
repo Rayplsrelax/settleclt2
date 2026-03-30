@@ -9,6 +9,7 @@ import {
   ThumbsUp, ThumbsDown, ArrowRight
 } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
+import { useSEO } from "@/hooks/useSEO";
 
 const STAT_ROWS: { key: string; label: string; icon: React.ReactNode; format: (n: Neighborhood) => string; higher: "better" | "worse" | "neutral" }[] = [
   { key: "avgRent", label: "Avg Rent (1BR)", icon: <DollarSign className="w-4 h-4" />, format: n => n.stats.avgRent, higher: "worse" },
@@ -34,6 +35,13 @@ const COST_ROWS: { key: keyof Neighborhood["monthlyCosts"]; label: string }[] = 
 ];
 
 export default function Compare() {
+  useSEO({
+    title: "Compare Charlotte Neighborhoods Side by Side",
+    description: "Compare up to 3 Charlotte neighborhoods side by side. See rent, walkability, schools, nightlife, transit, and more to find the best fit for your lifestyle.",
+    keywords: "compare Charlotte neighborhoods, Charlotte neighborhood comparison, best neighborhood Charlotte, Charlotte cost of living comparison",
+    path: "/compare",
+  });
+
   const search = useSearch();
   const [, navigate] = useLocation();
   const params = new URLSearchParams(search);

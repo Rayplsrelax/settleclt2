@@ -1,0 +1,37 @@
+{
+  "query": "SELECT slug FROM blog_posts WHERE status = 'published';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3FRNjLS9FnCWG2G.0a443978a78d --database KbchydCPFi8EjNXDBYUsCi --execute SELECT slug FROM blog_posts WHERE status = 'published';",
+  "rows": [
+    {
+      "slug": "moving-to-charlotte-checklist"
+    },
+    {
+      "slug": "best-brunch-spots-by-neighborhood"
+    },
+    {
+      "slug": "charlotte-vs-raleigh"
+    },
+    {
+      "slug": "first-30-days-in-charlotte"
+    },
+    {
+      "slug": "charlotte-hidden-gems"
+    },
+    {
+      "slug": "this-weekend-in-clt-spring-2026"
+    },
+    {
+      "slug": "noda-neighborhood-deep-dive"
+    },
+    {
+      "slug": "charlotte-summer-survival-guide-2026"
+    },
+    {
+      "slug": "date-night-charlotte-guide"
+    }
+  ],
+  "messages": [],
+  "stdout": "slug\nmoving-to-charlotte-checklist\nbest-brunch-spots-by-neighborhood\ncharlotte-vs-raleigh\nfirst-30-days-in-charlotte\ncharlotte-hidden-gems\nthis-weekend-in-clt-spring-2026\nnoda-neighborhood-deep-dive\ncharlotte-summer-survival-guide-2026\ndate-night-charlotte-guide\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}
