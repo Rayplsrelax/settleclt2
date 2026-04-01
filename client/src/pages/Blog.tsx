@@ -118,11 +118,8 @@ export default function Blog() {
                     {a.coverImage ? (
                       <img src={a.coverImage} alt={a.title} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                        <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                          <BookOpen className="w-6 h-6 text-white/60" />
-                        </div>
-                        <span className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">{a.category}</span>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <BookOpen className="w-10 h-10 text-white/30" />
                       </div>
                     )}
                     {a.featured && (

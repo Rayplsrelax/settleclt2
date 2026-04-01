@@ -20,10 +20,10 @@ interface BingoSquare {
   category?: string;
 }
 
-const THEME_LABELS: Record<string, { label: string; icon: string; color: string; gradient: string }> = {
-  "food-drink": { label: "Food & Drink", icon: "🍺", color: "bg-amber-500/10 text-amber-600", gradient: "from-amber-500/10 to-orange-500/5" },
-  experiences: { label: "Experiences", icon: "✨", color: "bg-purple-500/10 text-purple-600", gradient: "from-purple-500/10 to-pink-500/5" },
-  newcomer: { label: "Newcomer", icon: "🏙️", color: "bg-teal-500/10 text-teal-600", gradient: "from-teal-500/10 to-cyan-500/5" },
+const THEME_LABELS: Record<string, { label: string; icon: string; color: string }> = {
+  "food-drink": { label: "Food & Drink", icon: "🍺", color: "bg-amber-500/10 text-amber-600" },
+  experiences: { label: "Experiences", icon: "✨", color: "bg-purple-500/10 text-purple-600" },
+  newcomer: { label: "Newcomer", icon: "🏙️", color: "bg-teal-500/10 text-teal-600" },
 };
 
 function BingoContent() {
@@ -168,7 +168,7 @@ function BingoContent() {
               <Card key={card.id} className={`overflow-hidden ${isComplete ? "ring-2 ring-amber-400/50" : ""}`}>
                 {/* Card header - always visible */}
                 <div
-                  className={`px-5 py-4 cursor-pointer hover:bg-muted/30 transition-colors bg-gradient-to-r ${themeInfo.gradient}`}
+                  className="px-5 py-4 cursor-pointer hover:bg-muted/30 transition-colors"
                   onClick={() => setExpandedCardId(expanded ? null : card.id)}
                 >
                   <div className="flex items-center justify-between">

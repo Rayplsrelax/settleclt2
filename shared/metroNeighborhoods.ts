@@ -56,7 +56,6 @@ export const metroNeighborhoods: Neighborhood[] = [
     directoryCtaLinks: [
       { label: 'SouthPark restaurants & dining', category: 'restaurants', area: 'SouthPark' },
       { label: 'Shopping in SouthPark', category: 'shopping', area: 'SouthPark' },
-      { label: 'SouthPark real estate agents', category: 'real-estate', area: 'SouthPark' },
       { label: 'Fitness & wellness in SouthPark', category: 'gyms-fitness', area: 'SouthPark' }
     ],
     localsLove: [
@@ -146,7 +145,6 @@ export const metroNeighborhoods: Neighborhood[] = [
     directoryCtaLinks: [
       { label: 'Elizabeth restaurants & cafes', category: 'restaurants', area: 'Elizabeth' },
       { label: 'Healthcare jobs near Elizabeth', category: 'professional-services', area: 'Elizabeth' },
-      { label: 'Elizabeth apartments & homes', category: 'real-estate', area: 'Elizabeth' },
       { label: 'Parks & recreation in Elizabeth', category: 'recreation', area: 'Elizabeth' }
     ],
     localsLove: [
@@ -236,7 +234,6 @@ export const metroNeighborhoods: Neighborhood[] = [
     directoryCtaLinks: [
       { label: 'LoSo breweries & taprooms', category: 'breweries', area: 'LoSo' },
       { label: 'Restaurants in Lower South End', category: 'restaurants', area: 'LoSo' },
-      { label: 'LoSo apartments', category: 'real-estate', area: 'LoSo' },
       { label: 'Art studios & creative spaces', category: 'entertainment', area: 'LoSo' }
     ],
     localsLove: [
@@ -326,7 +323,6 @@ export const metroNeighborhoods: Neighborhood[] = [
     directoryCtaLinks: [
       { label: 'International restaurants on Central Ave', category: 'restaurants', area: 'East Charlotte' },
       { label: 'Grocery stores in East Charlotte', category: 'shopping', area: 'East Charlotte' },
-      { label: 'Affordable apartments in East Charlotte', category: 'real-estate', area: 'East Charlotte' },
       { label: 'Community services', category: 'professional-services', area: 'East Charlotte' }
     ],
     localsLove: [
@@ -416,7 +412,6 @@ export const metroNeighborhoods: Neighborhood[] = [
     directoryCtaLinks: [
       { label: 'South Charlotte schools & tutoring', category: 'professional-services', area: 'South Charlotte' },
       { label: 'Family restaurants in South Charlotte', category: 'restaurants', area: 'South Charlotte' },
-      { label: 'South Charlotte real estate', category: 'real-estate', area: 'South Charlotte' },
       { label: 'Kids activities & recreation', category: 'recreation', area: 'South Charlotte' }
     ],
     localsLove: [
@@ -505,7 +500,6 @@ export const metroNeighborhoods: Neighborhood[] = [
     communityTopics: ['Gentrification and community preservation', 'JCSU campus and community events'],
     directoryCtaLinks: [
       { label: 'West Charlotte restaurants & food', category: 'restaurants', area: 'West Charlotte' },
-      { label: 'Affordable housing in West Charlotte', category: 'real-estate', area: 'West Charlotte' },
       { label: 'Community services & organizations', category: 'professional-services', area: 'West Charlotte' },
       { label: 'West Charlotte recreation', category: 'recreation', area: 'West Charlotte' }
     ],
@@ -596,7 +590,6 @@ export const metroNeighborhoods: Neighborhood[] = [
     directoryCtaLinks: [
       { label: 'Huntersville restaurants', category: 'restaurants', area: 'Huntersville' },
       { label: 'Lake Norman activities', category: 'recreation', area: 'Huntersville' },
-      { label: 'Huntersville real estate', category: 'real-estate', area: 'Huntersville' },
       { label: 'Family services in Huntersville', category: 'professional-services', area: 'Huntersville' }
     ],
     localsLove: [
@@ -686,7 +679,6 @@ export const metroNeighborhoods: Neighborhood[] = [
     directoryCtaLinks: [
       { label: 'Lake Norman restaurants & dining', category: 'restaurants', area: 'Lake Norman' },
       { label: 'Water sports & boat rentals', category: 'recreation', area: 'Lake Norman' },
-      { label: 'Lake Norman real estate', category: 'real-estate', area: 'Lake Norman' },
       { label: 'Davidson shops & boutiques', category: 'shopping', area: 'Lake Norman' }
     ],
     localsLove: [
@@ -775,7 +767,6 @@ export const metroNeighborhoods: Neighborhood[] = [
     communityTopics: ['Downtown Matthews events and farmers market', 'Growth and development vs. small-town character'],
     directoryCtaLinks: [
       { label: 'Matthews restaurants & cafes', category: 'restaurants', area: 'Matthews' },
-      { label: 'Matthews real estate', category: 'real-estate', area: 'Matthews' },
       { label: 'Family activities in Matthews', category: 'recreation', area: 'Matthews' },
       { label: 'Local shops in downtown Matthews', category: 'shopping', area: 'Matthews' }
     ],
@@ -866,7 +857,6 @@ export const metroNeighborhoods: Neighborhood[] = [
     directoryCtaLinks: [
       { label: 'Concord restaurants', category: 'restaurants', area: 'Concord' },
       { label: 'Shopping at Concord Mills', category: 'shopping', area: 'Concord' },
-      { label: 'Concord real estate', category: 'real-estate', area: 'Concord' },
       { label: 'Family activities in Concord', category: 'recreation', area: 'Concord' }
     ],
     localsLove: [
@@ -956,7 +946,6 @@ export const metroNeighborhoods: Neighborhood[] = [
     directoryCtaLinks: [
       { label: 'Fort Mill restaurants', category: 'restaurants', area: 'Fort Mill' },
       { label: 'Outdoor activities at Anne Springs', category: 'recreation', area: 'Fort Mill' },
-      { label: 'Fort Mill real estate', category: 'real-estate', area: 'Fort Mill' },
       { label: 'Family services in Fort Mill', category: 'professional-services', area: 'Fort Mill' }
     ],
     localsLove: [
@@ -1046,7 +1035,6 @@ export const metroNeighborhoods: Neighborhood[] = [
     directoryCtaLinks: [
       { label: 'Pineville restaurants', category: 'restaurants', area: 'Pineville' },
       { label: 'Shopping in Pineville', category: 'shopping', area: 'Pineville' },
-      { label: 'Affordable apartments in Pineville', category: 'real-estate', area: 'Pineville' },
       { label: 'Pineville recreation & greenway', category: 'recreation', area: 'Pineville' }
     ],
     localsLove: [

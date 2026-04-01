@@ -2,8 +2,8 @@ import { describe, it, expect } from "vitest";
 import { QUIZ_QUESTIONS, scoreNeighborhoods, getMatchLabel, type QuizAnswers } from "../shared/quiz";
 
 describe("Quiz Questions", () => {
-  it("should have exactly 6 questions", () => {
-    expect(QUIZ_QUESTIONS).toHaveLength(6);
+  it("should have exactly 7 questions", () => {
+    expect(QUIZ_QUESTIONS).toHaveLength(7);
   });
 
   it("each question should have required fields", () => {

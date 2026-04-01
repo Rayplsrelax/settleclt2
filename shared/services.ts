@@ -39,7 +39,6 @@ export const SERVICE_SUPER_GROUPS: SuperGroup[] = [
 export const SERVICE_CATEGORIES: ServiceCategory[] = [
   // MOVING & SETTLING
   { id: 'moving-companies', name: 'Moving Companies', icon: '🚛', group: 'moving' },
-  { id: 'real-estate', name: 'Real Estate & Apartments', icon: '🏠', group: 'moving' },
   { id: 'storage', name: 'Storage & Moving Pods', icon: '🗃️', group: 'moving' },
   { id: 'utilities', name: 'Utilities', icon: '⚡', group: 'moving' },
   { id: 'internet', name: 'Internet & TV', icon: '📡', group: 'moving' },
@@ -101,14 +100,7 @@ export const SERVICES: Service[] = [
   { name: 'Bellhop Moving', category: 'moving-companies', description: 'Tech-forward, flat-rate pricing. Book online in minutes.', phone: '(855) 227-3542', website: 'https://getbellhops.com', featured: false, affiliate: true, area: 'Charlotte Metro' },  { name: 'Miracle Movers', category: 'moving-companies', description: 'Family-owned, stress-free moves with packing and unpacking services.', phone: '(704) 665-7222', website: 'https://miraclemovers.com', featured: false, affiliate: false, area: 'Charlotte Metro' },
   { name: 'College Hunks Hauling Junk', category: 'moving-companies', description: 'Moving + junk removal combo. Full-service residential and commercial.', phone: '(704) 741-1325', website: 'https://collegehunkshaulingjunk.com', featured: false, affiliate: true, area: 'Charlotte Metro' },
   { name: 'All My Sons Moving', category: 'moving-companies', description: 'National brand with strong local presence. Same-day services.', phone: '(704) 373-0498', website: 'https://allmysons.com', featured: false, affiliate: false, area: 'Charlotte Metro' },
-  // --- Real Estate & Apartments (10) ---  { name: 'Allen Tate Realtors', category: 'real-estate', description: 'Largest regional real estate firm. Buying, selling, and relocation.', phone: '(704) 365-6900', website: 'https://allentate.com', featured: true, affiliate: false, area: 'Charlotte Metro' },
-  { name: 'Keller Williams SouthPark', category: 'real-estate', description: 'Large agent network specializing in Charlotte neighborhoods.', phone: '(704) 366-0010', website: 'https://kwsouthpark.com', featured: false, affiliate: false, area: 'South Charlotte' },
-  { name: 'Zillow Charlotte', category: 'real-estate', description: 'Browse thousands of Charlotte listings. Rent estimates and market data.', phone: '', website: 'https://zillow.com/charlotte-nc', featured: false, affiliate: true, area: 'Charlotte Metro' },
-  { name: 'Apartments.com Charlotte', category: 'real-estate', description: 'Largest apartment listing platform. Virtual tours and floor plans.', phone: '', website: 'https://apartments.com/charlotte-nc', featured: false, affiliate: true, area: 'Charlotte Metro' },
-  { name: 'Greystar Real Estate', category: 'real-estate', description: 'Manages 11,500+ apartment units across the Charlotte metro.', phone: '(704) 501-7060', website: 'https://greystar.com', featured: false, affiliate: false, area: 'Charlotte Metro' },
-  { name: 'Cottingham Chalk Hayes', category: 'real-estate', description: 'Boutique Charlotte firm. Expertise in SouthPark, Myers Park, Dilworth.', phone: '(704) 366-5566', website: 'https://cottinghamchalk.com', featured: false, affiliate: false, area: 'South Charlotte' },
-  { name: 'RE/MAX Executive Charlotte', category: 'real-estate', description: 'Full-service real estate brokerage with 25+ years in Charlotte.', phone: '(704) 442-1520', website: 'https://remax.com', featured: false, affiliate: false, area: 'Charlotte Metro' },
-  { name: 'HotPads Charlotte', category: 'real-estate', description: 'Apartment and rental search with map-based browsing.', phone: '', website: 'https://hotpads.com/charlotte-nc', featured: false, affiliate: true, area: 'Charlotte Metro' },
+
   // --- Storage & Moving Pods (10) ---
   { name: 'CubeSmart Self Storage', category: 'storage', description: 'Climate-controlled units at multiple Charlotte locations. First month free.', phone: '(704) 525-6685', website: 'https://cubesmart.com', featured: true, affiliate: true, area: 'Charlotte Metro' },
   { name: 'Public Storage Charlotte', category: 'storage', description: 'Largest storage provider — over 15 locations in the metro area.', phone: '(704) 522-4666', website: 'https://publicstorage.com', featured: false, affiliate: true, area: 'Charlotte Metro' },

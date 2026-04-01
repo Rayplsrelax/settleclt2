@@ -20,12 +20,12 @@ const VALID_AREAS = [
 ];
 
 describe("Services data integrity", () => {
-  it("has 393 verified businesses", () => {
-    expect(SERVICES.length).toBe(393);
+  it("has 386 verified businesses", () => {
+    expect(SERVICES.length).toBe(386);
   });
 
-  it("has 43 categories", () => {
-    expect(SERVICE_CATEGORIES.length).toBe(43);
+  it("has 42 categories", () => {
+    expect(SERVICE_CATEGORIES.length).toBe(42);
   });
 
   it("has 6 super groups", () => {

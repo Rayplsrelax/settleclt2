@@ -74,7 +74,7 @@ function Hero() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-white/50 text-white hover:bg-white/15 font-semibold px-6 backdrop-blur-sm bg-white/5"
+                className="border-white/25 text-white hover:bg-white/10 font-semibold px-6 backdrop-blur-sm"
               >
                 Browse Directory
               </Button>
@@ -383,11 +383,8 @@ function BlogPreview() {
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                      <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                        <BookOpen className="w-6 h-6 text-white/60" />
-                      </div>
-                      <span className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">{a.category}</span>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <BookOpen className="w-10 h-10 text-white/30" />
                     </div>
                   )}
                   {a.featured && (

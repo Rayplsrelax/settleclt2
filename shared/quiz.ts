@@ -40,6 +40,17 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
     ],
   },
   {
+    id: 'housing_type',
+    title: 'Are you looking to rent or buy?',
+    subtitle: 'This helps us tailor your neighborhood recommendations and connect you with the right resources.',
+    type: 'single',
+    options: [
+      { id: 'renting', label: 'Renting an apartment', emoji: '🏢', description: 'Flexibility to explore' },
+      { id: 'buying', label: 'Buying a home', emoji: '🏡', description: 'Ready to put down roots' },
+      { id: 'not_sure', label: 'Not sure yet', emoji: '🤔', description: 'Still deciding' },
+    ],
+  },
+  {
     id: 'commute',
     title: 'How do you want to get to work?',
     subtitle: 'Charlotte is car-friendly, but some areas have real transit options.',

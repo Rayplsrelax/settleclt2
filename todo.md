@@ -268,12 +268,16 @@
 - [x] Generate XML sitemap with all public routes (42 URLs: 13 static + 20 neighborhoods + 9 blog articles)
 - [x] Add JSON-LD structured data for WebSite schema with SearchAction on home page
 
-## UI/UX Audit Fixes
-- [x] Fix: Blog card gradient placeholders — improve visual treatment with category-specific icons and better styling
-- [x] Fix: Hero "Browse Directory" button styling — make it more visible with solid white outline instead of faded
-- [x] Fix: Events page missing PageLayout wrapper — add Navbar/Footer via PageLayout
-- [x] Fix: Events sticky filter bar z-index conflict with Navbar (both sticky, Events filter at top-0 overlaps navbar)
-- [x] Fix: Bingo cards visual enhancement — add gradient header bars and better card styling
-- [x] Fix: Leaderboard encourage participation — add motivational CTA when few users
-- [x] Fix: Static blog articles not clickable — they render as div instead of Link (no detail page, intentional — static articles have no content pages)
-- [x] Fix: Navbar desktop items crowding at 1024-1280px — reduce padding/font-size at md breakpoint, remove Home link (logo serves as home)
+## Strategic Planning (Research Before Implementation)
+- [x] Research: Best realtor referral pipeline/conversion methods across USA
+- [x] Research: NC realtor apartment referral legality and fee structures
+- [x] Plan: Comprehensive realtor referral pipeline strategy document
+
+## Strategic Plan Implementation
+- [x] P1: Add Quiz results → Find a Realtor CTA (pre-fill form with quiz data)
+- [x] P2: Remove "Real Estate & Apartments" category from directory (8 entries + category removed, 18 neighborhood links cleaned)
+- [x] P3: Add rent vs. buy question to neighborhood quiz (housing_type question added as Q2)
+- [x] P4: Enhance Find a Realtor form (rental budget path, How It Works, FAQ, trust signals, quiz link, URL param pre-fill)
+- [x] P5: Add Google Maps direction links to directory addresses (uses verifiedAddress from enrichment)
+- [x] P6: Add Google Maps direction links to event venue addresses (list cards + detail modal)
+- [x] P7: Fix Facebook share button (use window.open popup for all social links)

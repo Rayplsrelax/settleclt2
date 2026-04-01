@@ -538,9 +538,28 @@ export default function Directory() {
                         <ReviewStars targetType="directory" targetId={toSlug(s.name)} />
                       </div>
                       <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <MapPin className="w-3 h-3" /> {s.area}
-                        </span>
+                        {(() => {
+                          const enriched = enrichmentMap[toSlug(s.name)];
+                          const addr = enriched?.verifiedAddress;
+                          if (addr) {
+                            return (
+                              <a
+                                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 no-underline transition-colors"
+                                title="Get directions"
+                              >
+                                <MapPin className="w-3 h-3" /> {s.area}
+                              </a>
+                            );
+                          }
+                          return (
+                            <span className="text-xs text-muted-foreground flex items-center gap-1">
+                              <MapPin className="w-3 h-3" /> {s.area}
+                            </span>
+                          );
+                        })()}
                         {isLocal && (
                           <span className="text-xs text-primary font-medium">Near you</span>
                         )}

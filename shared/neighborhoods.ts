@@ -126,7 +126,6 @@ export const neighborhoods: Neighborhood[] = [
     directoryCtaLinks: [
       { label: 'Find gyms near the Rail Trail', category: 'fitness', area: 'South End' },
       { label: 'South End breweries & restaurants', category: 'breweries', area: 'South End' },
-      { label: 'Apartments in South End', category: 'real-estate', area: 'South End' },
       { label: 'Coworking spaces nearby', category: 'coworking', area: 'South End' }
     ],
     localsLove: [
@@ -232,7 +231,6 @@ export const neighborhoods: Neighborhood[] = [
       { label: 'NoDa coffee shops & cafes', category: 'restaurants', area: 'NoDa' },
       { label: 'Breweries in the arts district', category: 'breweries', area: 'NoDa' },
       { label: 'Find a barber in NoDa', category: 'barbers', area: 'NoDa' },
-      { label: 'NoDa apartments & lofts', category: 'real-estate', area: 'NoDa' }
     ],
     localsLove: [
       'Gallery crawl on first and third Fridays is a genuine community event',
@@ -336,7 +334,6 @@ export const neighborhoods: Neighborhood[] = [
       { label: 'Dilworth restaurants & dining', category: 'restaurants', area: 'Dilworth' },
       { label: 'Find a plumber for your bungalow', category: 'plumbers', area: 'Charlotte Metro' },
       { label: 'Lawn care in Dilworth', category: 'lawn', area: 'Charlotte Metro' },
-      { label: 'Dilworth real estate agents', category: 'real-estate', area: 'Charlotte Metro' }
     ],
     localsLove: [
       'Tree-canopied streets with historic bungalows — small town inside a city',
@@ -544,7 +541,6 @@ export const neighborhoods: Neighborhood[] = [
       { label: 'Plaza Midwood restaurants', category: 'restaurants', area: 'Plaza Midwood' },
       { label: 'Find a vet nearby', category: 'pets', area: 'Charlotte Metro' },
       { label: 'Barbers & salons in the area', category: 'barbers', area: 'Charlotte Metro' },
-      { label: 'Plaza Midwood apartments', category: 'real-estate', area: 'Charlotte Metro' }
     ],
     localsLove: [
       'Best food scene in Charlotte — Central Avenue is a culinary world tour',
@@ -749,7 +745,6 @@ export const neighborhoods: Neighborhood[] = [
       'Queens Road tree preservation and neighborhood beautification'
     ],
     directoryCtaLinks: [
-      { label: 'Myers Park real estate agents', category: 'real-estate', area: 'South Charlotte' },
       { label: 'Private schools & childcare', category: 'childcare', area: 'South Charlotte' },
       { label: 'Lawn care & landscaping', category: 'lawn', area: 'South Charlotte' },
       { label: 'SouthPark restaurants', category: 'restaurants', area: 'South Charlotte' }
@@ -853,7 +848,6 @@ export const neighborhoods: Neighborhood[] = [
       'New development tracker: what\'s opening near UNCC'
     ],
     directoryCtaLinks: [
-      { label: 'University City apartments', category: 'real-estate', area: 'University Area' },
       { label: 'Gyms & fitness centers', category: 'fitness', area: 'University Area' },
       { label: 'Grocery stores nearby', category: 'grocery', area: 'University Area' },
       { label: 'Auto repair & car wash', category: 'auto', area: 'University Area' }

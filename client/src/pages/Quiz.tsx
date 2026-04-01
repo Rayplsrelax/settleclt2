@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import { Link } from "wouter";
 import {
   QUIZ_QUESTIONS, scoreNeighborhoods, getMatchLabel,
-  type QuizAnswers, type QuizQuestion, type NeighborhoodScore
+  type QuizAnswers, type QuizQuestion, type NeighborhoodScore,
 } from "@shared/quiz";
 import {
   ArrowRight, ArrowLeft, RotateCcw, MapPin, DollarSign,
@@ -157,7 +157,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
         Find Your Charlotte Neighborhood
       </h1>
       <p className="text-muted-foreground text-lg mb-2 max-w-md mx-auto">
-        Answer 6 quick questions and we'll match you with the best neighborhoods based on your budget, lifestyle, and priorities.
+        Answer 7 quick questions and we'll match you with the best neighborhoods based on your budget, lifestyle, and priorities.
       </p>
       <p className="text-sm text-muted-foreground mb-8">
         Takes about 2 minutes. No signup required.
@@ -294,8 +294,53 @@ function ResultCard({ result, rank }: { result: NeighborhoodScore; rank: number 
   );
 }
 
+// ─── Realtor CTA Section ─────────────────────────────────────────
+function RealtorCTA({ topNeighborhoods, housingType }: { topNeighborhoods: string[]; housingType?: string }) {
+  const neighborhoodParam = topNeighborhoods.slice(0, 3).join(', ');
+  const typeParam = housingType === 'renting' ? '&type=renting' : housingType === 'buying' ? '&type=buying' : '';
+  const realtorUrl = `/find-a-realtor?neighborhoods=${encodeURIComponent(neighborhoodParam)}&source=quiz${typeParam}`;
+
+  return (
+    <div className="max-w-2xl mx-auto mb-10">
+      <div className="relative rounded-2xl overflow-hidden border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-clt-teal" />
+        <div className="p-6 md:p-8">
+          <div className="flex items-start gap-4">
+            <div className="shrink-0 w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+              <HomeIcon className="w-6 h-6 text-emerald-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-display font-bold text-lg text-foreground mb-1">
+                Ready to Make the Move?
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Love your match? A local Charlotte expert can show you homes and apartments in {topNeighborhoods[0]}{topNeighborhoods.length > 1 ? ` and ${topNeighborhoods.length - 1} more area${topNeighborhoods.length > 2 ? 's' : ''}` : ''} — completely free.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Link href={realtorUrl}>
+                  <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white">
+                    <HomeIcon className="w-4 h-4" /> Get Matched with a Realtor
+                  </Button>
+                </Link>
+                <Link href={`${realtorUrl}&type=renting`}>
+                  <Button variant="outline" className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50">
+                    <MapPin className="w-4 h-4" /> Find an Apartment
+                  </Button>
+                </Link>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Free service — no obligations. We match you with vetted local agents.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Results Screen ───────────────────────────────────────────────
-function ResultsScreen({ results, onRetake }: { results: NeighborhoodScore[]; onRetake: () => void }) {
+function ResultsScreen({ results, answers, onRetake }: { results: NeighborhoodScore[]; answers: QuizAnswers; onRetake: () => void }) {
   const top3 = results.slice(0, 3);
   const honorable = results.slice(3, 6);
 
@@ -351,6 +396,9 @@ function ResultsScreen({ results, onRetake }: { results: NeighborhoodScore[]; on
         </div>
       )}
 
+      {/* Realtor CTA */}
+      <RealtorCTA topNeighborhoods={top3.map(r => r.neighborhood.name)} housingType={answers.housing_type as string} />
+
       {/* Actions */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-2xl mx-auto">
         <Button variant="outline" onClick={onRetake} className="gap-2">
@@ -375,7 +423,7 @@ function ResultsScreen({ results, onRetake }: { results: NeighborhoodScore[]; on
 export default function Quiz() {
   useSEO({
     title: "Neighborhood Quiz — Which Charlotte Area Fits You?",
-    description: "Take our 2-minute quiz to find your perfect Charlotte neighborhood. Answer questions about budget, lifestyle, and priorities to get personalized recommendations.",
+    description: "Take our 2-minute quiz to find your perfect Charlotte neighborhood. Answer 7 questions about budget, housing type, lifestyle, and priorities to get personalized recommendations.",
     keywords: "Charlotte neighborhood quiz, which Charlotte neighborhood, best neighborhood Charlotte NC, Charlotte relocation quiz, where to live Charlotte",
     path: "/quiz",
   });
@@ -454,7 +502,7 @@ export default function Quiz() {
         )}
 
         {phase === 'results' && (
-          <ResultsScreen results={results} onRetake={handleRetake} />
+          <ResultsScreen results={results} answers={answers} onRetake={handleRetake} />
         )}
       </main>
     </div>

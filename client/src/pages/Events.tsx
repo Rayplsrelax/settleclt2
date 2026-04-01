@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import { useSEO } from "@/hooks/useSEO";
-import PageLayout from "@/components/PageLayout";
 import {
   Dialog,
   DialogContent,
@@ -158,7 +157,19 @@ function EventCard({ event, onClick, onCategoryClick, onNeighborhoodClick }: { e
           {event.venueName && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <MapPin className="w-4 h-4 text-primary/70 shrink-0" />
-              <span className="truncate">{event.venueName}</span>
+              {event.venueAddress ? (
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(event.venueAddress)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="truncate hover:text-primary no-underline transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {event.venueName}
+                </a>
+              ) : (
+                <span className="truncate">{event.venueName}</span>
+              )}
             </div>
           )}
           {event.neighborhood && (
@@ -219,7 +230,7 @@ export default function Events() {
   }, [events]);
 
   return (
-    <PageLayout>
+    <div className="min-h-screen bg-background">
       {/* Hero */}
       <section className="relative bg-gradient-to-br from-primary/10 via-background to-primary/5 py-16 sm:py-20">
         <div className="container">
@@ -250,7 +261,7 @@ export default function Events() {
       </section>
 
       {/* Filters */}
-      <section className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm border-b border-border">
+      <section className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="container py-3">
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
             <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -434,9 +445,15 @@ export default function Events() {
                           {selectedEvent.venueName}
                         </div>
                         {selectedEvent.venueAddress && (
-                          <div className="text-muted-foreground">
+                          <a
+                            href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(selectedEvent.venueAddress)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-muted-foreground hover:text-primary no-underline transition-colors flex items-center gap-1"
+                          >
                             {selectedEvent.venueAddress}
-                          </div>
+                            <ExternalLink className="w-3 h-3 shrink-0" />
+                          </a>
                         )}
                       </div>
                     </div>
@@ -485,6 +502,6 @@ export default function Events() {
           )}
         </DialogContent>
       </Dialog>
-    </PageLayout>
+    </div>
   );
 }

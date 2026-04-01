@@ -124,16 +124,20 @@ export default function ShareButtons({
 
           {/* Social links */}
           {shareOptions.map((opt) => (
-            <a
+            <button
               key={opt.label}
-              href={opt.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`w-full flex items-center gap-3 px-2 py-2 rounded-md text-sm transition-colors no-underline text-foreground ${opt.color}`}
+              onClick={() => {
+                if (opt.href.startsWith('mailto:')) {
+                  window.location.href = opt.href;
+                } else {
+                  window.open(opt.href, '_blank', 'width=600,height=400,scrollbars=yes,resizable=yes');
+                }
+              }}
+              className={`w-full flex items-center gap-3 px-2 py-2 rounded-md text-sm transition-colors text-foreground ${opt.color}`}
             >
               {opt.icon}
               {opt.label}
-            </a>
+            </button>
           ))}
 
           {/* Copy link */}
