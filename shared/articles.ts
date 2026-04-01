@@ -25,6 +25,7 @@ export const articles: Article[] = [
     readTime: '8 min',
     date: 'March 2026',
     gradient: 'linear-gradient(135deg, #00C9A7 0%, #00A88C 100%)',
+    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/charlotte-skyline-cost-of-living_7d791b75.jpg',
     featured: true,
   },
   {
@@ -35,6 +36,7 @@ export const articles: Article[] = [
     readTime: '6 min',
     date: 'March 2026',
     gradient: 'linear-gradient(135deg, #FFB347 0%, #F09828 100%)',
+    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/charlotte-uptown-street_9a41b259.jpg',
   },
   {
     id: 'breweries-guide',
@@ -44,6 +46,7 @@ export const articles: Article[] = [
     readTime: '12 min',
     date: 'February 2026',
     gradient: 'linear-gradient(135deg, #1E3A5F 0%, #2A4F7A 100%)',
+    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/noda-brewery_806f23ef.jpg',
   },
   {
     id: 'nc-drivers-license',
@@ -53,6 +56,7 @@ export const articles: Article[] = [
     readTime: '5 min',
     date: 'February 2026',
     gradient: 'linear-gradient(135deg, #E74C3C 0%, #C0392B 100%)',
+    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/charlotte-uptown-dmv_d44d4b87.jpg',
   },
   {
     id: 'best-schools',
@@ -62,6 +66,7 @@ export const articles: Article[] = [
     readTime: '10 min',
     date: 'January 2026',
     gradient: 'linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%)',
+    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/charlotte-school-campus_50511254.jpg',
   },
   {
     id: 'getting-around-charlotte',
@@ -71,6 +76,7 @@ export const articles: Article[] = [
     readTime: '7 min',
     date: 'January 2026',
     gradient: 'linear-gradient(135deg, #3498DB 0%, #2980B9 100%)',
+    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/charlotte-light-rail_38fb43c8.jpg',
   },
   {
     id: 'moving-from-nyc',
@@ -80,6 +86,7 @@ export const articles: Article[] = [
     readTime: '9 min',
     date: 'January 2026',
     gradient: 'linear-gradient(135deg, #2C3E50 0%, #34495E 100%)',
+    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/charlotte-aerial-moving_ebb2452d.jpg',
   },
   {
     id: 'dog-parks-charlotte',
@@ -89,6 +96,7 @@ export const articles: Article[] = [
     readTime: '6 min',
     date: 'December 2025',
     gradient: 'linear-gradient(135deg, #27AE60 0%, #229954 100%)',
+    image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/charlotte-dog-greenway_0b5c64ea.jpg',
   }
 ];
 

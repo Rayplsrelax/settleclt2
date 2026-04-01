@@ -299,3 +299,10 @@
 - [x] Fix: Events page has no way to navigate back to main SettleCLT site (wrapped in PageLayout with Navbar+Footer)
 - [x] Verify: Google Maps direction links working on directory addresses (confirmed working)
 - [x] Verify: Google Maps direction links working on event venue addresses (confirmed working, both list cards and detail modal)
+
+## Homepage CTA, Redirect, Blog Photos, Maps Links Visibility
+- [x] Add "Find Your Home" CTA button to homepage hero section (gold button with HomeIcon)
+- [x] Set up redirect from /find-a-realtor to /find-your-home (wouter Redirect component)
+- [x] Add real Charlotte photography to blog cards (8 CDN images uploaded, articles.ts updated, Blog + Home pages rendering real photos)
+- [x] Make Google Maps direction links more visible on ALL directory listings (blue "Get Directions" pill button on every card)
+- [x] Make Google Maps direction links more visible on ALL event listings (blue "Directions" pill on list cards + "Get Directions" button in detail modal)

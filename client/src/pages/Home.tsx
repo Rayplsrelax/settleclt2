@@ -19,6 +19,7 @@ import {
   Activity,
   TrendingUp,
   Hash,
+  Home as HomeIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -77,6 +78,15 @@ function Hero() {
                 className="border-white/25 text-white hover:bg-white/10 font-semibold px-6 backdrop-blur-sm"
               >
                 Browse Directory
+              </Button>
+            </Link>
+            <Link href="/find-your-home">
+              <Button
+                size="lg"
+                className="bg-clt-gold hover:bg-clt-gold/90 text-clt-navy font-semibold px-6 shadow-lg shadow-clt-gold/20"
+              >
+                <HomeIcon className="mr-2 w-4 h-4" />
+                Find Your Home
               </Button>
             </Link>
           </div>

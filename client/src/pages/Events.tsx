@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Calendar, CalendarPlus, MapPin, ExternalLink, Clock, Filter, Sparkles, Tag } from "lucide-react";
+import { Calendar, CalendarPlus, MapPin, ExternalLink, Clock, Filter, Sparkles, Tag, Navigation } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import ShareButtons from "@/components/ShareButtons";
 import QuickStampButton from "@/components/QuickStampButton";
@@ -158,18 +158,17 @@ function EventCard({ event, onClick, onCategoryClick, onNeighborhoodClick }: { e
           {event.venueName && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <MapPin className="w-4 h-4 text-primary/70 shrink-0" />
-              {event.venueAddress ? (
+              <span className="truncate">{event.venueName}</span>
+              {event.venueAddress && (
                 <a
                   href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(event.venueAddress)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="truncate hover:text-primary no-underline transition-colors"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-medium no-underline transition-colors shrink-0"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {event.venueName}
+                  <Navigation className="w-3 h-3" /> Directions
                 </a>
-              ) : (
-                <span className="truncate">{event.venueName}</span>
               )}
             </div>
           )}
@@ -439,21 +438,23 @@ export default function Events() {
                   </div>
 
                   {selectedEvent.venueName && (
-                    <div className="flex items-center gap-3 text-sm">
-                      <MapPin className="w-4 h-4 text-primary shrink-0" />
-                      <div>
+                    <div className="flex items-start gap-3 text-sm">
+                      <MapPin className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                      <div className="flex-1">
                         <div className="font-medium text-foreground">
                           {selectedEvent.venueName}
                         </div>
+                        {selectedEvent.venueAddress && (
+                          <p className="text-muted-foreground text-xs mt-0.5">{selectedEvent.venueAddress}</p>
+                        )}
                         {selectedEvent.venueAddress && (
                           <a
                             href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(selectedEvent.venueAddress)}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-muted-foreground hover:text-primary no-underline transition-colors flex items-center gap-1"
+                            className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-medium no-underline transition-colors"
                           >
-                            {selectedEvent.venueAddress}
-                            <ExternalLink className="w-3 h-3 shrink-0" />
+                            <Navigation className="w-3.5 h-3.5" /> Get Directions
                           </a>
                         )}
                       </div>

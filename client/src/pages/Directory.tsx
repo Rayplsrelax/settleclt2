@@ -539,35 +539,30 @@ export default function Directory() {
                         <ReviewStars targetType="directory" targetId={toSlug(s.name)} />
                       </div>
                       <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
-                        {(() => {
-                          const enriched = enrichmentMap[toSlug(s.name)];
-                          const addr = enriched?.verifiedAddress;
-                          if (addr) {
-                            return (
-                              <a
-                                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 no-underline transition-colors"
-                                title="Get directions"
-                              >
-                                <MapPin className="w-3 h-3" /> {s.area}
-                              </a>
-                            );
-                          }
-                          return (
-                            <span className="text-xs text-muted-foreground flex items-center gap-1">
-                              <MapPin className="w-3 h-3" /> {s.area}
-                            </span>
-                          );
-                        })()}
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <MapPin className="w-3 h-3" /> {s.area}
+                        </span>
                         {isLocal && (
                           <span className="text-xs text-primary font-medium">Near you</span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 mt-3">
+                      <div className="flex flex-wrap items-center gap-2 mt-3">
+                        {(() => {
+                          const enriched = enrichmentMap[toSlug(s.name)];
+                          const addr = enriched?.verifiedAddress || s.name + ', ' + s.area + ', Charlotte, NC';
+                          return (
+                            <a
+                              href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-medium no-underline transition-colors"
+                            >
+                              <Map className="w-3 h-3" /> Get Directions
+                            </a>
+                          );
+                        })()}
                         {s.phone && (
-                          <a href={`tel:${s.phone}`} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground no-underline">
+                          <a href={`tel:${s.phone}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted text-muted-foreground hover:text-foreground text-xs font-medium no-underline transition-colors">
                             <Phone className="w-3 h-3" /> {s.phone}
                           </a>
                         )}
@@ -576,7 +571,7 @@ export default function Directory() {
                             href={s.website}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-xs text-primary hover:underline no-underline ml-auto"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted text-primary hover:bg-primary/10 text-xs font-medium no-underline transition-colors ml-auto"
                           >
                             Visit <ExternalLink className="w-3 h-3" />
                           </a>
