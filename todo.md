@@ -286,3 +286,9 @@
 - [x] Set up email notification to owner when referral form is submitted (enhanced notifyOwner with formatted lead details)
 - [x] Update response time from "24hr" to "48 business hours" across all pages (Find a Realtor: 5 references updated)
 - [x] Add "Real Estate Help" CTA banner in the directory page linking to Find a Realtor
+
+## Referral Lead Dashboard & Neighborhood CTA
+- [x] Lead status column already exists in referrals DB (new, contacted, matched, closed, lost)
+- [x] Admin API endpoints already exist (list, updateStatus, stats) — enhanced stats with conversion rate, avg age, monthly trend
+- [x] Build admin lead management dashboard UI with KPI cards, pipeline funnel, type breakdown, monthly trend, lead list with urgency badges
+- [x] Add Find a Realtor CTA banner to neighborhood detail pages (pre-fill neighborhood name)

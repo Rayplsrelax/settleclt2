@@ -802,6 +802,33 @@ export default function NeighborhoodDetail() {
           </div>
         </section>
 
+        {/* Find a Realtor CTA */}
+        <section className="my-8">
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 p-6 md:p-8">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-white/20" />
+              <div className="absolute -left-4 -bottom-4 w-24 h-24 rounded-full bg-white/15" />
+            </div>
+            <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex-1">
+                <h3 className="text-lg md:text-xl font-display font-bold text-white mb-1">
+                  Ready to make {n.name} your home?
+                </h3>
+                <p className="text-white/80 text-sm md:text-base">
+                  Get matched with a local real estate expert who knows {n.name} inside and out — whether you're buying, renting, or relocating.
+                </p>
+              </div>
+              <Link href={`/find-a-realtor?neighborhoods=${encodeURIComponent(n.name)}&source=neighborhood`}>
+                <Button className="bg-white text-teal-700 hover:bg-white/90 font-semibold gap-2 whitespace-nowrap">
+                  <Home className="w-4 h-4" />
+                  Find a Realtor
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* Community Reviews */}
         <section id="reviews" ref={el => { sectionRefs.current["reviews"] = el; }}>
           <ReviewSection targetType="neighborhood" targetId={n.id} />

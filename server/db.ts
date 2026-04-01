@@ -1151,8 +1151,8 @@ export async function updateReferralStatus(id: number, status: string, adminNote
 
 export async function getReferralStats() {
   const db = await getDb();
-  if (!db) return { total: 0, byStatus: {}, byType: {} };
-  const all = await db.select().from(referrals);
+  if (!db) return { total: 0, byStatus: {}, byType: {}, conversionRate: 0, avgAgeDays: 0, monthlyTrend: [] as { month: string; count: number }[], recentLeads: [] as any[] };
+  const all = await db.select().from(referrals).orderBy(desc(referrals.createdAt));
   const total = all.length;
   const byStatus: Record<string, number> = {};
   const byType: Record<string, number> = {};
@@ -1160,5 +1160,31 @@ export async function getReferralStats() {
     byStatus[r.status] = (byStatus[r.status] || 0) + 1;
     byType[r.referralType] = (byType[r.referralType] || 0) + 1;
   });
-  return { total, byStatus, byType };
+  // Conversion rate: closed / (total - new)
+  const closed = byStatus['closed'] || 0;
+  const processed = total - (byStatus['new'] || 0);
+  const conversionRate = processed > 0 ? Math.round((closed / processed) * 100) : 0;
+  // Average age in days for open leads (new + contacted + matched)
+  const now = Date.now();
+  const openLeads = all.filter(r => ['new', 'contacted', 'matched'].includes(r.status));
+  const avgAgeDays = openLeads.length > 0
+    ? Math.round(openLeads.reduce((sum, r) => sum + (now - new Date(r.createdAt).getTime()) / (1000 * 60 * 60 * 24), 0) / openLeads.length)
+    : 0;
+  // Monthly trend (last 6 months)
+  const monthlyMap: Record<string, number> = {};
+  all.forEach(r => {
+    const d = new Date(r.createdAt);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    monthlyMap[key] = (monthlyMap[key] || 0) + 1;
+  });
+  const monthlyTrend = Object.entries(monthlyMap)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .slice(-6)
+    .map(([month, count]) => ({ month, count }));
+  // Recent 5 leads for quick view
+  const recentLeads = all.slice(0, 5).map(r => ({
+    id: r.id, name: r.name, referralType: r.referralType, status: r.status,
+    createdAt: r.createdAt, neighborhoods: r.neighborhoods,
+  }));
+  return { total, byStatus, byType, conversionRate, avgAgeDays, monthlyTrend, recentLeads };
 }
