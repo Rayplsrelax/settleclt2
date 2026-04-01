@@ -294,3 +294,8 @@
 - [x] Add Find a Realtor CTA banner to neighborhood detail pages (pre-fill neighborhood name)
 ## Rename "Find a Realtor" to "Find Your Home"
 - [x] Rename all references to "Find a Realtor" → "Find Your Home" across entire codebase (Navbar, App.tsx route, Directory CTA, NeighborhoodDetail CTA, Quiz CTA, FindRealtor page SEO/hero/button, AdminReferrals empty states, sitemap)
+
+## Bug Fixes - Events Navigation & Maps Links
+- [x] Fix: Events page has no way to navigate back to main SettleCLT site (wrapped in PageLayout with Navbar+Footer)
+- [x] Verify: Google Maps direction links working on directory addresses (confirmed working)
+- [x] Verify: Google Maps direction links working on event venue addresses (confirmed working, both list cards and detail modal)

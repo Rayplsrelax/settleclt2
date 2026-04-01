@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Calendar, CalendarPlus, MapPin, ExternalLink, Clock, Filter, Sparkles, Tag } from "lucide-react";
+import PageLayout from "@/components/PageLayout";
 import ShareButtons from "@/components/ShareButtons";
 import QuickStampButton from "@/components/QuickStampButton";
 import { Button } from "@/components/ui/button";
@@ -230,7 +231,7 @@ export default function Events() {
   }, [events]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <PageLayout>
       {/* Hero */}
       <section className="relative bg-gradient-to-br from-primary/10 via-background to-primary/5 py-16 sm:py-20">
         <div className="container">
@@ -261,7 +262,7 @@ export default function Events() {
       </section>
 
       {/* Filters */}
-      <section className="sticky top-0 z-30 bg-background/95 backdrop-blur-sm border-b border-border">
+      <section className="sticky top-16 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
         <div className="container py-3">
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
             <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -502,6 +503,6 @@ export default function Events() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </PageLayout>
   );
 }
