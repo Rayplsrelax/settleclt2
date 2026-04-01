@@ -9,7 +9,7 @@ import {
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
-import { useSEO, buildBreadcrumbs } from "@/hooks/useSEO";
+import { useSEO } from "@/hooks/useSEO";
 
 type FilterKey = "all" | "budget" | "walkable" | "family" | "nightlife" | "transit";
 
@@ -152,25 +152,6 @@ export default function Neighborhoods() {
     description: "Explore 20 Charlotte neighborhoods with detailed guides, cost of living, local tips, and honest reviews. From South End to Ballantyne, find where you belong.",
     keywords: "Charlotte neighborhoods, South End, NoDa, Plaza Midwood, Uptown Charlotte, Dilworth, Myers Park, best neighborhoods Charlotte NC, where to live Charlotte",
     path: "/neighborhoods",
-    jsonLd: [
-      {
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        name: "Charlotte NC Neighborhoods",
-        description: "Comprehensive guide to Charlotte, North Carolina neighborhoods",
-        numberOfItems: allNeighborhoods.length,
-        itemListElement: neighborhoods.slice(0, 12).map((n, i) => ({
-          "@type": "ListItem",
-          position: i + 1,
-          name: n.name,
-          url: `https://settleclt.com/neighborhood/${n.id}`,
-        })),
-      },
-      buildBreadcrumbs([
-        { name: "Home", path: "/" },
-        { name: "Neighborhoods", path: "/neighborhoods" },
-      ]),
-    ],
   });
 
   const [filter, setFilter] = useState<FilterKey>("all");

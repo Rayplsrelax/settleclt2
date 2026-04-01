@@ -240,6 +240,29 @@ export default function Leaderboard() {
             </CardContent>
           </Card>
         )}
+
+        {/* Motivational CTA when logged in but few entries */}
+        {user && stamps.length <= 3 && (
+          <Card className="mt-8 border-dashed border-primary/20">
+            <CardContent className="py-6 text-center">
+              <Stamp className="w-8 h-8 text-primary/40 mx-auto mb-3" />
+              <p className="text-sm font-medium text-foreground mb-1">
+                The leaderboard is just getting started!
+              </p>
+              <p className="text-xs text-muted-foreground mb-4">
+                Visit local spots, complete bingo cards, and explore neighborhoods to climb the ranks.
+              </p>
+              <div className="flex gap-2 justify-center">
+                <Button size="sm" variant="outline" asChild>
+                  <a href="/passport">Add Stamps</a>
+                </Button>
+                <Button size="sm" variant="outline" asChild>
+                  <a href="/bingo">Play Bingo</a>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </PageLayout>
   );

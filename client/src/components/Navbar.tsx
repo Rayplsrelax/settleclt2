@@ -14,7 +14,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import GlobalSearch from "@/components/GlobalSearch";
 
 const navLinks = [
-  { href: "/", label: "Home" },
   { href: "/neighborhoods", label: "Neighborhoods" },
   { href: "/directory", label: "Directory" },
   { href: "/events", label: "Events" },
@@ -142,12 +141,12 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-1">
+        <div className="hidden md:flex items-center gap-0.5 lg:gap-1">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors no-underline ${
+              className={`px-2 lg:px-3 py-2 rounded-md text-[13px] lg:text-sm font-medium transition-colors no-underline whitespace-nowrap ${
                 location === link.href
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -161,7 +160,7 @@ export default function Navbar() {
           </div>
           <Link
             href="/list-your-business"
-            className="ml-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity no-underline"
+            className="ml-1.5 lg:ml-2 px-3 lg:px-4 py-2 rounded-lg bg-primary text-primary-foreground text-[13px] lg:text-sm font-semibold hover:opacity-90 transition-opacity no-underline whitespace-nowrap"
           >
             List Your Business
           </Link>

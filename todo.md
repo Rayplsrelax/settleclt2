@@ -268,10 +268,12 @@
 - [x] Generate XML sitemap with all public routes (42 URLs: 13 static + 20 neighborhoods + 9 blog articles)
 - [x] Add JSON-LD structured data for WebSite schema with SearchAction on home page
 
-## Google Search Console, OG Image, SEO Optimization & Events Nav Fix
-- [ ] Submit sitemap to Google Search Console for settleclt.com (skipped — requires user Google login)
-- [x] Add branded OG image (Charlotte skyline) for social media sharing previews
-- [x] Fix missing navigation on events page (added PageLayout with Navbar + Footer to Events and FindRealtor)
-- [x] Optimize SEO for neighborhood detail pages (Place + BreadcrumbList JSON-LD)
-- [x] Optimize SEO for directory listings (ItemList + BreadcrumbList JSON-LD)
-- [x] Optimize SEO for events pages (BreadcrumbList JSON-LD + Blog/Article/WebSite/Organization schemas across site)
+## UI/UX Audit Fixes
+- [x] Fix: Blog card gradient placeholders — improve visual treatment with category-specific icons and better styling
+- [x] Fix: Hero "Browse Directory" button styling — make it more visible with solid white outline instead of faded
+- [x] Fix: Events page missing PageLayout wrapper — add Navbar/Footer via PageLayout
+- [x] Fix: Events sticky filter bar z-index conflict with Navbar (both sticky, Events filter at top-0 overlaps navbar)
+- [x] Fix: Bingo cards visual enhancement — add gradient header bars and better card styling
+- [x] Fix: Leaderboard encourage participation — add motivational CTA when few users
+- [x] Fix: Static blog articles not clickable — they render as div instead of Link (no detail page, intentional — static articles have no content pages)
+- [x] Fix: Navbar desktop items crowding at 1024-1280px — reduce padding/font-size at md breakpoint, remove Home link (logo serves as home)

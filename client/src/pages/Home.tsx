@@ -74,7 +74,7 @@ function Hero() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-white/25 text-white hover:bg-white/10 font-semibold px-6 backdrop-blur-sm"
+                className="border-white/50 text-white hover:bg-white/15 font-semibold px-6 backdrop-blur-sm bg-white/5"
               >
                 Browse Directory
               </Button>
@@ -383,8 +383,11 @@ function BlogPreview() {
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <BookOpen className="w-10 h-10 text-white/30" />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                      <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                        <BookOpen className="w-6 h-6 text-white/60" />
+                      </div>
+                      <span className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">{a.category}</span>
                     </div>
                   )}
                   {a.featured && (
@@ -759,33 +762,11 @@ function ForYouSection() {
 
 export default function Home() {
   useSEO({
-    title: "Settle CLT — Your Complete Guide to Living in Charlotte, NC",
+    title: "Settle CLT \u2014 Your Complete Guide to Living in Charlotte, NC",
     description: "Explore 20 Charlotte neighborhoods, discover 400+ local businesses, find events, and get honest advice from locals. Your free relocation guide to CLT.",
     keywords: "Charlotte NC, moving to Charlotte, Charlotte neighborhoods, Charlotte restaurants, Charlotte events, CLT guide, Charlotte relocation, South End, NoDa, Uptown Charlotte, Charlotte food trucks, Charlotte breweries, Charlotte coffee shops",
     path: "/",
     noSuffix: true,
-    jsonLd: [
-      {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        name: "Settle CLT",
-        url: "https://settleclt.com",
-        description: "Your complete guide to living in Charlotte, North Carolina",
-        potentialAction: {
-          "@type": "SearchAction",
-          target: "https://settleclt.com/directory?q={search_term_string}",
-          "query-input": "required name=search_term_string",
-        },
-      },
-      {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        name: "Settle CLT",
-        url: "https://settleclt.com",
-        sameAs: [],
-        description: "Settle CLT helps people discover Charlotte, NC neighborhoods, local businesses, events, and community resources.",
-      },
-    ],
   });
 
   return (

@@ -20,7 +20,7 @@ import ShareButtons from "@/components/ShareButtons";
 import { trpc } from "@/lib/trpc";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
-import { useSEO, buildBreadcrumbs } from "@/hooks/useSEO";
+import { useSEO } from "@/hooks/useSEO";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ResponsiveContainer
@@ -87,34 +87,12 @@ export default function NeighborhoodDetail() {
     return () => observer.disconnect();
   }, [n]);
 
-  const neighborhoodJsonLd = n ? [
-    {
-      "@context": "https://schema.org",
-      "@type": "Place",
-      name: `${n.name}, Charlotte, NC`,
-      description: n.description,
-      address: {
-        "@type": "PostalAddress",
-        addressLocality: "Charlotte",
-        addressRegion: "NC",
-        addressCountry: "US",
-      },
-      ...(n.photoUrls?.[0] ? { image: n.photoUrls[0] } : {}),
-    },
-    buildBreadcrumbs([
-      { name: "Home", path: "/" },
-      { name: "Neighborhoods", path: "/neighborhoods" },
-      { name: n.name, path: `/neighborhood/${n.id}` },
-    ]),
-  ] : undefined;
-
   useSEO({
     title: n ? `${n.name} Neighborhood Guide — Charlotte NC` : "Neighborhood Guide",
     description: n ? `${n.name}: ${n.vibe}. ${n.description.slice(0, 100)}...` : "Explore Charlotte neighborhoods with detailed guides.",
     keywords: n ? `${n.name} Charlotte, ${n.name} NC, living in ${n.name}, ${n.name} apartments, ${n.name} restaurants, Charlotte neighborhoods` : "Charlotte neighborhoods",
     path: n ? `/neighborhood/${n.id}` : "/neighborhoods",
     ogImage: n?.photoUrls?.[0],
-    jsonLd: neighborhoodJsonLd,
   });
 
   if (!n) { setLocation("/404"); return null; }

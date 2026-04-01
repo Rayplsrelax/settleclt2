@@ -5,7 +5,7 @@ import { useState, useMemo } from "react";
 import { Link } from "wouter";
 import { BookOpen, Clock, Calendar } from "lucide-react";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
-import { useSEO, buildBreadcrumbs } from "@/hooks/useSEO";
+import { useSEO } from "@/hooks/useSEO";
 
 interface UnifiedArticle {
   id: string;
@@ -27,24 +27,6 @@ export default function Blog() {
     description: "Read insider guides to Charlotte NC including neighborhood deep dives, best restaurants, weekend plans, moving tips, and local stories from people who live here.",
     keywords: "Charlotte blog, Charlotte NC tips, moving to Charlotte guide, Charlotte restaurants blog, Charlotte neighborhood guides, things to do Charlotte",
     path: "/blog",
-    jsonLd: [
-      {
-        "@context": "https://schema.org",
-        "@type": "Blog",
-        name: "Settle CLT Blog",
-        description: "Insider guides, tips, and stories about living in Charlotte, North Carolina",
-        url: "https://settleclt.com/blog",
-        publisher: {
-          "@type": "Organization",
-          name: "Settle CLT",
-          url: "https://settleclt.com",
-        },
-      },
-      buildBreadcrumbs([
-        { name: "Home", path: "/" },
-        { name: "Blog", path: "/blog" },
-      ]),
-    ],
   });
 
   const [activeCategory, setActiveCategory] = useState("All");
@@ -136,8 +118,11 @@ export default function Blog() {
                     {a.coverImage ? (
                       <img src={a.coverImage} alt={a.title} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <BookOpen className="w-10 h-10 text-white/30" />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                        <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                          <BookOpen className="w-6 h-6 text-white/60" />
+                        </div>
+                        <span className="text-[10px] font-semibold text-white/40 uppercase tracking-widest">{a.category}</span>
                       </div>
                     )}
                     {a.featured && (
