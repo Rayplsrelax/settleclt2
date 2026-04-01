@@ -802,7 +802,7 @@ export default function NeighborhoodDetail() {
           </div>
         </section>
 
-        {/* Find a Realtor CTA */}
+        {/* Find Your Home CTA */}
         <section className="my-8">
           <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 p-6 md:p-8">
             <div className="absolute inset-0 opacity-10">
@@ -818,10 +818,10 @@ export default function NeighborhoodDetail() {
                   Get matched with a local real estate expert who knows {n.name} inside and out — whether you're buying, renting, or relocating.
                 </p>
               </div>
-              <Link href={`/find-a-realtor?neighborhoods=${encodeURIComponent(n.name)}&source=neighborhood`}>
+              <Link href={`/find-your-home?neighborhoods=${encodeURIComponent(n.name)}&source=neighborhood`}>
                 <Button className="bg-white text-teal-700 hover:bg-white/90 font-semibold gap-2 whitespace-nowrap">
                   <Home className="w-4 h-4" />
-                  Find a Realtor
+                  Find Your Home
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>

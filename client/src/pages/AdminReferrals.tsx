@@ -321,7 +321,7 @@ export default function AdminReferrals() {
                   </div>
                 ) : (
                   <div className="text-center py-8 text-sm text-muted-foreground">
-                    No leads yet. They'll appear here when someone submits the Find a Realtor form.
+                    No leads yet. They'll appear here when someone submits the Find Your Home form.
                   </div>
                 )}
               </CardContent>
@@ -364,7 +364,7 @@ export default function AdminReferrals() {
             ) : !filteredReferrals.length ? (
               <Card className="border-0 shadow-sm">
                 <CardContent className="py-12 text-center text-muted-foreground">
-                  No leads found. They'll appear here when someone submits the Find a Realtor form.
+                  No leads found. They'll appear here when someone submits the Find Your Home form.
                 </CardContent>
               </Card>
             ) : (

@@ -60,7 +60,7 @@ async function startServer() {
       { loc: "/leaderboard", priority: "0.6", changefreq: "daily" },
       { loc: "/quiz", priority: "0.8", changefreq: "monthly" },
       { loc: "/compare", priority: "0.7", changefreq: "monthly" },
-      { loc: "/find-a-realtor", priority: "0.8", changefreq: "monthly" },
+      { loc: "/find-your-home", priority: "0.8", changefreq: "monthly" },
       { loc: "/list-your-business", priority: "0.6", changefreq: "monthly" },
       { loc: "/submit-event", priority: "0.5", changefreq: "monthly" },
     ];

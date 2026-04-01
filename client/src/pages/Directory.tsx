@@ -597,9 +597,9 @@ export default function Directory() {
                     <h3 className="font-display font-semibold text-foreground text-sm">Looking for a home or apartment?</h3>
                     <p className="text-xs text-muted-foreground mt-0.5">We'll match you with a trusted local real estate expert — completely free.</p>
                   </div>
-                  <Link href="/find-a-realtor">
+                  <Link href="/find-your-home">
                     <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 shrink-0">
-                      Find a Realtor <ArrowRight className="w-3.5 h-3.5" />
+                      Find Your Home <ArrowRight className="w-3.5 h-3.5" />
                     </Button>
                   </Link>
                 </div>

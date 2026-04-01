@@ -108,15 +108,15 @@ function FAQSection() {
 
 export default function FindRealtor() {
   useSEO({
-    title: "Find a Charlotte Realtor — Free Matching Service",
+    title: "Find Your Home in Charlotte — Free Matching Service",
     description: "Get matched with a trusted Charlotte real estate agent for buying, selling, renting, or relocating. Free service — tell us what you need and we'll connect you.",
-    keywords: "Charlotte realtor, Charlotte real estate agent, buy house Charlotte NC, Charlotte homes for sale, Charlotte relocation agent, find realtor Charlotte, Charlotte apartments",
-    path: "/find-a-realtor",
+    keywords: "Charlotte homes, Charlotte apartments, buy house Charlotte NC, Charlotte homes for sale, Charlotte relocation, find home Charlotte, Charlotte rentals",
+    path: "/find-your-home",
   });
 
   const [submitted, setSubmitted] = useState(false);
 
-  // Pre-fill from URL params (quiz → realtor flow) on initial render
+  // Pre-fill from URL params (quiz → find your home flow) on initial render
   const [form, setForm] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     const neighborhoods = params.get("neighborhoods") || "";
@@ -218,10 +218,10 @@ export default function FindRealtor() {
             <div>
               <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm font-medium mb-4">
                 <Home className="w-4 h-4" />
-                Free Realtor Matching
+                Free Home Matching
               </div>
               <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-4 leading-tight">
-                Find Your Perfect Charlotte Realtor
+                Find Your Perfect Charlotte Home
               </h1>
               <p className="text-lg text-muted-foreground mb-6">
                 Whether you're buying your first home, renting an apartment, or relocating to Charlotte — we'll connect you with a trusted local expert who knows the Queen City inside and out.
@@ -410,7 +410,7 @@ export default function FindRealtor() {
                 <Button type="submit" size="lg" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white gap-2" disabled={submitMutation.isPending}>
                   {submitMutation.isPending ? "Submitting..." : (
                     <>
-                      {isRenting ? "Find My Apartment" : "Get Matched with a Realtor"}
+                      {isRenting ? "Find My Apartment" : "Find Your Home"}
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}

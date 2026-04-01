@@ -292,3 +292,5 @@
 - [x] Admin API endpoints already exist (list, updateStatus, stats) — enhanced stats with conversion rate, avg age, monthly trend
 - [x] Build admin lead management dashboard UI with KPI cards, pipeline funnel, type breakdown, monthly trend, lead list with urgency badges
 - [x] Add Find a Realtor CTA banner to neighborhood detail pages (pre-fill neighborhood name)
+## Rename "Find a Realtor" to "Find Your Home"
+- [x] Rename all references to "Find a Realtor" → "Find Your Home" across entire codebase (Navbar, App.tsx route, Directory CTA, NeighborhoodDetail CTA, Quiz CTA, FindRealtor page SEO/hero/button, AdminReferrals empty states, sitemap)

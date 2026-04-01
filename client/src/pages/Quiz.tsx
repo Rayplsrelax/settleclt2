@@ -294,11 +294,11 @@ function ResultCard({ result, rank }: { result: NeighborhoodScore; rank: number 
   );
 }
 
-// ─── Realtor CTA Section ─────────────────────────────────────────
-function RealtorCTA({ topNeighborhoods, housingType }: { topNeighborhoods: string[]; housingType?: string }) {
+// ─── Find Your Home CTA Section ─────────────────────────────────
+function HomeCTA({ topNeighborhoods, housingType }: { topNeighborhoods: string[]; housingType?: string }) {
   const neighborhoodParam = topNeighborhoods.slice(0, 3).join(', ');
   const typeParam = housingType === 'renting' ? '&type=renting' : housingType === 'buying' ? '&type=buying' : '';
-  const realtorUrl = `/find-a-realtor?neighborhoods=${encodeURIComponent(neighborhoodParam)}&source=quiz${typeParam}`;
+  const homeUrl = `/find-your-home?neighborhoods=${encodeURIComponent(neighborhoodParam)}&source=quiz${typeParam}`;
 
   return (
     <div className="max-w-2xl mx-auto mb-10">
@@ -317,12 +317,12 @@ function RealtorCTA({ topNeighborhoods, housingType }: { topNeighborhoods: strin
                 Love your match? A local Charlotte expert can show you homes and apartments in {topNeighborhoods[0]}{topNeighborhoods.length > 1 ? ` and ${topNeighborhoods.length - 1} more area${topNeighborhoods.length > 2 ? 's' : ''}` : ''} — completely free.
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
-                <Link href={realtorUrl}>
+                <Link href={homeUrl}>
                   <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white">
-                    <HomeIcon className="w-4 h-4" /> Get Matched with a Realtor
+                    <HomeIcon className="w-4 h-4" /> Find Your Home
                   </Button>
                 </Link>
-                <Link href={`${realtorUrl}&type=renting`}>
+                <Link href={`${homeUrl}&type=renting`}>
                   <Button variant="outline" className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50">
                     <MapPin className="w-4 h-4" /> Find an Apartment
                   </Button>
@@ -396,8 +396,8 @@ function ResultsScreen({ results, answers, onRetake }: { results: NeighborhoodSc
         </div>
       )}
 
-      {/* Realtor CTA */}
-      <RealtorCTA topNeighborhoods={top3.map(r => r.neighborhood.name)} housingType={answers.housing_type as string} />
+      {/* Find Your Home CTA */}
+      <HomeCTA topNeighborhoods={top3.map(r => r.neighborhood.name)} housingType={answers.housing_type as string} />
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-2xl mx-auto">
