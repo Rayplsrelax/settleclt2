@@ -281,3 +281,8 @@
 - [x] P5: Add Google Maps direction links to directory addresses (uses verifiedAddress from enrichment)
 - [x] P6: Add Google Maps direction links to event venue addresses (list cards + detail modal)
 - [x] P7: Fix Facebook share button (use window.open popup for all social links)
+
+## Email Notifications & Directory CTA
+- [x] Set up email notification to owner when referral form is submitted (enhanced notifyOwner with formatted lead details)
+- [x] Update response time from "24hr" to "48 business hours" across all pages (Find a Realtor: 5 references updated)
+- [x] Add "Real Estate Help" CTA banner in the directory page linking to Find a Realtor

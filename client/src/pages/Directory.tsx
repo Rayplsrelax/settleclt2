@@ -5,7 +5,8 @@ import { CORE_NEIGHBORHOOD_NAMES } from "@shared/metroAreas";
 import { useMyNeighborhood } from "@/hooks/useMyNeighborhood";
 import { MapView } from "@/components/Map";
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
-import { Search, ExternalLink, Phone, X, MapPin, Star, Filter, Map, List } from "lucide-react";
+import { Search, ExternalLink, Phone, X, MapPin, Star, Filter, Map, List, Home, ArrowRight } from "lucide-react";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import WishlistButton from "@/components/WishlistButton";
@@ -584,6 +585,24 @@ export default function Directory() {
                     </div>
                   );
                 })}
+              </div>
+
+              {/* Real Estate Help CTA Banner */}
+              <div className="mt-6 rounded-xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-5 md:p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100 shrink-0">
+                    <Home className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-display font-semibold text-foreground text-sm">Looking for a home or apartment?</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">We'll match you with a trusted local real estate expert — completely free.</p>
+                  </div>
+                  <Link href="/find-a-realtor">
+                    <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 shrink-0">
+                      Find a Realtor <ArrowRight className="w-3.5 h-3.5" />
+                    </Button>
+                  </Link>
+                </div>
               </div>
 
               {filteredServices.length === 0 && (

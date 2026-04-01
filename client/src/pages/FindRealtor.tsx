@@ -52,7 +52,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "How quickly will I hear back?",
-    a: "We aim to connect you with an agent within 24 hours. Most people hear back the same day.",
+    a: "We aim to connect you with an agent within 48 business hours. Many people hear back the same day.",
   },
   {
     q: "Can you help me find an apartment?",
@@ -184,7 +184,7 @@ export default function FindRealtor() {
             Request Received!
           </h1>
           <p className="text-lg text-muted-foreground mb-4 max-w-md mx-auto">
-            We've got your info and will connect you with a trusted Charlotte {isRenting ? "apartment specialist" : "real estate professional"} within 24 hours.
+            We've got your info and will connect you with a trusted Charlotte {isRenting ? "apartment specialist" : "real estate professional"} within 48 business hours.
           </p>
           <p className="text-sm text-muted-foreground mb-8 max-w-sm mx-auto">
             In the meantime, explore neighborhoods to get a head start on your search.
@@ -237,7 +237,7 @@ export default function FindRealtor() {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  24hr response time
+                  48hr business response
                 </div>
               </div>
             </div>
@@ -295,7 +295,7 @@ export default function FindRealtor() {
                 icon: <UserCheck className="w-6 h-6" />,
                 step: "2",
                 title: "We Match You",
-                desc: "Within 24 hours, we'll connect you with a vetted Charlotte agent who specializes in exactly what you need.",
+                desc: "Within 48 business hours, we'll connect you with a vetted Charlotte agent who specializes in exactly what you need.",
               },
               {
                 icon: <Home className="w-6 h-6" />,
@@ -431,7 +431,7 @@ export default function FindRealtor() {
             </div>
             <div className="flex flex-col items-center gap-2">
               <Clock className="w-5 h-5 text-emerald-500" />
-              <span className="text-xs text-muted-foreground">24hr Response</span>
+              <span className="text-xs text-muted-foreground">48hr Response</span>
             </div>
             <div className="flex flex-col items-center gap-2">
               <DollarSign className="w-5 h-5 text-emerald-500" />

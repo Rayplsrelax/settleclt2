@@ -991,10 +991,33 @@ export const appRouter = router({
           ...input,
           userId: ctx.user?.id ?? null,
         });
-        // Notify owner of new referral
+        // Notify owner of new referral lead
+        const typeLabels: Record<string, string> = {
+          buying: 'Buying a Home',
+          selling: 'Selling a Home',
+          renting: 'Renting an Apartment',
+          relocating: 'Relocating to Charlotte',
+          investing: 'Real Estate Investing',
+        };
+        const lines = [
+          `NEW LEAD — ${typeLabels[input.referralType] || input.referralType}`,
+          ``,
+          `Name: ${input.name}`,
+          `Email: ${input.email}`,
+          `Phone: ${input.phone || 'Not provided'}`,
+          ``,
+          `Service: ${typeLabels[input.referralType] || input.referralType}`,
+          `Budget: ${input.budget || 'Not specified'}`,
+          `Timeline: ${input.timeline || 'Not specified'}`,
+          `Preferred Neighborhoods: ${input.neighborhoods || 'Not specified'}`,
+          input.currentCity ? `Moving From: ${input.currentCity}` : '',
+          input.notes ? `\nNotes: ${input.notes}` : '',
+          ``,
+          `⏰ Respond within 48 business hours as promised on Settle CLT.`,
+        ].filter(Boolean).join('\n');
         await notifyOwner({
-          title: `New Real Estate Referral: ${input.name}`,
-          content: `Type: ${input.referralType}\nEmail: ${input.email}\nPhone: ${input.phone || 'N/A'}\nBudget: ${input.budget || 'N/A'}\nNeighborhoods: ${input.neighborhoods || 'N/A'}\nTimeline: ${input.timeline || 'N/A'}\nCurrent City: ${input.currentCity || 'N/A'}\nNotes: ${input.notes || 'N/A'}`,
+          title: `🏠 New Referral Lead: ${input.name} — ${typeLabels[input.referralType] || input.referralType}`,
+          content: lines,
         });
         return result;
       }),
