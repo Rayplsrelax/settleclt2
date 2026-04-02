@@ -353,3 +353,7 @@
 - [x] Add listing analytics for premium tier owners (views, clicks, leads tracking)
 - [x] Handle Stripe webhooks (checkout.session.completed, subscription.updated/deleted)
 - [x] Build admin management UI for premium listings (adminListPremium + adminUpdate procedures)
+
+## Bug Fix: FEATURED Badges Still Showing
+- [x] Fix Directory page: sorting now only prioritizes affiliate partners (not all featured items), rest sorted alphabetically
+- [x] Fix Events page: removed Featured badges, Featured Events section, and featured styling entirely (not tied to premium/monetization)

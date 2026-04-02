@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Calendar, CalendarPlus, MapPin, ExternalLink, Clock, Filter, Sparkles, Tag, Navigation } from "lucide-react";
+import { Calendar, CalendarPlus, MapPin, ExternalLink, Clock, Filter, Tag, Navigation } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import ShareButtons from "@/components/ShareButtons";
 import QuickStampButton from "@/components/QuickStampButton";
@@ -106,15 +106,10 @@ type EventType = {
 };
 
 function EventCard({ event, onClick, onCategoryClick, onNeighborhoodClick }: { event: EventType; onClick: () => void; onCategoryClick?: (category: string) => void; onNeighborhoodClick?: (neighborhood: string) => void }) {
-  const isFeatured = event.isFeatured === "yes";
   return (
     <button
       onClick={onClick}
-      className={`group text-left w-full rounded-xl border transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 overflow-hidden ${
-        isFeatured
-          ? "border-primary/30 bg-primary/5 ring-1 ring-primary/10"
-          : "border-border bg-card hover:border-primary/20"
-      }`}
+      className="group text-left w-full rounded-xl border transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 overflow-hidden border-border bg-card hover:border-primary/20"
     >
       {event.imageUrl && (
         <div className="h-40 overflow-hidden">
@@ -134,12 +129,7 @@ function EventCard({ event, onClick, onCategoryClick, onNeighborhoodClick }: { e
             >
               {CATEGORY_EMOJI[event.category]} {getCategoryLabel(event.category)}
             </Badge>
-            {isFeatured && (
-              <Badge className="bg-primary/10 text-primary border-primary/20 text-xs">
-                <Sparkles className="w-3 h-3 mr-1" />
-                Featured
-              </Badge>
-            )}
+
           </div>
           <QuickStampButton eventSlug={event.slug} area={event.neighborhood ?? undefined} />
         </div>
@@ -213,11 +203,6 @@ export default function Events() {
   );
 
   const events = allEvents ?? [];
-
-  const featuredEvents = useMemo(
-    () => events.filter((e) => e.isFeatured === "yes"),
-    [events]
-  );
 
   const upcomingEvents = useMemo(() => {
     const now = new Date();
@@ -322,26 +307,6 @@ export default function Events() {
           </div>
         ) : (
           <div className="space-y-12">
-            {/* Featured Events */}
-            {featuredEvents.length > 0 && !selectedCategory && (
-              <div>
-                <h2 className="font-display font-bold text-2xl text-foreground mb-6 flex items-center gap-2">
-                  <Sparkles className="w-6 h-6 text-primary" />
-                  Featured Events
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {featuredEvents.slice(0, 3).map((event) => (
-                    <EventCard
-                      key={event.id}
-                      event={event as EventType}
-                      onClick={() => setSelectedEvent(event as EventType)}
-                      onCategoryClick={(cat) => trackClickByName(cat, 'event-card')}
-                      onNeighborhoodClick={(n) => trackClickByName(n, 'event-card')}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Upcoming Events */}
             {upcomingEvents.length > 0 && (
@@ -406,11 +371,7 @@ export default function Events() {
                     {CATEGORY_EMOJI[selectedEvent.category]}{" "}
                     {getCategoryLabel(selectedEvent.category)}
                   </Badge>
-                  {selectedEvent.isFeatured === "yes" && (
-                    <Badge className="bg-primary/10 text-primary border-primary/20 text-xs">
-                      Featured
-                    </Badge>
-                  )}
+
                 </div>
                 <DialogTitle className="font-display text-xl">
                   {selectedEvent.title}

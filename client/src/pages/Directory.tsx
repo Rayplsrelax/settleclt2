@@ -162,21 +162,24 @@ export default function Directory() {
     }
 
     // Personalization: boost services in user's neighborhood
+    // Only affiliate partners get priority placement (not all featured items)
     if (myNeighborhoodData) {
       const myArea = myNeighborhoodData.name;
       result.sort((a, b) => {
         const aLocal = a.area.includes(myArea) ? 0 : 1;
         const bLocal = b.area.includes(myArea) ? 0 : 1;
         if (aLocal !== bLocal) return aLocal - bLocal;
-        if (a.featured && !b.featured) return -1;
-        if (!a.featured && b.featured) return 1;
-        return 0;
+        const aPartner = a.featured && a.affiliate ? 0 : 1;
+        const bPartner = b.featured && b.affiliate ? 0 : 1;
+        if (aPartner !== bPartner) return aPartner - bPartner;
+        return a.name.localeCompare(b.name);
       });
     } else {
       result.sort((a, b) => {
-        if (a.featured && !b.featured) return -1;
-        if (!a.featured && b.featured) return 1;
-        return 0;
+        const aPartner = a.featured && a.affiliate ? 0 : 1;
+        const bPartner = b.featured && b.affiliate ? 0 : 1;
+        if (aPartner !== bPartner) return aPartner - bPartner;
+        return a.name.localeCompare(b.name);
       });
     }
 
