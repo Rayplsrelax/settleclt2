@@ -42,7 +42,10 @@ export default function Footer() {
         </div>
         <div className="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground">&copy; {new Date().getFullYear()} Settle CLT. All rights reserved.</p>
-          <p className="text-xs text-muted-foreground">Made with care for the Queen City</p>
+          <div className="flex items-center gap-4">
+            <Link href="/privacy" className="text-xs text-muted-foreground hover:text-primary transition-colors no-underline">Privacy Policy</Link>
+            <Link href="/terms" className="text-xs text-muted-foreground hover:text-primary transition-colors no-underline">Terms of Service</Link>
+          </div>
         </div>
       </div>
     </footer>

@@ -306,3 +306,18 @@
 - [x] Add real Charlotte photography to blog cards (8 CDN images uploaded, articles.ts updated, Blog + Home pages rendering real photos)
 - [x] Make Google Maps direction links more visible on ALL directory listings (blue "Get Directions" pill button on every card)
 - [x] Make Google Maps direction links more visible on ALL event listings (blue "Directions" pill on list cards + "Get Directions" button in detail modal)
+
+## Comprehensive Assessment Implementation
+- [x] P1: Add Privacy Policy page with data collection disclosures
+- [x] P1: Add Terms of Service page
+- [x] P1: Add links to Privacy Policy and ToS in Footer
+- [x] P2: Fix Passport page to show compelling preview for unauthenticated users (already done)
+- [x] P2: Fix Bingo page to show compelling preview for unauthenticated users (landing page with card previews, how-it-works, CTA)
+- [x] P3: Remove universal "FEATURED" badge — now only shows for affiliate partners (future premium listing revenue)
+- [x] P4: Add testimonials/social proof section to Find Your Home page (3 success stories with star ratings)
+- [x] P5: Auto-archive past events older than 30 days (filter in frontend useMemo)
+- [x] P6: Add CTAs at end of blog articles (Neighborhood Quiz + Find Your Home)
+- [x] P7: Add NC Real Estate Commission compliance disclosures to Find Your Home page
+- [x] P8: Add referral source tracking to admin dashboard (quiz, neighborhood, directory, direct, blog, homepage)
+- [x] P9: Add success stories/testimonials to Find Your Home page (merged with P4)
+- [x] P10: Implement follow-up reminders for leads in "new" status >48 hours (alert banner + KPI card in admin dashboard)

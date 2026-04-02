@@ -1,0 +1,1 @@
+ALTER TABLE `referrals` ADD `referralSource` varchar(128);

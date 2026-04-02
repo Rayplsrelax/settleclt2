@@ -1,11 +1,12 @@
 import PageLayout from "@/components/PageLayout";
-import AuthGate from "@/components/AuthGate";
 import { trpc } from "@/lib/trpc";
 import { useState, useMemo } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import {
-  Grid3X3, Check, Trophy, ChevronDown, ChevronUp, Sparkles
+  Grid3X3, Check, Trophy, ChevronDown, ChevronUp, Sparkles, ArrowRight, LogIn
 } from "lucide-react";
+import { Link } from "wouter";
+import { getLoginUrl } from "@/const";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -305,6 +306,127 @@ function BingoContent() {
   );
 }
 
+function BingoLanding() {
+  return (
+    <div>
+      {/* Hero */}
+      <section className="relative bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-50 py-20 overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 w-32 h-32 rounded-full bg-teal-400" />
+          <div className="absolute bottom-10 right-20 w-48 h-48 rounded-full bg-cyan-300" />
+          <div className="absolute top-1/2 left-1/3 w-24 h-24 rounded-full bg-blue-400" />
+        </div>
+        <div className="container max-w-5xl relative">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-500/10 border border-teal-500/20 mb-6">
+              <Grid3X3 className="w-4 h-4 text-teal-600" />
+              <span className="text-sm font-medium text-teal-700">Charlotte Challenge Cards</span>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-4">
+              Explore Charlotte.
+              <br />
+              <span className="text-teal-600">One Square at a Time.</span>
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+              CLT Bingo gives you themed challenge cards to discover the best of Charlotte. Visit breweries, try coffee shops, explore date night spots, and complete newcomer essentials.
+            </p>
+            <div className="flex items-center justify-center gap-4">
+              <a
+                href={getLoginUrl()}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-teal-600 text-white font-semibold hover:bg-teal-700 transition-colors no-underline"
+              >
+                <LogIn className="w-4 h-4" />
+                Start Playing
+              </a>
+              <Link href="/passport" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border bg-background text-foreground font-semibold hover:bg-muted transition-colors no-underline">
+                CLT Passport
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Challenge Cards Preview */}
+      <section className="py-16 bg-background">
+        <div className="container max-w-5xl">
+          <h2 className="text-2xl font-display font-bold text-foreground text-center mb-12">Themed Challenge Cards</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { icon: "\uD83C\uDF7A", title: "Brewery Tour", desc: "Visit Charlotte's best breweries from NoDa to South End. 9 squares of craft beer heaven.", theme: "food-drink", color: "bg-amber-500/10 border-amber-200" },
+              { icon: "\u2615", title: "Best Coffee in CLT", desc: "Discover Charlotte's thriving coffee scene. From pour-overs to lattes, find your favorite.", theme: "food-drink", color: "bg-orange-500/10 border-orange-200" },
+              { icon: "\uD83C\uDF03", title: "Date Night CLT", desc: "Romantic restaurants, rooftop bars, and unique experiences for the perfect Charlotte date.", theme: "experiences", color: "bg-purple-500/10 border-purple-200" },
+            ].map((card) => (
+              <div key={card.title} className={`rounded-xl border p-6 ${card.color}`}>
+                <div className="text-3xl mb-3">{card.icon}</div>
+                <h3 className="font-display font-bold text-foreground mb-2">{card.title}</h3>
+                <p className="text-sm text-muted-foreground mb-4">{card.desc}</p>
+                <div className="grid grid-cols-3 gap-1">
+                  {Array.from({ length: 9 }).map((_, i) => (
+                    <div key={i} className="aspect-square rounded bg-muted/50 border border-border/50 flex items-center justify-center">
+                      {i < 3 ? <Check className="w-3 h-3 text-green-500" /> : <span className="text-xs text-muted-foreground">?</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-16 bg-muted/30">
+        <div className="container max-w-5xl">
+          <h2 className="text-2xl font-display font-bold text-foreground text-center mb-12">How It Works</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-14 h-14 rounded-2xl bg-teal-500/10 flex items-center justify-center mx-auto mb-4">
+                <Grid3X3 className="w-7 h-7 text-teal-600" />
+              </div>
+              <h3 className="font-semibold text-foreground mb-2">Pick a Card</h3>
+              <p className="text-sm text-muted-foreground">Choose from themed bingo cards like Brewery Tour, Coffee Crawl, Date Night, or Newcomer Challenge.</p>
+            </div>
+            <div className="text-center">
+              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="w-7 h-7 text-amber-600" />
+              </div>
+              <h3 className="font-semibold text-foreground mb-2">Visit & Check Off</h3>
+              <p className="text-sm text-muted-foreground">Visit the places on your card and check off each square. Auto-links with your CLT Passport stamps.</p>
+            </div>
+            <div className="text-center">
+              <div className="w-14 h-14 rounded-2xl bg-green-500/10 flex items-center justify-center mx-auto mb-4">
+                <Trophy className="w-7 h-7 text-green-600" />
+              </div>
+              <h3 className="font-semibold text-foreground mb-2">Complete & Share</h3>
+              <p className="text-sm text-muted-foreground">Complete a full card to earn bragging rights. Share your progress and climb the leaderboard.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-16 bg-background">
+        <div className="container max-w-3xl text-center">
+          <Grid3X3 className="w-12 h-12 text-teal-600 mx-auto mb-4" />
+          <h2 className="text-2xl font-display font-bold text-foreground mb-4">
+            Ready to play CLT Bingo?
+          </h2>
+          <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
+            Create a free account and start checking off Charlotte's best spots. It takes less than 30 seconds.
+          </p>
+          <a
+            href={getLoginUrl()}
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg bg-teal-600 text-white font-semibold text-lg hover:bg-teal-700 transition-colors no-underline"
+          >
+            <LogIn className="w-5 h-5" />
+            Start Playing Bingo
+          </a>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 export default function BingoCards() {
   useSEO({
     title: "CLT Bingo — Charlotte Challenge Cards",
@@ -313,11 +435,29 @@ export default function BingoCards() {
     path: "/bingo",
   });
 
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <PageLayout>
+        <div className="min-h-[40vh] flex items-center justify-center">
+          <div className="animate-pulse text-muted-foreground">Loading...</div>
+        </div>
+      </PageLayout>
+    );
+  }
+
+  if (!user) {
+    return (
+      <PageLayout>
+        <BingoLanding />
+      </PageLayout>
+    );
+  }
+
   return (
     <PageLayout>
-      <AuthGate featureLabel="play CLT Bingo">
-        <BingoContent />
-      </AuthGate>
+      <BingoContent />
     </PageLayout>
   );
 }

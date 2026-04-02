@@ -1,7 +1,7 @@
 import PageLayout from "@/components/PageLayout";
 import { trpc } from "@/lib/trpc";
 import { useParams, Link } from "wouter";
-import { ArrowLeft, Calendar, Clock, User, BookOpen } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, User, BookOpen, Home, Compass, ArrowRight } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
 import { Button } from "@/components/ui/button";
 import CommentSection from "@/components/CommentSection";
@@ -143,6 +143,38 @@ export default function BlogArticle() {
             __html: `<p class="text-foreground/90 leading-relaxed mb-4">${htmlContent}</p>`
           }}
         />
+
+        {/* End-of-Article CTAs */}
+        <div className="mt-12 grid gap-4 sm:grid-cols-2">
+          <Link href="/quiz" className="no-underline">
+            <div className="group rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 p-5 hover:border-primary/40 transition-all cursor-pointer h-full">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Compass className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">Find Your Neighborhood</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">Take our 2-minute quiz to discover which Charlotte neighborhood fits your lifestyle.</p>
+              <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
+                Take the Quiz <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </div>
+          </Link>
+          <Link href="/find-your-home?source=blog" className="no-underline">
+            <div className="group rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-5 hover:border-emerald-300 transition-all cursor-pointer h-full">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                  <Home className="w-5 h-5 text-emerald-600" />
+                </div>
+                <h3 className="font-semibold text-foreground group-hover:text-emerald-700 transition-colors">Find Your Home</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">Get matched with a local real estate expert — free, no obligation.</p>
+              <span className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600">
+                Get Started <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </div>
+          </Link>
+        </div>
 
         {/* Comments */}
         <div className="mt-12 pt-8 border-t border-border">

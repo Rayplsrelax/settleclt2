@@ -985,6 +985,7 @@ export const appRouter = router({
         timeline: z.string().optional(),
         notes: z.string().optional(),
         currentCity: z.string().optional(),
+        referralSource: z.string().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         const result = await submitReferral({
@@ -1012,6 +1013,7 @@ export const appRouter = router({
           `Preferred Neighborhoods: ${input.neighborhoods || 'Not specified'}`,
           input.currentCity ? `Moving From: ${input.currentCity}` : '',
           input.notes ? `\nNotes: ${input.notes}` : '',
+          input.referralSource ? `Source: ${input.referralSource}` : '',
           ``,
           `⏰ Respond within 48 business hours as promised on Settle CLT.`,
         ].filter(Boolean).join('\n');

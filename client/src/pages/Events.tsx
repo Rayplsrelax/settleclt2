@@ -226,7 +226,11 @@ export default function Events() {
 
   const pastEvents = useMemo(() => {
     const now = new Date();
-    return events.filter((e) => new Date(e.startDate) < now);
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    return events.filter((e) => {
+      const start = new Date(e.startDate);
+      return start < now && start >= thirtyDaysAgo;
+    });
   }, [events]);
 
   return (

@@ -85,6 +85,8 @@ export default function AdminReferrals() {
 
   const byStatus = (stats?.byStatus || {}) as Record<string, number>;
   const byType = (stats?.byType || {}) as Record<string, number>;
+  const bySource = ((stats as any)?.bySource || {}) as Record<string, number>;
+  const needsFollowUp = (stats as any)?.needsFollowUp || 0;
   const pipelineStages = [
     { key: "new", label: "New", count: byStatus['new'] || 0 },
     { key: "contacted", label: "Contacted", count: byStatus['contacted'] || 0 },
@@ -158,7 +160,9 @@ export default function AdminReferrals() {
                     <AlertTriangle className="w-4 h-4 text-amber-500" />
                   </div>
                   <div className="text-3xl font-bold text-amber-600">{byStatus['new'] || 0}</div>
-                  <p className="text-xs text-muted-foreground mt-1">New / uncontacted leads</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {needsFollowUp > 0 ? <span className="text-red-600 font-medium">{needsFollowUp} overdue (48h+)</span> : 'New / uncontacted leads'}
+                  </p>
                 </CardContent>
               </Card>
               <Card className="border-0 shadow-sm">
@@ -218,6 +222,24 @@ export default function AdminReferrals() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Follow-up Alert */}
+            {needsFollowUp > 0 && (
+              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 flex items-center gap-3">
+                <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-red-800">
+                    {needsFollowUp} lead{needsFollowUp > 1 ? 's' : ''} overdue for follow-up
+                  </p>
+                  <p className="text-xs text-red-600 mt-0.5">
+                    These leads have been in "New" status for more than 48 hours. Respond promptly to maintain the 48-hour promise.
+                  </p>
+                </div>
+                <Button size="sm" variant="outline" className="ml-auto border-red-300 text-red-700 hover:bg-red-100 shrink-0" onClick={() => { setStatusFilter('new'); setView('list'); }}>
+                  View Leads
+                </Button>
+              </div>
+            )}
 
             {/* Two-column: Lead Types + Monthly Trend */}
             <div className="grid md:grid-cols-2 gap-4 mb-6">
@@ -283,6 +305,37 @@ export default function AdminReferrals() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Source Breakdown */}
+            {Object.keys(bySource).length > 0 && (
+              <Card className="border-0 shadow-sm mb-6">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-semibold">Leads by Source</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {Object.entries(bySource).sort(([,a],[,b]) => (b as number) - (a as number)).map(([source, count]) => {
+                      const pct = stats?.total ? Math.round(((count as number) / stats.total) * 100) : 0;
+                      const sourceLabels: Record<string, string> = {
+                        direct: 'Direct Visit',
+                        quiz: 'Neighborhood Quiz',
+                        neighborhood: 'Neighborhood Page',
+                        directory: 'Directory',
+                        blog: 'Blog Article',
+                        homepage: 'Homepage CTA',
+                      };
+                      return (
+                        <div key={source} className="rounded-lg border border-border bg-white p-3 text-center">
+                          <div className="text-2xl font-bold text-foreground">{count as number}</div>
+                          <div className="text-xs text-muted-foreground mt-1">{sourceLabels[source] || source}</div>
+                          <div className="text-[10px] text-muted-foreground">{pct}%</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Recent Leads Quick View */}
             <Card className="border-0 shadow-sm">

@@ -420,6 +420,8 @@ export const referrals = mysqlTable("referrals", {
   notes: text("notes"),
   /** Current city (for relocators) */
   currentCity: varchar("currentCity", { length: 255 }),
+  /** Referral source tracking (quiz, neighborhood, directory, direct, etc.) */
+  referralSource: varchar("referralSource", { length: 128 }),
   /** Status tracking */
   status: mysqlEnum("status", ["new", "contacted", "matched", "closed", "lost"]).default("new").notNull(),
   /** Admin notes */

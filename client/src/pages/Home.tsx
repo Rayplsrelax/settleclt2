@@ -80,7 +80,7 @@ function Hero() {
                 Browse Directory
               </Button>
             </Link>
-            <Link href="/find-your-home">
+            <Link href="/find-your-home?source=homepage">
               <Button
                 size="lg"
                 className="bg-clt-gold hover:bg-clt-gold/90 text-clt-navy font-semibold px-6 shadow-lg shadow-clt-gold/20"

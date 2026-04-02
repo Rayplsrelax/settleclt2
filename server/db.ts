@@ -1151,14 +1151,17 @@ export async function updateReferralStatus(id: number, status: string, adminNote
 
 export async function getReferralStats() {
   const db = await getDb();
-  if (!db) return { total: 0, byStatus: {}, byType: {}, conversionRate: 0, avgAgeDays: 0, monthlyTrend: [] as { month: string; count: number }[], recentLeads: [] as any[] };
+  if (!db) return { total: 0, byStatus: {}, byType: {}, bySource: {}, conversionRate: 0, avgAgeDays: 0, monthlyTrend: [] as { month: string; count: number }[], recentLeads: [] as any[], needsFollowUp: 0 };
   const all = await db.select().from(referrals).orderBy(desc(referrals.createdAt));
   const total = all.length;
   const byStatus: Record<string, number> = {};
   const byType: Record<string, number> = {};
+  const bySource: Record<string, number> = {};
   all.forEach(r => {
     byStatus[r.status] = (byStatus[r.status] || 0) + 1;
     byType[r.referralType] = (byType[r.referralType] || 0) + 1;
+    const src = (r as any).referralSource || 'direct';
+    bySource[src] = (bySource[src] || 0) + 1;
   });
   // Conversion rate: closed / (total - new)
   const closed = byStatus['closed'] || 0;
@@ -1186,5 +1189,8 @@ export async function getReferralStats() {
     id: r.id, name: r.name, referralType: r.referralType, status: r.status,
     createdAt: r.createdAt, neighborhoods: r.neighborhoods,
   }));
-  return { total, byStatus, byType, conversionRate, avgAgeDays, monthlyTrend, recentLeads };
+  // Leads in "new" status for > 48 hours that need follow-up
+  const fortyEightHours = 48 * 60 * 60 * 1000;
+  const needsFollowUp = all.filter(r => r.status === 'new' && (now - new Date(r.createdAt).getTime()) > fortyEightHours).length;
+  return { total, byStatus, byType, bySource, conversionRate, avgAgeDays, monthlyTrend, recentLeads, needsFollowUp };
 }

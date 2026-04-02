@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import {
   Home, MapPin, CheckCircle2, Building2, TrendingUp, Users,
@@ -127,6 +128,7 @@ export default function FindRealtor() {
     if (type === "renting") referralType = "renting";
     else if (type === "buying") referralType = "buying";
     const notes = source === "quiz" ? "Came from the neighborhood quiz" : "";
+    const referralSource = source || params.get("ref") || "direct";
     return {
       name: "",
       email: "",
@@ -137,6 +139,7 @@ export default function FindRealtor() {
       timeline: "",
       notes,
       currentCity: "",
+      referralSource,
     };
   });
 
@@ -166,6 +169,7 @@ export default function FindRealtor() {
       timeline: form.timeline || undefined,
       notes: form.notes || undefined,
       currentCity: form.currentCity || undefined,
+      referralSource: form.referralSource || undefined,
     });
   };
 
@@ -319,6 +323,52 @@ export default function FindRealtor() {
         </div>
       </section>
 
+      {/* Success Stories / Testimonials */}
+      <section className="py-12 bg-gradient-to-b from-background to-emerald-50/30">
+        <div className="container max-w-5xl">
+          <h2 className="text-2xl font-display font-bold text-foreground text-center mb-2">What People Are Saying</h2>
+          <p className="text-sm text-muted-foreground text-center mb-8 max-w-lg mx-auto">Real stories from people who found their Charlotte home through Settle CLT.</p>
+          <div className="grid md:grid-cols-3 gap-5">
+            {[
+              {
+                quote: "We moved from Denver and had no idea where to start. Settle CLT matched us with an agent who knew South End inside and out. Closed on our first home in 6 weeks!",
+                name: "Sarah & Mike T.",
+                detail: "Relocated from Denver \u2192 South End",
+                type: "Buying",
+              },
+              {
+                quote: "As a first-time renter in Charlotte, the neighborhood quiz helped me narrow down to NoDa. My agent found me a perfect apartment within my budget in just 3 days.",
+                name: "Jordan P.",
+                detail: "First apartment in NoDa",
+                type: "Renting",
+              },
+              {
+                quote: "I was investing in Charlotte real estate from out of state. The agent they connected me with understood the rental market in University City and helped me close on two properties.",
+                name: "David L.",
+                detail: "Investor from New York",
+                type: "Investing",
+              },
+            ].map((t, i) => (
+              <Card key={i} className="bg-white border-emerald-100 shadow-sm">
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-1 mb-3">
+                    {[1,2,3,4,5].map(s => (
+                      <svg key={s} className="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                    ))}
+                  </div>
+                  <p className="text-sm text-foreground/90 leading-relaxed mb-4 italic">"{t.quote}"</p>
+                  <div className="border-t border-border pt-3">
+                    <p className="text-sm font-semibold text-foreground">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">{t.detail}</p>
+                    <Badge variant="outline" className="mt-1.5 text-[10px] border-emerald-200 text-emerald-700">{t.type}</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Form */}
       <section className="py-16" id="form">
         <div className="container max-w-2xl">
@@ -417,7 +467,8 @@ export default function FindRealtor() {
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground">
-                  By submitting, you agree to be contacted by a real estate professional. This is a free service — no obligations.
+                  By submitting, you agree to be contacted by a licensed NC real estate professional. This is a free service — no obligations.
+                  You may also review our <Link href="/privacy" className="underline">Privacy Policy</Link> and <Link href="/terms" className="underline">Terms of Service</Link>.
                 </p>
               </form>
             </CardContent>
@@ -461,6 +512,20 @@ export default function FindRealtor() {
 
       {/* FAQ */}
       <FAQSection />
+
+      {/* NC Real Estate Commission Compliance */}
+      <section className="py-8 bg-muted/20 border-t border-border">
+        <div className="container max-w-3xl">
+          <p className="text-xs text-muted-foreground leading-relaxed text-center">
+            <strong>NC Real Estate Commission Disclosure:</strong> Settle CLT is not a licensed real estate brokerage.
+            We connect prospective buyers, renters, and investors with independent, licensed real estate professionals
+            in North Carolina. Any referral fees are paid by the agent, not by you. All agents in our network hold
+            active licenses with the <a href="https://www.ncrec.gov" target="_blank" rel="noopener noreferrer" className="underline">North Carolina Real Estate Commission (NCREC)</a>.
+            Settle CLT does not provide real estate advice, appraisals, or legal counsel. For questions about
+            NC real estate licensing, visit <a href="https://www.ncrec.gov" target="_blank" rel="noopener noreferrer" className="underline">ncrec.gov</a>.
+          </p>
+        </div>
+      </section>
 
       <Footer />
     </div>

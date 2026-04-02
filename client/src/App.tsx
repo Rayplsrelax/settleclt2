@@ -31,6 +31,8 @@ const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics"));
 const AdminDigest = lazy(() => import("./pages/AdminDigest"));
 const FindYourHome = lazy(() => import("./pages/FindRealtor"));
 const AdminReferrals = lazy(() => import("./pages/AdminReferrals"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 
 function PageLoader() {
   return (
@@ -68,6 +70,8 @@ function Router() {
         <Route path="/admin/referrals" component={AdminReferrals} />
         <Route path="/find-your-home" component={FindYourHome} />
         <Route path="/find-a-realtor">{() => <Redirect to="/find-your-home" />}</Route>
+        <Route path="/privacy" component={PrivacyPolicy} />
+        <Route path="/terms" component={TermsOfService} />
         <Route path="/tag/:slug" component={TagPage} />
         <Route path="/blog/:slug" component={BlogArticle} />
         <Route path="/404" component={NotFound} />

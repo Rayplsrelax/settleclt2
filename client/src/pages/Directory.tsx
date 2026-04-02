@@ -500,7 +500,7 @@ export default function Directory() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <h3 className="font-semibold text-sm text-foreground">{s.name}</h3>
-                            {s.featured && (
+                            {s.featured && s.affiliate && (
                               <span className="px-1.5 py-0.5 rounded bg-clt-gold/20 text-clt-gold text-[10px] font-bold uppercase">Featured</span>
                             )}
                           </div>
@@ -592,7 +592,7 @@ export default function Directory() {
                     <h3 className="font-display font-semibold text-foreground text-sm">Looking for a home or apartment?</h3>
                     <p className="text-xs text-muted-foreground mt-0.5">We'll match you with a trusted local real estate expert — completely free.</p>
                   </div>
-                  <Link href="/find-your-home">
+                  <Link href="/find-your-home?source=directory">
                     <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 shrink-0">
                       Find Your Home <ArrowRight className="w-3.5 h-3.5" />
                     </Button>
