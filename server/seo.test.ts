@@ -90,7 +90,7 @@ describe("Sitemap Enhancement", () => {
     expect(content).toContain("/terms-of-service");
   });
 
-  it("should have all 42 directory categories in sitemap", async () => {
+  it("should have all 54 directory categories in sitemap", async () => {
     const content = await import("fs").then((fs) =>
       fs.readFileSync("./server/_core/index.ts", "utf-8")
     );
@@ -99,7 +99,7 @@ describe("Sitemap Enhancement", () => {
     expect(match).toBeTruthy();
     const categories = match![1].match(/"([^"]+)"/g);
     expect(categories).toBeTruthy();
-    expect(categories!.length).toBe(42);
+    expect(categories!.length).toBe(54);
   });
 
   it("should generate XML for directory category URLs", async () => {

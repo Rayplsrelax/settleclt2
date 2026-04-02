@@ -374,3 +374,12 @@
 - [x] Enhance sitemap with 42 directory category pages, privacy/terms pages, proper lastmod dates
 - [x] Created reusable useStructuredData hook with schema builders (Organization, LocalBusiness, Event, Article, Breadcrumb)
 - [x] Canonical URLs and robots.txt already correct (verified)
+
+## Directory Expansion: Double to ~800 Listings
+- [x] Audit current category distribution and identify gaps (386 listings across 42 categories)
+- [x] Research real Charlotte businesses via Gemini API (51 + 16 batch calls)
+- [x] Added 327 new deduplicated listings (713 total, up from 386)
+- [x] Added 12 new experience/lifestyle categories (54 total): Nightlife, Outdoor & Parks, Tours, Art & Culture, Live Music, Yoga & Wellness, Sports & Recreation, Kids Activities, Date Night, Classes & Workshops, Shopping & Boutiques, Wedding & Events
+- [x] Balanced distribution: Restaurants (47), Breweries (37), Coffee (33), Food Trucks (28), all others 6-19
+- [x] All listings have complete data (name, phone, website, description, area, category)
+- [x] Updated sitemap with all 54 directory category pages

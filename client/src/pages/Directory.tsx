@@ -78,8 +78,8 @@ const GROUP_COLORS: Record<string, string> = {
 
 export default function Directory() {
   useSEO({
-    title: "Charlotte Business Directory — 400+ Local Businesses",
-    description: "Discover 400+ Charlotte businesses across 40 categories including restaurants, breweries, coffee shops, food trucks, and services. Ratings, hours, and reviews.",
+    title: "Charlotte Business Directory — 700+ Local Businesses",
+    description: "Discover 700+ Charlotte businesses across 50+ categories including restaurants, breweries, coffee shops, food trucks, nightlife, yoga, tours, and more. Ratings, hours, and reviews.",
     keywords: "Charlotte restaurants, Charlotte breweries, Charlotte businesses, Charlotte food trucks, Charlotte coffee shops, local directory Charlotte NC, Charlotte services",
     path: "/directory",
   });
@@ -314,7 +314,7 @@ export default function Directory() {
               <h1 className="font-display font-extrabold text-3xl md:text-4xl text-white">Services Directory</h1>
               <p className="mt-2 text-white/70">{SERVICES.length}+ Charlotte businesses across {SERVICE_CATEGORIES.length} categories</p>
             </div>
-            <ShareButtons compact title="Charlotte Services Directory - Settle CLT" description="Discover 400+ local businesses in Charlotte" className="text-white hover:text-white/80" />
+            <ShareButtons compact title="Charlotte Services Directory - Settle CLT" description="Discover 700+ local businesses in Charlotte" className="text-white hover:text-white/80" />
           </div>
 
           {/* Neighborhood banner */}

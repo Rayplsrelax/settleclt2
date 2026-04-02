@@ -1,0 +1,1122 @@
+[
+  {
+    "name": "Mac's Speed Shop",
+    "description": "A legendary Charlotte BBQ joint offering slow-smoked meats, classic Southern sides, and a lively atmosphere with live music and motorcycles.",
+    "phone": "(704) 522-6227",
+    "website": "https://macspeedshop.com",
+    "area": "South End",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Noble Smoke",
+    "description": "A renowned BBQ spot serving authentic, Carolina-style barbecue with a focus on whole-hog and pit-smoked meats in a rustic setting.",
+    "phone": "(704) 397-3000",
+    "website": "https://noblesmokebbq.com",
+    "area": "West Charlotte",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Sabor Latin Street Grill",
+    "description": "A local favorite for fresh, authentic Latin street food, offering a vibrant menu of tacos, burritos, and more from various Latin American countries.",
+    "phone": "(704) 835-2575",
+    "website": "https://saborlatinstreetgrill.com",
+    "area": "NoDa",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Velvet Taco",
+    "description": "A unique taco experience featuring globally-inspired flavors and inventive ingredient combinations, all served in a chic, vibrant setting.",
+    "phone": "(980) 299-7383",
+    "website": "https://www.velvettaco.com",
+    "area": "South End",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "JINYA Ramen Bar",
+    "description": "An authentic Japanese ramen shop serving slow-cooked broths, tender noodles, and a variety of delicious toppings in a modern, casual environment.",
+    "phone": "(704) 571-7000",
+    "website": "https://jinya-ramenbar.com",
+    "area": "Uptown",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Inizio Pizza Napoletana",
+    "description": "Crafting authentic Neapolitan pizza with imported ingredients and cooked in a 900-degree wood-fired oven for a perfect, chewy crust.",
+    "phone": "(704) 222-8351",
+    "website": "https://iniziopizza.com",
+    "area": "Dilworth",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Benny's Big Time Pizzeria",
+    "description": "From award-winning chef Vivian Howard, this pizzeria offers classic, New York-style pizzas with unique toppings in a lively and spacious setting.",
+    "phone": "(704) 919-0925",
+    "website": "https://www.bennysbigtime.com",
+    "area": "Plaza Midwood",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Snooze, an A.M. Eatery",
+    "description": "A popular, retro-inspired breakfast and brunch spot known for its creative pancake flights, Benedicts, and energetic atmosphere.",
+    "phone": "(980) 299-2470",
+    "website": "https://www.snoozeeatery.com",
+    "area": "South End",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "The Flying Biscuit Cafe",
+    "description": "A beloved Southern breakfast and lunch spot famous for its fluffy biscuits, creamy grits, and whimsical, cozy atmosphere.",
+    "phone": "(704) 332-8411",
+    "website": "https://www.flyingbiscuit.com",
+    "area": "Dilworth",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Cuzzo's Cuisine",
+    "description": "Serving up delicious, homemade Southern comfort food with a focus on classic soul food dishes, including fried chicken and mac & cheese.",
+    "phone": "(980) 355-0814",
+    "website": "https://www.cuzzoscuisine.com",
+    "area": "South End",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Nana's Soul Food Kitchen",
+    "description": "A cherished spot offering generous portions of traditional soul food, from collard greens to candied yams, served in a warm, welcoming environment.",
+    "phone": "(704) 548-8120",
+    "website": "https://www.nanassoulfood.com",
+    "area": "University City",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Calle Sol Latin Cafe & Cevicheria",
+    "description": "A vibrant cafe celebrating the diverse culinary traditions of Latin America with a focus on fresh ceviche, flavorful empanadas, and classic cocktails.",
+    "phone": "(704) 496-5115",
+    "website": "https://www.callesolcafe.com",
+    "area": "Plaza Midwood",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "North Italia",
+    "description": "A stylish Italian eatery offering handcrafted pasta, wood-fired pizzas, and classic dishes made with fresh, seasonal ingredients in a lively atmosphere.",
+    "phone": "(704) 912-3200",
+    "website": "https://www.northitalia.com",
+    "area": "South End",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "RuRu's Tacos & Tequila",
+    "description": "A vibrant and popular spot known for its creative tacos, extensive tequila menu, and spacious patio perfect for al fresco dining.",
+    "phone": "(980) 335-0101",
+    "website": "https://rurustacos.com",
+    "area": "Myers Park",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Pizzeria Omaggio",
+    "description": "A highly-rated pizzeria specializing in authentic Neapolitan-style pizzas, fresh salads, and Italian street food in a cozy neighborhood setting.",
+    "phone": "(704) 377-0100",
+    "website": "https://www.pizzeriaomaggio.com",
+    "area": "Elizabeth",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Lower Left Brewing Co.",
+    "description": "A hidden gem in South End, crafting a diverse range of approachable beers in a cozy, community-focused taproom.",
+    "phone": "(980) 207-1678",
+    "website": "https://www.lowerleftbrewing.com/",
+    "area": "South End",
+    "category": "breweries",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Petty Thieves Brewing Co.",
+    "description": "Known for its eclectic atmosphere and adventurous brews, this NoDa spot pushes the boundaries with unique flavors and styles.",
+    "phone": "(980) 237-7707",
+    "website": "https://www.pettythievesbrewing.com/",
+    "area": "NoDa",
+    "category": "breweries",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Heist Brewery and Barrel Arts",
+    "description": "Specializing in innovative sours, barrel-aged beers, and wood-fired pizzas, this expansive facility offers a unique culinary and craft beer experience in Camp North End.",
+    "phone": "(980) 430-5568",
+    "website": "https://heistbrewery.com/barrel-arts/",
+    "area": "Charlotte Metro",
+    "category": "breweries",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Divine Barrel Brewing",
+    "description": "A beloved NoDa brewery focused on quality and variety, offering everything from crisp lagers to juicy IPAs in a vibrant taproom setting.",
+    "phone": "(980) 207-9195",
+    "website": "https://divinebarrel.com/",
+    "area": "NoDa",
+    "category": "breweries",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "HopFly Brewing Company",
+    "description": "Bringing their highly-rated brews from Raleigh to South End, HopFly offers a relaxed vibe with a focus on fresh, flavorful IPAs and diverse craft beer styles.",
+    "phone": "(904) 505-8664",
+    "website": "https://hopflybrewing.com/",
+    "area": "South End",
+    "category": "breweries",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Gilde Brewery",
+    "description": "Experience authentic German brewing traditions in Lower South End, featuring classic lagers and a delicious food menu in a beautiful biergarten setting.",
+    "phone": "(980) 294-0130",
+    "website": "https://gilde.com/",
+    "area": "South End",
+    "category": "breweries",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Helm's Deep Brewing",
+    "description": "A true neighborhood brewery in Pineville, known for its friendly atmosphere and rotating selection of well-crafted, small-batch beers.",
+    "phone": "(980) 237-1335",
+    "website": "https://www.helmsdeepbrewing.com/",
+    "area": "Pineville",
+    "category": "breweries",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Pilot Brewing",
+    "description": "This Plaza Midwood nanobrewery offers an ever-changing lineup of experimental and small-batch beers, inviting patrons to explore new and unique flavors.",
+    "phone": "(980) 207-5264",
+    "website": "https://www.pilotbrewing.com/",
+    "area": "Plaza Midwood",
+    "category": "breweries",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Midnight Mulligan Brewing",
+    "description": "Located in the historic Wesley Heights neighborhood, this brewery offers a diverse tap list, tasty food, and a spacious patio with city views.",
+    "phone": "(704) 248-3568",
+    "website": "https://midnightmulligan.com/",
+    "area": "West Charlotte",
+    "category": "breweries",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Primal Brewery",
+    "description": "A popular community hub in Huntersville, serving up a wide array of excellent craft beers, often with live music and food trucks.",
+    "phone": "(980) 285-6477",
+    "website": "https://primalbrewery.com/",
+    "area": "Huntersville",
+    "category": "breweries",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Central Coffee Co.",
+    "description": "A beloved local spot known for its cozy atmosphere, delicious coffee, and house-made pastries, perfect for a casual meet-up or work session.",
+    "phone": "(704) 372-7470",
+    "website": "centralcoffeeco.com",
+    "area": "Plaza Midwood",
+    "category": "coffee-shops",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Smelly Cat Coffeehouse",
+    "description": "An eclectic and vibrant coffee shop in the heart of NoDa, offering a diverse menu of coffee, tea, and baked goods in a bohemian setting.",
+    "phone": "(704) 374-9659",
+    "website": "smellycatcoffee.com",
+    "area": "NoDa",
+    "category": "coffee-shops",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Not Just Coffee (Atherton)",
+    "description": "A stylish and popular coffee shop known for its carefully crafted espresso drinks and a modern, airy ambiance within the vibrant Atherton Mill.",
+    "phone": "(980) 237-7561",
+    "website": "notjustcoffee.com",
+    "area": "South End",
+    "category": "coffee-shops",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Trade and Lore Coffee",
+    "description": "A craft coffee experience focused on unique roasts and meticulous preparation, providing a bright and inviting space for coffee enthusiasts downtown.",
+    "phone": "(980) 237-9759",
+    "website": "tradeandlore.com",
+    "area": "Uptown",
+    "category": "coffee-shops",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Amelie's French Bakery & Cafe (NoDa)",
+    "description": "An iconic 24/7 French-inspired bakery and cafe famous for its whimsical decor, delectable pastries, and excellent coffee, perfect for any time of day.",
+    "phone": "(704) 376-1507",
+    "website": "ameliesfrenchbakery.com",
+    "area": "NoDa",
+    "category": "coffee-shops",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "The Giddy Goat Coffee Roasters",
+    "description": "A popular local roaster and cafe offering a wide selection of expertly roasted coffees, delicious breakfast, and brunch items in a lively atmosphere.",
+    "phone": "(704) 264-6725",
+    "website": "thegiddygoatcoffeeroasters.com",
+    "area": "Plaza Midwood",
+    "category": "coffee-shops",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Queen City Grounds",
+    "description": "A spacious and modern coffee shop in Uptown, known for its high-quality coffee, diverse food menu, and comfortable environment for working or socializing.",
+    "phone": "(980) 207-6232",
+    "website": "queencitygrounds.com",
+    "area": "Uptown",
+    "category": "coffee-shops",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Sunflour Baking Company (Elizabeth)",
+    "description": "A beloved neighborhood bakery and cafe serving freshly baked breads, pastries, sandwiches, and exceptional coffee in a cozy setting.",
+    "phone": "(704) 332-9500",
+    "website": "sunflourbakingcompany.com",
+    "area": "Elizabeth",
+    "category": "coffee-shops",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Dot Dot Dot",
+    "description": "A members-only speakeasy offering expertly crafted cocktails in a discreet, sophisticated setting behind Bardo.",
+    "phone": "(704) 797-2270",
+    "website": "https://dotdotdotclt.com/",
+    "area": "Myers Park",
+    "category": "nightlife",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Merchant & Trade",
+    "description": "An upscale rooftop bar offering stunning panoramic views of the city skyline, unique cocktails, and a chic lounge atmosphere.",
+    "phone": "(704) 526-9807",
+    "website": "https://merchantandtrade.com/",
+    "area": "Uptown",
+    "category": "nightlife",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "VBGB Beer Hall and Garden",
+    "description": "A sprawling beer hall with a massive patio, sand volleyball courts, live music, and a huge selection of local and regional beers.",
+    "phone": "(704) 333-4111",
+    "website": "https://www.vbgb.com/",
+    "area": "Charlotte Metro",
+    "category": "nightlife",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Soul Gastrolounge",
+    "description": "A vibrant spot known for its inventive global tapas, creative cocktails, and lively atmosphere with a rooftop patio.",
+    "phone": "(704) 348-5772",
+    "website": "https://soulgastrolounge.com/",
+    "area": "Plaza Midwood",
+    "category": "nightlife",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Idlewild",
+    "description": "An intimate, reservations-only cocktail bar offering a bespoke drink experience tailored to each guest's preferences.",
+    "phone": "(980) 263-9528",
+    "website": "https://idlewildclt.com/",
+    "area": "NoDa",
+    "category": "nightlife",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "The Cellar at Duckworth's",
+    "description": "A hidden, sophisticated speakeasy-style bar beneath Duckworth's, featuring an extensive whiskey selection and classic cocktails.",
+    "phone": "(980) 938-2398",
+    "website": "https://thecellaratduckworths.com/",
+    "area": "Uptown",
+    "category": "nightlife",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Suffolk Punch",
+    "description": "A unique concept combining a brewery, coffee bar, and scratch kitchen, offering a wide array of craft beers, cocktails, and delicious food.",
+    "phone": "(980) 224-7667",
+    "website": "https://thesuffolkpunch.com/",
+    "area": "South End",
+    "category": "nightlife",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Whiskey Warehouse",
+    "description": "A popular neighborhood bar in Plaza Midwood known for its extensive whiskey selection, pub fare, and spacious outdoor patio.",
+    "phone": "(704) 332-7243",
+    "website": "https://www.whiskeywarehouse.com/",
+    "area": "Plaza Midwood",
+    "category": "nightlife",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Freedom Park",
+    "description": "A sprawling urban park featuring a lake, walking trails, sports fields, and a popular playground, known for its iconic steam locomotive.",
+    "phone": "(980) 314-1000",
+    "website": "https://www.mecknc.gov/ParkandRec/Parks/Pages/Freedom-Park.aspx",
+    "area": "Dilworth",
+    "category": "outdoor-parks",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "McDowell Nature Preserve",
+    "description": "Mecklenburg County's oldest and largest nature preserve, offering extensive hiking trails, camping, kayaking, and a nature center along Lake Wylie.",
+    "phone": "(980) 314-2500",
+    "website": "https://www.mecknc.gov/ParkandRec/StewardshipServices/NatureCenters/Pages/McDowellNatureCenter.aspx",
+    "area": "South Charlotte",
+    "category": "outdoor-parks",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Anne Springs Close Greenway",
+    "description": "A vast 2,100-acre nature preserve in Fort Mill, SC, offering miles of trails for hiking, biking, horseback riding, and various outdoor activities.",
+    "phone": "(803) 547-4575",
+    "website": "https://www.ascgreenway.org/",
+    "area": "Fort Mill",
+    "category": "outdoor-parks",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "U.S. National Whitewater Center",
+    "description": "The world's largest man-made whitewater river, offering kayaking, rafting, zip-lining, rock climbing, mountain biking, and various outdoor adventures.",
+    "phone": "(704) 391-3900",
+    "website": "https://whitewater.org/",
+    "area": "West Charlotte",
+    "category": "outdoor-parks",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Latta Nature Preserve",
+    "description": "The largest nature preserve in Mecklenburg County's park system, featuring diverse habitats, miles of trails, and the Carolina Raptor Center.",
+    "phone": "(980) 314-7880",
+    "website": "https://www.mecknc.gov/ParkandRec/StewardshipServices/NatureCenters/Pages/LattaNatureCenter.aspx",
+    "area": "Huntersville",
+    "category": "outdoor-parks",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Reedy Creek Park & Nature Preserve",
+    "description": "A large multi-use park with extensive nature trails, a nature center, disc golf course, and a popular playground, great for family outings.",
+    "phone": "(980) 314-1000",
+    "website": "https://www.mecknc.gov/ParkandRec/Parks/Pages/Reedy-Creek-Park.aspx",
+    "area": "University City",
+    "category": "outdoor-parks",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Little Sugar Creek Greenway",
+    "description": "A vital urban greenway connecting neighborhoods, parks, and businesses with paved trails, perfect for walking, running, and biking along the creek.",
+    "phone": "(980) 314-1000",
+    "website": "https://www.mecknc.gov/ParkandRec/Greenways/Pages/LittleSugarCreekGreenway.aspx",
+    "area": "South End",
+    "category": "outdoor-parks",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Crowders Mountain State Park",
+    "description": "Features rugged peaks with challenging hiking trails, rock climbing, bouldering, and panoramic views, offering a true mountain experience close to Charlotte.",
+    "phone": "(704) 866-9085",
+    "website": "https://www.ncparks.gov/state-parks/crowders-mountain-state-park",
+    "area": "Charlotte Metro",
+    "category": "outdoor-parks",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Paper Skyscraper",
+    "description": "A beloved Charlotte institution offering an eclectic mix of books, gifts, stationery, and quirky finds, perfect for any occasion.",
+    "phone": "(704) 333-7130",
+    "website": "https://paperskyscraper.com/",
+    "area": "South End",
+    "category": "shopping-boutiques",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Boris & Natasha",
+    "description": "A vibrant vintage clothing store known for its carefully curated selection of unique apparel, accessories, and eccentric finds.",
+    "phone": "(704) 377-0925",
+    "website": "https://www.borisandnatasha.shop/",
+    "area": "Plaza Midwood",
+    "category": "shopping-boutiques",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Moxie Mercantile",
+    "description": "A beautifully curated boutique featuring artisanal gifts, unique home goods, women's apparel, and accessories with a focus on local and independent makers.",
+    "phone": "(704) 919-0520",
+    "website": "https://www.moxiemercantile.com/",
+    "area": "Plaza Midwood",
+    "category": "shopping-boutiques",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Pura Vida Worldly Art",
+    "description": "An inspiring gallery and gift shop specializing in fair trade art, crafts, jewelry, and gifts from around the world, bringing global culture to NoDa.",
+    "phone": "(704) 332-6302",
+    "website": "https://puravidaworldlyart.com/",
+    "area": "NoDa",
+    "category": "shopping-boutiques",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "The Rat's Nest",
+    "description": "A popular vintage and thrift store in NoDa offering a wide array of clothing, accessories, and unique finds, perfect for digging up a treasure.",
+    "phone": "(704) 344-9333",
+    "website": "https://www.instagram.com/theratsnestclt/",
+    "area": "NoDa",
+    "category": "shopping-boutiques",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Blis Gift Boutique",
+    "description": "A charming boutique offering a delightful selection of gifts, home decor, baby items, and accessories, perfect for thoughtful presents.",
+    "phone": "(704) 375-9034",
+    "website": "https://blisboutique.com/",
+    "area": "Dilworth",
+    "category": "shopping-boutiques",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Girl Tribe Co. Boutique",
+    "description": "A trendy women's apparel and accessories boutique that started as a local market, empowering women with stylish and comfortable fashion.",
+    "phone": "(980) 207-1607",
+    "website": "https://girltribeco.com/",
+    "area": "South End",
+    "category": "shopping-boutiques",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Thrift Pony",
+    "description": "A curated vintage clothing and home goods store offering a stylish and sustainable selection of unique pre-loved treasures.",
+    "phone": "(704) 737-0599",
+    "website": "https://www.thriftpony.com/",
+    "area": "Plaza Midwood",
+    "category": "shopping-boutiques",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Awaze Ethiopian Cuisine",
+    "description": "Offers authentic Ethiopian dishes in a cozy atmosphere, known for its flavorful stews and injera bread.",
+    "phone": "(704) 910-1896",
+    "website": "https://www.awazeethiopiancuisine.com/",
+    "area": "Plaza Midwood",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Curry Gate",
+    "description": "A beloved spot for Nepali and Indian cuisine, featuring delicious curries, tandoori specialties, and momos.",
+    "phone": "(704) 596-7777",
+    "website": "https://www.currygatenc.com/",
+    "area": "University City",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Let's Meat Korean BBQ & Bar",
+    "description": "An upscale Korean BBQ experience where diners cook premium meats at their table, accompanied by traditional sides and a lively bar scene.",
+    "phone": "(704) 817-7117",
+    "website": "https://www.letsmeatkbbq.com/",
+    "area": "South End",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Lang Van Vietnamese Restaurant",
+    "description": "A Charlotte institution known for its extensive menu of authentic Vietnamese dishes, friendly service, and community feel.",
+    "phone": "(704) 531-9525",
+    "website": "http://www.langvan.com/",
+    "area": "East Charlotte",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Basil Thai",
+    "description": "Offers a modern take on classic Thai dishes with a sophisticated ambiance, perfect for both casual and special occasions.",
+    "phone": "(704) 377-9023",
+    "website": "https://basilthai.com/",
+    "area": "Dilworth",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "O-Ku Sushi",
+    "description": "A sleek, contemporary restaurant serving innovative sushi rolls, sashimi, and Japanese small plates in a vibrant South End setting.",
+    "phone": "(704) 594-1922",
+    "website": "https://www.okurestaurants.com/location/o-ku-charlotte/",
+    "area": "South End",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Yafo Kitchen",
+    "description": "Offers fresh, flavorful Mediterranean and Middle Eastern street food, focusing on build-your-own bowls, pitas, and salads.",
+    "phone": "(980) 237-7095",
+    "website": "https://yafokitchen.com/",
+    "area": "SouthPark",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Mama's Caribbean Grill & Bar",
+    "description": "A vibrant spot bringing the authentic tastes of the Caribbean to Charlotte, featuring delicious jerk chicken, curry goat, and roti.",
+    "phone": "(704) 393-7800",
+    "website": "https://www.mamascaribbeangrill.net/",
+    "area": "West Charlotte",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Inca Gourmet Peruvian Cuisine",
+    "description": "Serves traditional Peruvian dishes like lomo saltado and ceviche, offering a true taste of Peru in a welcoming environment.",
+    "phone": "(704) 542-8700",
+    "website": "https://incagourmet.us/",
+    "area": "Pineville",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Tamarind Indian Cuisine",
+    "description": "An elegant Indian restaurant offering a diverse menu of traditional and modern Indian dishes, along with a popular lunch buffet.",
+    "phone": "(704) 554-1500",
+    "website": "https://tamarindcharlotte.com/",
+    "area": "SouthPark",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Pepero",
+    "description": "A long-standing casual Korean restaurant offering a wide range of authentic dishes from bibimbap to stews and Korean BBQ staples.",
+    "phone": "(704) 549-9233",
+    "website": "",
+    "area": "University City",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Pho @ NoDa",
+    "description": "A popular NoDa spot known for its comforting bowls of pho, fresh spring rolls, and other classic Vietnamese comfort food.",
+    "phone": "(704) 332-9099",
+    "website": "https://phoatnoda.com/",
+    "area": "NoDa",
+    "category": "restaurants",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Gracie Barra Charlotte - South End",
+    "description": "A premier Brazilian Jiu-Jitsu academy offering self-defense and martial arts training for all ages and skill levels in a supportive community.",
+    "phone": "(704) 737-1249",
+    "website": "https://www.graciebarracharlotte.com/",
+    "area": "South End",
+    "category": "fitness",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "CycleBar SouthPark",
+    "description": "An energizing indoor cycling studio offering high-energy rides with premium amenities and diverse class formats for all fitness levels.",
+    "phone": "(704) 936-3398",
+    "website": "https://www.cyclebar.com/location/southpark",
+    "area": "SouthPark",
+    "category": "fitness",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Contrology Pilates & Movement",
+    "description": "A classical Pilates studio dedicated to teaching the authentic method through private and small group sessions, focusing on strengthening and rehabilitation.",
+    "phone": "(704) 347-1111",
+    "website": "https://www.contrologypilates.com/",
+    "area": "Dilworth",
+    "category": "fitness",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "British Swim School Charlotte - Ballantyne",
+    "description": "Offers water safety and survival skills lessons for infants, children, and adults in a gentle, progressive environment.",
+    "phone": "(704) 220-4131",
+    "website": "https://britishswimschool.com/charlotte/",
+    "area": "Ballantyne",
+    "category": "fitness",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Pure Barre Myers Park",
+    "description": "A low-impact, high-intensity barre workout that lifts, tones, and burns through a series of small, isometric movements for a full-body transformation.",
+    "phone": "(704) 377-2277",
+    "website": "https://www.purebarre.com/location/myers-park-nc",
+    "area": "Myers Park",
+    "category": "fitness",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Dowd YMCA",
+    "description": "A comprehensive community wellness center offering state-of-the-art fitness equipment, swimming pools, diverse group exercise classes, and youth programs.",
+    "phone": "(704) 716-4300",
+    "website": "https://www.ymcacharlotte.org/locations/dowd-ymca",
+    "area": "Uptown",
+    "category": "fitness",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Discovery Place Science",
+    "description": "An interactive science museum offering hands-on exhibits, an IMAX Dome Theatre, and engaging educational programs for all ages.",
+    "phone": "(704) 372-6261",
+    "website": "https://science.discoveryplace.org/",
+    "area": "Uptown",
+    "category": "kids-activities",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Carowinds",
+    "description": "A premier amusement park featuring thrilling roller coasters, family rides, a water park (Carolina Harbor), and live entertainment on the North and South Carolina border.",
+    "phone": "(704) 561-8243",
+    "website": "https://www.carowinds.com/",
+    "area": "Fort Mill",
+    "category": "kids-activities",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "ImaginOn: The Joe & Joan Martin Center",
+    "description": "A unique partnership between Charlotte Mecklenburg Library and Children's Theatre of Charlotte, offering a vibrant space for learning, creativity, and performance for kids and teens.",
+    "phone": "(704) 416-4600",
+    "website": "https://www.imaginon.org/",
+    "area": "Uptown",
+    "category": "kids-activities",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Ray's Splash Planet",
+    "description": "Charlotte's only public indoor water park, featuring a three-story water slide, a current channel, and various aquatic play structures for all ages.",
+    "phone": "(980) 314-4729",
+    "website": "https://www.mecknc.gov/parkandrec/aquatics/rays-splash-planet",
+    "area": "West Charlotte",
+    "category": "kids-activities",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Anne Springs Close Greenway",
+    "description": "A vast 2,100-acre nature preserve offering over 40 miles of trails for hiking, biking, and horseback riding, along with various outdoor educational programs and events.",
+    "phone": "(803) 547-4575",
+    "website": "https://www.ascgreenway.org/",
+    "area": "Fort Mill",
+    "category": "kids-activities",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Y2 Yoga",
+    "description": "Charlotte's premier power yoga studio, offering hot yoga classes for all levels in a vibrant and supportive community.",
+    "phone": "(704) 333-9642",
+    "website": "https://y2yoga.com",
+    "area": "SouthPark",
+    "category": "yoga-wellness",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "The Ritz-Carlton Spa, Charlotte",
+    "description": "An urban oasis offering luxurious spa treatments, a swimming pool, and a tranquil escape in the heart of Uptown Charlotte.",
+    "phone": "(704) 547-2244",
+    "website": "https://www.ritzcarlton.com/en/hotels/qlnrz-the-ritz-carlton-charlotte/spa",
+    "area": "Uptown",
+    "category": "yoga-wellness",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Charlotte Natural Wellness",
+    "description": "A holistic health center offering chiropractic care, acupuncture, massage therapy, and nutritional counseling for comprehensive wellness.",
+    "phone": "(704) 305-6490",
+    "website": "https://charlottenaturalwellness.com",
+    "area": "Dilworth",
+    "category": "yoga-wellness",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Charlotte Yoga",
+    "description": "One of Charlotte's longest-running yoga studios, offering a wide range of classes from Vinyasa to restorative, fostering mind-body connection.",
+    "phone": "(704) 372-2462",
+    "website": "https://charlotteyoga.com",
+    "area": "Dilworth",
+    "category": "yoga-wellness",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Mood House",
+    "description": "A modern spa focusing on creating personalized experiences through massage, aromatherapy, and sound therapy to uplift or relax your mood.",
+    "phone": "(980) 237-7744",
+    "website": "https://themoodhouse.com",
+    "area": "South End",
+    "category": "yoga-wellness",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Middle C Jazz",
+    "description": "Charlotte's premier upscale jazz club, offering live performances from national and local jazz artists in a sophisticated setting. Enjoy a full menu and bar with your show.",
+    "phone": "(704) 595-5020",
+    "website": "https://www.middlecjazz.com/",
+    "area": "Uptown",
+    "category": "live-music",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Neighborhood Theatre",
+    "description": "A historic, mid-sized music venue in the heart of NoDa, hosting a diverse range of national and regional touring acts across various genres. It's a staple for live performances.",
+    "phone": "(704) 358-9292",
+    "website": "https://www.neighborhoodtheatre.com/",
+    "area": "NoDa",
+    "category": "live-music",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "The Visulite Theatre",
+    "description": "A historic, intimate venue in Elizabeth with a rich past, providing a stage for a wide array of rock, indie, blues, and alternative touring bands. It offers a classic concert experience.",
+    "phone": "(704) 358-3860",
+    "website": "https://www.visulite.com/",
+    "area": "Elizabeth",
+    "category": "live-music",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Comet Grill",
+    "description": "A classic Charlotte dive bar and music institution in Dilworth, famous for its no-frills atmosphere and consistent lineup of local blues, rock, and roots bands. It's a neighborhood favorite.",
+    "phone": "(704) 374-1200",
+    "website": "https://www.facebook.com/CometGrillCharlotte/",
+    "area": "Dilworth",
+    "category": "live-music",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "The Fig Tree Restaurant",
+    "description": "Located in a historic 1913 Craftsman bungalow, The Fig Tree offers upscale French-American cuisine with an award-winning wine list, perfect for an intimate evening.",
+    "phone": "(704) 332-5007",
+    "website": "https://www.thefigtreerestaurant.com/",
+    "area": "Elizabeth",
+    "category": "date-night",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Peppervine",
+    "description": "A sophisticated restaurant featuring an innovative menu of New American cuisine with a focus on fresh, seasonal ingredients and a stylish, inviting atmosphere.",
+    "phone": "(980) 283-2333",
+    "website": "https://peppervine.com/",
+    "area": "SouthPark",
+    "category": "date-night",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Barcelona Wine Bar",
+    "description": "Enjoy a vibrant and intimate evening with an extensive selection of Spanish and South American wines paired with delicious small plates and tapas.",
+    "phone": "(704) 479-7900",
+    "website": "https://www.barcelonawinebar.com/location/charlotte/",
+    "area": "South End",
+    "category": "date-night",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Stagioni: A Tuscan Kitchen",
+    "description": "Housed in a beautifully renovated former church, Stagioni offers authentic Tuscan cuisine in a rustic yet elegant setting, ideal for a romantic Italian escape.",
+    "phone": "(704) 372-8880",
+    "website": "https://stagionicharlotte.com/",
+    "area": "Myers Park",
+    "category": "date-night",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Dot Dot Dot",
+    "description": "An exclusive, members-only speakeasy offering expertly crafted cocktails and a sophisticated, intimate atmosphere perfect for a clandestine romantic evening.",
+    "phone": "(704) 791-3443",
+    "website": "https://www.dotdotdotcharlotte.com/",
+    "area": "Myers Park",
+    "category": "date-night",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Papi Queso",
+    "description": "Charlotte's beloved gourmet grilled cheese truck, serving up creative and comforting sandwiches with fresh, quality ingredients. They often feature unique cheese blends and additions like bacon jam or short rib.",
+    "phone": "(980) 237-7274",
+    "website": "https://www.papiqueso.com/",
+    "area": "Charlotte Metro",
+    "category": "food-trucks",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "What The Fries",
+    "description": "A popular food truck specializing in elevated gourmet fries, loaded with creative toppings and often paired with delicious burgers or wings. They bring unique flavor combinations to classic comfort food.",
+    "phone": "(980) 819-8663",
+    "website": "https://www.whatthefriesclt.com/",
+    "area": "Charlotte Metro",
+    "category": "food-trucks",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Katsu Kart",
+    "description": "Bringing authentic Japanese street food to Charlotte, Katsu Kart specializes in crispy, tender tonkatsu sandwiches and bowls. Their carefully crafted dishes offer a taste of Japan on the go.",
+    "phone": "",
+    "website": "https://www.katsukart.com/",
+    "area": "Charlotte Metro",
+    "category": "food-trucks",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Bao Time",
+    "description": "This truck offers delicious Asian fusion, with a focus on perfectly steamed bao buns filled with savory meats and fresh toppings. Their menu often includes other popular Asian street snacks.",
+    "phone": "",
+    "website": "https://www.baotimeclt.com/",
+    "area": "Charlotte Metro",
+    "category": "food-trucks",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Bleu Barn Bistro",
+    "description": "A farm-to-truck experience, Bleu Barn Bistro crafts delicious and fresh American comfort food using locally sourced ingredients whenever possible. Their menu changes seasonally, ensuring quality and creativity.",
+    "phone": "(704) 996-0331",
+    "website": "https://bleubarnbistro.com/",
+    "area": "Charlotte Metro",
+    "category": "food-trucks",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Cousins Maine Lobster (Charlotte)",
+    "description": "Featured on Shark Tank, this truck brings authentic, wild-caught Maine lobster straight to Charlotte, serving classic lobster rolls, tots, and bisque. It's a taste of New England on wheels.",
+    "phone": "(704) 936-3913",
+    "website": "https://www.cousinsmainelobster.com/truck/charlotte-nc/",
+    "area": "Charlotte Metro",
+    "category": "food-trucks",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Yummy Banh Mi",
+    "description": "Serving fresh and flavorful Vietnamese banh mi sandwiches, rice bowls, and spring rolls. This truck is known for its authentic flavors and generous portions.",
+    "phone": "(980) 498-8868",
+    "website": "https://www.yummybanhmi.com/",
+    "area": "Charlotte Metro",
+    "category": "food-trucks",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Plant Joy",
+    "description": "A vibrant vegan food truck often found at Camp North End, offering creative and delicious plant-based dishes. They focus on fresh, healthy, and flavorful options that appeal to everyone.",
+    "phone": "",
+    "website": "https://www.plantjoyclt.com/",
+    "area": "Charlotte Metro",
+    "category": "food-trucks",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Chef Alyssa's Kitchen",
+    "description": "Offers hands-on cooking classes for all skill levels, focusing on fresh, seasonal ingredients and diverse cuisines. They also host private events and team building.",
+    "phone": "(704) 819-0949",
+    "website": "https://chefalyssaskitchen.com/",
+    "area": "South End",
+    "category": "classes-workshops",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "ShardShop Charlotte",
+    "description": "A unique art experience where participants create beautiful, textured glass art using recycled glass shards and resin. Great for creative outings and gifts.",
+    "phone": "(980) 430-8025",
+    "website": "https://shardshop.com/charlotte/",
+    "area": "South End",
+    "category": "classes-workshops",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Charlotte Academy of Music",
+    "description": "Provides comprehensive music lessons for all ages and instruments, fostering a love for music through experienced instructors and a supportive environment.",
+    "phone": "(704) 545-7400",
+    "website": "https://charlotteacademyofmusic.com/",
+    "area": "South Charlotte",
+    "category": "classes-workshops",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Vibe5 Yoga & Fitness",
+    "description": "Offers a variety of yoga, barre, and fitness classes in a welcoming studio environment, promoting physical and mental well-being for all levels.",
+    "phone": "(980) 237-7096",
+    "website": "https://www.vibe5yoga.com/",
+    "area": "South End",
+    "category": "classes-workshops",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "McColl Center for Art + Innovation",
+    "description": "A contemporary art center offering workshops, artist talks, and studio tours, connecting the community with working artists and creative processes.",
+    "phone": "(704) 332-5535",
+    "website": "https://mccollcenter.org/",
+    "area": "Uptown",
+    "category": "classes-workshops",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Monster Mini Golf",
+    "description": "Indoor glow-in-the-dark monster-themed mini golf course with an arcade, laser maze, and gift shop.",
+    "phone": "(704) 527-3999",
+    "website": "https://www.monsterminigolf.com/charlotte/",
+    "area": "Pineville",
+    "category": "sports-recreation",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Spare Time Charlotte",
+    "description": "A premier entertainment center featuring bowling, laser tag, a huge arcade, and a full-service restaurant and bar.",
+    "phone": "(980) 901-2000",
+    "website": "https://www.sparetimecharlotte.com/",
+    "area": "Pineville",
+    "category": "sports-recreation",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Sports Connection - Northlake",
+    "description": "A massive family entertainment complex offering laser tag, ropes course, rock climbing, trampolines, and a huge arcade.",
+    "phone": "(704) 596-3003",
+    "website": "https://www.sportsconnectionnc.com/",
+    "area": "University City",
+    "category": "sports-recreation",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Urban Air Adventure Park - Cornelius",
+    "description": "A dynamic indoor adventure park featuring trampolines, a ropes course, climbing walls, dodgeball, and a warrior course for all ages.",
+    "phone": "(704) 892-2999",
+    "website": "https://www.urbanair.com/north-carolina-cornelius",
+    "area": "Lake Norman",
+    "category": "sports-recreation",
+    "featured": false,
+    "affiliate": false
+  },
+  {
+    "name": "Putt-Putt Fun Center",
+    "description": "A classic outdoor entertainment spot offering multiple mini golf courses, batting cages, and a large arcade.",
+    "phone": "(704) 525-2342",
+    "website": "https://www.charlotteputtputt.com/",
+    "area": "South Charlotte",
+    "category": "sports-recreation",
+    "featured": false,
+    "affiliate": false
+  }
+]

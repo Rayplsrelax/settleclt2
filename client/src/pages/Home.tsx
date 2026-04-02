@@ -59,7 +59,7 @@ function Hero() {
             <span className="block text-clt-gold">settling in Charlotte</span>
           </h1>
           <p className="mt-5 text-lg md:text-xl text-white/80 leading-relaxed max-w-xl">
-            Explore 20 neighborhoods, discover 400+ local services, and get
+            Explore 20 neighborhoods, discover 700+ local services, and get
             honest advice from people who actually live here.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -96,8 +96,8 @@ function Hero() {
           <div className="mt-10 flex flex-wrap gap-6 md:gap-10">
             {[
               { value: "20", label: "Neighborhoods" },
-              { value: "400+", label: "Local Services" },
-              { value: "40", label: "Categories" },
+              { value: "700+", label: "Local Services" },
+              { value: "50+", label: "Categories" },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
                 <div className="text-2xl md:text-3xl font-display font-extrabold text-clt-gold">
@@ -227,7 +227,7 @@ function DirectoryPreview() {
       <div className="container">
         <div className="text-center mb-10">
           <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">
-            400+ Charlotte Services
+            700+ Charlotte Services
           </h2>
           <p className="mt-2 text-muted-foreground max-w-xl mx-auto">
             From movers to mechanics, barbers to breweries — every service you
@@ -771,7 +771,7 @@ function ForYouSection() {
 export default function Home() {
   useSEO({
     title: "Settle CLT \u2014 Your Complete Guide to Living in Charlotte, NC",
-    description: "Explore 20 Charlotte neighborhoods, discover 400+ local businesses, find events, and get honest advice from locals. Your free relocation guide to CLT.",
+    description: "Explore 20 Charlotte neighborhoods, discover 700+ local businesses across 50+ categories, find events, and get honest advice from locals. Your free relocation guide to CLT.",
     keywords: "Charlotte NC, moving to Charlotte, Charlotte neighborhoods, Charlotte restaurants, Charlotte events, CLT guide, Charlotte relocation, South End, NoDa, Uptown Charlotte, Charlotte food trucks, Charlotte breweries, Charlotte coffee shops",
     path: "/",
     noSuffix: true,

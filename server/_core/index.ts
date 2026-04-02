@@ -156,7 +156,10 @@ async function startServer() {
       "barbers", "salons", "makeup", "photographers", "chefs",
       "grocery", "healthcare", "fitness", "auto", "childcare", "pets",
       "restaurants", "breweries", "coffee-shops", "food-trucks",
-      "attractions", "community", "coworking", "beauty-booking"
+      "attractions", "community", "coworking", "beauty-booking",
+      "nightlife", "outdoor-parks", "tours-experiences", "art-culture",
+      "live-music", "yoga-wellness", "sports-recreation", "kids-activities",
+      "date-night", "classes-workshops", "shopping-boutiques", "wedding-events"
     ];
 
     // Neighborhood pages
