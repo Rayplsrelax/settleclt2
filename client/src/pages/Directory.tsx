@@ -15,6 +15,7 @@ import ShareButtons from "@/components/ShareButtons";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import { ReviewStars } from "@/components/ReviewSection";
 import { useSEO } from "@/hooks/useSEO";
+import { useStructuredData, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
 import ClaimBusinessDialog from "@/components/ClaimBusinessDialog";
 
 // Generate a slug key from service name
@@ -82,6 +83,14 @@ export default function Directory() {
     keywords: "Charlotte restaurants, Charlotte breweries, Charlotte businesses, Charlotte food trucks, Charlotte coffee shops, local directory Charlotte NC, Charlotte services",
     path: "/directory",
   });
+
+  useStructuredData([{
+    "@context": "https://schema.org",
+    ...buildBreadcrumbSchema([
+      { name: "Home", url: "https://settleclt.com" },
+      { name: "Business Directory", url: "https://settleclt.com/directory" },
+    ]),
+  }]);
 
   const urlParams = getUrlParams();
   const { myNeighborhood } = useMyNeighborhood();

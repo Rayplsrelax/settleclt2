@@ -142,6 +142,21 @@ async function startServer() {
       { loc: "/find-your-home", priority: "0.8", changefreq: "monthly" },
       { loc: "/list-your-business", priority: "0.6", changefreq: "monthly" },
       { loc: "/submit-event", priority: "0.5", changefreq: "monthly" },
+      { loc: "/privacy-policy", priority: "0.3", changefreq: "yearly" },
+      { loc: "/terms-of-service", priority: "0.3", changefreq: "yearly" },
+    ];
+
+    // Directory category pages (e.g., /directory?category=restaurants)
+    const directoryCategories = [
+      "moving-companies", "storage", "utilities", "internet", "insurance",
+      "dmv", "government", "banking", "tax", "legal",
+      "plumbers", "electricians", "hvac", "roofing", "handyman",
+      "pressure-washing", "lawn", "tree", "fencing", "tv-mounting",
+      "pest", "cleaning", "dumpster",
+      "barbers", "salons", "makeup", "photographers", "chefs",
+      "grocery", "healthcare", "fitness", "auto", "childcare", "pets",
+      "restaurants", "breweries", "coffee-shops", "food-trucks",
+      "attractions", "community", "coworking", "beauty-booking"
     ];
 
     // Neighborhood pages
@@ -178,6 +193,10 @@ async function startServer() {
 
     for (const slug of blogSlugs) {
       xml += `  <url>\n    <loc>${baseUrl}/blog/${slug}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
+    }
+
+    for (const cat of directoryCategories) {
+      xml += `  <url>\n    <loc>${baseUrl}/directory?category=${cat}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
     }
 
     xml += `</urlset>`;

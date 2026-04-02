@@ -1,14 +1,16 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Calendar, CalendarPlus, MapPin, ExternalLink, Clock, Filter, Tag, Navigation } from "lucide-react";
+import { Calendar, CalendarPlus, MapPin, ExternalLink, Clock, Filter, Tag, Navigation, Search, X, CalendarRange } from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import ShareButtons from "@/components/ShareButtons";
 import QuickStampButton from "@/components/QuickStampButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import { useSEO } from "@/hooks/useSEO";
+import { useStructuredData, buildEventSchema, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
 import {
   Dialog,
   DialogContent,
@@ -196,6 +198,10 @@ export default function Events() {
 
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
   const { trackClickByName } = useTagTrackingWithLookup();
 
   const { data: allEvents, isLoading } = trpc.events.getPublished.useQuery(
@@ -204,19 +210,84 @@ export default function Events() {
 
   const events = allEvents ?? [];
 
+  // Structured data for events (inject top 10 upcoming events as schema)
+  const eventsForSchema = useMemo(() => {
+    if (!allEvents) return null;
+    const now = new Date();
+    const upcoming = allEvents
+      .filter((e) => new Date(e.startDate) >= now)
+      .slice(0, 10);
+    if (upcoming.length === 0) return null;
+    return [
+      { "@context": "https://schema.org", ...buildBreadcrumbSchema([
+        { name: "Home", url: "https://settleclt.com" },
+        { name: "Events", url: "https://settleclt.com/events" },
+      ]) },
+      ...upcoming.map((e) => ({
+        "@context": "https://schema.org",
+        ...buildEventSchema({
+          title: e.title,
+          description: e.description ?? undefined,
+          startDate: e.startDate,
+          endDate: e.endDate,
+          venueName: e.venueName,
+          venueAddress: e.venueAddress,
+          externalUrl: e.externalUrl,
+          imageUrl: e.imageUrl,
+        }),
+      })),
+    ];
+  }, [allEvents]);
+  useStructuredData(eventsForSchema);
+
+  const hasActiveFilters = searchQuery || dateFrom || dateTo;
+
+  const clearAllFilters = useCallback(() => {
+    setSearchQuery("");
+    setDateFrom("");
+    setDateTo("");
+    setSelectedCategory("");
+  }, []);
+
+  // Apply search and date filters
+  const filteredEvents = useMemo(() => {
+    let result = [...events];
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (e) =>
+          e.title.toLowerCase().includes(q) ||
+          (e.description && e.description.toLowerCase().includes(q)) ||
+          (e.neighborhood && e.neighborhood.toLowerCase().includes(q)) ||
+          (e.venueName && e.venueName.toLowerCase().includes(q))
+      );
+    }
+    if (dateFrom) {
+      const from = new Date(dateFrom);
+      from.setHours(0, 0, 0, 0);
+      result = result.filter((e) => new Date(e.startDate) >= from);
+    }
+    if (dateTo) {
+      const to = new Date(dateTo);
+      to.setHours(23, 59, 59, 999);
+      result = result.filter((e) => new Date(e.startDate) <= to);
+    }
+    return result;
+  }, [events, searchQuery, dateFrom, dateTo]);
+
   const upcomingEvents = useMemo(() => {
     const now = new Date();
-    return events.filter((e) => new Date(e.startDate) >= now);
-  }, [events]);
+    return filteredEvents.filter((e) => new Date(e.startDate) >= now);
+  }, [filteredEvents]);
 
   const pastEvents = useMemo(() => {
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    return events.filter((e) => {
+    return filteredEvents.filter((e) => {
       const start = new Date(e.startDate);
       return start < now && start >= thirtyDaysAgo;
     });
-  }, [events]);
+  }, [filteredEvents]);
 
   return (
     <PageLayout>
@@ -249,9 +320,91 @@ export default function Events() {
         </div>
       </section>
 
-      {/* Filters */}
+      {/* Search & Filters */}
       <section className="sticky top-16 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="container py-3">
+        <div className="container py-3 space-y-3">
+          {/* Search bar + filter toggle */}
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search events, venues, neighborhoods..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-9 h-9 text-sm"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+              className={`gap-1.5 shrink-0 ${
+                showFilters || hasActiveFilters ? "border-primary text-primary" : ""
+              }`}
+            >
+              <CalendarRange className="w-4 h-4" />
+              Date Range
+              {(dateFrom || dateTo) && (
+                <span className="w-2 h-2 rounded-full bg-primary" />
+              )}
+            </Button>
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearAllFilters}
+                className="text-muted-foreground hover:text-foreground gap-1 shrink-0"
+              >
+                <X className="w-3.5 h-3.5" />
+                Clear all
+              </Button>
+            )}
+          </div>
+
+          {/* Date range picker (collapsible) */}
+          {showFilters && (
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-medium text-muted-foreground">From</label>
+                <Input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="h-8 text-sm w-40"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-medium text-muted-foreground">To</label>
+                <Input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="h-8 text-sm w-40"
+                />
+              </div>
+              {(dateFrom || dateTo) && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => { setDateFrom(""); setDateTo(""); }}
+                  className="text-xs text-muted-foreground h-8"
+                >
+                  Clear dates
+                </Button>
+              )}
+            </div>
+          )}
+
+          {/* Category pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
             <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
             {CATEGORIES.map((cat) => (
@@ -293,17 +446,24 @@ export default function Events() {
               </div>
             ))}
           </div>
-        ) : events.length === 0 ? (
+        ) : filteredEvents.length === 0 ? (
           <div className="text-center py-20">
             <Calendar className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
             <h2 className="font-display font-bold text-2xl text-foreground mb-2">
-              No events yet
+              {hasActiveFilters ? "No matching events" : "No events yet"}
             </h2>
             <p className="text-muted-foreground max-w-md mx-auto">
-              {selectedCategory
-                ? "No events found in this category. Try a different filter or check back soon."
-                : "Events are coming soon! Check back for concerts, festivals, food events, and more happening in Charlotte."}
+              {hasActiveFilters
+                ? "Try adjusting your search, date range, or category filters."
+                : selectedCategory
+                  ? "No events found in this category. Try a different filter or check back soon."
+                  : "Events are coming soon! Check back for concerts, festivals, food events, and more happening in Charlotte."}
             </p>
+            {hasActiveFilters && (
+              <Button variant="outline" size="sm" onClick={clearAllFilters} className="mt-4">
+                Clear all filters
+              </Button>
+            )}
           </div>
         ) : (
           <div className="space-y-12">

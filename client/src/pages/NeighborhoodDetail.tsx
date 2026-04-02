@@ -21,6 +21,7 @@ import { trpc } from "@/lib/trpc";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import { useSEO } from "@/hooks/useSEO";
+import { useStructuredData, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
   ResponsiveContainer
@@ -94,6 +95,19 @@ export default function NeighborhoodDetail() {
     path: n ? `/neighborhood/${n.id}` : "/neighborhoods",
     ogImage: n?.photoUrls?.[0],
   });
+
+  useStructuredData(
+    n
+      ? [{
+          "@context": "https://schema.org",
+          ...buildBreadcrumbSchema([
+            { name: "Home", url: "https://settleclt.com" },
+            { name: "Neighborhoods", url: "https://settleclt.com/neighborhoods" },
+            { name: n.name, url: `https://settleclt.com/neighborhood/${n.id}` },
+          ]),
+        }]
+      : null
+  );
 
   if (!n) { setLocation("/404"); return null; }
 

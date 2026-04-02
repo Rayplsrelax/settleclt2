@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useSEO } from "@/hooks/useSEO";
+import { useStructuredData, buildOrganizationSchema, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
@@ -775,6 +776,11 @@ export default function Home() {
     path: "/",
     noSuffix: true,
   });
+
+  useStructuredData([
+    { "@context": "https://schema.org", ...buildOrganizationSchema() },
+    { "@context": "https://schema.org", ...buildBreadcrumbSchema([{ name: "Home", url: "https://settleclt.com" }]) },
+  ]);
 
   return (
     <PageLayout>

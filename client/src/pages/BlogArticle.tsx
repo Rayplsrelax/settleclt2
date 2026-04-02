@@ -6,6 +6,7 @@ import ShareButtons from "@/components/ShareButtons";
 import { Button } from "@/components/ui/button";
 import CommentSection from "@/components/CommentSection";
 import { useSEO } from "@/hooks/useSEO";
+import { useStructuredData, buildArticleSchema, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
 
 function renderMarkdown(md: string): string {
   return md
@@ -48,6 +49,31 @@ export default function BlogArticle() {
     ogImage: post?.coverImage || undefined,
     ogType: "article",
   });
+
+  useStructuredData(
+    post
+      ? [
+          {
+            "@context": "https://schema.org",
+            ...buildBreadcrumbSchema([
+              { name: "Home", url: "https://settleclt.com" },
+              { name: "Blog", url: "https://settleclt.com/blog" },
+              { name: post.title, url: `https://settleclt.com/blog/${slug}` },
+            ]),
+          },
+          {
+            "@context": "https://schema.org",
+            ...buildArticleSchema({
+              title: post.title,
+              description: post.excerpt || "",
+              slug: slug || "",
+              publishedAt: post.publishedAt ?? undefined,
+              imageUrl: post.coverImage ?? undefined,
+            }),
+          },
+        ]
+      : null
+  );
 
   if (isLoading) {
     return (

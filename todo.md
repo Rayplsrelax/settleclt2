@@ -357,3 +357,20 @@
 ## Bug Fix: FEATURED Badges Still Showing
 - [x] Fix Directory page: sorting now only prioritizes affiliate partners (not all featured items), rest sorted alphabetically
 - [x] Fix Events page: removed Featured badges, Featured Events section, and featured styling entirely (not tied to premium/monetization)
+
+## Events Page Search & Date Filter
+- [x] Add search bar to Events page (search by title, description, neighborhood, venue)
+- [x] Add date range filter to Events page (collapsible from/to date pickers)
+- [x] Integrate search and date filters with existing category filters (clear all button, empty state)
+
+## Directory Growth for Launch
+- [x] Research optimal directory size for launch (400+ is already strong; focus on data quality)
+- [x] Audit existing listings: 393 listings across 42 categories, 100% data completeness (all have phone, website, description, area)
+- [x] Category coverage is balanced: smallest categories have 5-6 listings, largest have 20-25. Ready for launch.
+
+## SEO Improvements
+- [x] Add JSON-LD structured data: Organization (homepage), Event (events), Article (blog)
+- [x] Add BreadcrumbList structured data to Home, Directory, Events, Blog, Neighborhood pages
+- [x] Enhance sitemap with 42 directory category pages, privacy/terms pages, proper lastmod dates
+- [x] Created reusable useStructuredData hook with schema builders (Organization, LocalBusiness, Event, Article, Breadcrumb)
+- [x] Canonical URLs and robots.txt already correct (verified)
