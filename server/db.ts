@@ -1,6 +1,6 @@
 import { eq, and, desc, asc, sql, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim } from "../drizzle/schema";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -1246,4 +1246,85 @@ export async function hasExistingClaim(serviceKey: string, email: string) {
       eq(businessClaims.claimantEmail, email)
     ));
   return existing.length > 0;
+}
+
+// ============ Business Listing Overrides ============
+
+export async function getListingOverride(serviceKey: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const results = await db.select().from(businessListingOverrides)
+    .where(and(eq(businessListingOverrides.serviceKey, serviceKey), eq(businessListingOverrides.isActive, true)));
+  return results[0] || null;
+}
+
+export async function upsertListingOverride(serviceKey: string, claimId: number, data: Partial<InsertBusinessListingOverride>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await db.select().from(businessListingOverrides)
+    .where(eq(businessListingOverrides.serviceKey, serviceKey));
+  if (existing.length > 0) {
+    await db.update(businessListingOverrides)
+      .set({ ...data })
+      .where(eq(businessListingOverrides.serviceKey, serviceKey));
+    return { id: existing[0].id, updated: true };
+  } else {
+    const result = await db.insert(businessListingOverrides).values({
+      serviceKey,
+      claimId,
+      ...data,
+    });
+    return { id: result[0].insertId, updated: false };
+  }
+}
+
+export async function getApprovedClaimForUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(businessClaims)
+    .where(and(eq(businessClaims.userId, userId), eq(businessClaims.status, 'approved' as any)));
+}
+
+export async function getAllListingOverrides() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(businessListingOverrides).orderBy(desc(businessListingOverrides.updatedAt));
+}
+
+// ============ Premium Listings ============
+
+export async function getPremiumListing(serviceKey: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const results = await db.select().from(premiumListings)
+    .where(and(eq(premiumListings.serviceKey, serviceKey), eq(premiumListings.paymentStatus, 'active' as any)));
+  return results[0] || null;
+}
+
+export async function upsertPremiumListing(serviceKey: string, data: Partial<InsertPremiumListing>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await db.select().from(premiumListings)
+    .where(eq(premiumListings.serviceKey, serviceKey));
+  if (existing.length > 0) {
+    await db.update(premiumListings).set({ ...data }).where(eq(premiumListings.serviceKey, serviceKey));
+    return { id: existing[0].id, updated: true };
+  } else {
+    const result = await db.insert(premiumListings).values({ serviceKey, ...data });
+    return { id: result[0].insertId, updated: false };
+  }
+}
+
+export async function getAllPremiumListings() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(premiumListings).orderBy(desc(premiumListings.updatedAt));
+}
+
+export async function incrementListingAnalytics(serviceKey: string, field: 'viewsThisPeriod' | 'clicksThisPeriod' | 'leadsThisPeriod') {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(premiumListings)
+    .set({ [field]: sql`${premiumListings[field]} + 1` })
+    .where(eq(premiumListings.serviceKey, serviceKey));
 }

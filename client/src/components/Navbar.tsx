@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { useState } from "react";
-import { Menu, X, LogIn, User, LogOut, Heart, Stamp, ChevronDown, Shield, Grid3X3, Trophy } from "lucide-react";
+import { Menu, X, LogIn, User, LogOut, Heart, Stamp, ChevronDown, Shield, Grid3X3, Trophy, Building2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -80,6 +80,10 @@ function UserMenu() {
         <DropdownMenuItem onClick={() => navigate("/leaderboard")}>
           <Trophy className="w-4 h-4 mr-2" />
           Leaderboard
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/my-business")}>
+          <Building2 className="w-4 h-4 mr-2" />
+          My Business
         </DropdownMenuItem>
         {user.role === 'admin' && (
           <>

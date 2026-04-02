@@ -1,4 +1,5 @@
 import { COOKIE_NAME } from "@shared/const";
+import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router, adminProcedure } from "./_core/trpc";
@@ -25,9 +26,13 @@ import {
   createReview, getReviews, getReviewStats, deleteReview, toggleReviewVisibility, getAllReviews,
   submitReferral, getReferrals, updateReferralStatus, getReferralStats,
   submitBusinessClaim, getBusinessClaims, updateBusinessClaimStatus, getBusinessClaimStats, hasExistingClaim,
+  getListingOverride, upsertListingOverride, getApprovedClaimForUser,
+  getPremiumListing, upsertPremiumListing, getAllPremiumListings, incrementListingAnalytics,
 } from "./db";
 import { makeRequest, type PlacesSearchResult, type PlaceDetailsResult } from "./_core/map";
 import { notifyOwner } from "./_core/notification";
+import { storagePut } from "./storage";
+import { createCheckoutSession, createPortalSession } from "./stripe-helpers";
 
 export const appRouter = router({
   system: systemRouter,
@@ -1105,11 +1110,198 @@ export const appRouter = router({
         adminNotes: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        return updateBusinessClaimStatus(input.id, input.status, input.adminNotes);
+        // Get the claim details before updating for notification
+        const claims = await getBusinessClaims();
+        const claim = claims.find((c: any) => c.id === input.id);
+        const result = await updateBusinessClaimStatus(input.id, input.status, input.adminNotes);
+        // Notify owner about status change
+        if (claim && input.status !== 'pending') {
+          const statusLabel = input.status === 'approved' ? '✅ Approved' : '❌ Rejected';
+          await notifyOwner({
+            title: `Business Claim ${statusLabel}: ${claim.businessName}`,
+            content: [
+              `Claim for "${claim.businessName}" has been ${input.status}.`,
+              `Claimant: ${claim.claimantName} (${claim.claimantEmail})`,
+              input.adminNotes ? `Admin Notes: ${input.adminNotes}` : '',
+              input.status === 'approved' ? 'The business owner can now manage their listing.' : '',
+            ].filter(Boolean).join('\n'),
+          }).catch(() => {});
+        }
+        return result;
       }),
     stats: adminProcedure.query(async () => {
       return getBusinessClaimStats();
     }),
+  }),
+
+  // ============ Business Owner Portal ============
+  businessPortal: router({
+    myClaims: protectedProcedure.query(async ({ ctx }) => {
+      return getApprovedClaimForUser(ctx.user.id);
+    }),
+    getOverride: protectedProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .query(async ({ input }) => {
+        return getListingOverride(input.serviceKey);
+      }),
+    updateListing: protectedProcedure
+      .input(z.object({
+        serviceKey: z.string(),
+        claimId: z.number(),
+        displayName: z.string().optional(),
+        description: z.string().optional(),
+        phone: z.string().optional(),
+        website: z.string().optional(),
+        email: z.string().optional(),
+        hours: z.string().optional(),
+        tagline: z.string().optional(),
+        socialLinks: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Verify user owns this claim
+        const claims = await getApprovedClaimForUser(ctx.user.id);
+        const claim = claims.find((c: any) => c.id === input.claimId && c.serviceKey === input.serviceKey);
+        if (!claim) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'You do not have an approved claim for this business.' });
+        }
+        const { serviceKey, claimId, ...data } = input;
+        return upsertListingOverride(serviceKey, claimId, data);
+      }),
+    uploadPhoto: protectedProcedure
+      .input(z.object({
+        serviceKey: z.string(),
+        claimId: z.number(),
+        photoUrl: z.string().url(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const claims = await getApprovedClaimForUser(ctx.user.id);
+        const claim = claims.find((c: any) => c.id === input.claimId && c.serviceKey === input.serviceKey);
+        if (!claim) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'You do not have an approved claim for this business.' });
+        }
+        const existing = await getListingOverride(input.serviceKey);
+        const currentPhotos = existing?.photoUrls ? existing.photoUrls.split(',').filter(Boolean) : [];
+        currentPhotos.push(input.photoUrl);
+        await upsertListingOverride(input.serviceKey, input.claimId, { photoUrls: currentPhotos.join(',') });
+        return { success: true, photos: currentPhotos };
+      }),
+    removePhoto: protectedProcedure
+      .input(z.object({
+        serviceKey: z.string(),
+        claimId: z.number(),
+        photoUrl: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const claims = await getApprovedClaimForUser(ctx.user.id);
+        const claim = claims.find((c: any) => c.id === input.claimId && c.serviceKey === input.serviceKey);
+        if (!claim) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'You do not have an approved claim for this business.' });
+        }
+        const existing = await getListingOverride(input.serviceKey);
+        const currentPhotos = existing?.photoUrls ? existing.photoUrls.split(',').filter(Boolean) : [];
+        const filtered = currentPhotos.filter(p => p !== input.photoUrl);
+        await upsertListingOverride(input.serviceKey, input.claimId, { photoUrls: filtered.join(',') });
+        return { success: true, photos: filtered };
+      }),
+  }),
+
+  // ============ Premium Listings ============
+  premium: router({
+    getTier: publicProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .query(async ({ input }) => {
+        const listing = await getPremiumListing(input.serviceKey);
+        return listing ? { tier: listing.tier, active: listing.paymentStatus === 'active' } : { tier: 'basic' as const, active: false };
+      }),
+    getAnalytics: protectedProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .query(async ({ input, ctx }) => {
+        // Verify ownership
+        const claims = await getApprovedClaimForUser(ctx.user.id);
+        const claim = claims.find((c: any) => c.serviceKey === input.serviceKey);
+        if (!claim && ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied.' });
+        }
+        const listing = await getPremiumListing(input.serviceKey);
+        return listing ? {
+          views: listing.viewsThisPeriod,
+          clicks: listing.clicksThisPeriod,
+          leads: listing.leadsThisPeriod,
+          tier: listing.tier,
+          periodEnd: listing.currentPeriodEnd,
+        } : null;
+      }),
+    trackView: publicProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .mutation(async ({ input }) => {
+        await incrementListingAnalytics(input.serviceKey, 'viewsThisPeriod');
+        return { success: true };
+      }),
+    trackClick: publicProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .mutation(async ({ input }) => {
+        await incrementListingAnalytics(input.serviceKey, 'clicksThisPeriod');
+        return { success: true };
+      }),
+    createCheckout: protectedProcedure
+      .input(z.object({
+        tier: z.enum(['featured', 'premium']),
+        serviceKey: z.string(),
+        businessName: z.string(),
+        claimId: z.number(),
+        origin: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Verify user owns this claim
+        const claims = await getApprovedClaimForUser(ctx.user.id);
+        const claim = claims.find((c: any) => c.id === input.claimId && c.serviceKey === input.serviceKey);
+        if (!claim) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'You do not have an approved claim for this business.' });
+        }
+        const result = await createCheckoutSession({
+          tier: input.tier,
+          serviceKey: input.serviceKey,
+          businessName: input.businessName,
+          claimId: input.claimId,
+          userId: ctx.user.id,
+          userEmail: ctx.user.email || '',
+          userName: ctx.user.name || '',
+          origin: input.origin,
+        });
+        return result;
+      }),
+    manageSubscription: protectedProcedure
+      .input(z.object({
+        serviceKey: z.string(),
+        origin: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const listing = await getPremiumListing(input.serviceKey);
+        if (!listing?.stripeCustomerId) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'No active subscription found.' });
+        }
+        return createPortalSession({
+          stripeCustomerId: listing.stripeCustomerId,
+          origin: input.origin,
+        });
+      }),
+    adminListPremium: adminProcedure.query(async () => {
+      return getAllPremiumListings();
+    }),
+    adminUpdate: adminProcedure
+      .input(z.object({
+        serviceKey: z.string(),
+        tier: z.enum(['basic', 'featured', 'premium']),
+        claimId: z.number().optional(),
+        billingEmail: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return upsertPremiumListing(input.serviceKey, {
+          tier: input.tier,
+          claimId: input.claimId,
+          billingEmail: input.billingEmail,
+        });
+      }),
   }),
 });
 export type AppRouter = typeof appRouter;

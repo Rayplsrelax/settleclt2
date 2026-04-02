@@ -30,6 +30,85 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
+
+  // Stripe webhook must be BEFORE express.json() for raw body signature verification
+  app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async (req, res) => {
+    try {
+      const { constructWebhookEvent } = await import("../stripe-helpers");
+      const { upsertPremiumListing } = await import("../db");
+      const sig = req.headers["stripe-signature"] as string;
+      const event = constructWebhookEvent(req.body, sig);
+
+      // Handle test events
+      if (event.id.startsWith("evt_test_")) {
+        console.log("[Webhook] Test event detected, returning verification response");
+        return res.json({ verified: true });
+      }
+
+      console.log(`[Stripe Webhook] ${event.type} (${event.id})`);
+
+      switch (event.type) {
+        case "checkout.session.completed": {
+          const session = event.data.object as any;
+          const serviceKey = session.metadata?.service_key;
+          const tier = session.metadata?.tier;
+          const claimId = session.metadata?.claim_id ? parseInt(session.metadata.claim_id) : undefined;
+          const billingEmail = session.metadata?.customer_email;
+          if (serviceKey && tier) {
+            await upsertPremiumListing(serviceKey, {
+              tier: tier as any,
+              stripeCustomerId: session.customer,
+              stripeSubscriptionId: session.subscription,
+              claimId,
+              billingEmail,
+              paymentStatus: "active" as any,
+            });
+            console.log(`[Stripe] Activated ${tier} tier for ${serviceKey}`);
+          }
+          break;
+        }
+        case "customer.subscription.updated": {
+          const sub = event.data.object as any;
+          const { getStripe } = await import("../stripe-helpers");
+          // Find the premium listing by subscription ID
+          const { getAllPremiumListings } = await import("../db");
+          const all = await getAllPremiumListings();
+          const listing = all.find((l: any) => l.stripeSubscriptionId === sub.id);
+          if (listing) {
+            const statusMap: Record<string, string> = {
+              active: "active", past_due: "past_due", canceled: "canceled", trialing: "trialing",
+            };
+            await upsertPremiumListing(listing.serviceKey, {
+              paymentStatus: (statusMap[sub.status] || "active") as any,
+              currentPeriodStart: new Date(sub.current_period_start * 1000),
+              currentPeriodEnd: new Date(sub.current_period_end * 1000),
+            });
+          }
+          break;
+        }
+        case "customer.subscription.deleted": {
+          const sub = event.data.object as any;
+          const { getAllPremiumListings } = await import("../db");
+          const all = await getAllPremiumListings();
+          const listing = all.find((l: any) => l.stripeSubscriptionId === sub.id);
+          if (listing) {
+            await upsertPremiumListing(listing.serviceKey, {
+              paymentStatus: "canceled" as any,
+              tier: "basic" as any,
+            });
+            console.log(`[Stripe] Canceled subscription for ${listing.serviceKey}`);
+          }
+          break;
+        }
+      }
+
+      res.json({ received: true });
+    } catch (err: any) {
+      console.error("[Stripe Webhook] Error:", err.message);
+      res.status(400).json({ error: err.message });
+    }
+  });
+
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));

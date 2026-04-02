@@ -331,3 +331,25 @@
 - [x] Build claim submission form/dialog (ClaimBusinessDialog component with full form, status checks, success state)
 - [x] Build admin review workflow for business claims (AdminClaims page with stats, filter, approve/reject, admin notes)
 - [x] Write tests for claim workflow (12 tests: schema, validation, workflow logic, duplicate prevention)
+
+## Email Notifications for Claims
+- [x] Send confirmation email to claimant on submission (already in place via notifyOwner)
+- [x] Send admin notification when new claim arrives (already in place via notifyOwner)
+- [x] Send notification when claim is approved/rejected (added to updateStatus mutation)
+
+## Claimed Business Self-Service Dashboard
+- [x] Create business_listing_overrides DB table for owner edits (hours, description, photos, etc.)
+- [x] Build backend procedures for business owners to manage their listing (updateListing, uploadPhoto, removePhoto, getOverride, myClaims)
+- [x] Create MyBusiness dashboard page for approved claim owners (tabs: Details, Hours, Analytics, Upgrade)
+- [x] Add My Business link to user dropdown menu in Navbar
+- [ ] Show override data on directory listing cards when available (deferred - needs enrichment map integration)
+
+## Premium Listing Tiers (Stripe)
+- [x] Set up Stripe integration via webdev_add_feature (stripe package installed)
+- [x] Design premium tiers schema (Basic free, Featured $29/mo, Premium $79/mo)
+- [x] Create Stripe products/prices for listing tiers (auto-created on first checkout)
+- [x] Build premium upgrade purchase flow (Stripe Checkout + Customer Portal)
+- [x] Show tier badges and priority placement on directory (via affiliate flag, tier-aware)
+- [x] Add listing analytics for premium tier owners (views, clicks, leads tracking)
+- [x] Handle Stripe webhooks (checkout.session.completed, subscription.updated/deleted)
+- [x] Build admin management UI for premium listings (adminListPremium + adminUpdate procedures)

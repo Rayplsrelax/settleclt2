@@ -464,3 +464,67 @@ export const businessClaims = mysqlTable("business_claims", {
 
 export type BusinessClaim = typeof businessClaims.$inferSelect;
 export type InsertBusinessClaim = typeof businessClaims.$inferInsert;
+
+// Business listing overrides - owner-managed data for claimed businesses
+export const businessListingOverrides = mysqlTable("business_listing_overrides", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Links to the service key in shared/services or directory_listings */
+  serviceKey: varchar("serviceKey", { length: 255 }).notNull().unique(),
+  /** The claim ID that authorized this override */
+  claimId: int("claimId").notNull(),
+  /** Owner-provided overrides (null = use original data) */
+  displayName: varchar("displayName", { length: 255 }),
+  description: text("description"),
+  phone: varchar("phone", { length: 32 }),
+  website: varchar("website", { length: 512 }),
+  email: varchar("email", { length: 320 }),
+  /** Business hours as JSON string, e.g. {"mon":"9am-5pm","tue":"9am-5pm",...} */
+  hours: text("hours"),
+  /** Comma-separated photo URLs (stored in S3) */
+  photoUrls: text("photoUrls"),
+  /** Social media links as JSON string */
+  socialLinks: text("socialLinks"),
+  /** Short tagline */
+  tagline: varchar("tagline", { length: 255 }),
+  /** Whether the override is active (admin can disable) */
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BusinessListingOverride = typeof businessListingOverrides.$inferSelect;
+export type InsertBusinessListingOverride = typeof businessListingOverrides.$inferInsert;
+
+// Premium listing tiers for monetization
+export const premiumListings = mysqlTable("premium_listings", {
+  id: int("id").autoincrement().primaryKey(),
+  serviceKey: varchar("serviceKey", { length: 255 }).notNull(),
+  /** Tier: basic (free), featured, premium */
+  tier: mysqlEnum("tier", ["basic", "featured", "premium"]).default("basic").notNull(),
+  /** Stripe customer ID */
+  stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
+  /** Stripe subscription ID */
+  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 255 }),
+  /** Stripe price ID for the current tier */
+  stripePriceId: varchar("stripePriceId", { length: 255 }),
+  /** Payment status */
+  paymentStatus: mysqlEnum("paymentStatus", ["active", "past_due", "canceled", "trialing"]).default("active").notNull(),
+  /** Subscription period */
+  currentPeriodStart: timestamp("currentPeriodStart"),
+  currentPeriodEnd: timestamp("currentPeriodEnd"),
+  /** The claim ID that owns this premium listing */
+  claimId: int("claimId"),
+  /** Owner email for billing */
+  billingEmail: varchar("billingEmail", { length: 320 }),
+  /** Analytics: total views this period */
+  viewsThisPeriod: int("viewsThisPeriod").default(0).notNull(),
+  /** Analytics: total clicks this period */
+  clicksThisPeriod: int("clicksThisPeriod").default(0).notNull(),
+  /** Analytics: total leads this period */
+  leadsThisPeriod: int("leadsThisPeriod").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PremiumListing = typeof premiumListings.$inferSelect;
+export type InsertPremiumListing = typeof premiumListings.$inferInsert;
