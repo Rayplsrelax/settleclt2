@@ -321,3 +321,13 @@
 - [x] P8: Add referral source tracking to admin dashboard (quiz, neighborhood, directory, direct, blog, homepage)
 - [x] P9: Add success stories/testimonials to Find Your Home page (merged with P4)
 - [x] P10: Implement follow-up reminders for leads in "new" status >48 hours (alert banner + KPI card in admin dashboard)
+
+## FEATURED Badge Fix & Claim This Business Workflow
+- [x] Fix remaining FEATURED badges on directory listing cards (NeighborhoodDetail now requires affiliate)
+- [x] Review FEATURED badges on events page (kept — admin-curated spotlight, not universal)
+- [x] Design business_claims database table schema (serviceKey, claimant info, role, verification method, status)
+- [x] Create backend procedures for submitting and managing claims (submit, checkClaimed, list, updateStatus, stats)
+- [x] Add "Claim This Business" button to directory listing cards
+- [x] Build claim submission form/dialog (ClaimBusinessDialog component with full form, status checks, success state)
+- [x] Build admin review workflow for business claims (AdminClaims page with stats, filter, approve/reject, admin notes)
+- [x] Write tests for claim workflow (12 tests: schema, validation, workflow logic, duplicate prevention)

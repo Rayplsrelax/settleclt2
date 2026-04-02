@@ -1,6 +1,6 @@
 import { eq, and, desc, asc, sql, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral } from "../drizzle/schema";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -1193,4 +1193,57 @@ export async function getReferralStats() {
   const fortyEightHours = 48 * 60 * 60 * 1000;
   const needsFollowUp = all.filter(r => r.status === 'new' && (now - new Date(r.createdAt).getTime()) > fortyEightHours).length;
   return { total, byStatus, byType, bySource, conversionRate, avgAgeDays, monthlyTrend, recentLeads, needsFollowUp };
+}
+
+// --- Business Claims ---
+
+export async function submitBusinessClaim(data: InsertBusinessClaim) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(businessClaims).values(data);
+  return { id: result[0].insertId };
+}
+
+export async function getBusinessClaims(opts?: { status?: string; serviceKey?: string }) {
+  const db = await getDb();
+  if (!db) return [];
+  let q = db.select().from(businessClaims).orderBy(desc(businessClaims.createdAt)).$dynamic();
+  if (opts?.status) {
+    q = q.where(eq(businessClaims.status, opts.status as any));
+  }
+  if (opts?.serviceKey) {
+    q = q.where(eq(businessClaims.serviceKey, opts.serviceKey));
+  }
+  return q;
+}
+
+export async function updateBusinessClaimStatus(id: number, status: string, adminNotes?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(businessClaims)
+    .set({ status: status as any, ...(adminNotes !== undefined ? { adminNotes } : {}) })
+    .where(eq(businessClaims.id, id));
+  return { success: true };
+}
+
+export async function getBusinessClaimStats() {
+  const db = await getDb();
+  if (!db) return { total: 0, pending: 0, approved: 0, rejected: 0 };
+  const all = await db.select().from(businessClaims);
+  const total = all.length;
+  const pending = all.filter(c => c.status === 'pending').length;
+  const approved = all.filter(c => c.status === 'approved').length;
+  const rejected = all.filter(c => c.status === 'rejected').length;
+  return { total, pending, approved, rejected };
+}
+
+export async function hasExistingClaim(serviceKey: string, email: string) {
+  const db = await getDb();
+  if (!db) return false;
+  const existing = await db.select().from(businessClaims)
+    .where(and(
+      eq(businessClaims.serviceKey, serviceKey),
+      eq(businessClaims.claimantEmail, email)
+    ));
+  return existing.length > 0;
 }

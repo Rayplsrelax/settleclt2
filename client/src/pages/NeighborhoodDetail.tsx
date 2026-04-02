@@ -735,7 +735,7 @@ export default function NeighborhoodDetail() {
                     <div key={s.name} className="p-4 rounded-xl bg-card border border-border hover:shadow-sm transition-all">
                       <div className="flex items-start justify-between gap-2">
                         <h5 className="font-semibold text-sm text-foreground leading-tight">{s.name}</h5>
-                        {s.featured && (
+                        {s.featured && s.affiliate && (
                           <span className="px-1.5 py-0.5 rounded bg-clt-gold/20 text-clt-gold text-[10px] font-bold uppercase shrink-0">Featured</span>
                         )}
                       </div>

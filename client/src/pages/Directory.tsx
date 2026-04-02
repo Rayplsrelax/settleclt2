@@ -5,7 +5,7 @@ import { CORE_NEIGHBORHOOD_NAMES } from "@shared/metroAreas";
 import { useMyNeighborhood } from "@/hooks/useMyNeighborhood";
 import { MapView } from "@/components/Map";
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
-import { Search, ExternalLink, Phone, X, MapPin, Star, Filter, Map, List, Home, ArrowRight } from "lucide-react";
+import { Search, ExternalLink, Phone, X, MapPin, Star, Filter, Map, List, Home, ArrowRight, Building2 } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
@@ -15,6 +15,7 @@ import ShareButtons from "@/components/ShareButtons";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import { ReviewStars } from "@/components/ReviewSection";
 import { useSEO } from "@/hooks/useSEO";
+import ClaimBusinessDialog from "@/components/ClaimBusinessDialog";
 
 // Generate a slug key from service name
 function toSlug(name: string): string {
@@ -571,11 +572,16 @@ export default function Directory() {
                             href={s.website}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted text-primary hover:bg-primary/10 text-xs font-medium no-underline transition-colors ml-auto"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted text-primary hover:bg-primary/10 text-xs font-medium no-underline transition-colors"
                           >
                             Visit <ExternalLink className="w-3 h-3" />
                           </a>
                         )}
+                        <ClaimBusinessDialog serviceKey={toSlug(s.name)} businessName={s.name}>
+                          <button className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted text-[11px] transition-colors ml-auto">
+                            <Building2 className="w-3 h-3" /> Claim
+                          </button>
+                        </ClaimBusinessDialog>
                       </div>
                     </div>
                   );

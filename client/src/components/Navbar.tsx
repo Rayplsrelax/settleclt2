@@ -108,6 +108,10 @@ function UserMenu() {
               <Shield className="w-4 h-4 mr-2" />
               Admin: Referrals
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/admin/claims")}>
+              <Shield className="w-4 h-4 mr-2" />
+              Admin: Business Claims
+            </DropdownMenuItem>
           </>
         )}
         <DropdownMenuSeparator />

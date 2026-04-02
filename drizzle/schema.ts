@@ -434,3 +434,33 @@ export const referrals = mysqlTable("referrals", {
 
 export type Referral = typeof referrals.$inferSelect;
 export type InsertReferral = typeof referrals.$inferInsert;
+
+// --- Business Claims: let business owners claim and manage their directory listing ---
+export const businessClaims = mysqlTable("business_claims", {
+  id: int("id").autoincrement().primaryKey(),
+  /** The service key from shared/services.ts or directory_listings.serviceKey */
+  serviceKey: varchar("serviceKey", { length: 255 }).notNull(),
+  /** Business name (denormalized for admin convenience) */
+  businessName: varchar("businessName", { length: 255 }).notNull(),
+  /** Claimant contact info */
+  claimantName: varchar("claimantName", { length: 255 }).notNull(),
+  claimantEmail: varchar("claimantEmail", { length: 320 }).notNull(),
+  claimantPhone: varchar("claimantPhone", { length: 32 }),
+  /** Role at the business */
+  claimantRole: varchar("claimantRole", { length: 128 }).notNull(),
+  /** How they can prove ownership (e.g. "I'm the owner", "I'm the manager", etc.) */
+  verificationMethod: mysqlEnum("verificationMethod", ["owner", "manager", "employee", "authorized_rep"]).notNull(),
+  /** Optional message / proof details */
+  message: text("message"),
+  /** Optional: logged-in user who submitted */
+  userId: int("userId"),
+  /** Claim status */
+  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  /** Admin notes */
+  adminNotes: text("adminNotes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BusinessClaim = typeof businessClaims.$inferSelect;
+export type InsertBusinessClaim = typeof businessClaims.$inferInsert;

@@ -24,6 +24,7 @@ import {
   getNewListings, getUpcomingEvents, getRecentBlogPosts, getNewsletterRecipients,
   createReview, getReviews, getReviewStats, deleteReview, toggleReviewVisibility, getAllReviews,
   submitReferral, getReferrals, updateReferralStatus, getReferralStats,
+  submitBusinessClaim, getBusinessClaims, updateBusinessClaimStatus, getBusinessClaimStats, hasExistingClaim,
 } from "./db";
 import { makeRequest, type PlacesSearchResult, type PlaceDetailsResult } from "./_core/map";
 import { notifyOwner } from "./_core/notification";
@@ -1042,6 +1043,72 @@ export const appRouter = router({
       }),
     stats: adminProcedure.query(async () => {
       return getReferralStats();
+    }),
+  }),
+
+  // --- Business Claims ---
+  claims: router({
+    submit: publicProcedure
+      .input(z.object({
+        serviceKey: z.string().min(1),
+        businessName: z.string().min(1),
+        claimantName: z.string().min(1),
+        claimantEmail: z.string().email(),
+        claimantPhone: z.string().optional(),
+        claimantRole: z.string().min(1),
+        verificationMethod: z.enum(['owner', 'manager', 'employee', 'authorized_rep']),
+        message: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Check for existing claim
+        const exists = await hasExistingClaim(input.serviceKey, input.claimantEmail);
+        if (exists) {
+          return { success: false, error: 'You have already submitted a claim for this business.' };
+        }
+        const result = await submitBusinessClaim({
+          ...input,
+          userId: ctx.user?.id ?? null,
+        });
+        // Notify owner
+        const roleLabels: Record<string, string> = {
+          owner: 'Owner', manager: 'Manager', employee: 'Employee', authorized_rep: 'Authorized Representative',
+        };
+        await notifyOwner({
+          title: `🏢 New Business Claim: ${input.businessName}`,
+          content: [
+            `Business: ${input.businessName} (${input.serviceKey})`,
+            `Claimant: ${input.claimantName} (${input.claimantEmail})`,
+            input.claimantPhone ? `Phone: ${input.claimantPhone}` : '',
+            `Role: ${roleLabels[input.verificationMethod] || input.verificationMethod}`,
+            input.message ? `Message: ${input.message}` : '',
+          ].filter(Boolean).join('\n'),
+        }).catch(() => {});
+        return { success: true, id: result.id };
+      }),
+    checkClaimed: publicProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .query(async ({ input }) => {
+        const claims = await getBusinessClaims({ serviceKey: input.serviceKey });
+        const approved = claims.find((c: any) => c.status === 'approved');
+        const pending = claims.find((c: any) => c.status === 'pending');
+        return { claimed: !!approved, pending: !!pending };
+      }),
+    list: adminProcedure
+      .input(z.object({ status: z.string().optional() }).optional())
+      .query(async ({ input }) => {
+        return getBusinessClaims(input);
+      }),
+    updateStatus: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(['pending', 'approved', 'rejected']),
+        adminNotes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return updateBusinessClaimStatus(input.id, input.status, input.adminNotes);
+      }),
+    stats: adminProcedure.query(async () => {
+      return getBusinessClaimStats();
     }),
   }),
 });
