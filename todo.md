@@ -429,3 +429,10 @@
 - [x] Build shared area detection utility with neighborhood boundary keywords
 - [x] Support zip code + keyword + suburb city fallback chain for area detection
 - [x] Write tests for area detection logic (41 tests)
+
+## Events Expansion & Event Scout Skill
+- [x] Analyze current events data structure and category counts (40 events across 10 categories)
+- [x] Research real Charlotte events across all categories (100+ researched)
+- [x] Add 100 new events to every category (140 total, up from 40)
+- [x] All 342 tests passing after events expansion
+- [x] Create settle-clt-event-scout skill with source registry, output templates, and seed script workflow
