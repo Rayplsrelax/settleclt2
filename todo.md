@@ -383,3 +383,22 @@
 - [x] Balanced distribution: Restaurants (47), Breweries (37), Coffee (33), Food Trucks (28), all others 6-19
 - [x] All listings have complete data (name, phone, website, description, area, category)
 - [x] Updated sitemap with all 54 directory category pages
+
+## Individual Business Detail Pages
+- [x] Add slug generation utility for service names (toSlug reused from Directory)
+- [x] Create /directory/:slug route in App.tsx
+- [x] Build BusinessDetail page with full listing info (name, description, phone, website, hours, photos)
+- [x] Add Google Map pin for business location (geocoded from address)
+- [x] Add LocalBusiness JSON-LD structured data with aggregateRating for SEO
+- [x] Add breadcrumb navigation (Home > Directory > Category > Business)
+- [x] Link directory listing cards to detail pages (name is clickable)
+- [x] Add business detail pages to sitemap for 700+ indexable URLs
+
+## User Reviews & Ratings on Business Pages
+- [x] Build review form UI on business detail page (reused existing ReviewSection component)
+- [x] Display average rating and review count on listing cards and detail pages (ReviewStars already on cards)
+- [x] Add aggregate rating in LocalBusiness structured data for SEO rich snippets
+
+## New This Week Section
+- [x] Build "New This Week" section at top of Directory page (between hero and search, hidden when filters active)
+- [x] Show 6 most recently added listings with "NEW" badge, category icon, area, and link to detail page

@@ -35,6 +35,7 @@ const AdminClaims = lazy(() => import("./pages/AdminClaims"));
 const MyBusiness = lazy(() => import("./pages/MyBusiness"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const BusinessDetail = lazy(() => import("./pages/BusinessDetail"));
 
 function PageLoader() {
   return (
@@ -77,6 +78,7 @@ function Router() {
         <Route path="/privacy" component={PrivacyPolicy} />
         <Route path="/terms" component={TermsOfService} />
         <Route path="/tag/:slug" component={TagPage} />
+        <Route path="/directory/:slug" component={BusinessDetail} />
         <Route path="/blog/:slug" component={BlogArticle} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />

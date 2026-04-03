@@ -170,6 +170,12 @@ async function startServer() {
       "huntersville", "lake-norman", "matthews", "concord", "fort-mill", "pineville"
     ];
 
+    // Individual business detail pages (700+ URLs)
+    const { SERVICES: allServices } = await import("../../shared/services");
+    const businessSlugs = Array.from(new Set(allServices.map((s: { name: string }) =>
+      s.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+    )));
+
     // Blog slugs from DB
     let blogSlugs: string[] = [];
     try {
@@ -200,6 +206,10 @@ async function startServer() {
 
     for (const cat of directoryCategories) {
       xml += `  <url>\n    <loc>${baseUrl}/directory?category=${cat}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+    }
+
+    for (const bSlug of businessSlugs) {
+      xml += `  <url>\n    <loc>${baseUrl}/directory/${bSlug}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.5</priority>\n  </url>\n`;
     }
 
     xml += `</urlset>`;

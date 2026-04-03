@@ -5,7 +5,7 @@ import { CORE_NEIGHBORHOOD_NAMES } from "@shared/metroAreas";
 import { useMyNeighborhood } from "@/hooks/useMyNeighborhood";
 import { MapView } from "@/components/Map";
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
-import { Search, ExternalLink, Phone, X, MapPin, Star, Filter, Map, List, Home, ArrowRight, Building2 } from "lucide-react";
+import { Search, ExternalLink, Phone, X, MapPin, Star, Filter, Map, List, Home, ArrowRight, Building2, Sparkles, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
@@ -335,6 +335,45 @@ export default function Directory() {
         </div>
       </section>
 
+      {/* New This Week Section */}
+      {!activeCategory && !activeGroup && !activeArea && !search && (
+        <section className="py-6 md:py-8 bg-gradient-to-b from-amber-50/50 to-background border-b border-border">
+          <div className="container">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-amber-100">
+                <Sparkles className="w-4 h-4 text-amber-600" />
+              </div>
+              <div>
+                <h2 className="font-display font-bold text-lg text-foreground">New This Week</h2>
+                <p className="text-xs text-muted-foreground">Recently added to the directory</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              {SERVICES.slice(-12).reverse().slice(0, 6).map((s, i) => {
+                const cat = SERVICE_CATEGORIES.find((c) => c.id === s.category);
+                const sSlug = toSlug(s.name);
+                return (
+                  <Link key={`new-${i}`} href={`/directory/${sSlug}`}>
+                    <div className="group relative p-3 rounded-xl border border-amber-200/60 bg-white hover:shadow-md hover:border-amber-300 transition-all cursor-pointer">
+                      <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[9px] font-bold uppercase tracking-wider">New</span>
+                      <span className="text-xl mb-1.5 block">{cat?.icon || "📍"}</span>
+                      <h3 className="font-semibold text-xs text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">{s.name}</h3>
+                      <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+                        <MapPin className="w-2.5 h-2.5" /> {s.area}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+            <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>{SERVICES.length} businesses and growing — <Link href="/list-your-business" className="text-primary hover:underline">Add yours</Link></span>
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="py-8 md:py-10">
         <div className="container">
           {/* Search bar + view toggle */}
@@ -512,7 +551,9 @@ export default function Directory() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-sm text-foreground">{s.name}</h3>
+                            <Link href={`/directory/${toSlug(s.name)}`}>
+                            <h3 className="font-semibold text-sm text-foreground hover:text-primary transition-colors cursor-pointer">{s.name}</h3>
+                          </Link>
                             {s.featured && s.affiliate && (
                               <span className="px-1.5 py-0.5 rounded bg-clt-gold/20 text-clt-gold text-[10px] font-bold uppercase">Featured</span>
                             )}
