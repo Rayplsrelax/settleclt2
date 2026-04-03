@@ -423,3 +423,9 @@
 - [x] Add premium tier badges to business detail page (Premium Listing / Featured Listing badges)
 - [x] Optimize Directory card rendering: compute slug once per card instead of multiple toSlug() calls
 - [x] Write vitest tests for sort logic, premium tier mapping, and lightbox navigation (13 tests)
+
+## Improve Area Detection for New Business Listings
+- [x] Replace naive extractArea (comma-split) with canonical area mapping
+- [x] Build shared area detection utility with neighborhood boundary keywords
+- [x] Support zip code + keyword + suburb city fallback chain for area detection
+- [x] Write tests for area detection logic (41 tests)

@@ -12,15 +12,10 @@ import { toast } from "sonner";
 import { Search, Plus, Star, MapPin, Phone, Globe, Check, Trash2, Building2, RefreshCw, ArrowLeft, Shield, Loader2 } from "lucide-react";
 import { SERVICES, SERVICE_CATEGORIES } from "../../../shared/services";
 import { Link } from "wouter";
+import { detectArea, CANONICAL_AREAS } from "../../../shared/areaDetection";
 
 function toSlug(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-}
-
-function extractArea(address: string): string {
-  const parts = address.split(",").map(p => p.trim());
-  if (parts.length >= 3) return parts[1];
-  return "Charlotte Metro";
 }
 
 export default function AdminEnrich() {
@@ -153,7 +148,7 @@ export default function AdminEnrich() {
         name,
         category: selectedCategory,
         description: `${rating ? `${rating}★ rated on Google` : ""} ${(types || []).slice(0, 3).join(", ")}`.trim() || undefined,
-        area: extractArea(address),
+        area: detectArea(address, types),
         phone: phone || undefined,
         website: website || undefined,
         googlePlaceId: placeId,
@@ -352,6 +347,18 @@ export default function AdminEnrich() {
                           </div>
                         </div>
                       )}
+
+                      {/* Detected area preview */}
+                      <div className="border-t pt-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Label className="font-semibold text-sm">Detected Area:</Label>
+                          <Badge variant="outline" className="gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {detectArea(selectedPlace.address || selectedPlace.formatted_address || "", selectedPlace.types)}
+                          </Badge>
+                          <span className="text-xs text-muted-foreground">(auto-detected from address)</span>
+                        </div>
+                      </div>
 
                       <div className="border-t pt-4">
                         <Label className="mb-2 block font-semibold">Assign a Category</Label>
