@@ -1,7 +1,7 @@
 import { SERVICES, SERVICE_CATEGORIES, type Service } from "@shared/services";
-import { useMemo, useRef, useCallback } from "react";
+import { useMemo, useRef, useCallback, useState } from "react";
 import { useRoute, Link } from "wouter";
-import { MapPin, Phone, ExternalLink, ArrowLeft, Clock, Star, Share2, Navigation, Building2, ChevronRight } from "lucide-react";
+import { MapPin, Phone, ExternalLink, ArrowLeft, Clock, Star, Share2, Navigation, Building2, ChevronRight, Camera, ChevronLeft, X, Crown, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +41,12 @@ export default function BusinessDetail() {
     { enabled: !!slug }
   );
 
+  // Fetch premium tier for this business
+  const { data: premiumData } = trpc.premium.getTier.useQuery(
+    { serviceKey: slug },
+    { enabled: !!slug }
+  );
+
   // Parse hours from enrichment
   const hours = useMemo(() => {
     if (!enrichment?.hoursJson) return null;
@@ -60,6 +66,9 @@ export default function BusinessDetail() {
       return null;
     }
   }, [enrichment?.photosJson]);
+
+  // Lightbox state
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   // Map ref for geocoding
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -148,6 +157,49 @@ export default function BusinessDetail() {
     return <NotFound />;
   }
 
+  // Lightbox modal component
+  const lightboxModal = lightboxIndex !== null && photos && photos.length > 0 && (
+    <div
+      className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+      onClick={() => setLightboxIndex(null)}
+    >
+      <button
+        onClick={(e) => { e.stopPropagation(); setLightboxIndex(null); }}
+        className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10"
+      >
+        <X className="w-6 h-6" />
+      </button>
+      <button
+        onClick={(e) => { e.stopPropagation(); setLightboxIndex(Math.max(0, lightboxIndex - 1)); }}
+        className={`absolute left-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10 ${
+          lightboxIndex === 0 ? 'opacity-30 cursor-not-allowed' : ''
+        }`}
+        disabled={lightboxIndex === 0}
+      >
+        <ChevronLeft className="w-6 h-6" />
+      </button>
+      <button
+        onClick={(e) => { e.stopPropagation(); setLightboxIndex(Math.min(photos.length - 1, lightboxIndex + 1)); }}
+        className={`absolute right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10 ${
+          lightboxIndex === photos.length - 1 ? 'opacity-30 cursor-not-allowed' : ''
+        }`}
+        disabled={lightboxIndex === photos.length - 1}
+      >
+        <ChevronRight className="w-6 h-6" />
+      </button>
+      <div className="max-w-4xl max-h-[85vh] px-16" onClick={(e) => e.stopPropagation()}>
+        <img
+          src={photos[lightboxIndex]}
+          alt={`${service.name} photo ${lightboxIndex + 1}`}
+          className="max-w-full max-h-[80vh] object-contain rounded-lg"
+        />
+        <div className="text-center mt-3">
+          <span className="text-white/70 text-sm">{lightboxIndex + 1} / {photos.length}</span>
+        </div>
+      </div>
+    </div>
+  );
+
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(
     enrichment?.verifiedAddress || `${service.name}, ${service.area}, Charlotte, NC`
   )}`;
@@ -159,6 +211,7 @@ export default function BusinessDetail() {
 
   return (
     <div className="min-h-screen bg-background">
+      {lightboxModal}
       {/* Breadcrumb */}
       <div className="bg-card border-b border-border">
         <div className="max-w-5xl mx-auto px-4 py-3">
@@ -196,24 +249,50 @@ export default function BusinessDetail() {
             <Card className="overflow-hidden">
               {/* Photo gallery */}
               {photos && photos.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 max-h-[300px] overflow-hidden">
-                  <img
-                    src={photos[0]}
-                    alt={service.name}
-                    className="w-full h-[300px] object-cover sm:col-span-1"
-                  />
-                  {photos.length > 1 && (
-                    <div className="hidden sm:grid grid-rows-2 gap-1">
-                      {photos.slice(1, 3).map((photo, i) => (
-                        <img
-                          key={i}
-                          src={photo}
-                          alt={`${service.name} photo ${i + 2}`}
-                          className="w-full h-[148px] object-cover"
-                        />
-                      ))}
-                    </div>
-                  )}
+                <div className="relative">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-1 max-h-[320px] overflow-hidden">
+                    <button
+                      onClick={() => setLightboxIndex(0)}
+                      className="sm:col-span-2 relative overflow-hidden group cursor-pointer"
+                    >
+                      <img
+                        src={photos[0]}
+                        alt={service.name}
+                        className="w-full h-[320px] object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                    </button>
+                    {photos.length > 1 && (
+                      <div className="hidden sm:grid grid-rows-3 gap-1">
+                        {photos.slice(1, 4).map((photo, i) => (
+                          <button
+                            key={i}
+                            onClick={() => setLightboxIndex(i + 1)}
+                            className="relative overflow-hidden group cursor-pointer"
+                          >
+                            <img
+                              src={photo}
+                              alt={`${service.name} photo ${i + 2}`}
+                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                              style={{ minHeight: '100px' }}
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                            {i === 2 && photos.length > 4 && (
+                              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                <span className="text-white font-semibold text-sm">+{photos.length - 4} more</span>
+                              </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setLightboxIndex(0)}
+                    className="absolute bottom-3 right-3 px-3 py-1.5 rounded-lg bg-black/60 hover:bg-black/80 text-white text-xs font-medium flex items-center gap-1.5 transition-colors backdrop-blur-sm"
+                  >
+                    <Camera className="w-3.5 h-3.5" /> {photos.length} photos
+                  </button>
                 </div>
               )}
 
@@ -234,7 +313,17 @@ export default function BusinessDetail() {
 
                     {/* Badges row */}
                     <div className="flex flex-wrap items-center gap-2 mt-3">
-                      {service.featured && service.affiliate && (
+                      {premiumData?.tier === 'premium' && premiumData?.active && (
+                        <Badge className="bg-purple-100 text-purple-700 border-purple-200 text-xs gap-1">
+                          <Crown className="w-3 h-3" /> Premium Listing
+                        </Badge>
+                      )}
+                      {premiumData?.tier === 'featured' && premiumData?.active && (
+                        <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-xs gap-1">
+                          <Award className="w-3 h-3" /> Featured Listing
+                        </Badge>
+                      )}
+                      {(!premiumData?.active || premiumData?.tier === 'basic') && service.featured && service.affiliate && (
                         <Badge className="bg-clt-gold/20 text-clt-gold border-clt-gold/30 text-xs">Featured Partner</Badge>
                       )}
                       <Badge variant="outline" className="gap-1 text-xs">

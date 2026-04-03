@@ -5,7 +5,7 @@ import { CORE_NEIGHBORHOOD_NAMES } from "@shared/metroAreas";
 import { useMyNeighborhood } from "@/hooks/useMyNeighborhood";
 import { MapView } from "@/components/Map";
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
-import { Search, ExternalLink, Phone, X, MapPin, Star, Filter, Map, List, Home, ArrowRight, Building2, Sparkles, TrendingUp } from "lucide-react";
+import { Search, ExternalLink, Phone, X, MapPin, Star, Filter, Map, List, Home, ArrowRight, Building2, Sparkles, TrendingUp, ArrowUpDown, Crown, Award } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
@@ -103,6 +103,7 @@ export default function Directory() {
   const { trackClickByName } = useTagTrackingWithLookup();
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
+  const [sortBy, setSortBy] = useState<"default" | "top-rated" | "most-reviewed" | "newest">("default");
 
   // Fetch enrichment data for all services
   const enrichmentQuery = trpc.enrichment.getAll.useQuery();
@@ -115,6 +116,18 @@ export default function Directory() {
     }
     return m;
   }, [enrichmentQuery.data]);
+
+  // Fetch active premium tiers
+  const premiumQuery = trpc.premium.getActiveTiers.useQuery();
+  const premiumMap = useMemo(() => {
+    const m: Record<string, string> = {};
+    if (premiumQuery.data) {
+      for (const p of premiumQuery.data) {
+        m[p.serviceKey] = p.tier;
+      }
+    }
+    return m;
+  }, [premiumQuery.data]);
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
@@ -170,42 +183,61 @@ export default function Directory() {
       );
     }
 
-    // Personalization: boost services in user's neighborhood
-    // Only affiliate partners get priority placement (not all featured items)
-    if (myNeighborhoodData) {
-      const myArea = myNeighborhoodData.name;
+    // Sort based on selected sort option
+    if (sortBy === "top-rated") {
       result.sort((a, b) => {
-        const aLocal = a.area.includes(myArea) ? 0 : 1;
-        const bLocal = b.area.includes(myArea) ? 0 : 1;
-        if (aLocal !== bLocal) return aLocal - bLocal;
-        const aPartner = a.featured && a.affiliate ? 0 : 1;
-        const bPartner = b.featured && b.affiliate ? 0 : 1;
-        if (aPartner !== bPartner) return aPartner - bPartner;
-        return a.name.localeCompare(b.name);
+        const aRating = parseFloat(enrichmentMap[toSlug(a.name)]?.googleRating || "0");
+        const bRating = parseFloat(enrichmentMap[toSlug(b.name)]?.googleRating || "0");
+        if (bRating !== aRating) return bRating - aRating;
+        return (enrichmentMap[toSlug(b.name)]?.reviewCount || 0) - (enrichmentMap[toSlug(a.name)]?.reviewCount || 0);
       });
+    } else if (sortBy === "most-reviewed") {
+      result.sort((a, b) => {
+        const aReviews = enrichmentMap[toSlug(a.name)]?.reviewCount || 0;
+        const bReviews = enrichmentMap[toSlug(b.name)]?.reviewCount || 0;
+        if (bReviews !== aReviews) return bReviews - aReviews;
+        return parseFloat(enrichmentMap[toSlug(b.name)]?.googleRating || "0") - parseFloat(enrichmentMap[toSlug(a.name)]?.googleRating || "0");
+      });
+    } else if (sortBy === "newest") {
+      result.reverse();
     } else {
-      result.sort((a, b) => {
-        const aPartner = a.featured && a.affiliate ? 0 : 1;
-        const bPartner = b.featured && b.affiliate ? 0 : 1;
-        if (aPartner !== bPartner) return aPartner - bPartner;
-        return a.name.localeCompare(b.name);
-      });
+      // Default: affiliate partners first, then personalization, then alphabetical
+      if (myNeighborhoodData) {
+        const myArea = myNeighborhoodData.name;
+        result.sort((a, b) => {
+          const aLocal = a.area.includes(myArea) ? 0 : 1;
+          const bLocal = b.area.includes(myArea) ? 0 : 1;
+          if (aLocal !== bLocal) return aLocal - bLocal;
+          const aPartner = a.featured && a.affiliate ? 0 : 1;
+          const bPartner = b.featured && b.affiliate ? 0 : 1;
+          if (aPartner !== bPartner) return aPartner - bPartner;
+          return a.name.localeCompare(b.name);
+        });
+      } else {
+        result.sort((a, b) => {
+          const aPartner = a.featured && a.affiliate ? 0 : 1;
+          const bPartner = b.featured && b.affiliate ? 0 : 1;
+          if (aPartner !== bPartner) return aPartner - bPartner;
+          return a.name.localeCompare(b.name);
+        });
+      }
     }
 
     return result;
-  }, [activeCategory, activeGroup, activeArea, search, myNeighborhoodData]);
+  }, [activeCategory, activeGroup, activeArea, search, myNeighborhoodData, sortBy, enrichmentMap]);
 
   const clearFilters = () => {
     setSearch("");
     setActiveGroup("");
     setActiveCategory("");
     setActiveArea("");
+    setSortBy("default");
     if (typeof window !== "undefined") {
       window.history.replaceState({}, "", "/directory");
     }
   };
 
-  const hasFilters = search || activeGroup || activeCategory || activeArea;
+  const hasFilters = search || activeGroup || activeCategory || activeArea || sortBy !== "default";
 
   // Map initialization callback
   const handleMapReady = useCallback((map: google.maps.Map) => {
@@ -376,9 +408,9 @@ export default function Directory() {
 
       <section className="py-8 md:py-10">
         <div className="container">
-          {/* Search bar + view toggle */}
-          <div className="flex gap-3 mb-6">
-            <div className="relative flex-1">
+          {/* Search bar + view toggle + sort */}
+          <div className="flex flex-wrap gap-3 mb-6">
+            <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
@@ -405,6 +437,24 @@ export default function Directory() {
               >
                 <Map className="w-4 h-4" /> Map
               </button>
+            </div>
+            {/* Sort dropdown */}
+            <div className="relative">
+              <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                className={`pl-9 pr-8 py-2.5 rounded-lg border text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring ${
+                  sortBy !== "default"
+                    ? "border-primary/40 bg-primary/5 text-primary font-medium"
+                    : "border-input bg-background text-foreground"
+                }`}
+              >
+                <option value="default">Sort: Default</option>
+                <option value="top-rated">Top Rated</option>
+                <option value="most-reviewed">Most Reviewed</option>
+                <option value="newest">Newest First</option>
+              </select>
             </div>
             <Button
               variant="outline"
@@ -541,34 +591,50 @@ export default function Directory() {
                 {filteredServices.map((s, i) => {
                   const cat = SERVICE_CATEGORIES.find((c) => c.id === s.category);
                   const isLocal = myNeighborhoodData && s.area.includes(myNeighborhoodData.name);
+                  const sSlug = toSlug(s.name);
+                  const premiumTier = premiumMap[sSlug];
                   return (
                     <div
                       key={`${s.name}-${i}`}
                       className={`p-4 rounded-xl border bg-card transition-all hover:shadow-md ${
-                        isLocal ? "border-primary/30 ring-1 ring-primary/10" : "border-border"
+                        premiumTier === 'premium'
+                          ? "border-purple-300 ring-1 ring-purple-100 bg-gradient-to-br from-purple-50/30 to-card"
+                          : premiumTier === 'featured'
+                          ? "border-amber-300 ring-1 ring-amber-100 bg-gradient-to-br from-amber-50/30 to-card"
+                          : isLocal ? "border-primary/30 ring-1 ring-primary/10" : "border-border"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <Link href={`/directory/${toSlug(s.name)}`}>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Link href={`/directory/${sSlug}`}>
                             <h3 className="font-semibold text-sm text-foreground hover:text-primary transition-colors cursor-pointer">{s.name}</h3>
                           </Link>
-                            {s.featured && s.affiliate && (
+                            {premiumTier === 'premium' && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 text-[10px] font-bold uppercase">
+                                <Crown className="w-2.5 h-2.5" /> Premium
+                              </span>
+                            )}
+                            {premiumTier === 'featured' && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold uppercase">
+                                <Award className="w-2.5 h-2.5" /> Featured
+                              </span>
+                            )}
+                            {!premiumTier && s.featured && s.affiliate && (
                               <span className="px-1.5 py-0.5 rounded bg-clt-gold/20 text-clt-gold text-[10px] font-bold uppercase">Featured</span>
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">{s.description}</p>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
-                          <QuickStampButton serviceKey={toSlug(s.name)} area={s.area} />
-                          <WishlistButton serviceKey={toSlug(s.name)} />
+                          <QuickStampButton serviceKey={sSlug} area={s.area} />
+                          <WishlistButton serviceKey={sSlug} />
                           {cat && <span className="text-lg">{cat.icon}</span>}
                         </div>
                       </div>
                       {/* Enrichment data: rating + reviews */}
                       {(() => {
-                        const enriched = enrichmentMap[toSlug(s.name)];
+                        const enriched = enrichmentMap[sSlug];
                         if (!enriched?.googleRating) return null;
                         return (
                           <div className="flex items-center gap-2 mt-2">
@@ -590,7 +656,7 @@ export default function Directory() {
                         );
                       })()}
                       <div className="mt-2">
-                        <ReviewStars targetType="directory" targetId={toSlug(s.name)} />
+                        <ReviewStars targetType="directory" targetId={sSlug} />
                       </div>
                       <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -602,7 +668,7 @@ export default function Directory() {
                       </div>
                       <div className="flex flex-wrap items-center gap-2 mt-3">
                         {(() => {
-                          const enriched = enrichmentMap[toSlug(s.name)];
+                          const enriched = enrichmentMap[sSlug];
                           const addr = enriched?.verifiedAddress || s.name + ', ' + s.area + ', Charlotte, NC';
                           return (
                             <a
@@ -630,7 +696,7 @@ export default function Directory() {
                             Visit <ExternalLink className="w-3 h-3" />
                           </a>
                         )}
-                        <ClaimBusinessDialog serviceKey={toSlug(s.name)} businessName={s.name}>
+                        <ClaimBusinessDialog serviceKey={sSlug} businessName={s.name}>
                           <button className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted text-[11px] transition-colors ml-auto">
                             <Building2 className="w-3 h-3" /> Claim
                           </button>

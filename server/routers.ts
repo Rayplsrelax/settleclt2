@@ -1213,6 +1213,11 @@ export const appRouter = router({
         const listing = await getPremiumListing(input.serviceKey);
         return listing ? { tier: listing.tier, active: listing.paymentStatus === 'active' } : { tier: 'basic' as const, active: false };
       }),
+    getActiveTiers: publicProcedure.query(async () => {
+      const all = await getAllPremiumListings();
+      const active = all.filter((l: any) => l.paymentStatus === 'active' && l.tier !== 'basic');
+      return active.map((l: any) => ({ serviceKey: l.serviceKey, tier: l.tier }));
+    }),
     getAnalytics: protectedProcedure
       .input(z.object({ serviceKey: z.string() }))
       .query(async ({ input, ctx }) => {

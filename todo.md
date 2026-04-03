@@ -402,3 +402,24 @@
 ## New This Week Section
 - [x] Build "New This Week" section at top of Directory page (between hero and search, hidden when filters active)
 - [x] Show 6 most recently added listings with "NEW" badge, category icon, area, and link to detail page
+
+## Directory Enhancements: Sort, Premium Badges, Photo Gallery
+- [x] Add sort-by dropdown to Directory page (Default, Top Rated, Most Reviewed, Newest First)
+- [x] Sort by Top Rated: highest Google rating first, tiebreak by review count
+- [x] Sort by Most Reviewed: highest review count first, tiebreak by rating
+- [x] Sort by Newest: reverse order to show recently added listings first
+- [x] Include sortBy in clear filters and hasFilters logic
+- [x] Wire premium tier badges into Directory listing cards (query premium_listings table)
+- [x] Premium tier: purple border + Crown icon badge
+- [x] Featured tier: amber border + Award icon badge
+- [x] Basic/no tier: fallback to existing affiliate Featured badge
+- [x] Add getActiveTiers public procedure to premium router for batch directory queries
+- [x] Enhance photo gallery on business detail pages with lightbox viewer
+- [x] Show up to 4 photos in 2/3 + 1/3 grid layout (main photo + 3 side photos)
+- [x] Add "+N more" overlay on last visible photo when more photos exist
+- [x] Add "N photos" button with Camera icon for quick access
+- [x] Lightbox: full-screen overlay with prev/next navigation and photo counter
+- [x] Lightbox: bounds checking prevents going past first/last photo
+- [x] Add premium tier badges to business detail page (Premium Listing / Featured Listing badges)
+- [x] Optimize Directory card rendering: compute slug once per card instead of multiple toSlug() calls
+- [x] Write vitest tests for sort logic, premium tier mapping, and lightbox navigation (13 tests)
