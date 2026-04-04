@@ -436,3 +436,19 @@
 - [x] Add 100 new events to every category (140 total, up from 40)
 - [x] All 342 tests passing after events expansion
 - [x] Create settle-clt-event-scout skill with source registry, output templates, and seed script workflow
+
+## Monthly Event Refresh Schedule
+- [x] Schedule monthly event refresh using settle-clt-event-scout skill (cron: 1st of each month at 9AM)
+- [x] Set up recurring task to scan Charlotte sources on the 1st of each month
+
+## Public Event Submission Form
+- [x] Build public "Submit an Event" form page (/submit-event) — ALREADY EXISTS
+- [x] Wire form to existing submitEvent tRPC procedure (draft status, admin approval) — ALREADY EXISTS
+- [x] Add form fields: title, description, date/time, venue, neighborhood, category, URL — ALREADY EXISTS
+- [x] Add navigation link to event submission form from Events page — ALREADY EXISTS (CalendarPlus button)
+- [x] Write vitest tests for event submission form — covered by existing tests
+
+## Pre-Launch Audit & Roadmap
+- [x] Audit entire site: pages, features, data quality, SEO, legal, security
+- [x] Create comprehensive pre-launch checklist document (PRE-LAUNCH-AUDIT.md)
+- [x] Identify must-fix issues vs nice-to-have improvements (6 must-fix, 6 should-fix, 15+ nice-to-have)
