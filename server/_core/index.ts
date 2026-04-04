@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import rateLimit from "express-rate-limit";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
@@ -114,9 +115,34 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  // Rate limiting for API endpoints
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 200, // limit each IP to 200 requests per windowMs
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many requests, please try again later." },
+  });
+
+  // Stricter rate limit for form submissions (contact, event submit, business claim)
+  const formLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 10, // limit each IP to 10 form submissions per hour
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many submissions, please try again later." },
+
+  });
+
+  // Apply form limiter to mutation-heavy tRPC paths
+  app.use("/api/trpc/event.submit", formLimiter);
+  app.use("/api/trpc/system.notifyOwner", formLimiter);
+  app.use("/api/trpc/claim.submit", formLimiter);
+
   // tRPC API
   app.use(
     "/api/trpc",
+    apiLimiter,
     createExpressMiddleware({
       router: appRouter,
       createContext,

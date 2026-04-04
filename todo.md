@@ -469,3 +469,18 @@
 - [x] 2.5 Add Contact link to Footer (both in Get Started column and bottom bar)
 - [x] 2.6 Add /contact to sitemap
 - [x] 2.7 Write tests for all Phase 1 and Phase 2 changes (375 tests passing)
+
+## Phase 3: Content Expansion
+- [x] 3.1 Source and add event images for events across all 10 categories (AI-generated, CDN-hosted)
+- [x] 3.2 Write 16 new blog posts for SEO (25 total, up from 9)
+- [x] 3.3 Enrichment available via admin tool (manual admin action, not bulk-run)
+- [x] 3.4 Add 6 more bingo cards (10 total): Food Trucks, Outdoor Explorer, Live Music, Fitness, Arts & Culture, Family Fun
+
+## Phase 4: Marketing & Growth (minus Stripe)
+- [x] 4.1 Add social media links to footer (Instagram, X/Twitter, Facebook, TikTok with SVG icons)
+- [x] 4.2 Improve structured data (Organization + BreadcrumbList JSON-LD schemas added)
+- [x] 4.3 Set up error monitoring (ErrorBoundary componentDidCatch + global error/rejection handlers)
+- [ ] 4.4 Set up newsletter email delivery mechanism (deferred — needs email service integration)
+- [ ] 4.5 Add Google Search Console verification meta tag (needs verification code from user)
+- [x] 4.6 Add rate limiting to API and form submission endpoints (express-rate-limit)
+- [x] 4.7 Write tests for Phase 3 and Phase 4 features (394 tests passing across 31 files)

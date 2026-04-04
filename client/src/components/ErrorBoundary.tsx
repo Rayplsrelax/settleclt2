@@ -21,6 +21,41 @@ class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // Log error details for monitoring
+    console.error("[ErrorBoundary] Caught error:", {
+      message: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+      timestamp: new Date().toISOString(),
+      url: window.location.href,
+    });
+  }
+
+  componentDidMount() {
+    // Global unhandled error handler
+    window.addEventListener("error", (event) => {
+      console.error("[GlobalError] Unhandled error:", {
+        message: event.message,
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno,
+        timestamp: new Date().toISOString(),
+        url: window.location.href,
+      });
+    });
+
+    // Global unhandled promise rejection handler
+    window.addEventListener("unhandledrejection", (event) => {
+      console.error("[GlobalError] Unhandled promise rejection:", {
+        reason: event.reason?.message || String(event.reason),
+        stack: event.reason?.stack,
+        timestamp: new Date().toISOString(),
+        url: window.location.href,
+      });
+    });
+  }
+
   render() {
     if (this.state.hasError) {
       return (
