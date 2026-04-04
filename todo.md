@@ -484,3 +484,6 @@
 - [ ] 4.5 Add Google Search Console verification meta tag (needs verification code from user)
 - [x] 4.6 Add rate limiting to API and form submission endpoints (express-rate-limit)
 - [x] 4.7 Write tests for Phase 3 and Phase 4 features (394 tests passing across 31 files)
+
+## Remove Event Photos
+- [x] Clear all image URLs from events in the database (140 rows updated)
