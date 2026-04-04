@@ -36,7 +36,9 @@ export default function Footer() {
             <div className="flex flex-col gap-2">
               <Link href="/quiz" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Neighborhood Quiz</Link>
               <Link href="/neighborhoods" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Find Your Neighborhood</Link>
+              <Link href="/find-your-home" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Find Your Home</Link>
               <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Moving Guides</Link>
+              <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Contact Us</Link>
             </div>
           </div>
         </div>
@@ -45,6 +47,7 @@ export default function Footer() {
           <div className="flex items-center gap-4">
             <Link href="/privacy" className="text-xs text-muted-foreground hover:text-primary transition-colors no-underline">Privacy Policy</Link>
             <Link href="/terms" className="text-xs text-muted-foreground hover:text-primary transition-colors no-underline">Terms of Service</Link>
+            <Link href="/contact" className="text-xs text-muted-foreground hover:text-primary transition-colors no-underline">Contact</Link>
           </div>
         </div>
       </div>

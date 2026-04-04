@@ -85,7 +85,7 @@ export default function AdminClaims() {
       <div className="container py-8 max-w-6xl">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <Link href="/admin">
+          <Link href="/admin/enrich">
             <Button variant="ghost" size="sm" className="gap-1">
               <ArrowLeft className="w-4 h-4" /> Admin
             </Button>

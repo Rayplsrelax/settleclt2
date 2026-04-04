@@ -15,7 +15,11 @@ import {
   Grid3X3,
   Trophy,
   Mail,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -117,6 +121,76 @@ function NewsletterToggle({ defaultOptIn }: { defaultOptIn: boolean }) {
         }`}
       />
     </button>
+  );
+}
+
+function DeleteAccountSection() {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+  const deleteAccount = trpc.auth.deleteAccount.useMutation({
+    onSuccess: () => {
+      toast.success("Your account has been deleted.");
+      window.location.href = "/";
+    },
+    onError: () => {
+      toast.error("Failed to delete account. Please try again or contact support.");
+    },
+  });
+
+  if (!showConfirm) {
+    return (
+      <button
+        onClick={() => setShowConfirm(true)}
+        className="flex items-center gap-2 text-sm text-muted-foreground hover:text-destructive transition-colors"
+      >
+        <Trash2 className="w-4 h-4" />
+        Delete My Account
+      </button>
+    );
+  }
+
+  return (
+    <Card className="border-destructive/30 bg-destructive/5">
+      <CardContent className="p-4 space-y-3">
+        <div className="flex items-start gap-2">
+          <AlertTriangle className="w-5 h-5 text-destructive mt-0.5 shrink-0" />
+          <div>
+            <p className="text-sm font-semibold text-destructive">Delete your account?</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              This will permanently delete your account and all associated data including passport stamps, wishlist, bingo progress, reviews, and comments. This action cannot be undone.
+            </p>
+          </div>
+        </div>
+        <div>
+          <label className="text-xs text-muted-foreground mb-1 block">
+            Type <span className="font-mono font-bold">DELETE MY ACCOUNT</span> to confirm
+          </label>
+          <Input
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            placeholder="DELETE MY ACCOUNT"
+            className="text-sm"
+          />
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="destructive"
+            size="sm"
+            disabled={confirmText !== "DELETE MY ACCOUNT" || deleteAccount.isPending}
+            onClick={() => deleteAccount.mutate({ confirmText: "DELETE MY ACCOUNT" })}
+          >
+            {deleteAccount.isPending ? "Deleting..." : "Permanently Delete"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => { setShowConfirm(false); setConfirmText(""); }}
+          >
+            Cancel
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -264,14 +338,20 @@ export default function Profile() {
           </CardContent>
         </Card>
 
-        {/* Sign out */}
-        <button
-          onClick={() => logout()}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-destructive transition-colors"
-        >
-          <LogOut className="w-4 h-4" />
-          Sign Out
-        </button>
+        {/* Account Actions */}
+        <h2 className="text-lg font-display font-semibold text-foreground mb-4">
+          Account
+        </h2>
+        <div className="space-y-3">
+          <button
+            onClick={() => logout()}
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-destructive transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            Sign Out
+          </button>
+          <DeleteAccountSection />
+        </div>
       </div>
     </PageLayout>
   );

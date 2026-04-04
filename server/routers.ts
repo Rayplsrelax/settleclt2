@@ -28,6 +28,7 @@ import {
   submitBusinessClaim, getBusinessClaims, updateBusinessClaimStatus, getBusinessClaimStats, hasExistingClaim,
   getListingOverride, upsertListingOverride, getApprovedClaimForUser,
   getPremiumListing, upsertPremiumListing, getAllPremiumListings, incrementListingAnalytics,
+  deleteUserAccount,
 } from "./db";
 import { makeRequest, type PlacesSearchResult, type PlaceDetailsResult } from "./_core/map";
 import { notifyOwner } from "./_core/notification";
@@ -43,6 +44,21 @@ export const appRouter = router({
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
     }),
+    deleteAccount: protectedProcedure
+      .input(z.object({ confirmText: z.literal("DELETE MY ACCOUNT") }))
+      .mutation(async ({ ctx }) => {
+        const deleted = await deleteUserAccount(ctx.user.id);
+        if (!deleted) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to delete account" });
+        // Clear session cookie
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+        // Notify owner
+        notifyOwner({
+          title: "Account Deleted",
+          content: `User ${ctx.user.name || ctx.user.email || ctx.user.id} deleted their account.`,
+        }).catch(() => {});
+        return { success: true } as const;
+      }),
   }),
 
   leads: router({

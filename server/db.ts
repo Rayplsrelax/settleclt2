@@ -1328,3 +1328,27 @@ export async function incrementListingAnalytics(serviceKey: string, field: 'view
     .set({ [field]: sql`${premiumListings[field]} + 1` })
     .where(eq(premiumListings.serviceKey, serviceKey));
 }
+
+// --- Account Deletion: GDPR/CCPA compliant user data removal ---
+export async function deleteUserAccount(userId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+
+  // Delete all user-related data across tables (order matters for foreign keys)
+  await db.delete(commentVotes).where(eq(commentVotes.userId, userId));
+  await db.delete(comments).where(eq(comments.userId, userId));
+  await db.delete(passportEntries).where(eq(passportEntries.userId, userId));
+  await db.delete(bingoProgress).where(eq(bingoProgress.userId, userId));
+  await db.delete(wishlists).where(eq(wishlists.userId, userId));
+  await db.delete(reviews).where(eq(reviews.userId, userId));
+  await db.delete(userTagPreferences).where(eq(userTagPreferences.userId, userId));
+  await db.delete(searchQueries).where(eq(searchQueries.userId, userId));
+  // Anonymize events submitted by user (don't delete the events themselves)
+  await db.update(events).set({ submittedBy: null } as any).where(eq(events.submittedBy, userId));
+  // Anonymize business claims (keep for business continuity)
+  await db.update(businessClaims).set({ userId: null } as any).where(eq(businessClaims.userId, userId));
+  // Finally delete the user record
+  await db.delete(users).where(eq(users.id, userId));
+
+  return true;
+}

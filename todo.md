@@ -452,3 +452,20 @@
 - [x] Audit entire site: pages, features, data quality, SEO, legal, security
 - [x] Create comprehensive pre-launch checklist document (PRE-LAUNCH-AUDIT.md)
 - [x] Identify must-fix issues vs nice-to-have improvements (6 must-fix, 6 should-fix, 15+ nice-to-have)
+
+## Phase 1: Fix Launch Blockers
+- [x] 1.1 Fix sitemap URL mismatch (/privacy-policy → /privacy, /terms-of-service → /terms)
+- [x] 1.2 Create and add OG image (1200x630) with meta tags
+- [x] 1.3 Create and add favicon set (16x16, 32x32, apple-touch-icon)
+- [x] 1.4 Update meta descriptions from "400+" to "700+"
+- [x] 1.5 Fix broken /admin link in AdminClaims.tsx → /admin/enrich
+- [x] 1.6 Remind user to claim Stripe sandbox (will include in delivery message)
+
+## Phase 2: Compliance & Trust
+- [x] 2.1 Add "Find Your Home" link to Footer
+- [x] 2.2 Add cookie consent banner component
+- [x] 2.3 Add account deletion mechanism to Profile page (with confirmation dialog)
+- [x] 2.4 Add Contact page with form and contact info (uses notifyOwner)
+- [x] 2.5 Add Contact link to Footer (both in Get Started column and bottom bar)
+- [x] 2.6 Add /contact to sitemap
+- [x] 2.7 Write tests for all Phase 1 and Phase 2 changes (375 tests passing)

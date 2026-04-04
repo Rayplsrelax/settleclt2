@@ -86,8 +86,8 @@ describe("Sitemap Enhancement", () => {
     const content = await import("fs").then((fs) =>
       fs.readFileSync("./server/_core/index.ts", "utf-8")
     );
-    expect(content).toContain("/privacy-policy");
-    expect(content).toContain("/terms-of-service");
+    expect(content).toContain("/privacy");
+    expect(content).toContain("/terms");
   });
 
   it("should have all 54 directory categories in sitemap", async () => {

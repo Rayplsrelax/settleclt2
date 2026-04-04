@@ -142,8 +142,9 @@ async function startServer() {
       { loc: "/find-your-home", priority: "0.8", changefreq: "monthly" },
       { loc: "/list-your-business", priority: "0.6", changefreq: "monthly" },
       { loc: "/submit-event", priority: "0.5", changefreq: "monthly" },
-      { loc: "/privacy-policy", priority: "0.3", changefreq: "yearly" },
-      { loc: "/terms-of-service", priority: "0.3", changefreq: "yearly" },
+      { loc: "/contact", priority: "0.5", changefreq: "yearly" },
+      { loc: "/privacy", priority: "0.3", changefreq: "yearly" },
+      { loc: "/terms", priority: "0.3", changefreq: "yearly" },
     ];
 
     // Directory category pages (e.g., /directory?category=restaurants)
