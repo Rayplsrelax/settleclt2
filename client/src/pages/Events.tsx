@@ -117,7 +117,7 @@ function EventCard({ event, onClick, onCategoryClick, onNeighborhoodClick }: { e
         <div className="h-40 overflow-hidden">
           <img
             src={event.imageUrl}
-            alt={event.title}
+            alt={`${event.title} - Charlotte NC event`}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>
@@ -541,7 +541,7 @@ export default function Events() {
               {selectedEvent.imageUrl && (
                 <img
                   src={selectedEvent.imageUrl}
-                  alt={selectedEvent.title}
+                  alt={`${selectedEvent.title} - Charlotte NC event`}
                   className="w-full h-48 object-cover rounded-lg"
                 />
               )}

@@ -481,7 +481,7 @@
 - [x] 4.2 Improve structured data (Organization + BreadcrumbList JSON-LD schemas added)
 - [x] 4.3 Set up error monitoring (ErrorBoundary componentDidCatch + global error/rejection handlers)
 - [ ] 4.4 Set up newsletter email delivery mechanism (deferred — needs email service integration)
-- [ ] 4.5 Add Google Search Console verification meta tag (needs verification code from user)
+- [x] 4.5 Add Google Search Console verification meta tag (via VITE_GOOGLE_SITE_VERIFICATION env var)
 - [x] 4.6 Add rate limiting to API and form submission endpoints (express-rate-limit)
 - [x] 4.7 Write tests for Phase 3 and Phase 4 features (394 tests passing across 31 files)
 
@@ -491,3 +491,9 @@
 ## SEO Fixes: Homepage
 - [x] Reduce keywords from 13 to 5 focused keywords (Charlotte NC, moving to Charlotte, Charlotte neighborhoods, Charlotte local guide, CLT relocation)
 - [x] Shorten meta description from 172 to 115 characters
+
+## SEO Audit & Improvements
+- [x] Audit SEO meta tags on all 17 pages (Directory, Events, Blog, Neighborhoods, Leaderboard, Quiz, Contact, SubmitEvent, etc.)
+- [x] Fix 6 pages: Directory description (175→148), Neighborhoods keywords (9→6), Leaderboard description (166→148), Quiz description (174→155), Contact (added keywords), SubmitEvent (added useSEO)
+- [x] Add descriptive alt text with location context to images on Home, Neighborhoods, NeighborhoodDetail, BusinessDetail, Compare, Quiz, Events, Blog pages
+- [x] Add Google Search Console verification meta tag (via VITE_GOOGLE_SITE_VERIFICATION env var) + canonical URL tag

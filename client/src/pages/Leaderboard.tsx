@@ -129,7 +129,7 @@ function LeaderboardTable({
 export default function Leaderboard() {
   useSEO({
     title: "CLT Leaderboard — Top Charlotte Explorers",
-    description: "See who's exploring Charlotte the most. Leaderboard rankings by passport stamps, bingo completions, and neighborhoods visited. Join the community and climb the ranks.",
+    description: "See who's exploring Charlotte the most. Rankings by passport stamps, bingo completions, and neighborhoods visited.",
     keywords: "Charlotte leaderboard, CLT explorers, Charlotte community, Charlotte passport rankings, explore Charlotte NC",
     path: "/leaderboard",
   });

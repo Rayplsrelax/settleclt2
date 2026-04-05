@@ -183,7 +183,7 @@ export default function NeighborhoodDetail() {
           <img
             key={i}
             src={url}
-            alt={`${n.name} ${i + 1}`}
+            alt={`${n.name} neighborhood in Charlotte NC - photo ${i + 1}`}
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === heroIdx ? "opacity-100" : "opacity-0"}`}
           />
         ))}

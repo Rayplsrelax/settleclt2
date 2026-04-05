@@ -10,6 +10,7 @@ import {
   CalendarPlus, CheckCircle, LogIn, Clock, MapPin,
   Users, Shield, Sparkles
 } from "lucide-react";
+import { useSEO } from "@/hooks/useSEO";
 
 const CATEGORIES = [
   { value: "concerts", label: "Concerts & Music" },
@@ -25,6 +26,12 @@ const CATEGORIES = [
 ] as const;
 
 export default function SubmitEvent() {
+  useSEO({
+    title: "Submit an Event — Settle CLT",
+    description: "Share Charlotte events with the community. Submit concerts, food festivals, sports, arts, and more for free.",
+    keywords: "submit Charlotte event, Charlotte community events, add event Charlotte NC, CLT event calendar",
+    path: "/submit-event",
+  });
   const { user, loading } = useAuth();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");

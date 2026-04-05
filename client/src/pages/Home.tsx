@@ -41,7 +41,7 @@ function Hero() {
       <div className="absolute inset-0">
         <img
           src={HERO_IMAGE}
-          alt="Charlotte NC skyline"
+          alt="Charlotte NC skyline - Settle CLT relocation guide"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-clt-navy/90 via-clt-navy/75 to-clt-navy/50" />
@@ -181,7 +181,7 @@ function FeaturedNeighborhoods() {
                 {/* Real photo background */}
                 <img
                   src={n.photoUrls[0]}
-                  alt={n.name}
+                  alt={`${n.name} neighborhood in Charlotte NC`}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
@@ -390,7 +390,7 @@ function BlogPreview() {
                   {a.image ? (
                     <img
                       src={a.image}
-                      alt={a.title}
+                      alt={`${a.title} - Settle CLT blog`}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (

@@ -210,7 +210,7 @@ function ResultCard({ result, rank }: { result: NeighborhoodScore; rank: number 
         <div className="relative md:w-48 h-40 md:h-auto shrink-0">
           <img
             src={n.photoUrls[0]}
-            alt={n.name}
+            alt={`${n.name} - Charlotte NC neighborhood quiz result`}
             className="w-full h-full object-cover"
             loading="lazy"
           />
@@ -423,7 +423,7 @@ function ResultsScreen({ results, answers, onRetake }: { results: NeighborhoodSc
 export default function Quiz() {
   useSEO({
     title: "Neighborhood Quiz — Which Charlotte Area Fits You?",
-    description: "Take our 2-minute quiz to find your perfect Charlotte neighborhood. Answer 7 questions about budget, housing type, lifestyle, and priorities to get personalized recommendations.",
+    description: "Take our 2-minute quiz to find your perfect Charlotte neighborhood. Answer questions about budget, lifestyle, and priorities for personalized results.",
     keywords: "Charlotte neighborhood quiz, which Charlotte neighborhood, best neighborhood Charlotte NC, Charlotte relocation quiz, where to live Charlotte",
     path: "/quiz",
   });

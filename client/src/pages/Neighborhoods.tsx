@@ -87,7 +87,7 @@ function NeighborhoodCard({ n, isComparing, onToggleCompare, trackClickByName }:
       <Link href={`/neighborhood/${n.id}`} className="no-underline group block">
         {/* Image */}
         <div className="h-48 relative">
-          <img src={n.photoUrls[0]} alt={n.name} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <img src={n.photoUrls[0]} alt={`${n.name} - Charlotte NC neighborhood`} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
           <div className="absolute bottom-4 left-5 right-5">
             <div className="flex items-center gap-2">
@@ -150,7 +150,7 @@ export default function Neighborhoods() {
   useSEO({
     title: "Charlotte Neighborhoods Guide — Find Your Perfect Area",
     description: "Explore 20 Charlotte neighborhoods with detailed guides, cost of living, local tips, and honest reviews. From South End to Ballantyne, find where you belong.",
-    keywords: "Charlotte neighborhoods, South End, NoDa, Plaza Midwood, Uptown Charlotte, Dilworth, Myers Park, best neighborhoods Charlotte NC, where to live Charlotte",
+    keywords: "Charlotte neighborhoods, best neighborhoods Charlotte NC, where to live Charlotte, South End, NoDa, Uptown Charlotte",
     path: "/neighborhoods",
   });
 

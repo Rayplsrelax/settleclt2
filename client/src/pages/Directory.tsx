@@ -79,7 +79,7 @@ const GROUP_COLORS: Record<string, string> = {
 export default function Directory() {
   useSEO({
     title: "Charlotte Business Directory — 700+ Local Businesses",
-    description: "Discover 700+ Charlotte businesses across 50+ categories including restaurants, breweries, coffee shops, food trucks, nightlife, yoga, tours, and more. Ratings, hours, and reviews.",
+    description: "Browse 700+ Charlotte businesses across 50+ categories. Restaurants, breweries, coffee shops, nightlife, and more with ratings and reviews.",
     keywords: "Charlotte restaurants, Charlotte breweries, Charlotte businesses, Charlotte food trucks, Charlotte coffee shops, local directory Charlotte NC, Charlotte services",
     path: "/directory",
   });

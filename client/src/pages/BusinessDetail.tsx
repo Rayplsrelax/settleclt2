@@ -190,7 +190,7 @@ export default function BusinessDetail() {
       <div className="max-w-4xl max-h-[85vh] px-16" onClick={(e) => e.stopPropagation()}>
         <img
           src={photos[lightboxIndex]}
-          alt={`${service.name} photo ${lightboxIndex + 1}`}
+          alt={`${service.name} in Charlotte NC - photo ${lightboxIndex + 1}`}
           className="max-w-full max-h-[80vh] object-contain rounded-lg"
         />
         <div className="text-center mt-3">
@@ -257,7 +257,7 @@ export default function BusinessDetail() {
                     >
                       <img
                         src={photos[0]}
-                        alt={service.name}
+                        alt={`${service.name} - Charlotte NC local business`}
                         className="w-full h-[320px] object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
@@ -272,7 +272,7 @@ export default function BusinessDetail() {
                           >
                             <img
                               src={photo}
-                              alt={`${service.name} photo ${i + 2}`}
+                              alt={`${service.name} in Charlotte NC - photo ${i + 2}`}
                               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                               style={{ minHeight: '100px' }}
                             />

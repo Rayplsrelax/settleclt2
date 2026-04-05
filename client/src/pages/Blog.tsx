@@ -117,7 +117,7 @@ export default function Blog() {
                 <article className="rounded-xl overflow-hidden border border-border bg-card hover:shadow-md transition-all group h-full">
                   <div className="h-44 relative overflow-hidden" style={a.coverImage ? {} : { background: a.gradient || "linear-gradient(135deg, #1a365d, #2d9c95)" }}>
                     {a.coverImage ? (
-                      <img src={a.coverImage} alt={a.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <img src={a.coverImage} alt={`${a.title} - Settle CLT blog`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <BookOpen className="w-10 h-10 text-white/30" />

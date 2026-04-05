@@ -14,6 +14,8 @@ export default function Contact() {
   useSEO({
     title: "Contact Us — Settle CLT",
     description: "Get in touch with the Settle CLT team. Questions about Charlotte, business listings, partnerships, or feedback — we'd love to hear from you.",
+    keywords: "contact Settle CLT, Charlotte guide contact, Settle CLT feedback, Charlotte business listing inquiry",
+    path: "/contact",
   });
 
   const [name, setName] = useState("");
