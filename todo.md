@@ -487,3 +487,7 @@
 
 ## Remove Event Photos
 - [x] Clear all image URLs from events in the database (140 rows updated)
+
+## SEO Fixes: Homepage
+- [x] Reduce keywords from 13 to 5 focused keywords (Charlotte NC, moving to Charlotte, Charlotte neighborhoods, Charlotte local guide, CLT relocation)
+- [x] Shorten meta description from 172 to 115 characters
