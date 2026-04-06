@@ -1083,6 +1083,28 @@ export async function getReviewStats(targetType: "neighborhood" | "directory", t
   return { avgRating: Number(result[0]?.avgRating ?? 0), count: Number(result[0]?.count ?? 0) };
 }
 
+/** Get review stats for all items of a given targetType in one query */
+export async function getBulkReviewStats(targetType: "neighborhood" | "directory") {
+  const db = await getDb();
+  if (!db) return [];
+  const result = await db.select({
+    targetId: reviews.targetId,
+    avgRating: sql<number>`COALESCE(AVG(${reviews.rating}), 0)`,
+    count: sql<number>`COUNT(*)`,
+  })
+    .from(reviews)
+    .where(and(
+      eq(reviews.targetType, targetType),
+      eq(reviews.visible, "yes"),
+    ))
+    .groupBy(reviews.targetId);
+  return result.map(r => ({
+    targetId: r.targetId,
+    avgRating: Number(r.avgRating),
+    count: Number(r.count),
+  }));
+}
+
 /** Delete a review (by owner or admin) */
 export async function deleteReview(reviewId: number, userId: number, isAdmin: boolean) {
   const db = await getDb();

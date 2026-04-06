@@ -520,3 +520,6 @@
 - [x] Notification preferences page: per-category toggles for in-app, email, and push channels
 - [x] Admin notifications: notify owner on new signups, claims, payments, reviews (via notifyOwner)
 - [x] Tests for notification system (468 tests passing across 34 files)
+
+## Bug Fix: Directory Page API Error (HTML instead of JSON)
+- [x] Fix tRPC API error on /directory page returning HTML instead of JSON (414 URI Too Large — replaced 700+ individual ReviewStars queries with single bulkStats query)

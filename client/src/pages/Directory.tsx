@@ -13,7 +13,6 @@ import WishlistButton from "@/components/WishlistButton";
 import QuickStampButton from "@/components/QuickStampButton";
 import ShareButtons from "@/components/ShareButtons";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
-import { ReviewStars } from "@/components/ReviewSection";
 import { useSEO } from "@/hooks/useSEO";
 import { useStructuredData, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
 import ClaimBusinessDialog from "@/components/ClaimBusinessDialog";
@@ -116,6 +115,18 @@ export default function Directory() {
     }
     return m;
   }, [enrichmentQuery.data]);
+
+  // Fetch all review stats in one query (prevents 700+ individual queries)
+  const bulkReviewStats = trpc.reviews.bulkStats.useQuery({ targetType: "directory" });
+  const reviewStatsMap = useMemo(() => {
+    const m: Record<string, { avgRating: number; count: number }> = {};
+    if (bulkReviewStats.data) {
+      for (const r of bulkReviewStats.data) {
+        m[r.targetId] = { avgRating: r.avgRating, count: r.count };
+      }
+    }
+    return m;
+  }, [bulkReviewStats.data]);
 
   // Fetch active premium tiers
   const premiumQuery = trpc.premium.getActiveTiers.useQuery();
@@ -655,9 +666,21 @@ export default function Directory() {
                           </div>
                         );
                       })()}
-                      <div className="mt-2">
-                        <ReviewStars targetType="directory" targetId={sSlug} />
-                      </div>
+                      {reviewStatsMap[sSlug] && reviewStatsMap[sSlug].count > 0 && (
+                        <div className="flex items-center gap-1.5 mt-2">
+                          <div className="flex items-center gap-0.5">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`w-3 h-3 ${star <= Math.round(reviewStatsMap[sSlug].avgRating) ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30'}`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {reviewStatsMap[sSlug].avgRating.toFixed(1)} ({reviewStatsMap[sSlug].count})
+                          </span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                           <MapPin className="w-3 h-3" /> {s.area}

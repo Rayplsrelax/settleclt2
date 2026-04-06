@@ -23,7 +23,7 @@ import {
   getTagAnalytics,
   updateUserTagPreference, getUserTagPreferences, getRecommendedContent,
   getNewListings, getUpcomingEvents, getRecentBlogPosts, getNewsletterRecipients,
-  createReview, getReviews, getReviewStats, deleteReview, toggleReviewVisibility, getAllReviews,
+  createReview, getReviews, getReviewStats, getBulkReviewStats, deleteReview, toggleReviewVisibility, getAllReviews,
   submitReferral, getReferrals, updateReferralStatus, getReferralStats,
   submitBusinessClaim, getBusinessClaims, updateBusinessClaimStatus, getBusinessClaimStats, hasExistingClaim,
   getListingOverride, upsertListingOverride, getApprovedClaimForUser,
@@ -947,6 +947,11 @@ export const appRouter = router({
       .input(z.object({ targetType: z.enum(["neighborhood", "directory"]), targetId: z.string() }))
       .query(async ({ input }) => {
         return getReviewStats(input.targetType, input.targetId);
+      }),
+    bulkStats: publicProcedure
+      .input(z.object({ targetType: z.enum(["neighborhood", "directory"]) }))
+      .query(async ({ input }) => {
+        return getBulkReviewStats(input.targetType);
       }),
     create: protectedProcedure
       .input(z.object({
