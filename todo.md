@@ -508,3 +508,15 @@
 - [x] Ensure Stripe checkout, customer portal, and webhook handling are fully functional
 - [x] Test payment flows end-to-end
 - [x] Write/update tests for Stripe payment features
+
+## Comprehensive Notification System
+- [x] Database schema: notifications table, notification_preferences table, push_subscriptions table
+- [x] Backend helpers: createNotification, getUserNotifications, markAsRead, markAllAsRead, deleteNotification
+- [x] tRPC procedures: notifications.list, notifications.markRead, notifications.markAllRead, notifications.unreadCount, notifications.preferences
+- [x] In-app notification UI: bell icon with unread count badge in navbar, dropdown panel, full notification center page
+- [x] Notification triggers: business claim approved/denied, new review, payment success/failure, new event in neighborhood, welcome notification
+- [x] Email notifications: email templates ready, sendUserEmail placeholder for Resend/Mailgun integration
+- [x] Browser push notifications: service worker, subscription management, push UI in preferences
+- [x] Notification preferences page: per-category toggles for in-app, email, and push channels
+- [x] Admin notifications: notify owner on new signups, claims, payments, reviews (via notifyOwner)
+- [x] Tests for notification system (468 tests passing across 34 files)

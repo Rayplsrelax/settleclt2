@@ -66,6 +66,14 @@ async function startServer() {
               paymentStatus: "active" as any,
             });
             console.log(`[Stripe] Activated ${tier} tier for ${serviceKey}`);
+            // Notify user about successful payment
+            try {
+              const userId = session.metadata?.user_id ? parseInt(session.metadata.user_id) : null;
+              if (userId) {
+                const { notifyPaymentSuccess } = await import("../notification-service");
+                await notifyPaymentSuccess(userId, tier, serviceKey);
+              }
+            } catch (e) { console.error("[Webhook] Notification error:", e); }
           }
           break;
         }
@@ -136,6 +144,18 @@ async function startServer() {
                 content: `A subscription payment failed for business listing "${listing.serviceKey}" (${listing.billingEmail || 'unknown email'}). The listing has been marked as past_due. The customer will be retried automatically by Stripe.`,
               });
               console.log(`[Stripe] Payment failed for ${listing.serviceKey}`);
+              // Notify user about failed payment
+              try {
+                if (listing.claimId) {
+                  const { getBusinessClaims } = await import("../db");
+                  const claims = await getBusinessClaims();
+                  const claim = claims.find((c: any) => c.id === listing.claimId);
+                  if (claim?.userId) {
+                    const { notifyPaymentFailed } = await import("../notification-service");
+                    await notifyPaymentFailed(claim.userId, listing.serviceKey);
+                  }
+                }
+              } catch (e) { console.error("[Webhook] Notification error:", e); }
             }
           }
           break;

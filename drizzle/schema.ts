@@ -1,4 +1,4 @@
-import { boolean, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, int, json, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -528,3 +528,72 @@ export const premiumListings = mysqlTable("premium_listings", {
 
 export type PremiumListing = typeof premiumListings.$inferSelect;
 export type InsertPremiumListing = typeof premiumListings.$inferInsert;
+
+// ─── Notification System ───────────────────────────────────────
+
+/** In-app notifications for users */
+export const notifications = mysqlTable("notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  /** User who receives the notification */
+  userId: int("userId").notNull(),
+  /** Notification category for filtering and preferences */
+  category: mysqlEnum("category", [
+    "claim",       // Business claim approved/denied
+    "review",      // New review on claimed business
+    "payment",     // Payment success/failure/renewal
+    "event",       // New event in neighborhood or subscribed category
+    "community",   // Bingo completion, leaderboard, referrals
+    "system",      // Welcome, announcements, maintenance
+  ]).notNull(),
+  /** Short title */
+  title: varchar("title", { length: 255 }).notNull(),
+  /** Notification body text */
+  body: text("body").notNull(),
+  /** Optional link to navigate to when clicked */
+  actionUrl: varchar("actionUrl", { length: 500 }),
+  /** Optional icon name (lucide icon) */
+  icon: varchar("icon", { length: 64 }),
+  /** Read status */
+  isRead: boolean("isRead").default(false).notNull(),
+  /** Optional metadata JSON (e.g., serviceKey, claimId, reviewId) */
+  metadata: json("metadata"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;
+
+/** User notification preferences per category and channel */
+export const notificationPreferences = mysqlTable("notification_preferences", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  /** Which category this preference controls */
+  category: mysqlEnum("category", [
+    "claim", "review", "payment", "event", "community", "system",
+  ]).notNull(),
+  /** In-app notification enabled */
+  inApp: boolean("inApp").default(true).notNull(),
+  /** Email notification enabled */
+  email: boolean("email").default(true).notNull(),
+  /** Browser push notification enabled */
+  push: boolean("push").default(false).notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type NotificationPreference = typeof notificationPreferences.$inferSelect;
+export type InsertNotificationPreference = typeof notificationPreferences.$inferInsert;
+
+/** Browser push notification subscriptions */
+export const pushSubscriptions = mysqlTable("push_subscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  /** Push subscription endpoint URL */
+  endpoint: text("endpoint").notNull(),
+  /** P256DH key for encryption */
+  p256dh: text("p256dh").notNull(),
+  /** Auth key for encryption */
+  auth: text("auth").notNull(),
+  /** User agent for identifying the device */
+  userAgent: varchar("userAgent", { length: 500 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type InsertPushSubscription = typeof pushSubscriptions.$inferInsert;

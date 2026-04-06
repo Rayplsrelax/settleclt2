@@ -37,6 +37,7 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const BusinessDetail = lazy(() => import("./pages/BusinessDetail"));
 const Contact = lazy(() => import("./pages/Contact"));
+const Notifications = lazy(() => import("./pages/Notifications"));
 import CookieConsent from "./components/CookieConsent";
 
 function PageLoader() {
@@ -82,6 +83,7 @@ function Router() {
         <Route path="/tag/:slug" component={TagPage} />
         <Route path="/directory/:slug" component={BusinessDetail} />
         <Route path="/blog/:slug" component={BlogArticle} />
+        <Route path="/notifications" component={Notifications} />
         <Route path="/contact" component={Contact} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />

@@ -1,6 +1,6 @@
 import { eq, and, desc, asc, sql, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing } from "../drizzle/schema";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -86,6 +86,13 @@ export async function getUserByOpenId(openId: string) {
 
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
 
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getUserById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
 
@@ -1350,5 +1357,188 @@ export async function deleteUserAccount(userId: number): Promise<boolean> {
   // Finally delete the user record
   await db.delete(users).where(eq(users.id, userId));
 
+  return true;
+}
+
+
+// ─── Notification System Helpers ──────────────────────────────────
+
+export type NotificationCategory = "claim" | "review" | "payment" | "event" | "community" | "system";
+
+/** Create a new in-app notification for a user */
+export async function createNotification(data: {
+  userId: number;
+  category: NotificationCategory;
+  title: string;
+  body: string;
+  actionUrl?: string;
+  icon?: string;
+  metadata?: Record<string, any>;
+}): Promise<number | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.insert(notifications).values({
+    userId: data.userId,
+    category: data.category,
+    title: data.title,
+    body: data.body,
+    actionUrl: data.actionUrl || null,
+    icon: data.icon || null,
+    metadata: data.metadata || null,
+  });
+  return (result as any)[0]?.insertId ?? null;
+}
+
+/** Get notifications for a user, newest first, with optional limit and offset */
+export async function getUserNotifications(userId: number, opts?: { limit?: number; offset?: number; unreadOnly?: boolean }) {
+  const db = await getDb();
+  if (!db) return [];
+  const limit = opts?.limit ?? 50;
+  const offset = opts?.offset ?? 0;
+  const conditions = [eq(notifications.userId, userId)];
+  if (opts?.unreadOnly) {
+    conditions.push(eq(notifications.isRead, false));
+  }
+  return db.select().from(notifications)
+    .where(and(...conditions))
+    .orderBy(desc(notifications.createdAt))
+    .limit(limit)
+    .offset(offset);
+}
+
+/** Get unread notification count for a user */
+export async function getUnreadNotificationCount(userId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.select({ count: sql<number>`count(*)` })
+    .from(notifications)
+    .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
+  return result[0]?.count ?? 0;
+}
+
+/** Mark a single notification as read */
+export async function markNotificationRead(notificationId: number, userId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  await db.update(notifications)
+    .set({ isRead: true })
+    .where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)));
+  return true;
+}
+
+/** Mark all notifications as read for a user */
+export async function markAllNotificationsRead(userId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  await db.update(notifications)
+    .set({ isRead: true })
+    .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
+  return true;
+}
+
+/** Delete a notification */
+export async function deleteNotification(notificationId: number, userId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  await db.delete(notifications)
+    .where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)));
+  return true;
+}
+
+/** Get notification preferences for a user */
+export async function getNotificationPreferences(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(notificationPreferences)
+    .where(eq(notificationPreferences.userId, userId));
+}
+
+/** Upsert a notification preference for a user + category */
+export async function upsertNotificationPreference(data: {
+  userId: number;
+  category: NotificationCategory;
+  inApp?: boolean;
+  email?: boolean;
+  push?: boolean;
+}): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  // Check if preference exists
+  const existing = await db.select().from(notificationPreferences)
+    .where(and(
+      eq(notificationPreferences.userId, data.userId),
+      eq(notificationPreferences.category, data.category)
+    ))
+    .limit(1);
+  if (existing.length > 0) {
+    const updates: Record<string, any> = {};
+    if (data.inApp !== undefined) updates.inApp = data.inApp;
+    if (data.email !== undefined) updates.email = data.email;
+    if (data.push !== undefined) updates.push = data.push;
+    await db.update(notificationPreferences).set(updates)
+      .where(eq(notificationPreferences.id, existing[0].id));
+  } else {
+    await db.insert(notificationPreferences).values({
+      userId: data.userId,
+      category: data.category,
+      inApp: data.inApp ?? true,
+      email: data.email ?? true,
+      push: data.push ?? false,
+    });
+  }
+  return true;
+}
+
+/** Check if a user has a specific channel enabled for a category (defaults to true for inApp/email) */
+export async function isNotificationEnabled(userId: number, category: NotificationCategory, channel: "inApp" | "email" | "push"): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return channel !== "push"; // Default: inApp and email on, push off
+  const prefs = await db.select().from(notificationPreferences)
+    .where(and(
+      eq(notificationPreferences.userId, userId),
+      eq(notificationPreferences.category, category)
+    ))
+    .limit(1);
+  if (prefs.length === 0) return channel !== "push"; // Default
+  return !!prefs[0][channel];
+}
+
+// ─── Push Subscription Helpers ──────────────────────────────────
+
+/** Save a push subscription for a user */
+export async function savePushSubscription(data: {
+  userId: number;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  userAgent?: string;
+}): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  // Remove existing subscription with same endpoint (re-subscribe)
+  await db.delete(pushSubscriptions).where(eq(pushSubscriptions.endpoint, data.endpoint));
+  await db.insert(pushSubscriptions).values({
+    userId: data.userId,
+    endpoint: data.endpoint,
+    p256dh: data.p256dh,
+    auth: data.auth,
+    userAgent: data.userAgent || null,
+  });
+  return true;
+}
+
+/** Get all push subscriptions for a user */
+export async function getUserPushSubscriptions(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(pushSubscriptions)
+    .where(eq(pushSubscriptions.userId, userId));
+}
+
+/** Remove a push subscription by endpoint */
+export async function removePushSubscription(endpoint: string): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  await db.delete(pushSubscriptions).where(eq(pushSubscriptions.endpoint, endpoint));
   return true;
 }

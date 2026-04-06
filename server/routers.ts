@@ -29,11 +29,17 @@ import {
   getListingOverride, upsertListingOverride, getApprovedClaimForUser,
   getPremiumListing, upsertPremiumListing, getAllPremiumListings, incrementListingAnalytics,
   deleteUserAccount,
+  createNotification, getUserNotifications, getUnreadNotificationCount,
+  markNotificationRead, markAllNotificationsRead, deleteNotification,
+  getNotificationPreferences, upsertNotificationPreference, isNotificationEnabled,
+  savePushSubscription, getUserPushSubscriptions, removePushSubscription,
+  type NotificationCategory,
 } from "./db";
 import { makeRequest, type PlacesSearchResult, type PlaceDetailsResult } from "./_core/map";
 import { notifyOwner } from "./_core/notification";
 import { storagePut } from "./storage";
 import { createCheckoutSession, createPortalSession } from "./stripe-helpers";
+import { notifyClaimApproved, notifyClaimRejected, notifyNewReview, notifyBingoComplete, notifyWelcome } from "./notification-service";
 
 export const appRouter = router({
   system: systemRouter,
@@ -518,6 +524,8 @@ export const appRouter = router({
             title: "🎰 Bingo Card Completed!",
             content: `User ${ctx.user.name ?? ctx.user.id} completed bingo card #${input.cardId}! Time to celebrate a CLT explorer!`,
           }).catch(() => {}); // fire-and-forget
+          // Notify the user in-app
+          notifyBingoComplete(ctx.user.id, `Card #${input.cardId}`).catch(() => {});
         }
         return result;
       }),
@@ -957,6 +965,16 @@ export const appRouter = router({
           tip: input.tip,
           aspect: input.aspect || "general",
         });
+        // Notify business owner if this is a directory review on a claimed business
+        if (input.targetType === 'directory') {
+          try {
+            const claims = await getBusinessClaims();
+            const ownerClaim = claims.find((c: any) => c.serviceKey === input.targetId && c.status === 'approved' && c.userId);
+            if (ownerClaim && ownerClaim.userId && ownerClaim.userId !== ctx.user.id) {
+              notifyNewReview(ownerClaim.userId, ownerClaim.businessName, input.rating, input.targetId).catch(() => {});
+            }
+          } catch (e) { /* non-critical */ }
+        }
         return { success: true };
       }),
     delete: protectedProcedure
@@ -1142,6 +1160,14 @@ export const appRouter = router({
               input.status === 'approved' ? 'The business owner can now manage their listing.' : '',
             ].filter(Boolean).join('\n'),
           }).catch(() => {});
+          // Notify the claimant about their claim status
+          if (claim.userId) {
+            if (input.status === 'approved') {
+              notifyClaimApproved(claim.userId, claim.businessName, claim.serviceKey).catch(() => {});
+            } else if (input.status === 'rejected') {
+              notifyClaimRejected(claim.userId, claim.businessName, input.adminNotes).catch(() => {});
+            }
+          }
         }
         return result;
       }),
@@ -1322,6 +1348,132 @@ export const appRouter = router({
           claimId: input.claimId,
           billingEmail: input.billingEmail,
         });
+      }),
+  }),
+
+  // ─── Notifications ─────────────────────────────────────────────
+  notifications: router({
+    /** Get notifications for the current user */
+    list: protectedProcedure
+      .input(z.object({
+        limit: z.number().min(1).max(100).optional().default(30),
+        offset: z.number().min(0).optional().default(0),
+        unreadOnly: z.boolean().optional().default(false),
+      }))
+      .query(async ({ ctx, input }) => {
+        return getUserNotifications(ctx.user.id, input);
+      }),
+
+    /** Get unread count */
+    unreadCount: protectedProcedure.query(async ({ ctx }) => {
+      return { count: await getUnreadNotificationCount(ctx.user.id) };
+    }),
+
+    /** Mark a single notification as read */
+    markRead: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        return markNotificationRead(input.id, ctx.user.id);
+      }),
+
+    /** Mark all notifications as read */
+    markAllRead: protectedProcedure.mutation(async ({ ctx }) => {
+      return markAllNotificationsRead(ctx.user.id);
+    }),
+
+    /** Delete a notification */
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        return deleteNotification(input.id, ctx.user.id);
+      }),
+
+    /** Get notification preferences */
+    getPreferences: protectedProcedure.query(async ({ ctx }) => {
+      return getNotificationPreferences(ctx.user.id);
+    }),
+
+    /** Update a notification preference */
+    updatePreference: protectedProcedure
+      .input(z.object({
+        category: z.enum(["claim", "review", "payment", "event", "community", "system"]),
+        inApp: z.boolean().optional(),
+        email: z.boolean().optional(),
+        push: z.boolean().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return upsertNotificationPreference({
+          userId: ctx.user.id,
+          category: input.category,
+          inApp: input.inApp,
+          email: input.email,
+          push: input.push,
+        });
+      }),
+
+    /** Save a push subscription */
+    savePushSubscription: protectedProcedure
+      .input(z.object({
+        endpoint: z.string(),
+        p256dh: z.string(),
+        auth: z.string(),
+        userAgent: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return savePushSubscription({
+          userId: ctx.user.id,
+          endpoint: input.endpoint,
+          p256dh: input.p256dh,
+          auth: input.auth,
+          userAgent: input.userAgent,
+        });
+      }),
+
+    /** Remove a push subscription */
+    removePushSubscription: protectedProcedure
+      .input(z.object({ endpoint: z.string() }))
+      .mutation(async ({ ctx, input }) => {
+        return removePushSubscription(input.endpoint);
+      }),
+
+    /** Admin: send a notification to a specific user */
+    adminSend: adminProcedure
+      .input(z.object({
+        userId: z.number(),
+        category: z.enum(["claim", "review", "payment", "event", "community", "system"]),
+        title: z.string().min(1).max(255),
+        body: z.string().min(1),
+        actionUrl: z.string().optional(),
+        icon: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return createNotification(input);
+      }),
+
+    /** Admin: broadcast a notification to all users */
+    adminBroadcast: adminProcedure
+      .input(z.object({
+        category: z.enum(["claim", "review", "payment", "event", "community", "system"]),
+        title: z.string().min(1).max(255),
+        body: z.string().min(1),
+        actionUrl: z.string().optional(),
+        icon: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { getDb } = await import("./db");
+        const { users } = await import("../drizzle/schema");
+        const db = await getDb();
+        if (!db) return { sent: 0 };
+        const allUsers = await db.select({ id: users.id }).from(users);
+        let sent = 0;
+        for (const user of allUsers) {
+          const enabled = await isNotificationEnabled(user.id, input.category, "inApp");
+          if (enabled) {
+            await createNotification({ ...input, userId: user.id });
+            sent++;
+          }
+        }
+        return { sent };
       }),
   }),
 });

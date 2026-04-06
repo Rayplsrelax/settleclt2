@@ -2,7 +2,8 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { useState } from "react";
-import { Menu, X, LogIn, User, LogOut, Heart, Stamp, ChevronDown, Shield, Grid3X3, Trophy, Building2 } from "lucide-react";
+import { Menu, X, LogIn, User, LogOut, Heart, Stamp, ChevronDown, Shield, Grid3X3, Trophy, Building2, Settings } from "lucide-react";
+import NotificationBell from "@/components/NotificationBell";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -84,6 +85,10 @@ function UserMenu() {
         <DropdownMenuItem onClick={() => navigate("/my-business")}>
           <Building2 className="w-4 h-4 mr-2" />
           My Business
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/notifications")}>
+          <Settings className="w-4 h-4 mr-2" />
+          Notification Settings
         </DropdownMenuItem>
         {user.role === 'admin' && (
           <>
@@ -178,7 +183,8 @@ export default function Navbar() {
           {!loading && (
             <>
               {user ? (
-                <div className="ml-2">
+                <div className="ml-2 flex items-center gap-1">
+                  <NotificationBell />
                   <UserMenu />
                 </div>
               ) : (
@@ -199,7 +205,10 @@ export default function Navbar() {
         <div className="flex md:hidden items-center gap-2">
           <GlobalSearch />
           {!loading && user && (
-            <UserMenu />
+            <>
+              <NotificationBell />
+              <UserMenu />
+            </>
           )}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}

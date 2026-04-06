@@ -28,6 +28,10 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
+      // Check if this is a new user (for welcome notification)
+      const existingUser = await db.getUserByOpenId(userInfo.openId);
+      const isNewUser = !existingUser;
+
       await db.upsertUser({
         openId: userInfo.openId,
         name: userInfo.name || null,
@@ -35,6 +39,17 @@ export function registerOAuthRoutes(app: Express) {
         loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
         lastSignedIn: new Date(),
       });
+
+      // Send welcome notification to new users
+      if (isNewUser) {
+        try {
+          const newUser = await db.getUserByOpenId(userInfo.openId);
+          if (newUser) {
+            const { notifyWelcome } = await import("../notification-service");
+            await notifyWelcome(newUser.id, userInfo.name || "");
+          }
+        } catch (e) { console.error("[OAuth] Welcome notification error:", e); }
+      }
 
       const sessionToken = await sdk.createSessionToken(userInfo.openId, {
         name: userInfo.name || "",
