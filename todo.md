@@ -523,3 +523,8 @@
 
 ## Bug Fix: Directory Page API Error (HTML instead of JSON)
 - [x] Fix tRPC API error on /directory page returning HTML instead of JSON (414 URI Too Large — replaced 700+ individual ReviewStars queries with single bulkStats query)
+
+## Enrich Remaining Businesses
+- [x] Identify unenriched businesses from the directory (333 missing + 27 with null rating = 359 total)
+- [x] Run Google Places enrichment for all remaining businesses (339 success, 20 not found, 0 failed)
+- [x] Verify enrichment coverage (721 total enriched records, 691 with Google rating out of 708 unique businesses = 97.6% coverage)
