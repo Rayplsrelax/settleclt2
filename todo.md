@@ -497,3 +497,6 @@
 - [x] Fix 6 pages: Directory description (175→148), Neighborhoods keywords (9→6), Leaderboard description (166→148), Quiz description (174→155), Contact (added keywords), SubmitEvent (added useSEO)
 - [x] Add descriptive alt text with location context to images on Home, Neighborhoods, NeighborhoodDetail, BusinessDetail, Compare, Quiz, Events, Blog pages
 - [x] Add Google Search Console verification meta tag (via VITE_GOOGLE_SITE_VERIFICATION env var) + canonical URL tag
+
+## Bug Fix: Unhandled Promise Rejection on Homepage
+- [x] Fix unhandled promise rejection error on homepage after login (ErrorBoundary.tsx:34) — was MetaMask browser extension, added extension error filtering

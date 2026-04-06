@@ -11,6 +11,36 @@ interface State {
   error: Error | null;
 }
 
+/**
+ * Check if an error originates from a browser extension (not our app code).
+ * Common sources: MetaMask, Grammarly, ad blockers, password managers, etc.
+ */
+function isExtensionError(event: ErrorEvent | PromiseRejectionEvent): boolean {
+  // Check for chrome-extension:// or moz-extension:// in the stack or source
+  const stack =
+    "reason" in event
+      ? event.reason?.stack || String(event.reason)
+      : (event as ErrorEvent).error?.stack ||
+        (event as ErrorEvent).message ||
+        "";
+  const filename = "filename" in event ? (event as ErrorEvent).filename : "";
+
+  const extensionPatterns = [
+    "chrome-extension://",
+    "moz-extension://",
+    "safari-extension://",
+    "ms-browser-extension://",
+    "Failed to connect to MetaMask",
+  ];
+
+  return extensionPatterns.some(
+    (pattern) =>
+      stack?.includes(pattern) ||
+      filename?.includes(pattern) ||
+      String(event).includes(pattern)
+  );
+}
+
 class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -35,6 +65,9 @@ class ErrorBoundary extends Component<Props, State> {
   componentDidMount() {
     // Global unhandled error handler
     window.addEventListener("error", (event) => {
+      // Skip errors from browser extensions
+      if (isExtensionError(event)) return;
+
       console.error("[GlobalError] Unhandled error:", {
         message: event.message,
         filename: event.filename,
@@ -47,6 +80,9 @@ class ErrorBoundary extends Component<Props, State> {
 
     // Global unhandled promise rejection handler
     window.addEventListener("unhandledrejection", (event) => {
+      // Skip rejections from browser extensions
+      if (isExtensionError(event)) return;
+
       console.error("[GlobalError] Unhandled promise rejection:", {
         reason: event.reason?.message || String(event.reason),
         stack: event.reason?.stack,
