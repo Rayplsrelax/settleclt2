@@ -500,3 +500,11 @@
 
 ## Bug Fix: Unhandled Promise Rejection on Homepage
 - [x] Fix unhandled promise rejection error on homepage after login (ErrorBoundary.tsx:34) — was MetaMask browser extension, added extension error filtering
+
+## Stripe Payments Setup
+- [x] Audit current Stripe integration code and identify all payment touchpoints
+- [x] Verify Stripe keys and webhook configuration are working
+- [x] Fix and complete premium business listing payment flow (Featured $29/mo, Premium $79/mo)
+- [x] Ensure Stripe checkout, customer portal, and webhook handling are fully functional
+- [x] Test payment flows end-to-end
+- [x] Write/update tests for Stripe payment features

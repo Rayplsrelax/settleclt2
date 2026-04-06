@@ -56,6 +56,21 @@ export default function MyBusiness() {
     { enabled: isAuthenticated }
   );
 
+  // Handle Stripe checkout redirect results
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const upgradeStatus = params.get("upgrade");
+    const tier = params.get("tier");
+    if (upgradeStatus === "success" && tier) {
+      toast.success(`Your ${tier} plan is now active! It may take a moment to reflect.`);
+      // Clean up URL params
+      window.history.replaceState({}, "", window.location.pathname);
+    } else if (upgradeStatus === "canceled") {
+      toast.info("Checkout was canceled. You can upgrade anytime.");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
+
   const [selectedClaim, setSelectedClaim] = useState<any>(null);
   const [form, setForm] = useState({
     displayName: "",

@@ -102,6 +102,44 @@ async function startServer() {
           }
           break;
         }
+        case "invoice.payment_succeeded": {
+          const invoice = event.data.object as any;
+          const subId = invoice.subscription;
+          if (subId) {
+            const { getAllPremiumListings } = await import("../db");
+            const all = await getAllPremiumListings();
+            const listing = all.find((l: any) => l.stripeSubscriptionId === subId);
+            if (listing) {
+              await upsertPremiumListing(listing.serviceKey, {
+                paymentStatus: "active" as any,
+              });
+              console.log(`[Stripe] Payment succeeded for ${listing.serviceKey}`);
+            }
+          }
+          break;
+        }
+        case "invoice.payment_failed": {
+          const invoice = event.data.object as any;
+          const subId = invoice.subscription;
+          if (subId) {
+            const { getAllPremiumListings } = await import("../db");
+            const { notifyOwner } = await import("./notification");
+            const all = await getAllPremiumListings();
+            const listing = all.find((l: any) => l.stripeSubscriptionId === subId);
+            if (listing) {
+              await upsertPremiumListing(listing.serviceKey, {
+                paymentStatus: "past_due" as any,
+              });
+              // Notify admin about failed payment
+              await notifyOwner({
+                title: `Payment Failed: ${listing.serviceKey}`,
+                content: `A subscription payment failed for business listing "${listing.serviceKey}" (${listing.billingEmail || 'unknown email'}). The listing has been marked as past_due. The customer will be retried automatically by Stripe.`,
+              });
+              console.log(`[Stripe] Payment failed for ${listing.serviceKey}`);
+            }
+          }
+          break;
+        }
       }
 
       res.json({ received: true });

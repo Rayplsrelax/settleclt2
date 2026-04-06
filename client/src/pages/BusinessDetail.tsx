@@ -1,5 +1,5 @@
 import { SERVICES, SERVICE_CATEGORIES, type Service } from "@shared/services";
-import { useMemo, useRef, useCallback, useState } from "react";
+import { useMemo, useRef, useCallback, useState, useEffect } from "react";
 import { useRoute, Link } from "wouter";
 import { MapPin, Phone, ExternalLink, ArrowLeft, Clock, Star, Share2, Navigation, Building2, ChevronRight, Camera, ChevronLeft, X, Crown, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,16 @@ export default function BusinessDetail() {
     { serviceKey: slug },
     { enabled: !!slug }
   );
+
+  // Track views and clicks for premium listings
+  const trackView = trpc.premium.trackView.useMutation();
+  const trackClick = trpc.premium.trackClick.useMutation();
+  useEffect(() => {
+    if (slug && premiumData?.active && premiumData?.tier !== 'basic') {
+      trackView.mutate({ serviceKey: slug });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug, premiumData?.active, premiumData?.tier]);
 
   // Parse hours from enrichment
   const hours = useMemo(() => {
@@ -370,14 +380,22 @@ export default function BusinessDetail() {
                     </Button>
                   </a>
                   {service.phone && (
-                    <a href={`tel:${service.phone}`}>
+                    <a href={`tel:${service.phone}`} onClick={() => {
+                      if (premiumData?.active && premiumData?.tier !== 'basic') {
+                        trackClick.mutate({ serviceKey: slug });
+                      }
+                    }}>
                       <Button size="sm" variant="outline" className="gap-1.5">
                         <Phone className="w-3.5 h-3.5" /> {service.phone}
                       </Button>
                     </a>
                   )}
                   {service.website && (
-                    <a href={service.website} target="_blank" rel="noopener noreferrer">
+                    <a href={service.website} target="_blank" rel="noopener noreferrer" onClick={() => {
+                      if (premiumData?.active && premiumData?.tier !== 'basic') {
+                        trackClick.mutate({ serviceKey: slug });
+                      }
+                    }}>
                       <Button size="sm" variant="outline" className="gap-1.5">
                         <ExternalLink className="w-3.5 h-3.5" /> Visit Website
                       </Button>
