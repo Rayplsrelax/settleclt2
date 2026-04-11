@@ -669,7 +669,12 @@ export const appRouter = router({
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 7);
       endOfWeek.setHours(23, 59, 59, 999);
-      return getPublishedEvents({ fromDate: startOfWeek, toDate: endOfWeek, limit: 6 });
+      const thisWeek = await getPublishedEvents({ fromDate: startOfWeek, toDate: endOfWeek, limit: 6 });
+      // If no events this week, fall back to next 30 days of upcoming events
+      if (thisWeek.length === 0) {
+        return getUpcomingEvents(30).then(events => events.slice(0, 6));
+      }
+      return thisWeek;
     }),
     submitEvent: protectedProcedure
       .input(z.object({

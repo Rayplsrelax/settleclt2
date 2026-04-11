@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Calendar, CalendarPlus, MapPin, ExternalLink, Clock, Filter, Tag, Navigation, Search, X, CalendarRange } from "lucide-react";
@@ -209,6 +209,21 @@ export default function Events() {
   );
 
   const events = allEvents ?? [];
+
+  // Auto-open event from URL query param (e.g., /events?highlight=event-slug)
+  useEffect(() => {
+    if (!allEvents || allEvents.length === 0) return;
+    const params = new URLSearchParams(window.location.search);
+    const highlightSlug = params.get('highlight');
+    const highlightId = params.get('event');
+    if (highlightSlug) {
+      const found = allEvents.find((e: any) => e.slug === highlightSlug || String(e.id) === highlightSlug);
+      if (found) setSelectedEvent(found as EventType);
+    } else if (highlightId) {
+      const found = allEvents.find((e: any) => String(e.id) === highlightId);
+      if (found) setSelectedEvent(found as EventType);
+    }
+  }, [allEvents]);
 
   // Structured data for events (inject top 10 upcoming events as schema)
   const eventsForSchema = useMemo(() => {

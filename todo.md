@@ -528,3 +528,19 @@
 - [x] Identify unenriched businesses from the directory (333 missing + 27 with null rating = 359 total)
 - [x] Run Google Places enrichment for all remaining businesses (339 success, 20 not found, 0 failed)
 - [x] Verify enrichment coverage (721 total enriched records, 691 with Google rating out of 708 unique businesses = 97.6% coverage)
+
+## Fix: robots.txt Blocking Google Indexing
+- [x] Verified robots.txt is correct (Allow: / with sitemap) — issue was cached old version in Google
+
+## Full Site Audit: Links, Events, Navigation
+- [x] Audit homepage: all links, event cycling, CTAs, featured sections
+- [x] Audit directory: business card links, category/hashtag links, filters — all correct
+- [x] Audit events page: event links, date filtering, old event handling — working
+- [x] Audit neighborhood pages: all links and navigation — all correct
+- [x] Audit blog, tag pages, footer, navbar — all correct
+- [x] Fix: Homepage event cards now link to /events?highlight=slug (opens specific event)
+- [x] Fix: Homepage blog cards show DB posts first with detail links, static fallback to /blog
+- [x] Fix: Personalized event/directory recommendations link to correct detail pages
+- [x] Fix: TagPage event items link to /events?highlight=slug, directory items to /directory/slug
+- [x] Fix: Events page reads ?highlight= and ?event= URL params to auto-open event dialog
+- [x] Fix: getThisWeek falls back to upcoming 30-day events if no events this week

@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { useStructuredData, buildOrganizationSchema, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
 import { trpc } from "@/lib/trpc";
@@ -358,7 +358,25 @@ function NewsletterSignup() {
 }
 
 function BlogPreview() {
-  const recent = articles.slice(0, 3);
+  const { data: dbPosts } = trpc.blog.getPublished.useQuery();
+  // Show DB posts first (with proper detail links), then static articles as fallback
+  const recent = useMemo(() => {
+    const dbItems = (dbPosts || []).map(p => ({
+      id: p.slug || String(p.id),
+      title: p.title,
+      excerpt: p.excerpt || '',
+      category: p.category || 'Guide',
+      date: p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '',
+      readTime: `${Math.ceil((p.content?.length || 0) / 1500)} min read`,
+      gradient: 'linear-gradient(135deg, #2A9D8F 0%, #264653 100%)',
+      image: p.coverImage || undefined,
+      slug: p.slug,
+      featured: false,
+      source: 'db' as const,
+    }));
+    const staticItems = articles.slice(0, 3).map(a => ({ ...a, slug: undefined as string | undefined, source: 'static' as const }));
+    return [...dbItems, ...staticItems].slice(0, 3);
+  }, [dbPosts]);
   return (
     <section className="py-16 md:py-20">
       <div className="container">
@@ -382,7 +400,7 @@ function BlogPreview() {
           {recent.map((a) => (
             <Link
               key={a.id}
-              href={`/blog`}
+              href={a.source === 'db' && a.slug ? `/blog/${a.slug}` : `/blog#${a.id}`}
               className="no-underline group"
             >
               <div className="rounded-xl overflow-hidden border border-border bg-card transition-all group-hover:shadow-lg group-hover:-translate-y-1 flex flex-col">
@@ -492,7 +510,7 @@ function ThisWeekInCLT() {
             const monthDay = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
             const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
             return (
-              <Link key={event.id} href="/events" className="no-underline group">
+              <Link key={event.id} href={`/events?highlight=${event.slug}`} className="no-underline group">
                 <div className="flex gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition-all">
                   <div className="flex flex-col items-center justify-center w-14 h-14 rounded-lg bg-primary/10 text-primary shrink-0">
                     <span className="text-[10px] font-bold uppercase leading-none">{dayName}</span>
@@ -732,7 +750,7 @@ function ForYouSection() {
               </div>
               <div className="space-y-2">
                 {data.events.slice(0, 4).map((e, i) => (
-                  <Link key={i} href={`/events?event=${e.id}`}>
+                  <Link key={i} href={`/events?highlight=${e.id}`}>
                     <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer">
                       <span className="text-sm font-medium text-foreground truncate">{e.id}</span>
                       <Badge variant="outline" className="text-[10px]">{e.matchedTag}</Badge>
@@ -752,7 +770,7 @@ function ForYouSection() {
               </div>
               <div className="space-y-2">
                 {data.directory.slice(0, 4).map((d, i) => (
-                  <Link key={i} href={`/directory?search=${encodeURIComponent(d.id)}`}>
+                  <Link key={i} href={`/directory/${encodeURIComponent(d.id)}`}>
                     <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer">
                       <span className="text-sm font-medium text-foreground truncate">{d.id}</span>
                       <Badge variant="outline" className="text-[10px]">{d.matchedTag}</Badge>

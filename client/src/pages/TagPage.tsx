@@ -155,12 +155,12 @@ export default function TagPage() {
                       {items!.map((item) => {
                         const href =
                           type === "event"
-                            ? "/events"
+                            ? `/events?highlight=${item.contentId}`
                             : type === "blog"
                             ? `/blog/${item.contentId}`
                             : type === "neighborhood"
                             ? `/neighborhood/${item.contentId}`
-                            : `/directory?search=${item.contentId}`;
+                            : `/directory/${item.contentId}`;
                         return (
                           <Link
                             key={`${item.contentType}-${item.contentId}`}
