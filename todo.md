@@ -544,3 +544,15 @@
 - [x] Fix: TagPage event items link to /events?highlight=slug, directory items to /directory/slug
 - [x] Fix: Events page reads ?highlight= and ?event= URL params to auto-open event dialog
 - [x] Fix: getThisWeek falls back to upcoming 30-day events if no events this week
+
+## Directory Pagination
+- [x] Add "Load More" infinite scroll to directory page (30 per page, IntersectionObserver + manual button, resets on filter change)
+
+## Claim Your Business Email Campaign
+- [x] Create email campaign templates for top 50 businesses (3-email drip sequence)
+- [x] Generate list of top 50 businesses with contact info from enriched data
+
+## Social Media Templates & Profile Guide
+- [x] Design branded Instagram post templates (neighborhood spotlight, event promo, directory feature)
+- [x] Design branded TikTok/Reels cover template + Instagram Story template
+- [x] Write social media profile optimization guide for each platform (Instagram, TikTok, Facebook, X, YouTube, Pinterest, LinkedIn)

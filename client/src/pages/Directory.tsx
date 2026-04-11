@@ -103,6 +103,9 @@ export default function Directory() {
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
   const [sortBy, setSortBy] = useState<"default" | "top-rated" | "most-reviewed" | "newest">("default");
+  const PAGE_SIZE = 30;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // Fetch enrichment data for all services
   const enrichmentQuery = trpc.enrichment.getAll.useQuery();
@@ -249,6 +252,35 @@ export default function Directory() {
   };
 
   const hasFilters = search || activeGroup || activeCategory || activeArea || sortBy !== "default";
+
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [activeCategory, activeGroup, activeArea, search, sortBy]);
+
+  // Paginated slice of filtered services
+  const visibleServices = useMemo(() => {
+    return filteredServices.slice(0, visibleCount);
+  }, [filteredServices, visibleCount]);
+
+  const hasMore = visibleCount < filteredServices.length;
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    if (!hasMore || viewMode !== "list") return;
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, filteredServices.length));
+        }
+      },
+      { rootMargin: "400px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, viewMode, filteredServices.length]);
 
   // Map initialization callback
   const handleMapReady = useCallback((map: google.maps.Map) => {
@@ -599,7 +631,7 @@ export default function Directory() {
           {viewMode === "list" && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {filteredServices.map((s, i) => {
+                {visibleServices.map((s, i) => {
                   const cat = SERVICE_CATEGORIES.find((c) => c.id === s.category);
                   const isLocal = myNeighborhoodData && s.area.includes(myNeighborhoodData.name);
                   const sSlug = toSlug(s.name);
@@ -729,6 +761,28 @@ export default function Directory() {
                   );
                 })}
               </div>
+
+              {/* Load More / Infinite Scroll Trigger */}
+              {hasMore && (
+                <div ref={loadMoreRef} className="flex flex-col items-center justify-center py-8 gap-3">
+                  <p className="text-sm text-muted-foreground">
+                    Showing {visibleCount} of {filteredServices.length} businesses
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={() => setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, filteredServices.length))}
+                    className="gap-2"
+                  >
+                    Load More
+                  </Button>
+                </div>
+              )}
+
+              {!hasMore && filteredServices.length > PAGE_SIZE && (
+                <p className="text-center text-sm text-muted-foreground py-4">
+                  Showing all {filteredServices.length} businesses
+                </p>
+              )}
 
               {/* Real Estate Help CTA Banner */}
               <div className="mt-6 rounded-xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-5 md:p-6">
