@@ -556,3 +556,18 @@
 - [x] Design branded Instagram post templates (neighborhood spotlight, event promo, directory feature)
 - [x] Design branded TikTok/Reels cover template + Instagram Story template
 - [x] Write social media profile optimization guide for each platform (Instagram, TikTok, Facebook, X, YouTube, Pinterest, LinkedIn)
+
+## Social Media Profile Pictures & Logos
+- [x] Create main Settle CLT logo/profile picture for social media
+- [x] Create platform-specific profile pictures (Instagram, TikTok, Facebook, X/Twitter, YouTube, Pinterest, LinkedIn)
+- [x] Create banner/cover images for platforms that support them (Facebook, X/Twitter, YouTube, LinkedIn)
+- [x] Create Instagram Story Highlight covers (New to CLT, Neighborhoods, Eats, Events, Nightlife, Hidden Gems, Reviews)
+
+## Google Search Console - Canonical Tag Fix
+- [x] Investigate current canonical tag configuration in HTML head
+- [x] Add proper canonical tags pointing to settleclt.com for all pages
+- [x] Ensure www.settleclt.com redirects or canonicalizes to settleclt.com
+- [x] Add robots.txt blocking manus.space subdomain from crawling
+- [x] Add X-Robots-Tag noindex header for manus.space subdomain
+- [x] Fix useSEO hook to always set canonical (fallback to window.location.pathname)
+- [x] Add path prop to ListYourBusiness, Notifications, BusinessDetail useSEO calls

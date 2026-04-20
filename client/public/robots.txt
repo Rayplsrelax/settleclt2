@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /profile
+Disallow: /wishlist
+Disallow: /notifications
+
+# Canonical domain
+Host: https://settleclt.com
+
+# Sitemap
+Sitemap: https://settleclt.com/sitemap.xml

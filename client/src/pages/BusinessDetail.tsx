@@ -110,6 +110,8 @@ export default function BusinessDetail() {
     description: service
       ? `${service.description} Located in ${service.area}, Charlotte NC. Phone: ${service.phone}. Read reviews and get directions.`
       : "This business listing was not found.",
+    path: slug ? `/directory/${slug}` : "/directory",
+    noSuffix: true,
   });
 
   // Structured data

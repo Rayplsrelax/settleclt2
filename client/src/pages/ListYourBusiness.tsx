@@ -20,6 +20,7 @@ export default function ListYourBusiness() {
     title: "List Your Business | Settle CLT",
     description: "Get your Charlotte business discovered by thousands of newcomers. Free basic listing with optional premium upgrades for featured placement and analytics.",
     keywords: "list business Charlotte, Charlotte business directory, promote business CLT, Charlotte advertising",
+    path: "/list-your-business",
   });
 
   const { isAuthenticated } = useAuth();

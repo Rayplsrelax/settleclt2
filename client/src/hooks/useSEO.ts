@@ -71,11 +71,11 @@ export function useSEO({
     setMeta("property", "og:image", ogImage || DEFAULT_OG_IMAGE);
     setMeta("property", "og:type", ogType);
     setMeta("property", "og:site_name", SITE_NAME);
-    if (path) {
-      const canonicalUrl = `${SITE_URL}${path}`;
-      setMeta("property", "og:url", canonicalUrl);
-      setLink("canonical", canonicalUrl);
-    }
+    // Always set canonical — use provided path or fall back to current pathname
+    const canonicalPath = path ?? window.location.pathname;
+    const canonicalUrl = `${SITE_URL}${canonicalPath}`;
+    setMeta("property", "og:url", canonicalUrl);
+    setLink("canonical", canonicalUrl);
 
     // Twitter Card
     setMeta("name", "twitter:card", "summary_large_image");

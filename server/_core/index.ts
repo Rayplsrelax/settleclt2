@@ -169,6 +169,20 @@ async function startServer() {
     }
   });
 
+  // SEO: Tell search engines not to index the manus.space subdomain
+  app.use((req, res, next) => {
+    const host = req.hostname;
+    if (host.includes("manus.space") || host.includes("manus.computer")) {
+      res.setHeader("X-Robots-Tag", "noindex, nofollow");
+    }
+    // Add Link header with canonical URL for all HTML pages
+    if (req.accepts("html") && !req.path.startsWith("/api/")) {
+      const canonicalUrl = `https://settleclt.com${req.path === "/" ? "" : req.path}`;
+      res.setHeader("Link", `<${canonicalUrl}>; rel="canonical"`);
+    }
+    next();
+  });
+
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
@@ -304,10 +318,27 @@ async function startServer() {
     res.send(xml);
   });
 
-  // Robots.txt
-  app.get("/robots.txt", (_req, res) => {
+  // Robots.txt — block admin, private, and API paths; declare canonical host + sitemap
+  app.get("/robots.txt", (req, res) => {
+    const host = req.hostname;
     res.set("Content-Type", "text/plain");
-    res.send(`User-agent: *\nAllow: /\n\nSitemap: https://settleclt.com/sitemap.xml\n`);
+    // If accessed via the manus.space subdomain, block all crawling
+    if (host.includes("manus.space") || host.includes("manus.computer")) {
+      return res.send(`User-agent: *\nDisallow: /\n`);
+    }
+    res.send(
+`User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /profile
+Disallow: /wishlist
+Disallow: /notifications
+
+Host: https://settleclt.com
+Sitemap: https://settleclt.com/sitemap.xml
+`
+    );
   });
 
   // development mode uses Vite, production mode uses static files

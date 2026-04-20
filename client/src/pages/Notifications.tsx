@@ -52,6 +52,7 @@ export default function Notifications() {
   useSEO({
     title: "Notifications | Settle CLT",
     description: "Manage your notification preferences and view your notification history.",
+    path: "/notifications",
   });
 
   const { data: notifications, refetch, isLoading: loadingNotifs } = trpc.notifications.list.useQuery(
