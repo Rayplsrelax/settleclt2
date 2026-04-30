@@ -577,4 +577,4 @@
 - [x] Build admin submissions page with table display
 - [x] Add filters (status, date range, category)
 - [x] Add submission management (approve, reject, delete, view details)
-- [ ] Test and deploy admin page
+- [x] Test and deploy admin page
