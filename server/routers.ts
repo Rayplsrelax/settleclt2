@@ -5,7 +5,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router, adminProcedure } from "./_core/trpc";
 import { z } from "zod";
 import {
-  insertBusinessSubmission, insertNewsletterSubscriber,
+  insertBusinessSubmission, getBusinessSubmissions, getBusinessSubmissionCount, updateBusinessSubmissionStatus, deleteBusinessSubmission, insertNewsletterSubscriber,
   upsertEnrichedService, getEnrichedService, getAllEnrichedServices,
   addPassportEntry, getPassportEntries, deletePassportEntry,
   getActiveBingoCards, getBingoProgress, upsertBingoProgress,
@@ -96,6 +96,38 @@ export const appRouter = router({
           content: `${input.name} (${input.email}) submitted "${input.businessName}" in ${input.category}.${input.area ? ` Area: ${input.area}.` : ''}${input.website ? ` Website: ${input.website}` : ''}`,
         }).catch(() => {}); // fire-and-forget
         return result;
+      }),
+    
+    // Admin: List all submissions with pagination
+    adminList: adminProcedure
+      .input(z.object({
+        status: z.enum(['pending', 'approved', 'rejected']).optional(),
+        limit: z.number().min(1).max(100).default(20),
+        offset: z.number().min(0).default(0),
+      }))
+      .query(async ({ input }) => {
+        const [submissions, total] = await Promise.all([
+          getBusinessSubmissions(input.status, input.limit, input.offset),
+          getBusinessSubmissionCount(input.status),
+        ]);
+        return { submissions, total, limit: input.limit, offset: input.offset };
+      }),
+    
+    // Admin: Update submission status
+    updateStatus: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(['pending', 'approved', 'rejected']),
+      }))
+      .mutation(async ({ input }) => {
+        return updateBusinessSubmissionStatus(input.id, input.status);
+      }),
+    
+    // Admin: Delete submission
+    delete: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return deleteBusinessSubmission(input.id);
       }),
   }),
 

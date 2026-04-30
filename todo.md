@@ -571,3 +571,10 @@
 - [x] Add X-Robots-Tag noindex header for manus.space subdomain
 - [x] Fix useSEO hook to always set canonical (fallback to window.location.pathname)
 - [x] Add path prop to ListYourBusiness, Notifications, BusinessDetail useSEO calls
+
+## Admin Submissions Dashboard
+- [x] Create tRPC procedure to fetch business submissions with pagination
+- [x] Build admin submissions page with table display
+- [x] Add filters (status, date range, category)
+- [x] Add submission management (approve, reject, delete, view details)
+- [ ] Test and deploy admin page

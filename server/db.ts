@@ -104,6 +104,51 @@ export async function insertBusinessSubmission(data: InsertBusinessSubmission) {
   return { success: true };
 }
 
+export async function getBusinessSubmissions(status?: string, limit = 50, offset = 0) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const { eq, desc } = await import("drizzle-orm");
+  
+  let query: any = db.select().from(businessSubmissions);
+  if (status) {
+    query = query.where(eq(businessSubmissions.status, status as any));
+  }
+  return query.orderBy(desc(businessSubmissions.createdAt)).limit(limit).offset(offset);
+}
+
+export async function getBusinessSubmissionCount(status?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const { eq, count } = await import("drizzle-orm");
+  
+  let query: any = db.select({ count: count() }).from(businessSubmissions);
+  if (status) {
+    query = query.where(eq(businessSubmissions.status, status as any));
+  }
+  const result = await query;
+  return result[0]?.count ?? 0;
+}
+
+export async function updateBusinessSubmissionStatus(id: number, status: 'pending' | 'approved' | 'rejected') {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const { eq } = await import("drizzle-orm");
+  
+  await db.update(businessSubmissions)
+    .set({ status })
+    .where(eq(businessSubmissions.id, id));
+  return { success: true };
+}
+
+export async function deleteBusinessSubmission(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const { eq } = await import("drizzle-orm");
+  
+  await db.delete(businessSubmissions).where(eq(businessSubmissions.id, id));
+  return { success: true };
+}
+
 // --- Enriched services (Google Places data) ---
 export async function upsertEnrichedService(data: InsertEnrichedService) {
   const db = await getDb();
