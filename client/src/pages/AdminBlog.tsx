@@ -280,7 +280,7 @@ export default function AdminBlog() {
                       className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                     {coverImage && (
-                      <img src={coverImage} alt="Cover preview" className="mt-2 rounded-lg w-full h-32 object-cover" />
+                      <img loading="lazy" src={coverImage} alt="Cover preview" className="mt-2 rounded-lg w-full h-32 object-cover" />
                     )}
                   </div>
 

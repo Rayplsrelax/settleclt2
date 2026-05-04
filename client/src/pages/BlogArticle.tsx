@@ -19,7 +19,7 @@ function renderMarkdown(md: string): string {
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     // Images
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="rounded-lg my-4 max-w-full" />')
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img loading="lazy" src="$2" alt="$1" class="rounded-lg my-4 max-w-full" />')
     // Links
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-primary underline hover:text-primary/80" target="_blank" rel="noopener">$1</a>')
     // Blockquotes
@@ -112,7 +112,7 @@ export default function BlogArticle() {
       {/* Hero */}
       {post.coverImage ? (
         <div className="relative h-64 md:h-80">
-          <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
+          <img loading="eager" fetchPriority="high" src={post.coverImage} alt={post.title} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
         </div>
       ) : (

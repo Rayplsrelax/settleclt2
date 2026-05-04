@@ -103,7 +103,7 @@ export default function Compare() {
           <div className="flex items-center gap-3 flex-wrap">
             {selected.map(n => (
               <div key={n.id} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-                <img src={n.photoUrls[0]} alt={`${n.name} neighborhood`} className="w-6 h-6 rounded-full object-cover" />
+                <img loading="lazy" src={n.photoUrls[0]} alt={`${n.name} neighborhood`} className="w-6 h-6 rounded-full object-cover" />
                 <span className="text-sm font-medium text-foreground">{n.name}</span>
                 <button onClick={() => removeNeighborhood(n.id)} className="text-muted-foreground hover:text-destructive">
                   <X className="w-3.5 h-3.5" />
@@ -134,7 +134,7 @@ export default function Compare() {
                   onClick={() => addNeighborhood(n.id)}
                   className="relative rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all group"
                 >
-                  <img src={n.photoUrls[0]} alt={`${n.name} - Charlotte NC neighborhood`} className="w-full h-24 object-cover" />
+                  <img loading="lazy" src={n.photoUrls[0]} alt={`${n.name} - Charlotte NC neighborhood`} className="w-full h-24 object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                   <div className="absolute bottom-2 left-3 right-3">
                     <p className="text-sm font-semibold text-white group-hover:text-clt-gold transition">{n.name}</p>
@@ -164,7 +164,7 @@ export default function Compare() {
             <div className={`grid gap-6 ${selected.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
               {selected.map(n => (
                 <div key={n.id} className="rounded-xl overflow-hidden border border-border">
-                  <img src={n.photoUrls[0]} alt={`${n.name} - Charlotte NC neighborhood comparison`} className="w-full h-36 md:h-48 object-cover" />
+                  <img loading="lazy" src={n.photoUrls[0]} alt={`${n.name} - Charlotte NC neighborhood comparison`} className="w-full h-36 md:h-48 object-cover" />
                   <div className="p-4">
                     <Link href={`/neighborhood/${n.id}`} className="no-underline">
                       <h3 className="font-display font-bold text-lg text-foreground hover:text-primary transition">{n.name}</h3>

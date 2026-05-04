@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tag, Calendar, BookOpen, MapPin, Building2, ArrowLeft, ChevronRight } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
 import { useEffect, useRef } from "react";
+import { useSEO } from "@/hooks/useSEO";
 
 const CONTENT_TYPE_ICONS: Record<string, { icon: typeof Tag; label: string }> = {
   event: { icon: Calendar, label: "Events" },
@@ -39,6 +40,15 @@ export default function TagPage() {
   }, [tag?.id]);
 
   const isLoading = tagLoading || contentLoading;
+
+  useSEO({
+    title: tag?.name ? `${tag.name} in Charlotte` : "Tag",
+    description: tag?.name
+      ? `Explore everything tagged "${tag.name}" in Charlotte, NC — events, businesses, neighborhoods, and blog posts curated by Settle CLT.`
+      : "Browse content by tag on Settle CLT.",
+    keywords: tag?.name ? `${tag.name}, Charlotte NC, Charlotte tag` : undefined,
+    path: slug ? `/tag/${slug}` : "/tag",
+  });
 
   if (isLoading) {
     return (
