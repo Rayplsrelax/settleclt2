@@ -32,9 +32,9 @@ export const metroNeighborhoods: Neighborhood[] = [
     nearbyAreas: ['Myers Park', 'Dilworth', 'South Charlotte'],
     featured: false,
     photoUrls: [
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/southpark-1_d9ef3892.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/southpark-2_3945b05c.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/southpark-3_8f589d6d.jpg'
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/MICUXdtUEehgWyLb.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/uKjDQAbVpQxEVECi.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/zwasfLbDCcSUVUjC.jpg'
     ],
     dayInTheLife: 'You wake up in a well-appointed condo near Morrison Boulevard and drive three minutes to Starbucks Reserve at Phillips Place — the one with the leather chairs and actual quiet. Breakfast is a smoked salmon toast at Terrace Cafe, where the servers know your name but keep it professional.\n\nWork is either remote from your home office or a 20-minute drive to Uptown. Lunch means walking to one of a dozen restaurants within SouthPark Mall\'s orbit — maybe Brio for Italian or Cowfish for sushi-burgers. After work, you browse Nordstrom or hit the gym at Lifetime Fitness. Dinner is the real event: Dogwood Southern Table for craft cocktails, or Nakato for Japanese. You\'re home by 9:30, and the neighborhood is quiet enough to hear crickets.',
     honestTruth: 'SouthPark is Charlotte\'s "nice" neighborhood, and that comes with trade-offs. It\'s car-dependent — you\'re driving everywhere, and parking at the mall on weekends is a contact sport. The area skews older and more conservative than South End or NoDa. If you\'re in your 20s looking for nightlife and spontaneity, this isn\'t it. Rent is high for what you get compared to emerging areas. The "walkable" parts are really just the mall and Phillips Place — beyond that, it\'s suburban arterials and office parks.',
@@ -121,9 +121,9 @@ export const metroNeighborhoods: Neighborhood[] = [
     nearbyAreas: ['Dilworth', 'Plaza Midwood', 'Uptown'],
     featured: false,
     photoUrls: [
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/elizabeth-1_e7c91440.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/elizabeth-2_3390d587.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/elizabeth-3_47ae9863.jpg'
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/FVwDsIRnSBWNjzio.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/MgMZTwlNxwKzDKXK.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/iWFnjTngwBGskzOS.jpg'
     ],
     dayInTheLife: 'You wake up in a 1920s bungalow on Hawthorne Lane and walk to Crispy Crepe for breakfast — the owner waves from behind the counter. Independence Park is two blocks away, and you take the dog through the rose garden before the heat sets in.\n\nWork at Novant Health is a 5-minute walk. If you\'re remote, you set up at Not Just Coffee on Elizabeth Avenue. Lunch is a quick sandwich at Earl\'s Grocery or pho at Lang Van. The afternoon is quiet — Elizabeth doesn\'t do loud. After work, you walk to Midwood Smokehouse (technically next door in Plaza Midwood) or cook at home with groceries from Harris Teeter on Independence. The evening is a porch beer, the sound of kids playing, and the distant hum of Uptown just a mile away.',
     honestTruth: 'Elizabeth is charming but aging. Some of the historic homes need work, and the rental stock can be hit-or-miss — beautiful exteriors with outdated interiors. Street parking is tight, especially near the hospital. The "walkable" label is real for daily errands but doesn\'t extend to nightlife or entertainment — you\'ll need to go to Plaza Midwood or South End for that. The medical campus brings ambulance traffic at all hours. And gentrification is creeping in: new townhomes are replacing the bungalows that give Elizabeth its character.',
@@ -210,9 +210,9 @@ export const metroNeighborhoods: Neighborhood[] = [
     nearbyAreas: ['South End', 'Dilworth', 'Wilmore'],
     featured: false,
     photoUrls: [
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/loso-1_f4d7f31f.webp',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/loso-2_ad3e2ab8.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/loso-3_32c21d57.jpg'
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/DkNKsFDHGbUYkxnP.webp',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/XmtHIAsMbleBPtRz.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/nCJHQCsbHnxDCBlY.jpg'
     ],
     dayInTheLife: 'You wake up in a new-build apartment near Scaleybark Station and grab the LYNX to Uptown for work — 12 minutes, no traffic. Or you work remote from the taproom at Olde Mecklenburg Brewery, which opens early and has surprisingly good WiFi.\n\nLunch is a taco from one of the food trucks that park along South Boulevard. The afternoon is productive — LoSo is quieter than South End during work hours. After 5, the breweries come alive: OMB\'s biergarten fills up, Lenny Boy Brewing pours kombucha on tap, and the art studios along Clanton Road open their doors. Dinner might be Queen Park Social for games and cocktails, or you hop the LYNX one stop to South End for more options. You walk home past construction cranes and string lights — LoSo is building itself in real time.',
     honestTruth: 'LoSo is in transition, and that means construction noise, dust, and streets that change every few months. Some blocks are polished; others are still industrial. The "emerging" label means amenities are spotty — you might have three breweries within walking distance but no grocery store. Crime is slightly higher than South End proper. And the rapid development means the character that makes LoSo interesting is being replaced by the same luxury apartments popping up everywhere. Get in now if you want the authentic version.',
@@ -299,9 +299,9 @@ export const metroNeighborhoods: Neighborhood[] = [
     nearbyAreas: ['Plaza Midwood', 'Elizabeth', 'Mint Hill'],
     featured: false,
     photoUrls: [
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/east-charlotte-1_0df20047.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/east-charlotte-2_ce337cb5.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/east-charlotte-3_a3d3b507.jpg'
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/XlXVevsrdOgdTmMj.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/TFItzwUaFrFKXPOI.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/QxlCEyuRCGobMtUh.jpg'
     ],
     dayInTheLife: 'You wake up in a spacious apartment that costs less than a studio in South End. Breakfast is banh mi from a Vietnamese bakery on Central Avenue — $5 for a sandwich that would cost $14 in NoDa. The morning drive to Uptown takes 15 minutes on a good day.\n\nLunch is the real event: you rotate between Lang Van for pho, Kabab-Je for Lebanese, and Pupuseria Patty for Salvadoran. The international grocery stores are an adventure — Super G Mart alone could occupy an entire afternoon. After work, the pace slows. East Charlotte isn\'t a nightlife destination; it\'s a place where families gather, kids play in Eastway Park, and the best entertainment is discovering a new restaurant you\'ve walked past a hundred times.',
     honestTruth: 'East Charlotte is real in a way that polished neighborhoods aren\'t, and that includes the rough edges. Crime is higher than the city average, particularly property crime. Some stretches of Central Avenue feel neglected — crumbling sidewalks, vacant storefronts, and infrastructure that hasn\'t been updated in decades. Schools are below the county average. The area is car-dependent despite being relatively close to Uptown. And gentrification is a live wire: longtime immigrant communities are watching rents rise as developers discover the area.',
@@ -388,9 +388,9 @@ export const metroNeighborhoods: Neighborhood[] = [
     nearbyAreas: ['Ballantyne', 'SouthPark', 'Pineville'],
     featured: false,
     photoUrls: [
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/south-charlotte-1_3e835362.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/south-charlotte-2_4a189a81.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/south-charlotte-3_df7d2ed3.webp'
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/zlQRQNUZWSgRyHlJ.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/GBsYWUqSLYETampO.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/crBakoelqJziDMrK.webp'
     ],
     dayInTheLife: 'You wake up in a 4-bedroom house with a yard and drive the kids to Ardrey Kell or Providence High — both top-rated. The morning commute to Uptown is 25 minutes if you leave by 7:15, 45 if you leave at 7:45. Many parents work remote at least part-time.\n\nLunch is Chick-fil-A or a quick stop at one of the shopping centers along Providence Road. After school, it\'s swim team practice, soccer, or tutoring. The neighborhood pool is the summer social hub — parents chat while kids splash. Dinner is often at home, but date night means driving to SouthPark or Ballantyne. The evening is homework, bedtime routines, and the quiet satisfaction of knowing your kids are in excellent schools.',
     honestTruth: 'South Charlotte is car-dependent to an extreme degree — you\'re driving everywhere, and traffic on Providence Road and Rea Road is brutal during school hours. There\'s no walkable center, no transit, and no nightlife. If you don\'t have kids, there\'s very little reason to live here. The area is homogeneous — predominantly white, upper-middle-class families. And the "top schools" come with intense academic pressure and competitive parenting culture that isn\'t for everyone.',
@@ -477,9 +477,9 @@ export const metroNeighborhoods: Neighborhood[] = [
     nearbyAreas: ['Uptown', 'Camp North End', 'Seversville'],
     featured: false,
     photoUrls: [
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/west-charlotte-1_19125f3e.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/west-charlotte-2_444cd899.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/west-charlotte-3_2143eeb5.jpg'
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/ZSGULJdlbSaQHOzH.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/cfYCPpiNgthwHHbB.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/uDvxUPxVSaCxujyP.jpg'
     ],
     dayInTheLife: 'You wake up in a renovated bungalow on Beatties Ford Road — $1,100 for a 1BR that would cost $1,600 in South End. The drive to Uptown is 8 minutes, and you can see the skyline from your porch. Breakfast is at Reigning Doughnuts or a quick stop at the gas station that makes surprisingly good biscuits.\n\nJohnson C. Smith University\'s campus is the neighborhood\'s anchor — manicured grounds, historic buildings, and a sense of institutional permanence. The surrounding blocks are a patchwork: renovated homes next to vacant lots, new townhomes next to century-old shotgun houses. After work, the options are limited locally — most people drive to Camp North End or Uptown for dinner and entertainment. The evening is quiet, with porch conversations and the sound of a neighborhood figuring out what it wants to become.',
     honestTruth: 'West Charlotte has the most complex dynamics of any area on this list. Crime is higher than the city average. Infrastructure has been historically neglected — sidewalks, lighting, and roads are worse than the east side. Food deserts are real: there\'s no full-service grocery store in large parts of the area. Schools are below average. And the gentrification conversation is loaded: new development is raising property values and taxes, pushing out longtime Black residents and families who built these communities. If you move here, be aware of that history and dynamic.',
@@ -566,9 +566,9 @@ export const metroNeighborhoods: Neighborhood[] = [
     nearbyAreas: ['Lake Norman', 'Cornelius', 'Davidson'],
     featured: false,
     photoUrls: [
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/huntersville-1_ca1f5d52.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/huntersville-2_b2e242f3.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/huntersville-3_e73b6ab6.jpg'
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/jexjyrMSkGeXrsHr.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/ChckiRUHNjSWcONJ.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/zOznyzTwxdrLqMBa.jpg'
     ],
     dayInTheLife: 'You wake up in a house with a yard and drive 5 minutes to Birkdale Village for coffee at Summit Coffee. The kids get on the bus for Huntersville Elementary — rated A. Your commute to Uptown is 25 minutes on I-77 if you leave early, 40+ if you don\'t.\n\nLunch is at one of Birkdale\'s restaurants — Dressler\'s for something nice, Red Rocks for casual. After work, you might swing by Latta Nature Preserve for a quick hike or drive 10 minutes to Lake Norman for a sunset. Dinner is often at home — Huntersville has excellent grocery options. Weekends revolve around the lake, Birkdale Village events, and kids\' activities. It\'s suburban, but the lake access and Birkdale\'s walkable center give it more personality than typical sprawl.',
     honestTruth: 'I-77 traffic is the defining challenge. The commute to Uptown can double during rush hour, and the toll lanes (I-77 Express) cost $5–15 each way during peak times. Huntersville is growing fast, and the infrastructure hasn\'t kept up — new subdivisions are going up faster than roads can be widened. Outside of Birkdale Village, it\'s standard suburban sprawl. And while Lake Norman access is a selling point, actually living on the lake requires a much higher budget.',
@@ -655,9 +655,9 @@ export const metroNeighborhoods: Neighborhood[] = [
     nearbyAreas: ['Huntersville', 'Cornelius', 'Mooresville'],
     featured: false,
     photoUrls: [
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/lake-norman-1_9a3ac53e.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/lake-norman-2_bcfe05ed.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/lake-norman-3_93f7cd93.jpg'
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/kARKRiLiRDJGUZMm.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/VDjzQmvuUMaszakd.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/DurNcDFivhEbgwhe.jpg'
     ],
     dayInTheLife: 'You wake up and can see the lake from your window — or at least you\'re a 5-minute drive from it. Morning coffee is at Summit Coffee in Davidson, where the college-town vibe means good conversation and better pastries. If you commute, the drive to Uptown is 35 minutes without traffic, an hour with it.\n\nDavidson\'s Main Street is walkable and charming — bookshops, restaurants, and the college campus. Cornelius has the lakefront restaurants and marinas. Weekends are the real draw: boating, paddleboarding, fishing, or just sitting on a dock. The lake community has its own social ecosystem — boat clubs, lakeside restaurants, and seasonal events. By evening, you\'re grilling on the deck, watching the sunset over the water, and wondering why you ever lived in a city.',
     honestTruth: 'The commute to Charlotte is the dealbreaker for many. I-77 south is a parking lot during rush hour, and there\'s no transit option. Lake Norman waterfront property is expensive — $500K+ for anything with actual lake access, $1M+ for waterfront. The "lake lifestyle" requires a boat or knowing someone with one; otherwise, public access is limited. Winters are quiet to the point of isolation — the lake community is very seasonal. And while Davidson is charming, Mooresville and parts of Cornelius are standard suburban sprawl.',
@@ -744,9 +744,9 @@ export const metroNeighborhoods: Neighborhood[] = [
     nearbyAreas: ['South Charlotte', 'Mint Hill', 'Indian Trail'],
     featured: false,
     photoUrls: [
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/matthews-1_58ac2864.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/matthews-2_51c350e7.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/matthews-3_e9d2f181.jpg'
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/FZkZqFvHCPnLzefA.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/AQwcmTexuyYFWsBw.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/YGPanhFQHcnhCzlI.jpg'
     ],
     dayInTheLife: 'You wake up in a house on a tree-lined street and walk to downtown Matthews for coffee at Brakeman\'s. The Main Street shops are opening — the bookstore, the antique shop, the local boutiques. Kids walk to school or catch the bus.\n\nThe commute to Uptown is 25 minutes on Independence Boulevard. Lunch is a sandwich at Sante or BBQ at Mac\'s Speed Shop. After work, Stumptown Park has kids playing, dogs running, and families gathering. The farmers market on Saturday is the social event of the week. Dinner is at one of the downtown restaurants — nothing fancy, but genuine. The evening is quiet — porch sitting, fireflies in summer, and the feeling of living in a real community rather than a suburb.',
     honestTruth: 'Matthews\' charm is real but limited to a few blocks of downtown. Beyond that, it\'s standard suburban development — strip malls and subdivisions. The commute to Uptown on Independence Boulevard is one of the worst in Charlotte — traffic is heavy and the road is ugly. There\'s no transit option. The town is growing, and new development is testing the small-town identity. And while the community events are great, the dining and entertainment options are limited — you\'ll drive to Charlotte for anything beyond casual.',
@@ -833,9 +833,9 @@ export const metroNeighborhoods: Neighborhood[] = [
     nearbyAreas: ['Harrisburg', 'Kannapolis', 'University City'],
     featured: false,
     photoUrls: [
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/concord-1_4afccf6a.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/concord-2_88661c6a.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/concord-3_a7a64437.jpg'
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/DVLiUVpxHdVguTZu.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/kqzrjeHOKhqoNylv.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/WhLNpBOqEUZbVzuv.jpg'
     ],
     dayInTheLife: 'You wake up in a new-build house that cost $340K — the same house would be $480K in South Charlotte. The commute to Uptown is 30 minutes on I-85, or you work at one of the businesses along the Concord corridor. Breakfast is at a local diner or a drive-through — Concord is practical, not precious.\n\nLunch might be at Concord Mills if you\'re shopping, or downtown Concord for something with more character — the historic district has been quietly improving. After work, the kids have activities, you might hit the gym, or on race weekends the entire area transforms with Charlotte Motor Speedway events. Dinner is casual — local BBQ, Mexican, or cooking at home. The evening is suburban quiet, with the occasional roar of engines from the Speedway drifting across the neighborhood.',
     honestTruth: 'Concord is affordable for a reason — it\'s far from Charlotte\'s core and car-dependent in the extreme. The I-85 commute is unpredictable, and there\'s no transit. Concord Mills is a tourist magnet, which means traffic around the mall is terrible on weekends. The area lacks the cultural amenities of Charlotte proper — no arts scene, limited dining variety, and nightlife is essentially nonexistent. Downtown Concord is improving but still has empty storefronts. And being in Cabarrus County means different schools, taxes, and services than Mecklenburg.',
@@ -922,9 +922,9 @@ export const metroNeighborhoods: Neighborhood[] = [
     nearbyAreas: ['Pineville', 'Ballantyne', 'Rock Hill'],
     featured: false,
     photoUrls: [
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/fort-mill-1_2486a3e6.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/fort-mill-2_5398422f.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/fort-mill-3_1c7318fc.jpg'
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/WffwcXpYOfqvmubW.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/CrvsIocEyNMgASib.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/jmrYUEeYLETwKNZv.jpg'
     ],
     dayInTheLife: 'You wake up in a new-build house in a master-planned community and drive the kids to Fort Mill schools — consistently rated among the best in South Carolina. The commute to Uptown Charlotte is 30 minutes on I-77, or you work at one of the businesses along the Carowinds Boulevard corridor.\n\nLunch is at Kingsley Town Center — a walkable mixed-use development with restaurants, shops, and a brewery. After work, you might take the family to Anne Springs Close Greenway for a hike or bike ride — 2,100 acres of trails, lakes, and nature. Dinner is at home or one of the Kingsley restaurants. The evening is suburban quiet, with the knowledge that your state income tax savings are padding your retirement account.',
     honestTruth: 'Fort Mill is in South Carolina, which means different everything: schools, taxes, car registration, insurance, and healthcare systems. The tax savings are real but complicated — SC has higher property taxes and sales tax, so the net benefit depends on your income level. I-77 traffic to Charlotte is terrible during rush hour, and there\'s no transit. Fort Mill is growing explosively, and the infrastructure is struggling to keep up — school overcrowding is a real issue. And while Kingsley is nice, most of Fort Mill is standard suburban development.',
@@ -1011,9 +1011,9 @@ export const metroNeighborhoods: Neighborhood[] = [
     nearbyAreas: ['South Charlotte', 'Fort Mill', 'Ballantyne'],
     featured: false,
     photoUrls: [
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/pineville-1_7bc8ff5c.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/pineville-2_e04f86c8.jpg',
-      'https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/pineville-3_5f5fef50.jpg'
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/FsencMLOvfRBknYQ.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/dBghaZelxKsQAVkq.jpg',
+      'https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/IvQUIXcieVTTiREl.jpg'
     ],
     dayInTheLife: 'You wake up in an apartment that costs $1,300 — the cheapest rent this close to I-485 — and drive to work. The highway access is Pineville\'s superpower: I-485 connects you to anywhere in Charlotte in 20–30 minutes. Breakfast is a drive-through or a quick stop at a chain restaurant.\n\nLunch is at one of the many options along Park Road or near Carolina Place Mall — nothing exciting, but everything you need. After work, the McAlpine Creek Greenway is a genuine surprise: miles of paved trails through woods that make you forget you\'re near a mall. Dinner is practical — cooking at home with groceries from the well-stocked stores along the corridor, or grabbing something casual. The evening is quiet and affordable, which is exactly the point.',
     honestTruth: 'Pineville is functional, not charming. The main corridors are strip malls, big-box stores, and chain restaurants. There\'s very little walkability outside the greenway. Carolina Place Mall is declining — anchor stores have left, and the area around it feels tired. The historic downtown is tiny — a few blocks that are easy to miss entirely. Crime is moderate, particularly around the mall area. And while the affordability is real, you get what you pay for in terms of neighborhood character and amenities.',
