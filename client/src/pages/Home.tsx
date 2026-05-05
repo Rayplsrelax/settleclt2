@@ -66,7 +66,7 @@ function Hero() {
             <Link href="/neighborhoods">
               <Button
                 size="lg"
-                className="bg-clt-teal hover:bg-clt-teal-dark text-white font-semibold px-6 shadow-lg shadow-clt-teal/20"
+                className="bg-clt-teal-dark hover:bg-clt-teal text-white font-semibold px-6 shadow-lg shadow-clt-teal-dark/20"
               >
                 Explore Neighborhoods
                 <ArrowRight className="ml-2 w-4 h-4" />
@@ -512,7 +512,7 @@ function ThisWeekInCLT() {
             return (
               <Link key={event.id} href={`/events?highlight=${event.slug}`} className="no-underline group">
                 <div className="flex gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition-all">
-                  <div className="flex flex-col items-center justify-center w-14 h-14 rounded-lg bg-primary/10 text-primary shrink-0">
+                  <div className="flex flex-col items-center justify-center w-14 h-14 rounded-lg bg-primary text-primary-foreground shrink-0">
                     <span className="text-[10px] font-bold uppercase leading-none">{dayName}</span>
                     <span className="text-lg font-extrabold leading-tight">{d.getDate()}</span>
                   </div>

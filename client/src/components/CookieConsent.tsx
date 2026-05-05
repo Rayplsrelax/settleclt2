@@ -46,7 +46,7 @@ export default function CookieConsent() {
             <p className="text-xs text-muted-foreground leading-relaxed">
               We use cookies and analytics tools to understand how you use Settle CLT so we can improve your experience.
               Read our{" "}
-              <a href="/privacy" className="text-primary hover:underline">Privacy Policy</a>
+              <a href="/privacy" className="text-primary underline underline-offset-2 hover:no-underline">Privacy Policy</a>
               {" "}for details.
             </p>
             <div className="flex items-center gap-2 mt-3">

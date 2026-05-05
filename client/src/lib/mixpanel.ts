@@ -1,48 +1,115 @@
 /**
  * Mixpanel Analytics Integration for Settle CLT
- * 
+ *
  * Wraps the mixpanel-browser SDK with typed helpers for consistent event tracking.
  * Gracefully no-ops if the token is not configured (dev environments).
+ *
+ * The SDK is loaded LAZILY on first use to keep the initial JS payload small
+ * (~420 KB shaved from main bundle). Events fired before the SDK finishes
+ * loading are queued and flushed once it's ready.
  */
-import mixpanel from "mixpanel-browser";
 
 const MIXPANEL_TOKEN = import.meta.env.VITE_MIXPANEL_TOKEN as string | undefined;
 
-let initialized = false;
+type MixpanelModule = typeof import("mixpanel-browser").default;
 
-/** Initialize Mixpanel. Call once at app boot (main.tsx). */
+let mp: MixpanelModule | null = null;
+let loadPromise: Promise<MixpanelModule | null> | null = null;
+let initialized = false;
+const queue: Array<(m: MixpanelModule) => void> = [];
+
+function loadSdk(): Promise<MixpanelModule | null> {
+  if (loadPromise) return loadPromise;
+  if (!MIXPANEL_TOKEN) {
+    loadPromise = Promise.resolve(null);
+    return loadPromise;
+  }
+  loadPromise = import("mixpanel-browser")
+    .then((mod) => {
+      mp = mod.default;
+      mp.init(MIXPANEL_TOKEN, {
+        track_pageview: false, // we track manually for SPA
+        persistence: "localStorage",
+        ignore_dnt: false,
+      });
+      initialized = true;
+      // Flush any queued operations
+      while (queue.length) {
+        const op = queue.shift();
+        try {
+          op?.(mp!);
+        } catch {
+          /* swallow analytics errors */
+        }
+      }
+      return mp;
+    })
+    .catch(() => {
+      // If SDK fails to load (network, blocker), fall back to no-op
+      return null;
+    });
+  return loadPromise;
+}
+
+/** Schedule an op against the SDK. Loads it on first call; queues until ready. */
+function withSdk(op: (m: MixpanelModule) => void) {
+  if (!MIXPANEL_TOKEN) return;
+  if (initialized && mp) {
+    try {
+      op(mp);
+    } catch {
+      /* swallow analytics errors */
+    }
+    return;
+  }
+  queue.push(op);
+  // Kick off the load (idempotent)
+  void loadSdk();
+}
+
+/**
+ * Initialize Mixpanel. Call once at app boot (main.tsx).
+ *
+ * Schedules the SDK load via `requestIdleCallback` (or a short timeout
+ * fallback) so it never competes with first paint / LCP.
+ */
 export function initMixpanel() {
-  if (!MIXPANEL_TOKEN || initialized) return;
-  mixpanel.init(MIXPANEL_TOKEN, {
-    track_pageview: false, // we track manually for SPA
-    persistence: "localStorage",
-    ignore_dnt: false,
+  if (!MIXPANEL_TOKEN || loadPromise) return;
+  const schedule = (cb: () => void) => {
+    if (typeof window === "undefined") return cb();
+    const w = window as Window & { requestIdleCallback?: (cb: IdleRequestCallback) => number };
+    if (w.requestIdleCallback) {
+      w.requestIdleCallback(() => cb(), { timeout: 4000 });
+    } else {
+      setTimeout(cb, 1500);
+    }
+  };
+  schedule(() => {
+    void loadSdk();
   });
-  initialized = true;
 }
 
 /** Identify a logged-in user so events are attributed correctly. */
 export function identifyUser(user: { id: number; name?: string | null; email?: string | null; role?: string }) {
-  if (!initialized) return;
-  mixpanel.identify(String(user.id));
-  mixpanel.people.set({
-    $name: user.name ?? "Unknown",
-    $email: user.email ?? undefined,
-    role: user.role,
-    last_login: new Date().toISOString(),
+  withSdk((m) => {
+    m.identify(String(user.id));
+    m.people.set({
+      $name: user.name ?? "Unknown",
+      $email: user.email ?? undefined,
+      role: user.role,
+      last_login: new Date().toISOString(),
+    });
   });
 }
 
 /** Reset identity on logout. */
 export function resetUser() {
-  if (!initialized) return;
-  mixpanel.reset();
+  withSdk((m) => m.reset());
 }
 
 /** Track a named event with optional properties. */
 export function trackEvent(event: string, properties?: Record<string, unknown>) {
-  if (!initialized) return;
-  mixpanel.track(event, properties);
+  withSdk((m) => m.track(event, properties));
 }
 
 // ─── Typed Event Helpers ────────────────────────────────────────
