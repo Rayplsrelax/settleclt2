@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 const SITE_NAME = "Settle CLT";
 const DEFAULT_OG_IMAGE =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663270161707/KbchydCPFi8EjNXDBYUsCi/charlotte-skyline-hero_b8e3deb7.jpg";
+  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/YJZXYMWOczYLllKW.jpg";
 const SITE_URL = "https://settleclt.com";
 
 interface SEOOptions {
