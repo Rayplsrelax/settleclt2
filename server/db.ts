@@ -368,6 +368,32 @@ export async function getAllBlogPosts() {
   return db.select().from(blogPosts).orderBy(desc(blogPosts.updatedAt));
 }
 
+/**
+ * Returns published blog posts that have not been updated in the last
+ * `staleAfterDays` days (default 90). Sorted oldest first so the most
+ * neglected posts appear at the top.
+ *
+ * Used by the monthly stale-content scheduled job and the admin dashboard
+ * to surface posts that may need a content refresh.
+ */
+export async function getStaleBlogPosts(staleAfterDays = 90) {
+  const db = await getDb();
+  if (!db) return [];
+  const cutoff = new Date(Date.now() - staleAfterDays * 24 * 60 * 60 * 1000);
+  return db
+    .select({
+      id: blogPosts.id,
+      title: blogPosts.title,
+      slug: blogPosts.slug,
+      category: blogPosts.category,
+      publishedAt: blogPosts.publishedAt,
+      updatedAt: blogPosts.updatedAt,
+    })
+    .from(blogPosts)
+    .where(and(eq(blogPosts.status, "published"), lte(blogPosts.updatedAt, cutoff)))
+    .orderBy(asc(blogPosts.updatedAt));
+}
+
 export async function getBlogPostBySlug(slug: string) {
   const db = await getDb();
   if (!db) return undefined;

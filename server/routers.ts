@@ -11,7 +11,7 @@ import {
   getActiveBingoCards, getBingoProgress, upsertBingoProgress,
   addWishlistEntry, removeWishlistEntry, getWishlistEntries, updateWishlistNotes,
   addComment, getComments, deleteComment, voteComment, getUserVotes,
-  createBlogPost, updateBlogPost, deleteBlogPost, getPublishedBlogPosts, getAllBlogPosts, getBlogPostBySlug,
+  createBlogPost, updateBlogPost, deleteBlogPost, getPublishedBlogPosts, getAllBlogPosts, getStaleBlogPosts, getBlogPostBySlug,
   getLeaderboardByStamps, getLeaderboardByBingo, getLeaderboardByNeighborhoods,
   createEvent, updateEvent, deleteEvent, getPublishedEvents, getAllEvents, getEventBySlug, getEventById,
   createTag, getAllTags, getTagBySlug, addContentTag, removeContentTag, getContentTags, getContentByTag, bulkAddContentTags,
@@ -304,6 +304,13 @@ export const appRouter = router({
     getAllBlogPosts: adminProcedure.query(async () => {
       return getAllBlogPosts();
     }),
+    // Surface stale published blog posts (not updated in N days, default 90).
+    // Used by the admin dashboard "needs refresh" panel and the monthly digest job.
+    getStaleBlogPosts: adminProcedure
+      .input(z.object({ staleAfterDays: z.number().min(7).max(365).optional() }).optional())
+      .query(async ({ input }) => {
+        return getStaleBlogPosts(input?.staleAfterDays ?? 90);
+      }),
 
     createBlogPost: adminProcedure
       .input(z.object({

@@ -167,6 +167,37 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    sourcemap: true,
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        // Code-split heavy dependencies into separate vendor chunks so the
+        // main bundle stays small and individual pages only load what they
+        // need. Order matters: more specific patterns must come first.
+        manualChunks(id: string) {
+          if (!id.includes("node_modules")) {
+            // Split the giant shared data files so multiple pages share one cache entry
+            if (id.includes("shared/services")) return "data-services";
+            if (id.includes("shared/neighborhoods")) return "data-neighborhoods";
+            return undefined;
+          }
+          // Heaviest leaf deps first
+          if (id.includes("recharts") || id.includes("d3-") || id.includes("victory-vendor") || id.includes("/lodash/") || id.includes("/lodash-es/") || id.includes("/internmap/")) return "vendor-charts";
+          if (id.includes("html-to-image")) return "vendor-share";
+          if (id.includes("mixpanel-browser")) return "vendor-analytics";
+          if (id.includes("@radix-ui")) return "vendor-radix";
+          if (id.includes("lucide-react")) return "vendor-icons";
+          if (id.includes("@tanstack/react-query") || id.includes("@trpc") || id.includes("superjson")) return "vendor-data";
+          if (id.includes("react-dom") || id.includes("scheduler") || id.includes("/react/") || id.includes("react-is")) return "vendor-react";
+          if (id.includes("date-fns")) return "vendor-date";
+          if (id.includes("sonner") || id.includes("vaul") || id.includes("cmdk") || id.includes("embla-carousel")) return "vendor-ui";
+          if (id.includes("react-hook-form") || id.includes("zod")) return "vendor-forms";
+          if (id.includes("framer-motion")) return "vendor-motion";
+          // Everything else from node_modules ends up in a small misc vendor chunk
+          return "vendor-misc";
+        },
+      },
+    },
   },
   server: {
     host: true,

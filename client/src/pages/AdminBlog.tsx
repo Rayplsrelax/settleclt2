@@ -4,7 +4,7 @@ import { getLoginUrl } from "@/const";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import {
-  Plus, Edit3, Trash2, Eye, Save, ArrowLeft, FileText, Globe, Clock, Search
+  Plus, Edit3, Trash2, Eye, Save, ArrowLeft, FileText, Globe, Clock, Search, AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -33,6 +33,12 @@ export default function AdminBlog() {
   const { data: posts = [], isLoading } = trpc.admin.getAllBlogPosts.useQuery(undefined, {
     enabled: user?.role === "admin",
   });
+
+  // Surface posts whose updatedAt is older than 90 days so they can be refreshed
+  const { data: stalePosts = [] } = trpc.admin.getStaleBlogPosts.useQuery(
+    { staleAfterDays: 90 },
+    { enabled: user?.role === "admin" }
+  );
 
   const createPost = trpc.admin.createBlogPost.useMutation({
     onSuccess: () => {
@@ -340,6 +346,45 @@ export default function AdminBlog() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-8">
+        {stalePosts.length > 0 && (
+          <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 p-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-foreground">
+                  {stalePosts.length} post{stalePosts.length === 1 ? "" : "s"} need a refresh
+                </p>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  These published posts haven't been updated in 90+ days. Refreshing them keeps your search rankings strong and gives readers up-to-date information.
+                </p>
+                <ul className="mt-3 space-y-1.5">
+                  {stalePosts.slice(0, 5).map((p) => {
+                    const daysOld = Math.floor((Date.now() - new Date(p.updatedAt).getTime()) / (24 * 60 * 60 * 1000));
+                    const fullPost = posts.find((post) => post.id === p.id);
+                    return (
+                      <li key={p.id} className="flex items-center justify-between gap-3 text-sm">
+                        <button
+                          type="button"
+                          onClick={() => fullPost && startEdit(fullPost)}
+                          disabled={!fullPost}
+                          className="text-left hover:text-primary truncate flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {p.title}
+                        </button>
+                        <span className="text-xs text-muted-foreground shrink-0">{daysOld} days old</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+                {stalePosts.length > 5 && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    +{stalePosts.length - 5} more — see full list below
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
         {/* Search */}
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
