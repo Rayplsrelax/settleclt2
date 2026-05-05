@@ -1,0 +1,53 @@
+name: Stale Blog Post Monthly Digest
+
+# Runs at 14:00 UTC on the 1st of every month (= 9 AM EST / 10 AM EDT).
+# Also runnable on demand via "Run workflow" in the GitHub Actions UI.
+on:
+  schedule:
+    - cron: "0 14 1 * *"
+  workflow_dispatch:
+    inputs:
+      stale_after_days:
+        description: "Flag posts not updated in the last N days (default 90)"
+        required: false
+        default: "90"
+      notify:
+        description: "Send the owner email digest? (true/false). Always logs to the run output regardless."
+        required: false
+        default: "true"
+
+permissions:
+  contents: read
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run stale-blog digest
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          STALE_DAYS: ${{ github.event.inputs.stale_after_days || '90' }}
+          STALE_NOTIFY: ${{ github.event.inputs.notify == 'false' && '0' || '1' }}
+          # notifyOwner needs the Manus Forge API to send the email digest
+          BUILT_IN_FORGE_API_URL: ${{ secrets.BUILT_IN_FORGE_API_URL }}
+          BUILT_IN_FORGE_API_KEY: ${{ secrets.BUILT_IN_FORGE_API_KEY }}
+          SITE_URL: https://settleclt.com
+        run: pnpm exec tsx scripts/notify-stale-blog-posts.mjs
