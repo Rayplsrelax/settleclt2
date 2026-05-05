@@ -2,9 +2,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle, Home } from "lucide-react";
 import { useLocation } from "wouter";
+import { useSEO } from "@/hooks/useSEO";
 
 export default function NotFound() {
   const [, setLocation] = useLocation();
+
+  useSEO({
+    title: "Page Not Found (404)",
+    description: "The page you're looking for doesn't exist on Settle CLT. Head back home to explore Charlotte neighborhoods, businesses, and events.",
+    path: "/404",
+  });
 
   const handleGoHome = () => {
     setLocation("/");

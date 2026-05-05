@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SERVICES, type Service } from "@shared/services";
 import { toast } from "sonner";
+import { useSEO } from "@/hooks/useSEO";
 
 function slugify(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -201,6 +202,12 @@ function WishlistContent() {
 }
 
 export default function Wishlist() {
+  useSEO({
+    title: "Your Wishlist",
+    description: "Save and revisit your favorite Charlotte neighborhoods, businesses, and events on Settle CLT.",
+    path: "/wishlist",
+  });
+
   return (
     <PageLayout>
       <AuthGate featureLabel="save your wishlist">

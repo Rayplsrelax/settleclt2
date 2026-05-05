@@ -30,6 +30,10 @@ export default function CookieConsent() {
     }
   };
 
+  // Neutral dismiss — does NOT record a choice; banner will reappear next session
+  // so users can revisit consent without being silently opted out of analytics.
+  const dismiss = () => setVisible(false);
+
   if (!visible) return null;
 
   return (
@@ -55,9 +59,10 @@ export default function CookieConsent() {
             </div>
           </div>
           <button
-            onClick={decline}
+            onClick={dismiss}
             className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
-            aria-label="Close cookie banner"
+            aria-label="Dismiss cookie banner (decide later)"
+            title="Dismiss — we'll ask again next visit"
           >
             <X className="w-4 h-4" />
           </button>

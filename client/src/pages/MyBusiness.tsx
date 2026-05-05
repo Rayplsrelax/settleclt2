@@ -17,6 +17,7 @@ import {
 import { Link } from "wouter";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
+import { useSEO } from "@/hooks/useSEO";
 
 const DAY_LABELS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -50,6 +51,12 @@ function HoursEditor({ value, onChange }: { value: string; onChange: (v: string)
 
 export default function MyBusiness() {
   const { user, isAuthenticated } = useAuth();
+
+  useSEO({
+    title: "My Business Dashboard",
+    description: "Manage your claimed Charlotte business listing on Settle CLT — update info, view analytics, and upgrade to premium.",
+    path: "/my-business",
+  });
   const authLoading = false;
   const { data: claims, isLoading: claimsLoading } = trpc.businessPortal.myClaims.useQuery(
     undefined,

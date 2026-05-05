@@ -39,7 +39,7 @@ function Hero() {
     <section className="relative overflow-hidden min-h-[520px] md:min-h-[600px] flex items-center">
       {/* Background image */}
       <div className="absolute inset-0">
-        <img
+        <img loading="eager" fetchPriority="high"
           src={HERO_IMAGE}
           alt="Charlotte NC skyline - Settle CLT relocation guide"
           className="w-full h-full object-cover"
@@ -179,7 +179,7 @@ function FeaturedNeighborhoods() {
             >
               <div className="relative rounded-xl overflow-hidden h-72 border border-border bg-card transition-all group-hover:shadow-xl group-hover:-translate-y-1">
                 {/* Real photo background */}
-                <img
+                <img loading="lazy"
                   src={n.photoUrls[0]}
                   alt={`${n.name} neighborhood in Charlotte NC`}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -406,7 +406,7 @@ function BlogPreview() {
               <div className="rounded-xl overflow-hidden border border-border bg-card transition-all group-hover:shadow-lg group-hover:-translate-y-1 flex flex-col">
                 <div className="h-40 relative overflow-hidden" style={{ background: a.gradient }}>
                   {a.image ? (
-                    <img
+                    <img loading="lazy"
                       src={a.image}
                       alt={`${a.title} - Settle CLT blog`}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"

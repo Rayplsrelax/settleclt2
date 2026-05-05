@@ -180,7 +180,7 @@ export default function NeighborhoodDetail() {
       {/* Hero with Photo Carousel */}
       <section className="relative overflow-hidden h-[50vh] md:h-[60vh]">
         {n.photoUrls.map((url, i) => (
-          <img
+          <img loading="eager" fetchPriority="high"
             key={i}
             src={url}
             alt={`${n.name} neighborhood in Charlotte NC - photo ${i + 1}`}

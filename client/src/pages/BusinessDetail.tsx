@@ -200,7 +200,7 @@ export default function BusinessDetail() {
         <ChevronRight className="w-6 h-6" />
       </button>
       <div className="max-w-4xl max-h-[85vh] px-16" onClick={(e) => e.stopPropagation()}>
-        <img
+        <img loading="lazy"
           src={photos[lightboxIndex]}
           alt={`${service.name} in Charlotte NC - photo ${lightboxIndex + 1}`}
           className="max-w-full max-h-[80vh] object-contain rounded-lg"
@@ -267,7 +267,7 @@ export default function BusinessDetail() {
                       onClick={() => setLightboxIndex(0)}
                       className="sm:col-span-2 relative overflow-hidden group cursor-pointer"
                     >
-                      <img
+                      <img loading="lazy"
                         src={photos[0]}
                         alt={`${service.name} - Charlotte NC local business`}
                         className="w-full h-[320px] object-cover transition-transform duration-300 group-hover:scale-105"
@@ -282,7 +282,7 @@ export default function BusinessDetail() {
                             onClick={() => setLightboxIndex(i + 1)}
                             className="relative overflow-hidden group cursor-pointer"
                           >
-                            <img
+                            <img loading="lazy"
                               src={photo}
                               alt={`${service.name} in Charlotte NC - photo ${i + 2}`}
                               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"

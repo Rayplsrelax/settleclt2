@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { useSEO } from "@/hooks/useSEO";
 
 function formatDate(date: string | Date | null | undefined): string {
   if (!date) return "—";
@@ -196,6 +197,12 @@ function DeleteAccountSection() {
 
 export default function Profile() {
   const { user, loading, logout } = useAuth();
+
+  useSEO({
+    title: "Your Profile",
+    description: "Manage your Settle CLT profile, account preferences, and saved Charlotte favorites.",
+    path: "/profile",
+  });
 
   if (loading) {
     return (
