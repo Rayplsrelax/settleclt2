@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import Navbar from "@/components/Navbar";
@@ -233,7 +234,7 @@ export default function AdminDigest() {
             <CardContent>
               <div className="border rounded-lg p-6 bg-white">
                 <div
-                  dangerouslySetInnerHTML={{ __html: generatedHtml }}
+                  dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(generatedHtml) }}
                   className="prose max-w-none"
                 />
               </div>

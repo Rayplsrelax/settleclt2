@@ -55,7 +55,7 @@ vi.mock("./db", () => {
     {
       id: 1, title: "South End Wine Walk", slug: "south-end-wine-walk-mar-2026",
       description: "Explore South End's best restaurants",
-      startDate: new Date("2026-03-26T18:00:00Z"), endDate: new Date("2026-03-26T21:00:00Z"),
+      startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000),
       venueName: "South End Rail Trail", venueAddress: "South End, Charlotte, NC",
       neighborhood: "South End", category: "food-drink", isFeatured: "yes",
       isRecurring: "no", status: "published", createdAt: new Date(), updatedAt: new Date(),
@@ -63,7 +63,7 @@ vi.mock("./db", () => {
     {
       id: 2, title: "Charlotte SHOUT!", slug: "charlotte-shout-2026",
       description: "Charlotte's signature spring arts festival",
-      startDate: new Date("2026-04-10T12:00:00Z"), endDate: new Date("2026-04-26T22:00:00Z"),
+      startDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       venueName: "Various Uptown Venues", venueAddress: "Uptown Charlotte, NC",
       neighborhood: "Uptown", category: "festivals", isFeatured: "yes",
       isRecurring: "no", status: "published", createdAt: new Date(), updatedAt: new Date(),
@@ -120,6 +120,20 @@ vi.mock("./db", () => {
     getContentTags: vi.fn().mockImplementation(() => Promise.resolve(contentTagItems)),
     getContentByTag: vi.fn().mockImplementation(() => Promise.resolve(contentTagItems)),
     bulkAddContentTags: vi.fn().mockResolvedValue({}),
+    getBusinessSubmissions: vi.fn().mockResolvedValue([]),
+    getBusinessSubmissionCount: vi.fn().mockResolvedValue(0),
+    updateBusinessSubmissionStatus: vi.fn().mockResolvedValue({}),
+    deleteBusinessSubmission: vi.fn().mockResolvedValue({}),
+    isNotificationEnabled: vi.fn().mockResolvedValue(true),
+    getUserById: vi.fn().mockResolvedValue(null),
+    getRecentActivity: vi.fn().mockResolvedValue([]),
+    getDirectoryListings: vi.fn().mockResolvedValue([]),
+    getAllDirectoryListings: vi.fn().mockResolvedValue([]),
+    addDirectoryListing: vi.fn().mockResolvedValue({ insertId: 1 }),
+    updateDirectoryListing: vi.fn().mockResolvedValue({}),
+    deleteDirectoryListing: vi.fn().mockResolvedValue({}),
+    updateUserNewsletter: vi.fn().mockResolvedValue({}),
+    trackTagEngagement: vi.fn().mockResolvedValue({}),
   };
 });
 

@@ -578,3 +578,13 @@
 - [x] Add filters (status, date range, category)
 - [x] Add submission management (approve, reject, delete, view details)
 - [x] Test and deploy admin page
+
+## Security Hardening (from audit)
+- [ ] Fix XSS: add DOMPurify to BlogArticle.tsx and AdminDigest.tsx
+- [ ] Fix cookie sameSite: "none" → "lax" in cookies.ts
+- [ ] Reduce session TTL from 1 year to 30 days (SESSION_TTL_MS in shared/const.ts)
+- [ ] Add JWT issuer/audience claims in sdk.ts and oauth.ts
+- [ ] Add helmet with Content-Security-Policy to server
+- [ ] Scope 50MB body limit to upload routes only
+- [ ] Validate OAuth state redirect URI against allow-list
+- [ ] Purge .manus/ from git history and add to .gitignore

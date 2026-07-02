@@ -1,4 +1,5 @@
 import PageLayout from "@/components/PageLayout";
+import DOMPurify from "dompurify";
 import { trpc } from "@/lib/trpc";
 import { useParams, Link } from "wouter";
 import { ArrowLeft, Calendar, Clock, User, BookOpen, Home, Compass, ArrowRight } from "lucide-react";
@@ -166,7 +167,10 @@ export default function BlogArticle() {
         <article
           className="prose prose-lg max-w-none text-foreground/90 leading-relaxed"
           dangerouslySetInnerHTML={{
-            __html: `<p class="text-foreground/90 leading-relaxed mb-4">${htmlContent}</p>`
+            __html: DOMPurify.sanitize(
+              `<p class="text-foreground/90 leading-relaxed mb-4">${htmlContent}</p>`,
+              { ADD_ATTR: ["target", "rel", "loading"] }
+            )
           }}
         />
 

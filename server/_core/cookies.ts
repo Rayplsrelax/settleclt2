@@ -42,7 +42,11 @@ export function getSessionCookieOptions(
   return {
     httpOnly: true,
     path: "/",
-    sameSite: "none",
+    // "lax" keeps the browser's built-in CSRF protection: the session cookie
+    // is NOT sent on cross-site subrequests (e.g. a POST triggered by another
+    // origin). Use "none" only if you genuinely need cross-site auth, and if so
+    // add an anti-CSRF token or Origin allow-listing on every mutation.
+    sameSite: "lax",
     secure: isSecureRequest(req),
   };
 }

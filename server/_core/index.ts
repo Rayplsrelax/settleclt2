@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { createServer } from "http";
 import net from "net";
@@ -169,6 +170,25 @@ async function startServer() {
     }
   });
 
+  // Security headers via helmet (sets X-Content-Type-Options, X-Frame-Options, HSTS, etc.)
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://maps.googleapis.com", "https://maps.gstatic.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "blob:", "https:"],
+        connectSrc: ["'self'", "https://api.manus.im", "https://*.manus.space", "https://*.manus.computer", "https://maps.googleapis.com"],
+        frameSrc: ["'none'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    },
+    // Allow the canonical Link header we set below
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }));
+
   // SEO: Tell search engines not to index the manus.space subdomain
   app.use((req, res, next) => {
     const host = req.hostname;
@@ -183,9 +203,12 @@ async function startServer() {
     next();
   });
 
-  // Configure body parser with larger size limit for file uploads
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  // Global body parsers — keep small to prevent DoS; large limit only on upload routes
+  app.use(express.json({ limit: "1mb" }));
+  app.use(express.urlencoded({ limit: "1mb", extended: true }));
+  // Upload-specific routes that need a larger body limit
+  app.use("/api/trpc/storage", express.json({ limit: "50mb" }));
+  app.use("/api/upload", express.json({ limit: "50mb" }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   // Rate limiting for API endpoints

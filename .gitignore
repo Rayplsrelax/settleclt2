@@ -108,3 +108,8 @@ temp/
 
 # Webdev artifacts (checkpoint zips, migrations, etc.)
 .webdev/
+.project-config.json
+
+# DB query dumps — contain prod DB host/name/username
+.manus/
+.manus-logs/

@@ -1,4 +1,4 @@
-import { AXIOS_TIMEOUT_MS, COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+import { AXIOS_TIMEOUT_MS, COOKIE_NAME, SESSION_TTL_MS } from "@shared/const";
 import { ForbiddenError } from "@shared/_core/errors";
 import axios, { type AxiosInstance } from "axios";
 import { parse as parseCookieHeader } from "cookie";
@@ -24,6 +24,10 @@ export type SessionPayload = {
   name: string;
 };
 
+// Identifies tokens minted by this app. Verified on every request so a token
+// signed for a different service (even one sharing the same secret) is rejected.
+const SESSION_ISSUER = "settleclt";
+
 const EXCHANGE_TOKEN_PATH = `/webdev.v1.WebDevAuthPublicService/ExchangeToken`;
 const GET_USER_INFO_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfo`;
 const GET_USER_INFO_WITH_JWT_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfoWithJwt`;
@@ -40,6 +44,28 @@ class OAuthService {
 
   private decodeState(state: string): string {
     const redirectUri = atob(state);
+    // Restrict decoded redirect URI to known app domains to prevent open-redirect / SSRF
+    const ALLOWED_ORIGINS = [
+      "https://settleclt.com",
+      "https://www.settleclt.com",
+      "https://settleclt.manus.space",
+      "http://localhost:3000",
+      "http://localhost:5173",
+    ];
+    try {
+      const url = new URL(redirectUri);
+      const origin = url.origin;
+      // Allow any *.manus.space or *.manus.computer preview URL
+      const isManusPreview = origin.endsWith(".manus.space") || origin.endsWith(".manus.computer");
+      const isAllowed = isManusPreview || ALLOWED_ORIGINS.some(a => origin === a || redirectUri.startsWith(a));
+      if (!isAllowed) {
+        console.warn("[OAuth] Blocked redirect to disallowed origin:", origin);
+        return "https://settleclt.com";
+      }
+    } catch {
+      // Not a valid URL — fall back to home
+      return "https://settleclt.com";
+    }
     return redirectUri;
   }
 
@@ -183,7 +209,7 @@ class SDKServer {
     options: { expiresInMs?: number } = {}
   ): Promise<string> {
     const issuedAt = Date.now();
-    const expiresInMs = options.expiresInMs ?? ONE_YEAR_MS;
+    const expiresInMs = options.expiresInMs ?? SESSION_TTL_MS;
     const expirationSeconds = Math.floor((issuedAt + expiresInMs) / 1000);
     const secretKey = this.getSessionSecret();
 
@@ -193,6 +219,9 @@ class SDKServer {
       name: payload.name,
     })
       .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+      .setIssuedAt()
+      .setIssuer(SESSION_ISSUER)
+      .setAudience(ENV.appId)
       .setExpirationTime(expirationSeconds)
       .sign(secretKey);
   }
@@ -209,6 +238,8 @@ class SDKServer {
       const secretKey = this.getSessionSecret();
       const { payload } = await jwtVerify(cookieValue, secretKey, {
         algorithms: ["HS256"],
+        issuer: SESSION_ISSUER,
+        audience: ENV.appId,
       });
       const { openId, appId, name } = payload as Record<string, unknown>;
 
