@@ -170,27 +170,71 @@ async function startServer() {
     }
   });
 
-  // Security headers via helmet (sets X-Content-Type-Options, X-Frame-Options, HSTS, etc.)
-  app.use(helmet({
+  // ── Security headers via helmet ──────────────────────────────────────────
+  // Two modes, selected per request by hostname:
+  //  • PREVIEW (manus.space / manus.computer / localhost): CSP disabled.
+  //    The Manus dashboard embeds these hosts in an iframe from its own origin
+  //    (manus.im), which we can't reliably enumerate — any frame-ancestors list
+  //    here blanks the preview. Other helmet headers still apply.
+  //  • PRODUCTION (settleclt.com): full CSP, including frame-ancestors 'self'
+  //    (nobody should frame the real site).
+  const isPreviewHost = (hostname: string) =>
+    hostname.includes("manus.space") ||
+    hostname.includes("manus.computer") ||
+    hostname === "localhost" ||
+    hostname === "127.0.0.1";
+
+  // Derive third-party origins the client actually uses from env, so CSP and
+  // reality can't drift apart. Falls back to the known Forge default.
+  const toOrigin = (u?: string): string | null => {
+    try { return u ? new URL(u).origin : null; } catch { return null; }
+  };
+  const forgeOrigin =
+    toOrigin(process.env.VITE_FRONTEND_FORGE_API_URL) ??
+    "https://forge.butterfly-effect.dev";
+  const analyticsOrigin = toOrigin(process.env.VITE_ANALYTICS_ENDPOINT);
+
+  const strictHelmet = helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://maps.googleapis.com", "https://maps.gstatic.com"],
+        scriptSrc: [
+          "'self'", "'unsafe-inline'", "'unsafe-eval'",
+          "https://maps.googleapis.com", "https://maps.gstatic.com",
+          forgeOrigin,
+          ...(analyticsOrigin ? [analyticsOrigin] : []),
+        ],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "blob:", "https:"],
-        connectSrc: ["'self'", "https://api.manus.im", "https://*.manus.space", "https://*.manus.computer", "https://maps.googleapis.com"],
+        connectSrc: [
+          "'self'",
+          "https://api.manus.im", "https://*.manus.space", "https://*.manus.computer",
+          "https://maps.googleapis.com",
+          forgeOrigin,
+          "https://api-js.mixpanel.com", "https://api.mixpanel.com",
+          ...(analyticsOrigin ? [analyticsOrigin] : []),
+        ],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
-        frameAncestors: ["'self'", "https://*.manus.space", "https://*.manus.computer"],
+        frameAncestors: ["'self'"],
         upgradeInsecureRequests: [],
       },
     },
-    // Allow the canonical Link header we set below
     crossOriginResourcePolicy: { policy: "cross-origin" },
-    // Allow embedding in Manus dashboard preview iframes; block all other unknown origins
+    frameguard: false, // frame-ancestors above supersedes X-Frame-Options
+  });
+
+  const previewHelmet = helmet({
+    contentSecurityPolicy: false, // preview must be embeddable by the dashboard
+    crossOriginResourcePolicy: { policy: "cross-origin" },
     frameguard: false,
-  }));
+    hsts: false, // don't pin HSTS on shared preview domains
+  });
+
+  app.use((req, res, next) =>
+    (isPreviewHost(req.hostname) ? previewHelmet : strictHelmet)(req, res, next)
+  );
 
   // SEO: Tell search engines not to index the manus.space subdomain
   app.use((req, res, next) => {
