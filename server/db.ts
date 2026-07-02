@@ -1075,14 +1075,14 @@ export async function getUpcomingEvents(days: number = 30) {
     .orderBy(events.startDate);
 }
 
-/** Get recently published blog posts */
-export async function getRecentBlogPosts(days: number = 30) {
+/** Get recently published blog posts — used by homepage and monthly digest */
+export async function getRecentBlogPosts(limit: number = 3) {
   const db = await getDb();
   if (!db) return [];
-  const cutoff = new Date(Date.now() - days * 86400000);
   return db.select().from(blogPosts)
-    .where(and(eq(blogPosts.status, "published"), gte(blogPosts.createdAt, cutoff)))
-    .orderBy(desc(blogPosts.createdAt));
+    .where(eq(blogPosts.status, "published"))
+    .orderBy(desc(blogPosts.publishedAt))
+    .limit(limit);
 }
 
 /** Get newsletter subscribers (users who opted in + standalone subscribers) */

@@ -588,3 +588,10 @@
 - [x] Scope 50MB body limit to upload routes only
 - [x] Validate OAuth state redirect URI against allow-list
 - [x] Purge .manus/ from git history and add to .gitignore
+
+## Homepage Dynamic Blog Section
+- [x] Add tRPC procedure `blog.getRecent` to fetch 3 latest published posts
+- [x] Build HomeBlogSection component with card grid (image, category tag, title, excerpt, date, read more)
+- [x] Integrate HomeBlogSection into Home.tsx
+- [x] Add "View All Posts" link to blog page
+- [x] Write vitest tests for blog.getRecent procedure

@@ -650,6 +650,11 @@ export const appRouter = router({
     getPublished: publicProcedure.query(async () => {
       return getPublishedBlogPosts();
     }),
+    getRecent: publicProcedure
+      .input(z.object({ limit: z.number().min(1).max(10).optional() }))
+      .query(async ({ input }) => {
+        return getRecentBlogPosts(input?.limit ?? 3);
+      }),
     getBySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
       .query(async ({ input }) => {

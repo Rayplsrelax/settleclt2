@@ -358,88 +358,152 @@ function NewsletterSignup() {
 }
 
 function BlogPreview() {
-  const { data: dbPosts } = trpc.blog.getPublished.useQuery();
-  // Show DB posts first (with proper detail links), then static articles as fallback
+  const { data: dbPosts, isLoading } = trpc.blog.getRecent.useQuery({ limit: 3 });
+
+  // Merge DB posts with static articles as fallback
   const recent = useMemo(() => {
     const dbItems = (dbPosts || []).map(p => ({
       id: p.slug || String(p.id),
       title: p.title,
-      excerpt: p.excerpt || '',
-      category: p.category || 'Guide',
-      date: p.publishedAt ? new Date(p.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '',
-      readTime: `${Math.ceil((p.content?.length || 0) / 1500)} min read`,
-      gradient: 'linear-gradient(135deg, #2A9D8F 0%, #264653 100%)',
+      excerpt: p.excerpt || 'Read the full article on Settle CLT.',
+      category: p.category || 'Charlotte Guide',
+      date: p.publishedAt
+        ? new Date(p.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        : '',
+      readTime: p.readTime || `${Math.ceil((p.content?.length || 800) / 1500)} min read`,
       image: p.coverImage || undefined,
       slug: p.slug,
-      featured: false,
       source: 'db' as const,
     }));
-    const staticItems = articles.slice(0, 3).map(a => ({ ...a, slug: undefined as string | undefined, source: 'static' as const }));
-    return [...dbItems, ...staticItems].slice(0, 3);
+    if (dbItems.length >= 3) return dbItems.slice(0, 3);
+    const staticItems = articles.slice(0, 3 - dbItems.length).map(a => ({
+      id: String(a.id),
+      title: a.title,
+      excerpt: a.excerpt,
+      category: a.category,
+      date: a.date || '',
+      readTime: a.readTime,
+      image: a.image || undefined,
+      slug: undefined as string | undefined,
+      source: 'static' as const,
+    }));
+    return [...dbItems, ...staticItems];
   }, [dbPosts]);
+
   return (
     <section className="py-16 md:py-20">
       <div className="container">
-        <div className="flex items-end justify-between mb-8">
+        {/* Header */}
+        <div className="flex items-end justify-between mb-10">
           <div>
+            <div className="flex items-center gap-2 mb-2">
+              <BookOpen className="w-5 h-5 text-primary" />
+              <span className="text-sm font-semibold text-primary uppercase tracking-wide">Charlotte Blog</span>
+            </div>
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">
-              Moving Guides
+              Latest from Settle CLT
             </h2>
-            <p className="mt-2 text-muted-foreground">
-              Practical advice for your Charlotte move
+            <p className="mt-2 text-muted-foreground max-w-md">
+              Weekly guides, neighborhood deep-dives, and local intel for Charlotte newcomers
             </p>
           </div>
           <Link
             href="/blog"
-            className="hidden sm:flex items-center gap-1 text-sm font-medium text-primary hover:underline no-underline"
+            className="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline no-underline shrink-0"
           >
-            All articles <ChevronRight className="w-4 h-4" />
+            View all posts <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {recent.map((a) => (
-            <Link
-              key={a.id}
-              href={a.source === 'db' && a.slug ? `/blog/${a.slug}` : `/blog#${a.id}`}
-              className="no-underline group"
-            >
-              <div className="rounded-xl overflow-hidden border border-border bg-card transition-all group-hover:shadow-lg group-hover:-translate-y-1 flex flex-col">
-                <div className="h-40 relative overflow-hidden" style={{ background: a.gradient }}>
-                  {a.image ? (
-                    <img loading="lazy"
-                      src={a.image}
-                      alt={`${a.title} - Settle CLT blog`}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <BookOpen className="w-10 h-10 text-white/30" />
-                    </div>
-                  )}
-                  {a.featured && (
-                    <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-clt-gold text-clt-navy text-xs font-bold">
-                      Featured
-                    </span>
-                  )}
-                </div>
-                <div className="p-5 flex-1 flex flex-col">
-                  <span className="text-xs font-medium text-primary">
-                    {a.category}
-                  </span>
-                  <h3 className="font-display font-semibold text-foreground mt-1 group-hover:text-primary transition-colors">
-                    {a.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-2 flex-1">
-                    {a.excerpt}
-                  </p>
-                  <div className="flex items-center gap-3 mt-4 text-xs text-muted-foreground">
-                    <span>{a.date}</span>
-                    <span>{a.readTime}</span>
-                  </div>
+
+        {/* Cards grid */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {[0, 1, 2].map(i => (
+              <div key={i} className="rounded-xl border border-border bg-card overflow-hidden animate-pulse">
+                <div className="h-44 bg-muted" />
+                <div className="p-5 space-y-3">
+                  <div className="h-3 bg-muted rounded w-1/3" />
+                  <div className="h-5 bg-muted rounded w-4/5" />
+                  <div className="h-3 bg-muted rounded w-full" />
+                  <div className="h-3 bg-muted rounded w-2/3" />
                 </div>
               </div>
-            </Link>
-          ))}
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {recent.map((a, idx) => (
+              <Link
+                key={a.id}
+                href={a.source === 'db' && a.slug ? `/blog/${a.slug}` : `/blog#${a.id}`}
+                className="no-underline group"
+              >
+                <article className="rounded-xl overflow-hidden border border-border bg-card transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1.5 flex flex-col h-full">
+                  {/* Cover image */}
+                  <div className="h-44 relative overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
+                    {a.image ? (
+                      <img
+                        loading="lazy"
+                        src={a.image}
+                        alt={`${a.title} - Settle CLT blog`}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <BookOpen className="w-12 h-12 text-primary/20" />
+                      </div>
+                    )}
+                    {/* Category badge overlay */}
+                    <div className="absolute bottom-3 left-3">
+                      <span className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white text-xs font-semibold">
+                        {a.category}
+                      </span>
+                    </div>
+                    {idx === 0 && (
+                      <div className="absolute top-3 right-3">
+                        <span className="px-2.5 py-1 rounded-full bg-clt-gold text-clt-navy text-xs font-bold">
+                          Latest
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-5 flex-1 flex flex-col">
+                    <h3 className="font-display font-semibold text-base text-foreground group-hover:text-primary transition-colors leading-snug line-clamp-2">
+                      {a.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-2 flex-1 line-clamp-3">
+                      {a.excerpt}
+                    </p>
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        {a.date && <span>{a.date}</span>}
+                        {a.readTime && (
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {a.readTime}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs font-semibold text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
+                        Read <ArrowRight className="w-3 h-3" />
+                      </span>
+                    </div>
+                  </div>
+                </article>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* Mobile view all link */}
+        <div className="mt-6 text-center sm:hidden">
+          <Link href="/blog" className="no-underline">
+            <Button variant="outline" className="gap-2">
+              View all blog posts <ArrowRight className="w-4 h-4" />
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
