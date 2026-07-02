@@ -580,11 +580,11 @@
 - [x] Test and deploy admin page
 
 ## Security Hardening (from audit)
-- [ ] Fix XSS: add DOMPurify to BlogArticle.tsx and AdminDigest.tsx
-- [ ] Fix cookie sameSite: "none" → "lax" in cookies.ts
-- [ ] Reduce session TTL from 1 year to 30 days (SESSION_TTL_MS in shared/const.ts)
-- [ ] Add JWT issuer/audience claims in sdk.ts and oauth.ts
-- [ ] Add helmet with Content-Security-Policy to server
-- [ ] Scope 50MB body limit to upload routes only
-- [ ] Validate OAuth state redirect URI against allow-list
-- [ ] Purge .manus/ from git history and add to .gitignore
+- [x] Fix XSS: add DOMPurify to BlogArticle.tsx and AdminDigest.tsx
+- [x] Fix cookie sameSite: "none" → "lax" in cookies.ts
+- [x] Reduce session TTL from 1 year to 30 days (SESSION_TTL_MS in shared/const.ts)
+- [x] Add JWT issuer/audience claims in sdk.ts and oauth.ts
+- [x] Add helmet with Content-Security-Policy to server
+- [x] Scope 50MB body limit to upload routes only
+- [x] Validate OAuth state redirect URI against allow-list
+- [x] Purge .manus/ from git history and add to .gitignore

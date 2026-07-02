@@ -182,11 +182,14 @@ async function startServer() {
         connectSrc: ["'self'", "https://api.manus.im", "https://*.manus.space", "https://*.manus.computer", "https://maps.googleapis.com"],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
+        frameAncestors: ["'self'", "https://*.manus.space", "https://*.manus.computer"],
         upgradeInsecureRequests: [],
       },
     },
     // Allow the canonical Link header we set below
     crossOriginResourcePolicy: { policy: "cross-origin" },
+    // Allow embedding in Manus dashboard preview iframes; block all other unknown origins
+    frameguard: false,
   }));
 
   // SEO: Tell search engines not to index the manus.space subdomain
