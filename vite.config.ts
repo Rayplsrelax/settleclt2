@@ -182,7 +182,7 @@ export default defineConfig({
             return undefined;
           }
           // Heaviest leaf deps first
-          if (id.includes("recharts") || id.includes("d3-") || id.includes("victory-vendor") || id.includes("/lodash/") || id.includes("/lodash-es/") || id.includes("/internmap/")) return "vendor-charts";
+          if (id.includes("recharts") || id.includes("d3-") || id.includes("victory-vendor") || id.includes("/internmap/")) return "vendor-charts";
           if (id.includes("html-to-image")) return "vendor-share";
           if (id.includes("mixpanel-browser")) return "vendor-analytics";
           if (id.includes("@radix-ui")) return "vendor-radix";

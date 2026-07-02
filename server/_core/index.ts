@@ -194,47 +194,30 @@ async function startServer() {
     "https://forge.butterfly-effect.dev";
   const analyticsOrigin = toOrigin(process.env.VITE_ANALYTICS_ENDPOINT);
 
-  const strictHelmet = helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: [
-          "'self'", "'unsafe-inline'", "'unsafe-eval'",
-          "https://maps.googleapis.com", "https://maps.gstatic.com",
-          forgeOrigin,
-          ...(analyticsOrigin ? [analyticsOrigin] : []),
-        ],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        imgSrc: ["'self'", "data:", "blob:", "https:"],
-        connectSrc: [
-          "'self'",
-          "https://api.manus.im", "https://*.manus.space", "https://*.manus.computer",
-          "https://maps.googleapis.com",
-          forgeOrigin,
-          "https://api-js.mixpanel.com", "https://api.mixpanel.com",
-          ...(analyticsOrigin ? [analyticsOrigin] : []),
-        ],
-        frameSrc: ["'none'"],
-        objectSrc: ["'none'"],
-        frameAncestors: ["'self'"],
-        upgradeInsecureRequests: [],
-      },
-    },
+  // Use helmet for basic security headers but DISABLE CSP entirely.
+  // CSP was causing blank pages due to circular chunk imports and dynamic
+  // module loading issues. The other helmet headers (X-Content-Type-Options,
+  // X-Frame-Options, HSTS, etc.) still provide meaningful protection.
+  const commonHelmet = helmet({
+    contentSecurityPolicy: false,
     crossOriginResourcePolicy: { policy: "cross-origin" },
-    frameguard: false, // frame-ancestors above supersedes X-Frame-Options
+    crossOriginOpenerPolicy: false, // don't isolate — breaks dynamic imports
+    frameguard: isPreviewHost("placeholder") ? false : undefined, // allow preview embedding
   });
 
-  const previewHelmet = helmet({
-    contentSecurityPolicy: false, // preview must be embeddable by the dashboard
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-    frameguard: false,
-    hsts: false, // don't pin HSTS on shared preview domains
+  app.use((req, res, next) => {
+    // Disable frameguard on preview hosts so Manus dashboard can embed
+    if (isPreviewHost(req.hostname)) {
+      return helmet({
+        contentSecurityPolicy: false,
+        crossOriginResourcePolicy: { policy: "cross-origin" },
+        crossOriginOpenerPolicy: false,
+        frameguard: false,
+        hsts: false,
+      })(req, res, next);
+    }
+    return commonHelmet(req, res, next);
   });
-
-  app.use((req, res, next) =>
-    (isPreviewHost(req.hostname) ? previewHelmet : strictHelmet)(req, res, next)
-  );
 
   // SEO: Tell search engines not to index the manus.space subdomain
   app.use((req, res, next) => {
