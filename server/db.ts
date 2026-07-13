@@ -1635,3 +1635,60 @@ export async function removePushSubscription(endpoint: string): Promise<boolean>
   await db.delete(pushSubscriptions).where(eq(pushSubscriptions.endpoint, endpoint));
   return true;
 }
+
+// ─── Obsidian Webhook Blog Upsert ─────────────────────────────────────────────
+
+/** Create or update a blog post from the Obsidian → GitHub → Settle CLT pipeline.
+ *  Matches on slug — if a post with that slug exists it is updated, otherwise created.
+ *  Returns { action: "created" | "updated", id: number }
+ */
+export async function upsertBlogPostFromWebhook(data: {
+  slug: string;
+  title: string;
+  content: string;
+  excerpt: string | null;
+  category: string;
+  coverImage: string | null;
+  status: "published" | "draft";
+  readTime: string | null;
+  publishedAt: Date;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const existing = await db.select({ id: blogPosts.id })
+    .from(blogPosts)
+    .where(eq(blogPosts.slug, data.slug))
+    .limit(1);
+
+  if (existing.length > 0) {
+    await db.update(blogPosts)
+      .set({
+        title: data.title,
+        content: data.content,
+        excerpt: data.excerpt,
+        category: data.category,
+        coverImage: data.coverImage,
+        status: data.status,
+        readTime: data.readTime,
+        publishedAt: data.publishedAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(blogPosts.slug, data.slug));
+    return { action: "updated" as const, id: existing[0].id };
+  } else {
+    const result = await db.insert(blogPosts).values({
+      slug: data.slug,
+      title: data.title,
+      content: data.content,
+      excerpt: data.excerpt,
+      category: data.category,
+      coverImage: data.coverImage,
+      status: data.status,
+      readTime: data.readTime,
+      publishedAt: data.publishedAt,
+      authorId: 0, // 0 = system/webhook author (no user account)
+    });
+    return { action: "created" as const, id: result[0].insertId };
+  }
+}

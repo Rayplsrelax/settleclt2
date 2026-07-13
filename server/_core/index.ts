@@ -170,6 +170,56 @@ async function startServer() {
     }
   });
 
+  // ── Obsidian → Settle CLT publish webhook ─────────────────────────────────
+  // Accepts POST /api/obsidian/publish with a shared secret in the Authorization
+  // header. Called by GitHub Actions when a note tagged `publish: true` is
+  // pushed to the vault repo. Creates or updates a blog post by slug.
+  app.post("/api/obsidian/publish", express.json({ limit: "2mb" }), async (req, res) => {
+    try {
+      const secret = process.env.OBSIDIAN_PUBLISH_SECRET;
+      if (!secret) {
+        console.error("[Obsidian Webhook] OBSIDIAN_PUBLISH_SECRET not set");
+        return res.status(500).json({ error: "Server misconfiguration" });
+      }
+      const authHeader = req.headers["authorization"] || "";
+      const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+      if (token !== secret) {
+        console.warn("[Obsidian Webhook] Unauthorized attempt");
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { slug, title, content, excerpt, category, coverImage, status, readTime, publishedAt } = req.body;
+      if (!slug || !title || !content) {
+        return res.status(400).json({ error: "Missing required fields: slug, title, content" });
+      }
+
+      const { upsertBlogPostFromWebhook } = await import("../db");
+      const post = await upsertBlogPostFromWebhook({
+        slug,
+        title,
+        content,
+        excerpt: excerpt || null,
+        category: category || "Charlotte Guide",
+        coverImage: coverImage || null,
+        status: status === "draft" ? "draft" : "published",
+        readTime: readTime || null,
+        publishedAt: publishedAt ? new Date(publishedAt) : new Date(),
+      });
+
+      console.log(`[Obsidian Webhook] Upserted post: ${slug} (${post.action})`); 
+      const { notifyOwner } = await import("./notification");
+      await notifyOwner({
+        title: `📝 Blog post ${post.action}: "${title}"`,
+        content: `Obsidian pipeline published "${title}" (/${slug}) — status: ${status || 'published'}.`,
+      });
+
+      res.json({ ok: true, action: post.action, slug });
+    } catch (err: any) {
+      console.error("[Obsidian Webhook] Error:", err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // ── Security headers via helmet ──────────────────────────────────────────
   // Two modes, selected per request by hostname:
   //  • PREVIEW (manus.space / manus.computer / localhost): CSP disabled.

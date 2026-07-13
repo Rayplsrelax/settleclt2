@@ -595,3 +595,11 @@
 - [x] Integrate HomeBlogSection into Home.tsx
 - [x] Add "View All Posts" link to blog page
 - [x] Write vitest tests for blog.getRecent procedure
+
+## Obsidian → GitHub → Settle CLT Pipeline
+- [x] Add POST /api/obsidian/publish webhook endpoint with OBSIDIAN_PUBLISH_SECRET auth
+- [x] Add upsertBlogPostFromWebhook db helper (create or update by slug)
+- [x] Create .github/workflows/obsidian-publish.yml GitHub Action
+- [x] Write Obsidian vault setup guide (folder structure, frontmatter conventions, Git plugin setup)
+- [x] Write vitest tests for the webhook endpoint (10 tests)
+- [x] Save checkpoint and deliver full setup guide
