@@ -658,7 +658,8 @@ export const appRouter = router({
     getBySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
       .query(async ({ input }) => {
-        return getBlogPostBySlug(input.slug) ?? null;
+        const post = await getBlogPostBySlug(input.slug);
+        return post?.status === "published" ? post : null;
       }),
   }),
 
