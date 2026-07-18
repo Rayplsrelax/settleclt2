@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
+import { getBlogPostBySlug } from "./db";
 
 const mockEvents = [
   {
@@ -193,6 +194,52 @@ describe("Events API", () => {
       expect(event).toHaveProperty("category");
       expect(event).toHaveProperty("startDate");
     }
+  });
+});
+
+describe("Blog API", () => {
+  it("should not return draft posts by slug publicly", async () => {
+    vi.mocked(getBlogPostBySlug).mockResolvedValue({
+      id: 99,
+      title: "Draft Test Post",
+      slug: "draft-test-post",
+      excerpt: "Hidden draft",
+      content: "Draft content",
+      category: "Charlotte Guide",
+      coverImage: null,
+      status: "draft",
+      readTime: "1 min read",
+      publishedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      authorId: 1,
+    } as any);
+
+    const result = await publicCaller.blog.getBySlug({ slug: "draft-test-post" });
+
+    expect(result).toBeNull();
+  });
+
+  it("should return published posts by slug publicly", async () => {
+    vi.mocked(getBlogPostBySlug).mockResolvedValue({
+      id: 100,
+      title: "Published Test Post",
+      slug: "published-test-post",
+      excerpt: "Visible post",
+      content: "Published content",
+      category: "Charlotte Guide",
+      coverImage: null,
+      status: "published",
+      readTime: "2 min read",
+      publishedAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      authorId: 1,
+    } as any);
+
+    const result = await publicCaller.blog.getBySlug({ slug: "published-test-post" });
+
+    expect(result?.title).toBe("Published Test Post");
   });
 });
 
