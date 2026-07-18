@@ -9,6 +9,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
+import { registerObsidianPublishRoute } from "../obsidian-publish";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -241,6 +242,8 @@ async function startServer() {
   app.use("/api/upload", express.json({ limit: "50mb" }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  // Shared-secret endpoint for Obsidian/GitHub Actions blog publishing
+  registerObsidianPublishRoute(app);
   // Rate limiting for API endpoints
   const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
