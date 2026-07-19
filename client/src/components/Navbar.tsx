@@ -20,6 +20,7 @@ const navLinks = [
   { href: "/directory", label: "Directory" },
   { href: "/events", label: "Events" },
   { href: "/blog", label: "Blog" },
+  { href: "/relocation-checklist", label: "Relocation" },
   { href: "/passport", label: "CLT Passport" },
   { href: "/find-your-home", label: "Find Your Home" },
 ];

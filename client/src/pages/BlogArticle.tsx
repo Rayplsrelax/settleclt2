@@ -190,17 +190,17 @@ export default function BlogArticle() {
               </span>
             </div>
           </Link>
-          <Link href="/find-your-home?source=blog" className="no-underline">
+          <Link href="/relocation-checklist?source=blog" className="no-underline">
             <div className="group rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-5 hover:border-emerald-300 transition-all cursor-pointer h-full">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
                   <Home className="w-5 h-5 text-emerald-600" />
                 </div>
-                <h3 className="font-semibold text-foreground group-hover:text-emerald-700 transition-colors">Find Your Home</h3>
+                <h3 className="font-semibold text-foreground group-hover:text-emerald-700 transition-colors">Moving to Charlotte?</h3>
               </div>
-              <p className="text-sm text-muted-foreground mb-3">Get matched with a local real estate expert — free, no obligation.</p>
+              <p className="text-sm text-muted-foreground mb-3">Use the 30/60/90 checklist to plan neighborhoods, timing, and next steps.</p>
               <span className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600">
-                Get Started <ArrowRight className="w-3.5 h-3.5" />
+                Open Checklist <ArrowRight className="w-3.5 h-3.5" />
               </span>
             </div>
           </Link>
