@@ -19,6 +19,10 @@ describe("Phase 1: Launch Blockers", () => {
     it("should include /contact in sitemap", () => {
       expect(serverIndex).toContain('loc: "/contact"');
     });
+
+    it("should include /relocation-checklist in sitemap", () => {
+      expect(serverIndex).toContain('loc: "/relocation-checklist"');
+    });
   });
 
   describe("Meta tags and OG image", () => {
@@ -181,6 +185,10 @@ describe("Phase 2: Compliance & Trust", () => {
       expect(footer).toContain('href="/find-your-home"');
     });
 
+    it("should have Relocation Checklist link", () => {
+      expect(footer).toContain('href="/relocation-checklist"');
+    });
+
     it("should have Contact Us link", () => {
       expect(footer).toContain('href="/contact"');
     });
@@ -191,6 +199,34 @@ describe("Phase 2: Compliance & Trust", () => {
 
     it("should have Terms of Service link", () => {
       expect(footer).toContain('href="/terms"');
+    });
+  });
+
+  describe("Relocation checklist funnel", () => {
+    const appTsx = readFileSync(resolve(__dirname, "../client/src/App.tsx"), "utf-8");
+    const navbar = readFileSync(resolve(__dirname, "../client/src/components/Navbar.tsx"), "utf-8");
+    const checklist = readFileSync(resolve(__dirname, "../client/src/pages/RelocationChecklist.tsx"), "utf-8");
+    const findRealtor = readFileSync(resolve(__dirname, "../client/src/pages/FindRealtor.tsx"), "utf-8");
+
+    it("should register the relocation checklist route", () => {
+      expect(appTsx).toContain("RelocationChecklist");
+      expect(appTsx).toContain('path="/relocation-checklist"');
+    });
+
+    it("should expose relocation checklist in navigation", () => {
+      expect(navbar).toContain('href: "/relocation-checklist"');
+      expect(navbar).toContain('label: "Relocation"');
+    });
+
+    it("should include compliant checklist CTAs", () => {
+      expect(checklist).toContain("Charlotte 30/60/90 Day Relocation Checklist");
+      expect(checklist).toContain("licensed real estate professional");
+      expect(checklist).toContain("type=relocating&source=relocation_checklist");
+    });
+
+    it("should prefill relocation leads from checklist CTAs", () => {
+      expect(findRealtor).toContain('type === "relocating"');
+      expect(findRealtor).toContain('referralSource: form.referralSource');
     });
   });
 });

@@ -127,6 +127,7 @@ export default function FindRealtor() {
     let referralType = "" as "buying" | "selling" | "renting" | "relocating" | "investing" | "";
     if (type === "renting") referralType = "renting";
     else if (type === "buying") referralType = "buying";
+    else if (type === "relocating") referralType = "relocating";
     const notes = source === "quiz" ? "Came from the neighborhood quiz" : "";
     const referralSource = source || params.get("ref") || "direct";
     return {
