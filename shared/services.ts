@@ -16,6 +16,23 @@ export interface ServiceCategory {
   group: string;
 }
 
+export type TrustTier =
+  | "listed"
+  | "verified"
+  | "owner_claimed"
+  | "newcomer_friendly"
+  | "certified"
+  | "featured_partner";
+
+export const TRUST_TIERS: TrustTier[] = [
+  "listed",
+  "verified",
+  "owner_claimed",
+  "newcomer_friendly",
+  "certified",
+  "featured_partner",
+];
+
 export interface Service {
   name: string;
   category: string;
@@ -25,6 +42,7 @@ export interface Service {
   website: string;
   featured?: boolean;
   affiliate?: boolean;
+  trustTier?: TrustTier;
 }
 
 export const SERVICE_SUPER_GROUPS: SuperGroup[] = [
