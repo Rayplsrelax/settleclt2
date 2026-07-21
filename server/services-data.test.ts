@@ -17,11 +17,16 @@ const VALID_AREAS = [
   "Pineville", "South Charlotte", "SouthPark",
   "University Area", "West Charlotte",
   "Cornelius", "Davidson", "University City",
+  "North End", "FreeMoreWest", "Central Charlotte",
+  "Wesley Heights", "Belmont", "Sedgefield",
+  "Ayrsley", "Central Avenue", "Cotswold", "Independence", "Mint Hill",
+  "Monroe Road", "Morehead", "North Charlotte", "Northlake",
+  "Piper Glen", "Sardis Road", "South Boulevard", "South Tryon", "Steele Creek",
 ];
 
 describe("Services data integrity", () => {
-  it("has 713 verified businesses", () => {
-    expect(SERVICES.length).toBe(713);
+  it("has 1000 verified businesses", () => {
+    expect(SERVICES.length).toBe(1000);
   });
 
   it("has 54 categories", () => {
