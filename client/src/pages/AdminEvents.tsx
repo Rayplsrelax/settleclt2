@@ -231,7 +231,7 @@ export default function AdminEvents() {
                       </div>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Calendar className="w-3 h-3" />
-                        {new Date(event.startDate).toLocaleDateString()}
+                        {event.startDate ? new Date(event.startDate).toLocaleDateString() : "TBD"}
                         <span>·</span>
                         <Badge
                           variant="outline"

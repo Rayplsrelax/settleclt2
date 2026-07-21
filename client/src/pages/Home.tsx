@@ -569,7 +569,7 @@ function ThisWeekInCLT() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {events.slice(0, 6).map((event) => {
-            const d = new Date(event.startDate);
+            const d = event.startDate ? new Date(event.startDate) : new Date(0);
             const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
             const monthDay = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
             const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
