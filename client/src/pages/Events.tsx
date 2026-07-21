@@ -230,7 +230,7 @@ export default function Events() {
     if (!allEvents) return null;
     const now = new Date();
     const upcoming = allEvents
-      .filter((e) => new Date(e.startDate) >= now)
+      .filter((e) => e.startDate ? new Date(e.startDate) >= now : false)
       .slice(0, 10);
     if (upcoming.length === 0) return null;
     return [
@@ -241,9 +241,9 @@ export default function Events() {
       ...upcoming.map((e) => ({
         "@context": "https://schema.org",
         ...buildEventSchema({
-          title: e.title,
+          title: e.title || e.name || "Untitled Event",
           description: e.description ?? undefined,
-          startDate: e.startDate,
+          startDate: e.startDate || e.startDateStr || "",
           endDate: e.endDate,
           venueName: e.venueName,
           venueAddress: e.venueAddress,
@@ -271,7 +271,7 @@ export default function Events() {
       const q = searchQuery.toLowerCase();
       result = result.filter(
         (e) =>
-          e.title.toLowerCase().includes(q) ||
+          (e.title || e.name || "").toLowerCase().includes(q) ||
           (e.description && e.description.toLowerCase().includes(q)) ||
           (e.neighborhood && e.neighborhood.toLowerCase().includes(q)) ||
           (e.venueName && e.venueName.toLowerCase().includes(q))
@@ -280,25 +280,26 @@ export default function Events() {
     if (dateFrom) {
       const from = new Date(dateFrom);
       from.setHours(0, 0, 0, 0);
-      result = result.filter((e) => new Date(e.startDate) >= from);
+      result = result.filter((e) => e.startDate ? new Date(e.startDate) >= from : false);
     }
     if (dateTo) {
       const to = new Date(dateTo);
       to.setHours(23, 59, 59, 999);
-      result = result.filter((e) => new Date(e.startDate) <= to);
+      result = result.filter((e) => e.startDate ? new Date(e.startDate) <= to : false);
     }
     return result;
   }, [events, searchQuery, dateFrom, dateTo]);
 
   const upcomingEvents = useMemo(() => {
     const now = new Date();
-    return filteredEvents.filter((e) => new Date(e.startDate) >= now);
+    return filteredEvents.filter((e) => e.startDate ? new Date(e.startDate) >= now : false);
   }, [filteredEvents]);
 
   const pastEvents = useMemo(() => {
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     return filteredEvents.filter((e) => {
+      if (!e.startDate) return false;
       const start = new Date(e.startDate);
       return start < now && start >= thirtyDaysAgo;
     });

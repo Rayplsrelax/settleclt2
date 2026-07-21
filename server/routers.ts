@@ -949,7 +949,7 @@ export const appRouter = router({
         `New Directory Listings (${newListings.length}):`,
         ...newListings.slice(0, 10).map(l => `- ${l.name} (${l.category}, ${l.area})`),
         `\nUpcoming Events (${upcomingEvents.length}):`,
-        ...upcomingEvents.slice(0, 10).map(e => `- ${e.title} on ${new Date(e.startDate).toLocaleDateString()} at ${e.venueName || 'TBA'}`),
+        ...upcomingEvents.slice(0, 10).map(e => `- ${e.title || e.name || "Untitled Event"} on ${e.startDate ? new Date(e.startDate).toLocaleDateString() : "TBD"} at ${e.venueName || 'TBA'}`),
         `\nRecent Blog Posts (${recentPosts.length}):`,
         ...recentPosts.slice(0, 5).map(p => `- ${p.title} (${p.category || 'General'})`),
         `\nTrending Tags:`,
