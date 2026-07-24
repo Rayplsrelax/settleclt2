@@ -618,4 +618,4 @@
 - [x] Add Dilworth longDescription content
 - [x] Render longDescription in NeighborhoodDetail.tsx
 - [x] Update/create job market blog post in database
-- [ ] Add SEO docs to repo (docs/seo/) — deferred to future session
+- [x] Add SEO docs to repo (docs/seo/) — SEO_LOOP_AGENT_PROMPT, SEARCH_CONSOLE_RECRAWL_CHECKLIST, STAR_METHOD_DOMAINS, MIXPANEL_TRACKING_PLAN
