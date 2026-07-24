@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Building2, CheckCircle2, Clock, Shield } from "lucide-react";
+import { trackClaimSubmit } from "@/lib/mixpanel";
 
 interface ClaimBusinessDialogProps {
   serviceKey: string;
@@ -48,6 +49,11 @@ export default function ClaimBusinessDialog({ serviceKey, businessName, children
   const submitClaim = trpc.claims.submit.useMutation({
     onSuccess: (data) => {
       if (data.success) {
+        trackClaimSubmit({
+          service_key: serviceKey,
+          business_name: businessName,
+          claimant_role: form.claimantRole || form.verificationMethod,
+        });
         setSubmitted(true);
         toast.success("Claim submitted! We'll review it within 2-3 business days.");
       } else {
@@ -136,10 +142,18 @@ export default function ClaimBusinessDialog({ serviceKey, businessName, children
                 Claim {businessName}
               </DialogTitle>
               <DialogDescription>
-                Are you the owner or manager of this business? Claiming your listing lets you update
-                your information, respond to reviews, and access premium features.
+                Are you the owner or manager of this business? Claiming your listing is free and lets you verify your details, improve your profile, respond to reviews, and become eligible for featured placement.
               </DialogDescription>
             </DialogHeader>
+
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-xs text-muted-foreground space-y-1">
+              <p className="font-medium text-foreground text-sm">Free claim first, upgrades later</p>
+              <ul className="list-disc list-inside space-y-0.5">
+                <li>Free claim: verify ownership and fix listing details</li>
+                <li>Featured listing: stand out in your category and area</li>
+                <li>Premium listing: add stronger promotion, photos, and lead tracking</li>
+              </ul>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-4 mt-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

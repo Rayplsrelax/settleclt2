@@ -16,6 +16,7 @@ import {
   DollarSign, Search, UserCheck
 } from "lucide-react";
 import { useSEO } from "@/hooks/useSEO";
+import { trackFindHomeIntent, trackFindHomeLead } from "@/lib/mixpanel";
 import { Link } from "wouter";
 
 const BUYING_BUDGET_RANGES = [
@@ -143,8 +144,27 @@ export default function FindRealtor() {
     };
   });
 
+  useEffect(() => {
+    trackFindHomeIntent({
+      surface: "find_home_page",
+      source: form.referralSource,
+      neighborhoods: form.neighborhoods || undefined,
+      referral_type: form.referralType || undefined,
+    });
+    // Track initial entry only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const submitMutation = trpc.referrals.submit.useMutation({
     onSuccess: () => {
+      trackFindHomeLead({
+        referral_type: form.referralType,
+        budget: form.budget || undefined,
+        neighborhoods: form.neighborhoods || undefined,
+        timeline: form.timeline || undefined,
+        referral_source: form.referralSource || undefined,
+        current_city: form.currentCity || undefined,
+      });
       setSubmitted(true);
       toast.success("Your request has been submitted! We'll be in touch soon.");
     },

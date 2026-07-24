@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import { useSEO } from "@/hooks/useSEO";
+import { trackEventAction } from "@/lib/mixpanel";
 import { useStructuredData, buildEventSchema, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
 import {
   Dialog,
@@ -257,6 +258,18 @@ export default function Events() {
 
   const hasActiveFilters = searchQuery || dateFrom || dateTo;
 
+  const openEvent = useCallback((event: EventType, surface: string) => {
+    trackEventAction("event_view", {
+      event_slug: event.slug,
+      event_title: event.title,
+      category: event.category,
+      neighborhood: event.neighborhood || undefined,
+      venue_name: event.venueName,
+      surface,
+    });
+    setSelectedEvent(event);
+  }, []);
+
   const clearAllFilters = useCallback(() => {
     setSearchQuery("");
     setDateFrom("");
@@ -324,7 +337,7 @@ export default function Events() {
             </p>
             <div className="mt-6 flex items-center gap-3">
               <Link href="/submit-event">
-                <Button className="bg-primary text-primary-foreground font-semibold">
+                <Button className="bg-primary text-primary-foreground font-semibold" onClick={() => trackEventAction("submit_event_click", { surface: "events_hero" })}>
                   <CalendarPlus className="w-4 h-4 mr-2" />
                   Submit an Event
                 </Button>
@@ -361,7 +374,12 @@ export default function Events() {
                 type="text"
                 placeholder="Search events, venues, neighborhoods..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (e.target.value.trim().length >= 3) {
+                    trackEventAction("search", { search_query: e.target.value.trim(), surface: "events_search" });
+                  }
+                }}
                 className="pl-9 pr-9 h-9 text-sm"
               />
               {searchQuery && (
@@ -442,7 +460,10 @@ export default function Events() {
                 key={cat.value}
                 onClick={() => {
                   setSelectedCategory(cat.value);
-                  if (cat.value) trackClickByName(cat.value, 'event-filter');
+                  if (cat.value) {
+                    trackClickByName(cat.value, 'event-filter');
+                    trackEventAction("filter_click", { category: cat.value, surface: "events_category_pills" });
+                  }
                 }}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                   selectedCategory === cat.value
@@ -512,7 +533,7 @@ export default function Events() {
                     <EventCard
                       key={event.id}
                       event={event as EventType}
-                      onClick={() => setSelectedEvent(event as EventType)}
+                      onClick={() => openEvent(event as EventType, "upcoming_grid")}
                       onCategoryClick={(cat) => trackClickByName(cat, 'event-card')}
                       onNeighborhoodClick={(n) => trackClickByName(n, 'event-card')}
                     />
@@ -532,7 +553,7 @@ export default function Events() {
                     <EventCard
                       key={event.id}
                       event={event as EventType}
-                      onClick={() => setSelectedEvent(event as EventType)}
+                      onClick={() => openEvent(event as EventType, "past_grid")}
                       onCategoryClick={(cat) => trackClickByName(cat, 'event-card')}
                       onNeighborhoodClick={(n) => trackClickByName(n, 'event-card')}
                     />
@@ -608,6 +629,14 @@ export default function Events() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-medium no-underline transition-colors"
+                            onClick={() => trackEventAction("directions_click", {
+                              event_slug: selectedEvent.slug,
+                              event_title: selectedEvent.title,
+                              category: selectedEvent.category,
+                              neighborhood: selectedEvent.neighborhood || undefined,
+                              venue_name: selectedEvent.venueName,
+                              surface: "event_dialog",
+                            })}
                           >
                             <Navigation className="w-3.5 h-3.5" /> Get Directions
                           </a>
@@ -647,6 +676,14 @@ export default function Events() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-block"
+                    onClick={() => trackEventAction("external_click", {
+                      event_slug: selectedEvent.slug,
+                      event_title: selectedEvent.title,
+                      category: selectedEvent.category,
+                      neighborhood: selectedEvent.neighborhood || undefined,
+                      venue_name: selectedEvent.venueName,
+                      surface: "event_dialog",
+                    })}
                   >
                     <Button className="gap-2">
                       <ExternalLink className="w-4 h-4" />
