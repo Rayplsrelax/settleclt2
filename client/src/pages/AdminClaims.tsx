@@ -104,6 +104,24 @@ export default function AdminClaims() {
           </Button>
         </div>
 
+        <Card className="mb-6 border-primary/20 bg-primary/5">
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">Claim-to-revenue workflow</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Approve valid ownership claims, tell owners to visit My Business, then guide them from Free Claim to Featured ($29/mo) or Premium ($79/mo). Use the public pricing page when explaining the offer.
+                </p>
+              </div>
+              <Link href="/business-pricing">
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  View Pricing Page
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <Card>

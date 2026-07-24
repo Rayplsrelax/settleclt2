@@ -206,6 +206,20 @@ export default function AdminEvents() {
             </Button>
           </div>
 
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 mb-6 flex flex-col md:flex-row md:items-center gap-4">
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-foreground">Weekly event growth loop</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Keep at least 10 useful upcoming events live, cover every major category, publish a weekend roundup, and track clicks from `/events`, `/things-to-do`, and charlotteweekendevents.com.
+              </p>
+            </div>
+            <Link href="/events">
+              <Button variant="outline" size="sm" className="gap-1.5">
+                View Public Events
+              </Button>
+            </Link>
+          </div>
+
           {isLoading ? (
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (

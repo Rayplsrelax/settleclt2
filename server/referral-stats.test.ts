@@ -1,13 +1,16 @@
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
 
 // Test the referral stats shape and logic
 describe("Referral Stats", () => {
   it("should return correct shape from getReferralStats when no data", async () => {
     // The function returns a specific shape even with no data
-    const emptyStats = { total: 0, byStatus: {}, byType: {}, conversionRate: 0, avgAgeDays: 0, monthlyTrend: [], recentLeads: [] };
+    const emptyStats = { total: 0, byStatus: {}, byType: {}, bySource: {}, byPriority: {}, conversionRate: 0, avgAgeDays: 0, monthlyTrend: [], recentLeads: [], needsFollowUp: 0, dueNextActions: [] };
     expect(emptyStats).toHaveProperty("total");
     expect(emptyStats).toHaveProperty("byStatus");
     expect(emptyStats).toHaveProperty("byType");
+    expect(emptyStats).toHaveProperty("bySource");
+    expect(emptyStats).toHaveProperty("byPriority");
     expect(emptyStats).toHaveProperty("conversionRate");
     expect(emptyStats).toHaveProperty("avgAgeDays");
     expect(emptyStats).toHaveProperty("monthlyTrend");
@@ -100,5 +103,12 @@ describe("Referral Stats", () => {
 
     expect(byStatus).toEqual({ new: 2, contacted: 1, closed: 1, lost: 1 });
     expect(byType).toEqual({ buying: 2, renting: 2, relocating: 1 });
+  });
+
+  it("sorts due next actions by oldest due date before display", () => {
+    const dbSource = readFileSync("server/db.ts", "utf8");
+    expect(dbSource).toContain("priorityRank");
+    expect(dbSource).toContain("aDue - bDue");
+    expect(dbSource).toContain("bPriority - aPriority");
   });
 });

@@ -346,6 +346,7 @@ async function startServer() {
       { loc: "/quiz", priority: "0.8", changefreq: "monthly" },
       { loc: "/compare", priority: "0.7", changefreq: "monthly" },
       { loc: "/find-your-home", priority: "0.8", changefreq: "monthly" },
+      { loc: "/business-pricing", priority: "0.7", changefreq: "monthly" },
       { loc: "/list-your-business", priority: "0.6", changefreq: "monthly" },
       { loc: "/submit-event", priority: "0.5", changefreq: "monthly" },
       { loc: "/contact", priority: "0.5", changefreq: "yearly" },
@@ -353,7 +354,7 @@ async function startServer() {
       { loc: "/terms", priority: "0.3", changefreq: "yearly" },
     ];
 
-    // Directory category pages (e.g., /directory?category=restaurants)
+    // Directory category pages (e.g., /directory/category/restaurants)
     const directoryCategories = [
       "moving-companies", "storage", "utilities", "internet", "insurance",
       "dmv", "government", "banking", "tax", "legal",
@@ -412,7 +413,7 @@ async function startServer() {
     }
 
     for (const cat of directoryCategories) {
-      xml += `  <url>\n    <loc>${baseUrl}/directory?category=${cat}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${baseUrl}/directory/category/${cat}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
     }
 
     for (const bSlug of businessSlugs) {

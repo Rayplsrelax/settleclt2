@@ -1,6 +1,7 @@
 import { eq, and, desc, asc, sql, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription } from "../drizzle/schema";
+import { scoreRealtorLead } from "../shared/realtorLeadOps";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -1223,8 +1224,16 @@ export async function getAllReviews(limit = 50) {
 export async function submitReferral(data: Omit<InsertReferral, "id" | "createdAt" | "updatedAt" | "status">) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  const result = await db.insert(referrals).values(data);
-  return { id: result[0].insertId };
+  const ops = scoreRealtorLead(data);
+  const nextActionDueAt = new Date(Date.now() + ops.nextActionDueDays * 24 * 60 * 60 * 1000);
+  const result = await db.insert(referrals).values({
+    ...data,
+    leadScore: ops.leadScore,
+    leadPriority: ops.leadPriority,
+    nextAction: ops.nextAction,
+    nextActionDueAt,
+  });
+  return { id: result[0].insertId, ...ops, nextActionDueAt };
 }
 
 export async function getReferrals(opts?: { status?: string; limit?: number }) {
@@ -1251,17 +1260,20 @@ export async function updateReferralStatus(id: number, status: string, adminNote
 
 export async function getReferralStats() {
   const db = await getDb();
-  if (!db) return { total: 0, byStatus: {}, byType: {}, bySource: {}, conversionRate: 0, avgAgeDays: 0, monthlyTrend: [] as { month: string; count: number }[], recentLeads: [] as any[], needsFollowUp: 0 };
+  if (!db) return { total: 0, byStatus: {}, byType: {}, bySource: {}, byPriority: {}, conversionRate: 0, avgAgeDays: 0, monthlyTrend: [] as { month: string; count: number }[], recentLeads: [] as any[], needsFollowUp: 0, dueNextActions: [] as any[] };
   const all = await db.select().from(referrals).orderBy(desc(referrals.createdAt));
   const total = all.length;
   const byStatus: Record<string, number> = {};
   const byType: Record<string, number> = {};
   const bySource: Record<string, number> = {};
+  const byPriority: Record<string, number> = {};
   all.forEach(r => {
     byStatus[r.status] = (byStatus[r.status] || 0) + 1;
     byType[r.referralType] = (byType[r.referralType] || 0) + 1;
     const src = (r as any).referralSource || 'direct';
     bySource[src] = (bySource[src] || 0) + 1;
+    const priority = (r as any).leadPriority || 'low';
+    byPriority[priority] = (byPriority[priority] || 0) + 1;
   });
   // Conversion rate: closed / (total - new)
   const closed = byStatus['closed'] || 0;
@@ -1288,11 +1300,39 @@ export async function getReferralStats() {
   const recentLeads = all.slice(0, 5).map(r => ({
     id: r.id, name: r.name, referralType: r.referralType, status: r.status,
     createdAt: r.createdAt, neighborhoods: r.neighborhoods,
+    leadScore: (r as any).leadScore ?? 0,
+    leadPriority: (r as any).leadPriority ?? 'low',
+    nextAction: (r as any).nextAction ?? null,
+    nextActionDueAt: (r as any).nextActionDueAt ?? null,
   }));
   // Leads in "new" status for > 48 hours that need follow-up
   const fortyEightHours = 48 * 60 * 60 * 1000;
   const needsFollowUp = all.filter(r => r.status === 'new' && (now - new Date(r.createdAt).getTime()) > fortyEightHours).length;
-  return { total, byStatus, byType, bySource, conversionRate, avgAgeDays, monthlyTrend, recentLeads, needsFollowUp };
+  const priorityRank: Record<string, number> = { hot: 5, qualified: 4, nurture: 3, early: 2, low: 1 };
+  const dueNextActions = all
+    .filter(r => !['closed', 'lost'].includes(r.status) && (r as any).nextActionDueAt && new Date((r as any).nextActionDueAt).getTime() <= now)
+    .sort((a, b) => {
+      const aDue = new Date((a as any).nextActionDueAt).getTime();
+      const bDue = new Date((b as any).nextActionDueAt).getTime();
+      if (aDue !== bDue) return aDue - bDue;
+      const aPriority = priorityRank[(a as any).leadPriority || 'low'] || 0;
+      const bPriority = priorityRank[(b as any).leadPriority || 'low'] || 0;
+      if (aPriority !== bPriority) return bPriority - aPriority;
+      return ((b as any).leadScore ?? 0) - ((a as any).leadScore ?? 0);
+    })
+    .slice(0, 10)
+    .map(r => ({
+      id: r.id,
+      name: r.name,
+      status: r.status,
+      referralType: r.referralType,
+      leadScore: (r as any).leadScore ?? 0,
+      leadPriority: (r as any).leadPriority ?? 'low',
+      nextAction: (r as any).nextAction ?? null,
+      nextActionDueAt: (r as any).nextActionDueAt ?? null,
+      createdAt: r.createdAt,
+    }));
+  return { total, byStatus, byType, bySource, byPriority, conversionRate, avgAgeDays, monthlyTrend, recentLeads, needsFollowUp, dueNextActions };
 }
 
 // --- Business Claims ---

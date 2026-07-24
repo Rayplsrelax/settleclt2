@@ -424,6 +424,14 @@ export const referrals = mysqlTable("referrals", {
   referralSource: varchar("referralSource", { length: 128 }),
   /** Status tracking */
   status: mysqlEnum("status", ["new", "contacted", "matched", "closed", "lost"]).default("new").notNull(),
+  /** 0-25 lead score for realtor triage */
+  leadScore: int("leadScore").default(0).notNull(),
+  /** Operational priority derived from the score */
+  leadPriority: mysqlEnum("leadPriority", ["hot", "qualified", "nurture", "early", "low"]).default("low").notNull(),
+  /** Recommended next action for follow-up */
+  nextAction: varchar("nextAction", { length: 512 }),
+  /** Due date for the recommended next action */
+  nextActionDueAt: timestamp("nextActionDueAt"),
   /** Admin notes */
   adminNotes: text("adminNotes"),
   /** Logged-in user who submitted (optional) */
