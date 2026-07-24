@@ -190,9 +190,9 @@ function EventCard({ event, onClick, onCategoryClick, onNeighborhoodClick }: { e
 
 export default function Events() {
   useSEO({
-    title: "Charlotte Events — What's Happening in CLT",
-    description: "Find upcoming Charlotte events including festivals, food & drink, live music, sports, and community gatherings. Never miss what's happening in the Queen City.",
-    keywords: "Charlotte events, things to do Charlotte NC, Charlotte festivals, Charlotte concerts, Charlotte food events, what to do in Charlotte this weekend",
+    title: "Charlotte Events This Week & Weekend: Things to Do in CLT (2026)",
+    description: "Your complete Charlotte events calendar. Find concerts, festivals, sports, food events, family activities, and things to do in Charlotte NC this week and weekend.",
+    keywords: "Charlotte events, events in Charlotte NC, things to do in Charlotte this weekend, Charlotte events this weekend, Charlotte concerts, Charlotte festivals, what to do in Charlotte",
     path: "/events",
   });
 
@@ -332,6 +332,21 @@ export default function Events() {
               <ShareButtons title="Charlotte Events - Settle CLT" description="Discover what's happening in Charlotte" />
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* SEO intro section — indexable content for search engines */}
+      <section className="bg-muted/30 border-b border-border">
+        <div className="container py-6 max-w-4xl">
+          <h2 className="font-display font-bold text-xl text-foreground mb-3">
+            Things to Do in Charlotte, NC This Week & Weekend
+          </h2>
+          <p className="text-sm text-muted-foreground leading-relaxed mb-2">
+            Looking for things to do in Charlotte this weekend? Settle CLT's events calendar covers everything happening in the Queen City — from live concerts and music festivals to family-friendly activities, free community events, food and drink experiences, professional sports games, and seasonal festivals.
+          </p>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Whether you just moved to Charlotte or you're a lifelong local, use this page to find Charlotte events this week, plan your weekend, and discover new experiences across every neighborhood. Filter by date, category, or search for specific venues and artists.
+          </p>
         </div>
       </section>
 

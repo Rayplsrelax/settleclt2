@@ -338,6 +338,7 @@ async function startServer() {
       { loc: "/neighborhoods", priority: "0.9", changefreq: "weekly" },
       { loc: "/directory", priority: "0.9", changefreq: "weekly" },
       { loc: "/events", priority: "0.9", changefreq: "daily" },
+      { loc: "/things-to-do", priority: "0.85", changefreq: "weekly" },
       { loc: "/blog", priority: "0.8", changefreq: "weekly" },
       { loc: "/passport", priority: "0.7", changefreq: "weekly" },
       { loc: "/bingo", priority: "0.7", changefreq: "monthly" },

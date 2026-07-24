@@ -106,10 +106,15 @@ export default function BusinessDetail() {
 
   // SEO
   useSEO({
-    title: service ? `${service.name} — ${category?.name || "Directory"} | Settle CLT` : "Business Not Found | Settle CLT",
+    title: service
+      ? `${service.name} \u2014 ${category?.name || "Local Business"} in ${service.area}, Charlotte NC | Hours, Phone & Reviews`
+      : "Business Not Found | Settle CLT",
     description: service
-      ? `${service.description} Located in ${service.area}, Charlotte NC. Phone: ${service.phone}. Read reviews and get directions.`
+      ? `${service.name} in ${service.area}, Charlotte NC. ${service.description} Call ${service.phone || "the business"} for appointments. See hours, reviews, photos, and get directions.`
       : "This business listing was not found.",
+    keywords: service
+      ? `${service.name}, ${service.name} Charlotte, ${service.name} Charlotte NC, ${category?.name || "local business"} in ${service.area}, ${service.area} Charlotte NC, Charlotte ${category?.name || "local business"}`
+      : undefined,
     path: slug ? `/directory/${slug}` : "/directory",
     noSuffix: true,
   });
@@ -373,6 +378,21 @@ export default function BusinessDetail() {
 
                 {/* Description */}
                 <p className="text-muted-foreground mt-4 leading-relaxed">{service.description}</p>
+
+                {/* Local SEO context for thin listings */}
+                <div className="mt-4 rounded-2xl bg-muted/40 border border-border p-4 text-sm text-muted-foreground leading-relaxed space-y-2">
+                  <h2 className="font-display font-semibold text-base text-foreground">
+                    About {service.name} in {service.area}, Charlotte NC
+                  </h2>
+                  <p>
+                    {service.name} is listed in Settle CLT's Charlotte directory under {category?.name || "local services"}.
+                    Use this page to quickly check contact details, hours, photos, reviews, and directions before you visit or call.
+                  </p>
+                  <p>
+                    If you are moving to Charlotte or getting settled in {service.area}, compare this listing with other
+                    {category?.name ? ` ${category.name.toLowerCase()}` : " local service"} options nearby so you can choose the right fit for your home, commute, errands, or weekend plans.
+                  </p>
+                </div>
 
                 {/* Action buttons row */}
                 <div className="flex flex-wrap gap-2 mt-5">

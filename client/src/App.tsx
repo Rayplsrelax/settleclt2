@@ -24,6 +24,7 @@ const BingoCards = lazy(() => import("./pages/BingoCards"));
 const BlogArticle = lazy(() => import("./pages/BlogArticle"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 const Events = lazy(() => import("./pages/Events"));
+const ThingsToDo = lazy(() => import("./pages/ThingsToDo"));
 const AdminEvents = lazy(() => import("./pages/AdminEvents"));
 const TagPage = lazy(() => import("./pages/TagPage"));
 const SubmitEvent = lazy(() => import("./pages/SubmitEvent"));
@@ -67,6 +68,7 @@ function Router() {
         <Route path="/wishlist" component={Wishlist} />
         <Route path="/bingo" component={BingoCards} />
         <Route path="/events" component={Events} />
+        <Route path="/things-to-do" component={ThingsToDo} />
         <Route path="/leaderboard" component={Leaderboard} />
         <Route path="/admin/enrich" component={AdminEnrich} />
         <Route path="/admin/blog" component={AdminBlog} />

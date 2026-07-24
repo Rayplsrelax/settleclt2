@@ -89,9 +89,13 @@ export default function NeighborhoodDetail() {
   }, [n]);
 
   useSEO({
-    title: n ? `${n.name} Neighborhood Guide — Charlotte NC` : "Neighborhood Guide",
-    description: n ? `${n.name}: ${n.vibe}. ${n.description.slice(0, 100)}...` : "Explore Charlotte neighborhoods with detailed guides.",
-    keywords: n ? `${n.name} Charlotte, ${n.name} NC, living in ${n.name}, ${n.name} apartments, ${n.name} restaurants, Charlotte neighborhoods` : "Charlotte neighborhoods",
+    title: n ? `${n.name} Charlotte NC Neighborhood Guide (2026): Vibe, Costs & Reviews` : "Charlotte Neighborhood Guide",
+    description: n
+      ? `${n.name} Charlotte NC: ${n.vibe}. ${n.bestFor} See real costs, crime stats, schools, day-in-the-life, honest pros and cons, and local businesses in ${n.name}.`
+      : "Explore Charlotte NC neighborhoods with detailed guides, real costs, and honest reviews.",
+    keywords: n
+      ? `${n.name.toLowerCase()}, ${n.name.toLowerCase()} charlotte nc, ${n.name.toLowerCase()} neighborhood guide, ${n.name.toLowerCase()} charlotte, moving to ${n.name.toLowerCase()}, ${n.name.toLowerCase()} apartments, ${n.name.toLowerCase()} restaurants, charlotte nc neighborhoods`
+      : "Charlotte NC neighborhoods, Charlotte neighborhood guide, moving to Charlotte",
     path: n ? `/neighborhood/${n.id}` : "/neighborhoods",
     ogImage: n?.photoUrls?.[0],
   });
@@ -335,6 +339,15 @@ export default function NeighborhoodDetail() {
               <p className="text-sm text-muted-foreground leading-relaxed">{n.whoLivesHere.split("\n\n")[0]?.slice(0, 300)}...</p>
             </div>
           </div>
+
+          {/* Long-form neighborhood description for SEO */}
+          {n.longDescription && (
+            <div className="mt-8 max-w-3xl">
+              {n.longDescription.split("\n\n").map((paragraph, i) => (
+                <p key={i} className="text-muted-foreground leading-relaxed mb-4">{paragraph}</p>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Vibe Check — Locals Love / Don't Love */}

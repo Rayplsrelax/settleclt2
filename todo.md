@@ -603,3 +603,19 @@
 - [x] Write Obsidian vault setup guide (folder structure, frontmatter conventions, Git plugin setup)
 - [x] Write vitest tests for the webhook endpoint (10 tests)
 - [x] Save checkpoint and deliver full setup guide
+
+## SEO Upgrades (July 2026) — Google Search Console Improvements
+- [x] BusinessDetail SEO title fix: name + category + area + Charlotte NC + Hours, Phone & Reviews
+- [x] BusinessDetail thin listing content block (local SEO context)
+- [x] Events page SEO upgrade: stronger title/description/keywords + intro section
+- [x] NeighborhoodDetail SEO title fix: stronger titles with Vibe, Costs & Reviews
+- [x] Create ThingsToDo page at /things-to-do with SEO landing content
+- [x] Add ThingsToDo route to App.tsx
+- [x] Add /things-to-do to sitemap in server/_core/index.ts
+- [x] Mixpanel UTM/referrer tracking in useMixpanelPageView.ts
+- [x] Add longDescription field to Neighborhood interface
+- [x] Add South Charlotte longDescription content
+- [x] Add Dilworth longDescription content
+- [x] Render longDescription in NeighborhoodDetail.tsx
+- [x] Update/create job market blog post in database
+- [ ] Add SEO docs to repo (docs/seo/) — deferred to future session
