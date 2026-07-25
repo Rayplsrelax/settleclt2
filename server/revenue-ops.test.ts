@@ -16,6 +16,9 @@ describe("Revenue operations packaging", () => {
     expect(page).toContain("Events");
     expect(page).toContain("Microsites");
     expect(page).toContain("MONTHLY_TARGETS");
+    expect(page).toContain("hermesRevenueOps.snapshot");
+    expect(page).toContain("Hermes Revenue Agent");
+    expect(page).toContain("Draft-only tasks");
     expect(page).toContain("claimStats.data as any)?.pending");
     expect(page).not.toContain("byStatus?.pending");
     expect(page).toContain("authLoading");

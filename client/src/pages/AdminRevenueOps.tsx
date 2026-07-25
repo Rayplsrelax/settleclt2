@@ -34,6 +34,7 @@ export default function AdminRevenueOps() {
   const referralStats = trpc.referrals.stats.useQuery(undefined, { enabled: user?.role === "admin" });
   const claimStats = trpc.claims.stats.useQuery(undefined, { enabled: user?.role === "admin" });
   const premiumTiers = trpc.premium.getActiveTiers.useQuery(undefined, { enabled: user?.role === "admin" });
+  const hermesSnapshot = trpc.hermesRevenueOps.snapshot.useQuery(undefined, { enabled: user?.role === "admin" });
 
   if (authLoading) {
     return (
@@ -68,6 +69,9 @@ export default function AdminRevenueOps() {
   const referralTotal = Number((referralStats.data as any)?.total || 0);
   const hotLeads = Number((referralStats.data as any)?.byPriority?.hot || 0);
   const dueActions = Number((referralStats.data as any)?.dueNextActions?.length || 0);
+  const hermesTasks = ((hermesSnapshot.data as any)?.tasks || []) as any[];
+  const hermesSummary = (hermesSnapshot.data as any)?.summary || {};
+  const urgentHermesTasks = hermesTasks.filter(task => task.priority === "urgent").length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -125,6 +129,30 @@ export default function AdminRevenueOps() {
               <a href="/admin/analytics" className="flex gap-2 hover:text-primary"><MousePointerClick className="w-4 h-4 mt-0.5" /> Check search/click trends for content and category gaps.</a>
               <a href="/business-pricing" className="flex gap-2 hover:text-primary"><Sparkles className="w-4 h-4 mt-0.5" /> Send owners to the pricing/claim upgrade funnel.</a>
             </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-6">
+          <h2 className="text-lg font-semibold text-foreground flex items-center gap-2"><Sparkles className="w-5 h-5 text-primary" /> Hermes Revenue Agent</h2>
+          <p className="text-sm text-muted-foreground mt-1">Draft-only tasks for realtor leads, business claims, paid listing recovery, microsite launch checks, and weekly revenue summaries. Hermes does not send outreach automatically.</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
+            <div className="rounded-lg border border-border bg-background p-3"><p className="text-xs text-muted-foreground">Draft-only tasks</p><p className="text-2xl font-bold">{hermesTasks.length}</p></div>
+            <div className="rounded-lg border border-border bg-background p-3"><p className="text-xs text-muted-foreground">Urgent tasks</p><p className="text-2xl font-bold">{urgentHermesTasks}</p></div>
+            <div className="rounded-lg border border-border bg-background p-3"><p className="text-xs text-muted-foreground">Past-due listings</p><p className="text-2xl font-bold">{Number(hermesSummary.pastDueListings || 0)}</p></div>
+            <div className="rounded-lg border border-border bg-background p-3"><p className="text-xs text-muted-foreground">Ready microsites</p><p className="text-2xl font-bold">{Number(hermesSummary.readyMicrosites || 0)}</p></div>
+          </div>
+          <div className="mt-5 space-y-2 text-sm">
+            {hermesTasks.slice(0, 5).map(task => (
+              <div key={task.id} className="rounded-lg border border-border bg-background p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="font-medium text-foreground">{task.title}</p>
+                  <span className="text-xs uppercase text-muted-foreground">{task.priority}</span>
+                </div>
+                <p className="text-muted-foreground mt-1">{task.nextAction}</p>
+                <p className="text-xs text-muted-foreground mt-1">Status: {task.status} · Auto-send: {String(task.sendAutomatically)}</p>
+              </div>
+            ))}
+            {hermesTasks.length === 0 && <p className="text-muted-foreground">No Hermes revenue tasks are currently due.</p>}
           </div>
         </div>
 
