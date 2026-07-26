@@ -631,3 +631,6 @@
 - [x] Run pnpm check + build + test — all passing
 - [x] Deploy to production and push to GitHub
 - [x] Verify live URLs: /business-pricing, /admin/revenue, checkout flow, webhook status
+
+## Bug Fixes (July 26, 2026)
+- [x] Fix nested button error on /events page (QuickStampButton inside EventCard's outer button)

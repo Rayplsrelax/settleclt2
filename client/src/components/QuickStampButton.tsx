@@ -86,17 +86,20 @@ export default function QuickStampButton({
   const btnSize = size === "sm" ? "w-8 h-8" : "w-10 h-10";
 
   return (
-    <button
+    <span
+      role="button"
+      tabIndex={0}
       onClick={handleClick}
-      disabled={isPending || loading}
-      className={`${btnSize} rounded-full flex items-center justify-center transition-all duration-200 ${
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(e as any); } }}
+      aria-disabled={isPending || loading}
+      className={`${btnSize} rounded-full inline-flex items-center justify-center transition-all duration-200 cursor-pointer ${
         isStamped
           ? "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"
           : "bg-muted/50 text-muted-foreground hover:bg-amber-500/10 hover:text-amber-500"
-      } ${isPending ? "opacity-50" : ""} ${className}`}
+      } ${isPending || loading ? "opacity-50 pointer-events-none" : ""} ${className}`}
       title={isStamped ? "Already stamped" : "Add stamp to passport"}
     >
       <Stamp className={`${iconSize} ${isStamped ? "fill-amber-500" : ""}`} />
-    </button>
+    </span>
   );
 }
