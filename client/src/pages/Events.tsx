@@ -30,6 +30,19 @@ const CATEGORIES = [
   { value: "free", label: "Free Events" },
   { value: "markets", label: "Markets & Pop-ups" },
   { value: "community", label: "Community" },
+  // Recurring community event categories
+  { value: "run-walk", label: "Run & Walk Clubs" },
+  { value: "yoga-fitness", label: "Yoga & Fitness" },
+  { value: "farmers-markets", label: "Farmers Markets" },
+  { value: "game-nights", label: "Game Nights & Trivia" },
+  { value: "veteran", label: "Veteran & Military" },
+  { value: "music-jam", label: "Live Music & Open Mic" },
+  { value: "kids-storytime", label: "Kids & Storytime" },
+  { value: "meditation", label: "Meditation & Mindfulness" },
+  { value: "dog-meetups", label: "Dog Meetups" },
+  { value: "makers-crafts", label: "Makers & Crafts" },
+  { value: "neighborhood", label: "Neighborhood Events" },
+  { value: "professional", label: "Professional & Networking" },
 ] as const;
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -43,6 +56,18 @@ const CATEGORY_COLORS: Record<string, string> = {
   free: "bg-emerald-100 text-emerald-800 border-emerald-200",
   markets: "bg-amber-100 text-amber-800 border-amber-200",
   community: "bg-teal-100 text-teal-800 border-teal-200",
+  "run-walk": "bg-red-100 text-red-800 border-red-200",
+  "yoga-fitness": "bg-lime-100 text-lime-800 border-lime-200",
+  "farmers-markets": "bg-green-100 text-green-800 border-green-200",
+  "game-nights": "bg-violet-100 text-violet-800 border-violet-200",
+  veteran: "bg-blue-100 text-blue-800 border-blue-200",
+  "music-jam": "bg-purple-100 text-purple-800 border-purple-200",
+  "kids-storytime": "bg-cyan-100 text-cyan-800 border-cyan-200",
+  meditation: "bg-slate-100 text-slate-800 border-slate-200",
+  "dog-meetups": "bg-orange-100 text-orange-800 border-orange-200",
+  "makers-crafts": "bg-pink-100 text-pink-800 border-pink-200",
+  neighborhood: "bg-teal-100 text-teal-800 border-teal-200",
+  professional: "bg-gray-100 text-gray-800 border-gray-200",
 };
 
 const CATEGORY_EMOJI: Record<string, string> = {
@@ -56,6 +81,18 @@ const CATEGORY_EMOJI: Record<string, string> = {
   free: "🆓",
   markets: "🛍️",
   community: "🤝",
+  "run-walk": "🏃",
+  "yoga-fitness": "🧘",
+  "farmers-markets": "🥕",
+  "game-nights": "🎲",
+  veteran: "🎖️",
+  "music-jam": "🎵",
+  "kids-storytime": "📚",
+  meditation: "🧠",
+  "dog-meetups": "🐕",
+  "makers-crafts": "🎨",
+  neighborhood: "📍",
+  professional: "🤝",
 };
 
 function formatDate(date: Date | string) {
@@ -202,6 +239,8 @@ export default function Events() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+  const [recurringOnly, setRecurringOnly] = useState(false);
+  const [newcomerFriendlyOnly, setNewcomerFriendlyOnly] = useState(false);
   const { trackClickByName } = useTagTrackingWithLookup();
 
   const { data: allEvents, isLoading } = trpc.events.getPublished.useQuery(
@@ -255,18 +294,26 @@ export default function Events() {
   }, [allEvents]);
   useStructuredData(eventsForSchema);
 
-  const hasActiveFilters = searchQuery || dateFrom || dateTo;
+  const hasActiveFilters = searchQuery || dateFrom || dateTo || recurringOnly || newcomerFriendlyOnly;
 
   const clearAllFilters = useCallback(() => {
     setSearchQuery("");
     setDateFrom("");
     setDateTo("");
     setSelectedCategory("");
+    setRecurringOnly(false);
+    setNewcomerFriendlyOnly(false);
   }, []);
 
   // Apply search and date filters
   const filteredEvents = useMemo(() => {
     let result = [...events];
+    if (recurringOnly) {
+      result = result.filter((e: any) => e.type === "recurring" || e.isRecurring === "yes");
+    }
+    if (newcomerFriendlyOnly) {
+      result = result.filter((e: any) => e.newcomerFriendly === true);
+    }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
@@ -274,7 +321,7 @@ export default function Events() {
           (e.title || e.name || "").toLowerCase().includes(q) ||
           (e.description && e.description.toLowerCase().includes(q)) ||
           (e.neighborhood && e.neighborhood.toLowerCase().includes(q)) ||
-          (e.venueName && e.venueName.toLowerCase().includes(q))
+          (e.venueName || e.venue || "").toLowerCase().includes(q)
       );
     }
     if (dateFrom) {
@@ -288,7 +335,7 @@ export default function Events() {
       result = result.filter((e) => e.startDate ? new Date(e.startDate) <= to : false);
     }
     return result;
-  }, [events, searchQuery, dateFrom, dateTo]);
+  }, [events, searchQuery, dateFrom, dateTo, recurringOnly, newcomerFriendlyOnly]);
 
   const upcomingEvents = useMemo(() => {
     const now = new Date();
@@ -419,6 +466,30 @@ export default function Events() {
               )}
             </div>
           )}
+
+          {/* Recurring + Newcomer toggles */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={() => setRecurringOnly(!recurringOnly)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                recurringOnly
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              🔁 Recurring Events
+            </button>
+            <button
+              onClick={() => setNewcomerFriendlyOnly(!newcomerFriendlyOnly)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                newcomerFriendlyOnly
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              🌟 Newcomer Friendly
+            </button>
+          </div>
 
           {/* Category pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
