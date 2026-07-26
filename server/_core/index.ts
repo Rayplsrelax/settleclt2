@@ -326,6 +326,14 @@ async function startServer() {
       "huntersville", "lake-norman", "matthews", "concord", "fort-mill", "pineville"
     ];
 
+    // Event category landing pages (recurring community events)
+    const eventCategories = [
+      "run-walk", "yoga-fitness", "farmers-markets", "game-nights",
+      "veteran", "music-jam", "kids-storytime", "meditation",
+      "dog-meetups", "makers-crafts", "community", "neighborhood",
+      "professional", "festivals", "sports", "family"
+    ];
+
     // Individual business detail pages (700+ URLs)
     const { SERVICES: allServices } = await import("../../shared/services");
     const businessSlugs = Array.from(new Set(allServices.map((s: { name: string }) =>
@@ -362,6 +370,10 @@ async function startServer() {
 
     for (const cat of directoryCategories) {
       xml += `  <url>\n    <loc>${baseUrl}/directory?category=${cat}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+    }
+
+    for (const evtCat of eventCategories) {
+      xml += `  <url>\n    <loc>${baseUrl}/events/category/${evtCat}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n`;
     }
 
     for (const bSlug of businessSlugs) {
