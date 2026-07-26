@@ -619,3 +619,15 @@
 - [x] Render longDescription in NeighborhoodDetail.tsx
 - [x] Update/create job market blog post in database
 - [x] Add SEO docs to repo (docs/seo/) — SEO_LOOP_AGENT_PROMPT, SEARCH_CONSOLE_RECRAWL_CHECKLIST, STAR_METHOD_DOMAINS, MIXPANEL_TRACKING_PLAN
+
+## Monetization: Stripe Payment System (July 2026)
+- [x] Audit existing Stripe integration, premium schema, and BusinessPricing page
+- [x] Create Stripe checkout session endpoint (Featured $29/mo, Premium $79/mo)
+- [x] Implement Stripe webhook handler (checkout.session.completed, subscription.updated, subscription.deleted, invoice.payment_failed)
+- [x] Build My Business page with current plan display and manage billing button
+- [x] Update Admin Revenue dashboard with monetization stats (claimed, pending, active featured/premium, MRR)
+- [x] Wire premium/featured badges into directory listing cards
+- [x] Write vitest tests for payment flows (checkout, webhook, free claim, admin stats)
+- [x] Run pnpm check + build + test — all passing
+- [x] Deploy to production and push to GitHub
+- [x] Verify live URLs: /business-pricing, /admin/revenue, checkout flow, webhook status
