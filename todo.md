@@ -636,3 +636,4 @@
 - [x] Fix nested button error on /events page (QuickStampButton inside EventCard's outer button)
 - [x] Generate cover images for all 28 published blog posts missing them
 - [x] Set up storage proxy (server/_core/storageProxy.ts) for /manus-storage/ paths
+- [x] Fix events not showing: added missing `active` column to DB + regenerated 21 recurring event dates to upcoming weeks
