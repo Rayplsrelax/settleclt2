@@ -10,6 +10,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { registerObsidianPublishRoute } from "../obsidian-publish";
+import { registerStorageProxy } from "./storageProxy";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -291,6 +292,7 @@ async function startServer() {
   app.use("/api/trpc/storage", express.json({ limit: "50mb" }));
   app.use("/api/upload", express.json({ limit: "50mb" }));
   // OAuth callback under /api/oauth/callback
+  registerStorageProxy(app);
   registerOAuthRoutes(app);
   // Shared-secret endpoint for Obsidian/GitHub Actions blog publishing
   registerObsidianPublishRoute(app);
