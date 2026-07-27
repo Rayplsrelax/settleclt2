@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import { useSEO } from "@/hooks/useSEO";
+import { trackEventAction } from "@/lib/mixpanel";
 import { useStructuredData, buildEventSchema, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
 import {
   Dialog,
@@ -227,9 +228,9 @@ function EventCard({ event, onClick, onCategoryClick, onNeighborhoodClick }: { e
 
 export default function Events() {
   useSEO({
-    title: "Charlotte Events — What's Happening in CLT",
-    description: "Find upcoming Charlotte events including festivals, food & drink, live music, sports, and community gatherings. Never miss what's happening in the Queen City.",
-    keywords: "Charlotte events, things to do Charlotte NC, Charlotte festivals, Charlotte concerts, Charlotte food events, what to do in Charlotte this weekend",
+    title: "Charlotte Events This Week & Weekend: Things to Do in CLT (2026)",
+    description: "Your complete Charlotte events calendar. Find concerts, festivals, sports, food events, family activities, and things to do in Charlotte NC this week and weekend.",
+    keywords: "Charlotte events, events in Charlotte NC, things to do in Charlotte this weekend, Charlotte events this weekend, Charlotte concerts, Charlotte festivals, what to do in Charlotte",
     path: "/events",
   });
 
@@ -295,6 +296,18 @@ export default function Events() {
   useStructuredData(eventsForSchema);
 
   const hasActiveFilters = searchQuery || dateFrom || dateTo || recurringOnly || newcomerFriendlyOnly;
+
+  const openEvent = useCallback((event: EventType, surface: string) => {
+    trackEventAction("event_view", {
+      event_slug: event.slug,
+      event_title: event.title,
+      category: event.category,
+      neighborhood: event.neighborhood || undefined,
+      venue_name: event.venueName,
+      surface,
+    });
+    setSelectedEvent(event);
+  }, []);
 
   const clearAllFilters = useCallback(() => {
     setSearchQuery("");
@@ -372,7 +385,7 @@ export default function Events() {
             </p>
             <div className="mt-6 flex items-center gap-3">
               <Link href="/submit-event">
-                <Button className="bg-primary text-primary-foreground font-semibold">
+                <Button className="bg-primary text-primary-foreground font-semibold" onClick={() => trackEventAction("submit_event_click", { surface: "events_hero" })}>
                   <CalendarPlus className="w-4 h-4 mr-2" />
                   Submit an Event
                 </Button>
@@ -380,6 +393,21 @@ export default function Events() {
               <ShareButtons title="Charlotte Events - Settle CLT" description="Discover what's happening in Charlotte" />
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* SEO intro section — indexable content for search engines */}
+      <section className="bg-muted/30 border-b border-border">
+        <div className="container py-6 max-w-4xl">
+          <h2 className="font-display font-bold text-xl text-foreground mb-3">
+            Things to Do in Charlotte, NC This Week & Weekend
+          </h2>
+          <p className="text-sm text-muted-foreground leading-relaxed mb-2">
+            Looking for things to do in Charlotte this weekend? Settle CLT's events calendar covers everything happening in the Queen City — from live concerts and music festivals to family-friendly activities, free community events, food and drink experiences, professional sports games, and seasonal festivals.
+          </p>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Whether you just moved to Charlotte or you're a lifelong local, use this page to find Charlotte events this week, plan your weekend, and discover new experiences across every neighborhood. Filter by date, category, or search for specific venues and artists.
+          </p>
         </div>
       </section>
 
@@ -394,7 +422,12 @@ export default function Events() {
                 type="text"
                 placeholder="Search events, venues, neighborhoods..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (e.target.value.trim().length >= 3) {
+                    trackEventAction("search", { search_query: e.target.value.trim(), surface: "events_search" });
+                  }
+                }}
                 className="pl-9 pr-9 h-9 text-sm"
               />
               {searchQuery && (
@@ -499,7 +532,10 @@ export default function Events() {
                 key={cat.value}
                 onClick={() => {
                   setSelectedCategory(cat.value);
-                  if (cat.value) trackClickByName(cat.value, 'event-filter');
+                  if (cat.value) {
+                    trackClickByName(cat.value, 'event-filter');
+                    trackEventAction("filter_click", { category: cat.value, surface: "events_category_pills" });
+                  }
                 }}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                   selectedCategory === cat.value
@@ -569,7 +605,7 @@ export default function Events() {
                     <EventCard
                       key={event.id}
                       event={event as EventType}
-                      onClick={() => setSelectedEvent(event as EventType)}
+                      onClick={() => openEvent(event as EventType, "upcoming_grid")}
                       onCategoryClick={(cat) => trackClickByName(cat, 'event-card')}
                       onNeighborhoodClick={(n) => trackClickByName(n, 'event-card')}
                     />
@@ -589,7 +625,7 @@ export default function Events() {
                     <EventCard
                       key={event.id}
                       event={event as EventType}
-                      onClick={() => setSelectedEvent(event as EventType)}
+                      onClick={() => openEvent(event as EventType, "past_grid")}
                       onCategoryClick={(cat) => trackClickByName(cat, 'event-card')}
                       onNeighborhoodClick={(n) => trackClickByName(n, 'event-card')}
                     />
@@ -665,6 +701,14 @@ export default function Events() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-medium no-underline transition-colors"
+                            onClick={() => trackEventAction("directions_click", {
+                              event_slug: selectedEvent.slug,
+                              event_title: selectedEvent.title,
+                              category: selectedEvent.category,
+                              neighborhood: selectedEvent.neighborhood || undefined,
+                              venue_name: selectedEvent.venueName,
+                              surface: "event_dialog",
+                            })}
                           >
                             <Navigation className="w-3.5 h-3.5" /> Get Directions
                           </a>
@@ -704,6 +748,14 @@ export default function Events() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-block"
+                    onClick={() => trackEventAction("external_click", {
+                      event_slug: selectedEvent.slug,
+                      event_title: selectedEvent.title,
+                      category: selectedEvent.category,
+                      neighborhood: selectedEvent.neighborhood || undefined,
+                      venue_name: selectedEvent.venueName,
+                      surface: "event_dialog",
+                    })}
                   >
                     <Button className="gap-2">
                       <ExternalLink className="w-4 h-4" />

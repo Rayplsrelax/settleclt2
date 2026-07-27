@@ -595,3 +595,42 @@
 - [x] Integrate HomeBlogSection into Home.tsx
 - [x] Add "View All Posts" link to blog page
 - [x] Write vitest tests for blog.getRecent procedure
+
+## Obsidian → GitHub → Settle CLT Pipeline
+- [x] Add POST /api/obsidian/publish webhook endpoint with OBSIDIAN_PUBLISH_SECRET auth
+- [x] Add upsertBlogPostFromWebhook db helper (create or update by slug)
+- [x] Create .github/workflows/obsidian-publish.yml GitHub Action
+- [x] Write Obsidian vault setup guide (folder structure, frontmatter conventions, Git plugin setup)
+- [x] Write vitest tests for the webhook endpoint (10 tests)
+- [x] Save checkpoint and deliver full setup guide
+
+## SEO Upgrades (July 2026) — Google Search Console Improvements
+- [x] BusinessDetail SEO title fix: name + category + area + Charlotte NC + Hours, Phone & Reviews
+- [x] BusinessDetail thin listing content block (local SEO context)
+- [x] Events page SEO upgrade: stronger title/description/keywords + intro section
+- [x] NeighborhoodDetail SEO title fix: stronger titles with Vibe, Costs & Reviews
+- [x] Create ThingsToDo page at /things-to-do with SEO landing content
+- [x] Add ThingsToDo route to App.tsx
+- [x] Add /things-to-do to sitemap in server/_core/index.ts
+- [x] Mixpanel UTM/referrer tracking in useMixpanelPageView.ts
+- [x] Add longDescription field to Neighborhood interface
+- [x] Add South Charlotte longDescription content
+- [x] Add Dilworth longDescription content
+- [x] Render longDescription in NeighborhoodDetail.tsx
+- [x] Update/create job market blog post in database
+- [x] Add SEO docs to repo (docs/seo/) — SEO_LOOP_AGENT_PROMPT, SEARCH_CONSOLE_RECRAWL_CHECKLIST, STAR_METHOD_DOMAINS, MIXPANEL_TRACKING_PLAN
+
+## Monetization: Stripe Payment System (July 2026)
+- [x] Audit existing Stripe integration, premium schema, and BusinessPricing page
+- [x] Create Stripe checkout session endpoint (Featured $29/mo, Premium $79/mo)
+- [x] Implement Stripe webhook handler (checkout.session.completed, subscription.updated, subscription.deleted, invoice.payment_failed)
+- [x] Build My Business page with current plan display and manage billing button
+- [x] Update Admin Revenue dashboard with monetization stats (claimed, pending, active featured/premium, MRR)
+- [x] Wire premium/featured badges into directory listing cards
+- [x] Write vitest tests for payment flows (checkout, webhook, free claim, admin stats)
+- [x] Run pnpm check + build + test — all passing
+- [x] Deploy to production and push to GitHub
+- [x] Verify live URLs: /business-pricing, /admin/revenue, checkout flow, webhook status
+
+## Bug Fixes (July 26, 2026)
+- [x] Fix nested button error on /events page (QuickStampButton inside EventCard's outer button)

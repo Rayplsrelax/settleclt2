@@ -16,6 +16,7 @@ import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import { useSEO } from "@/hooks/useSEO";
 import { useStructuredData, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
 import ClaimBusinessDialog from "@/components/ClaimBusinessDialog";
+import { trackBusinessAction, trackFindHomeIntent } from "@/lib/mixpanel";
 
 // Generate a slug key from service name
 function toSlug(name: string): string {
@@ -731,13 +732,26 @@ export default function Directory() {
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-medium no-underline transition-colors"
+                              onClick={() => trackBusinessAction("directions_click", {
+                                service_key: sSlug,
+                                business_name: s.name,
+                                category: cat?.name || s.category,
+                                area: s.area,
+                                surface: "directory_card",
+                              })}
                             >
                               <Map className="w-3 h-3" /> Get Directions
                             </a>
                           );
                         })()}
                         {s.phone && (
-                          <a href={`tel:${s.phone}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted text-muted-foreground hover:text-foreground text-xs font-medium no-underline transition-colors">
+                          <a href={`tel:${s.phone}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted text-muted-foreground hover:text-foreground text-xs font-medium no-underline transition-colors" onClick={() => trackBusinessAction("phone_click", {
+                            service_key: sSlug,
+                            business_name: s.name,
+                            category: cat?.name || s.category,
+                            area: s.area,
+                            surface: "directory_card",
+                          })}>
                             <Phone className="w-3 h-3" /> {s.phone}
                           </a>
                         )}
@@ -747,12 +761,25 @@ export default function Directory() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted text-primary hover:bg-primary/10 text-xs font-medium no-underline transition-colors"
+                            onClick={() => trackBusinessAction("website_click", {
+                              service_key: sSlug,
+                              business_name: s.name,
+                              category: cat?.name || s.category,
+                              area: s.area,
+                              surface: "directory_card",
+                            })}
                           >
                             Visit <ExternalLink className="w-3 h-3" />
                           </a>
                         )}
                         <ClaimBusinessDialog serviceKey={sSlug} businessName={s.name}>
-                          <button className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted text-[11px] transition-colors ml-auto">
+                          <button className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted text-[11px] transition-colors ml-auto" onClick={() => trackBusinessAction("claim_click", {
+                            service_key: sSlug,
+                            business_name: s.name,
+                            category: cat?.name || s.category,
+                            area: s.area,
+                            surface: "directory_card",
+                          })}>
                             <Building2 className="w-3 h-3" /> Claim
                           </button>
                         </ClaimBusinessDialog>
@@ -795,7 +822,7 @@ export default function Directory() {
                     <p className="text-xs text-muted-foreground mt-0.5">We'll match you with a trusted local real estate expert — completely free.</p>
                   </div>
                   <Link href="/find-your-home?source=directory">
-                    <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 shrink-0">
+                    <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 shrink-0" onClick={() => trackFindHomeIntent({ surface: "directory_banner", source: "directory" })}>
                       Find Your Home <ArrowRight className="w-3.5 h-3.5" />
                     </Button>
                   </Link>

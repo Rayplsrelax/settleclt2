@@ -40,6 +40,15 @@ import { notifyOwner } from "./_core/notification";
 import { storagePut } from "./storage";
 import { createCheckoutSession, createPortalSession } from "./stripe-helpers";
 import { notifyClaimApproved, notifyClaimRejected, notifyNewReview, notifyBingoComplete, notifyWelcome } from "./notification-service";
+import { buildHermesRevenueOpsSummary, createHermesRevenueDraft, generateHermesRevenueTasks } from "../shared/hermesRevenueOps";
+
+const SETTLE_CLT_MICROSITES = [
+  { domain: "movingtocharlotteguide.com", campaign: "relocation", status: "ready_for_dns", primaryFunnel: "/find-your-home" },
+  { domain: "charlotteweekendevents.com", campaign: "events", status: "ready_for_dns", primaryFunnel: "/events" },
+  { domain: "charlottejobmarket.com", campaign: "jobs", status: "ready_for_dns", primaryFunnel: "/jobs" },
+  { domain: "charlotteneighborhoodsguide.com", campaign: "neighborhoods", status: "ready_for_dns", primaryFunnel: "/neighborhoods" },
+  { domain: "charlottehomepros.org", campaign: "home_pros", status: "ready_for_dns", primaryFunnel: "/directory" },
+];
 
 export const appRouter = router({
   system: systemRouter,
@@ -917,6 +926,57 @@ export const appRouter = router({
       .input(z.object({ limit: z.number().min(1).max(100).optional(), days: z.number().min(1).max(365).optional() }).optional())
       .query(async ({ input }) => {
         return getPopularSearches(input?.limit ?? 20, input?.days ?? 30);
+      }),
+  }),
+
+  // --- Hermes Revenue + Lead Operations Agent ---
+  hermesRevenueOps: router({
+    snapshot: adminProcedure.query(async () => {
+      const [referrals, claims, premiumListings] = await Promise.all([
+        getReferrals({ limit: 100 }),
+        getBusinessClaims(),
+        getAllPremiumListings(),
+      ]);
+      const input = {
+        referrals: referrals as any[],
+        claims: claims as any[],
+        premiumListings: premiumListings as any[],
+        microsites: SETTLE_CLT_MICROSITES as any[],
+      };
+      const tasks = generateHermesRevenueTasks(input);
+      const summary = buildHermesRevenueOpsSummary(input);
+      return { summary, tasks };
+    }),
+    tasks: adminProcedure.query(async () => {
+      const [referrals, claims, premiumListings] = await Promise.all([
+        getReferrals({ limit: 100 }),
+        getBusinessClaims(),
+        getAllPremiumListings(),
+      ]);
+      return generateHermesRevenueTasks({
+        referrals: referrals as any[],
+        claims: claims as any[],
+        premiumListings: premiumListings as any[],
+        microsites: SETTLE_CLT_MICROSITES as any[],
+      });
+    }),
+    draft: adminProcedure
+      .input(z.object({ taskId: z.string().min(1) }))
+      .query(async ({ input }) => {
+        const [referrals, claims, premiumListings] = await Promise.all([
+          getReferrals({ limit: 100 }),
+          getBusinessClaims(),
+          getAllPremiumListings(),
+        ]);
+        const tasks = generateHermesRevenueTasks({
+          referrals: referrals as any[],
+          claims: claims as any[],
+          premiumListings: premiumListings as any[],
+          microsites: SETTLE_CLT_MICROSITES as any[],
+        });
+        const task = tasks.find(item => item.id === input.taskId);
+        if (!task) throw new TRPCError({ code: "NOT_FOUND", message: "Hermes revenue task not found" });
+        return createHermesRevenueDraft(task);
       }),
   }),
 

@@ -14,6 +14,7 @@ import ShareButtons from "@/components/ShareButtons";
 import { MapView } from "@/components/Map";
 import { useSEO } from "@/hooks/useSEO";
 import { useStructuredData, buildLocalBusinessSchema, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
+import { trackBusinessAction } from "@/lib/mixpanel";
 import NotFound from "@/pages/NotFound";
 
 function toSlug(name: string): string {
@@ -106,10 +107,15 @@ export default function BusinessDetail() {
 
   // SEO
   useSEO({
-    title: service ? `${service.name} — ${category?.name || "Directory"} | Settle CLT` : "Business Not Found | Settle CLT",
+    title: service
+      ? `${service.name} \u2014 ${category?.name || "Local Business"} in ${service.area}, Charlotte NC | Hours, Phone & Reviews`
+      : "Business Not Found | Settle CLT",
     description: service
-      ? `${service.description} Located in ${service.area}, Charlotte NC. Phone: ${service.phone}. Read reviews and get directions.`
+      ? `${service.name} in ${service.area}, Charlotte NC. ${service.description} Call ${service.phone || "the business"} for appointments. See hours, reviews, photos, and get directions.`
       : "This business listing was not found.",
+    keywords: service
+      ? `${service.name}, ${service.name} Charlotte, ${service.name} Charlotte NC, ${category?.name || "local business"} in ${service.area}, ${service.area} Charlotte NC, Charlotte ${category?.name || "local business"}`
+      : undefined,
     path: slug ? `/directory/${slug}` : "/directory",
     noSuffix: true,
   });
@@ -220,6 +226,17 @@ export default function BusinessDetail() {
   const relatedBusinesses = useMemo(() => {
     return SERVICES.filter((s) => s.category === service.category && toSlug(s.name) !== slug).slice(0, 6);
   }, [service.category, slug]);
+
+  const trackListingAction = (action: "phone_click" | "website_click" | "directions_click" | "claim_click", surface: string) => {
+    trackBusinessAction(action, {
+      service_key: slug,
+      business_name: service.name,
+      category: category?.name || service.category,
+      area: service.area,
+      surface,
+      premium_tier: premiumData?.active ? premiumData.tier : "basic",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -374,15 +391,31 @@ export default function BusinessDetail() {
                 {/* Description */}
                 <p className="text-muted-foreground mt-4 leading-relaxed">{service.description}</p>
 
+                {/* Local SEO context for thin listings */}
+                <div className="mt-4 rounded-2xl bg-muted/40 border border-border p-4 text-sm text-muted-foreground leading-relaxed space-y-2">
+                  <h2 className="font-display font-semibold text-base text-foreground">
+                    About {service.name} in {service.area}, Charlotte NC
+                  </h2>
+                  <p>
+                    {service.name} is listed in Settle CLT's Charlotte directory under {category?.name || "local services"}.
+                    Use this page to quickly check contact details, hours, photos, reviews, and directions before you visit or call.
+                  </p>
+                  <p>
+                    If you are moving to Charlotte or getting settled in {service.area}, compare this listing with other
+                    {category?.name ? ` ${category.name.toLowerCase()}` : " local service"} options nearby so you can choose the right fit for your home, commute, errands, or weekend plans.
+                  </p>
+                </div>
+
                 {/* Action buttons row */}
                 <div className="flex flex-wrap gap-2 mt-5">
-                  <a href={directionsUrl} target="_blank" rel="noopener noreferrer">
+                  <a href={directionsUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackListingAction("directions_click", "hero_actions")}>
                     <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-700 text-white">
                       <Navigation className="w-3.5 h-3.5" /> Get Directions
                     </Button>
                   </a>
                   {service.phone && (
                     <a href={`tel:${service.phone}`} onClick={() => {
+                      trackListingAction("phone_click", "hero_actions");
                       if (premiumData?.active && premiumData?.tier !== 'basic') {
                         trackClick.mutate({ serviceKey: slug });
                       }
@@ -394,6 +427,7 @@ export default function BusinessDetail() {
                   )}
                   {service.website && (
                     <a href={service.website} target="_blank" rel="noopener noreferrer" onClick={() => {
+                      trackListingAction("website_click", "hero_actions");
                       if (premiumData?.active && premiumData?.tier !== 'basic') {
                         trackClick.mutate({ serviceKey: slug });
                       }
@@ -404,7 +438,7 @@ export default function BusinessDetail() {
                     </a>
                   )}
                   <ClaimBusinessDialog serviceKey={slug} businessName={service.name}>
-                    <Button size="sm" variant="ghost" className="gap-1.5 text-muted-foreground">
+                    <Button size="sm" variant="ghost" className="gap-1.5 text-muted-foreground" onClick={() => trackListingAction("claim_click", "hero_actions")}>
                       <Building2 className="w-3.5 h-3.5" /> Claim This Business
                     </Button>
                   </ClaimBusinessDialog>
@@ -496,7 +530,7 @@ export default function BusinessDetail() {
                 {(enrichment?.verifiedPhone || service.phone) && (
                   <div className="flex items-center gap-3">
                     <Phone className="w-4 h-4 text-muted-foreground shrink-0" />
-                    <a href={`tel:${enrichment?.verifiedPhone || service.phone}`} className="text-sm text-primary hover:underline">
+                    <a href={`tel:${enrichment?.verifiedPhone || service.phone}`} className="text-sm text-primary hover:underline" onClick={() => trackListingAction("phone_click", "sidebar_quick_info")}>
                       {enrichment?.verifiedPhone || service.phone}
                     </a>
                   </div>
@@ -505,14 +539,14 @@ export default function BusinessDetail() {
                 {service.website && (
                   <div className="flex items-center gap-3">
                     <ExternalLink className="w-4 h-4 text-muted-foreground shrink-0" />
-                    <a href={service.website} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate">
+                    <a href={service.website} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate" onClick={() => trackListingAction("website_click", "sidebar_quick_info")}>
                       {service.website.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")}
                     </a>
                   </div>
                 )}
 
                 <div className="pt-3 border-t border-border">
-                  <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="block">
+                  <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="block" onClick={() => trackListingAction("directions_click", "sidebar_quick_info")}>
                     <Button className="w-full gap-1.5 bg-blue-600 hover:bg-blue-700 text-white">
                       <Navigation className="w-4 h-4" /> Get Directions
                     </Button>

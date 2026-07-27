@@ -146,6 +146,71 @@ export function trackDirectoryView(serviceKey: string, category: string) {
   trackEvent("Directory View", { service_key: serviceKey, category });
 }
 
+export function trackBusinessAction(
+  action: "phone_click" | "website_click" | "directions_click" | "claim_click",
+  properties: {
+    service_key: string;
+    business_name?: string;
+    category?: string;
+    area?: string;
+    surface?: string;
+    premium_tier?: string | null;
+  }
+) {
+  trackEvent("Business Action", { action, ...properties });
+}
+
+export function trackClaimSubmit(properties: {
+  service_key: string;
+  business_name: string;
+  claimant_role?: string;
+}) {
+  trackEvent("Business Claim Submitted", properties);
+}
+
+export function trackFindHomeLead(properties: {
+  referral_type: string;
+  budget?: string;
+  neighborhoods?: string;
+  timeline?: string;
+  referral_source?: string;
+  current_city?: string;
+}) {
+  trackEvent("Find Home Lead Submitted", properties);
+}
+
+export function trackFindHomeIntent(properties: {
+  surface: string;
+  source?: string;
+  neighborhoods?: string;
+  referral_type?: string;
+}) {
+  trackEvent("Find Home Intent", properties);
+}
+
+export function trackEventAction(
+  action: "event_view" | "directions_click" | "external_click" | "submit_event_click" | "filter_click" | "search",
+  properties: {
+    event_slug?: string;
+    event_title?: string;
+    category?: string;
+    neighborhood?: string;
+    venue_name?: string | null;
+    search_query?: string;
+    surface?: string;
+  }
+) {
+  trackEvent("Event Action", { action, ...properties });
+}
+
+export function trackQuizComplete(properties: {
+  top_neighborhood?: string;
+  top_matches?: string[];
+  answer_count: number;
+}) {
+  trackEvent("Quiz Complete", properties);
+}
+
 export function trackNeighborhoodView(neighborhoodId: string) {
   trackEvent("Neighborhood View", { neighborhood_id: neighborhoodId });
 }

@@ -171,6 +171,56 @@ async function startServer() {
     }
   });
 
+  // ── Obsidian → Settle CLT publish webhook ─────────────────────────────────
+  // Accepts POST /api/obsidian/publish with a shared secret in the Authorization
+  // header. Called by GitHub Actions when a note tagged `publish: true` is
+  // pushed to the vault repo. Creates or updates a blog post by slug.
+  app.post("/api/obsidian/publish", express.json({ limit: "2mb" }), async (req, res) => {
+    try {
+      const secret = process.env.OBSIDIAN_PUBLISH_SECRET;
+      if (!secret) {
+        console.error("[Obsidian Webhook] OBSIDIAN_PUBLISH_SECRET not set");
+        return res.status(500).json({ error: "Server misconfiguration" });
+      }
+      const authHeader = req.headers["authorization"] || "";
+      const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+      if (token !== secret) {
+        console.warn("[Obsidian Webhook] Unauthorized attempt");
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const { slug, title, content, excerpt, category, coverImage, status, readTime, publishedAt } = req.body;
+      if (!slug || !title || !content) {
+        return res.status(400).json({ error: "Missing required fields: slug, title, content" });
+      }
+
+      const { upsertBlogPostFromWebhook } = await import("../db");
+      const post = await upsertBlogPostFromWebhook({
+        slug,
+        title,
+        content,
+        excerpt: excerpt || null,
+        category: category || "Charlotte Guide",
+        coverImage: coverImage || null,
+        status: status === "draft" ? "draft" : "published",
+        readTime: readTime || null,
+        publishedAt: publishedAt ? new Date(publishedAt) : new Date(),
+      });
+
+      console.log(`[Obsidian Webhook] Upserted post: ${slug} (${post.action})`); 
+      const { notifyOwner } = await import("./notification");
+      await notifyOwner({
+        title: `📝 Blog post ${post.action}: "${title}"`,
+        content: `Obsidian pipeline published "${title}" (/${slug}) — status: ${status || 'published'}.`,
+      });
+
+      res.json({ ok: true, action: post.action, slug });
+    } catch (err: any) {
+      console.error("[Obsidian Webhook] Error:", err.message);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // ── Security headers via helmet ──────────────────────────────────────────
   // Two modes, selected per request by hostname:
   //  • PREVIEW (manus.space / manus.computer / localhost): CSP disabled.
@@ -288,6 +338,7 @@ async function startServer() {
       { loc: "/neighborhoods", priority: "0.9", changefreq: "weekly" },
       { loc: "/directory", priority: "0.9", changefreq: "weekly" },
       { loc: "/events", priority: "0.9", changefreq: "daily" },
+      { loc: "/things-to-do", priority: "0.85", changefreq: "weekly" },
       { loc: "/blog", priority: "0.8", changefreq: "weekly" },
       { loc: "/passport", priority: "0.7", changefreq: "weekly" },
       { loc: "/bingo", priority: "0.7", changefreq: "monthly" },
@@ -295,6 +346,7 @@ async function startServer() {
       { loc: "/quiz", priority: "0.8", changefreq: "monthly" },
       { loc: "/compare", priority: "0.7", changefreq: "monthly" },
       { loc: "/find-your-home", priority: "0.8", changefreq: "monthly" },
+      { loc: "/business-pricing", priority: "0.7", changefreq: "monthly" },
       { loc: "/list-your-business", priority: "0.6", changefreq: "monthly" },
       { loc: "/submit-event", priority: "0.5", changefreq: "monthly" },
       { loc: "/contact", priority: "0.5", changefreq: "yearly" },
@@ -302,7 +354,7 @@ async function startServer() {
       { loc: "/terms", priority: "0.3", changefreq: "yearly" },
     ];
 
-    // Directory category pages (e.g., /directory?category=restaurants)
+    // Directory category pages (e.g., /directory/category/restaurants)
     const directoryCategories = [
       "moving-companies", "storage", "utilities", "internet", "insurance",
       "dmv", "government", "banking", "tax", "legal",
@@ -369,7 +421,7 @@ async function startServer() {
     }
 
     for (const cat of directoryCategories) {
-      xml += `  <url>\n    <loc>${baseUrl}/directory?category=${cat}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
+      xml += `  <url>\n    <loc>${baseUrl}/directory/category/${cat}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.6</priority>\n  </url>\n`;
     }
 
     for (const evtCat of eventCategories) {

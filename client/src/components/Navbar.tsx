@@ -22,6 +22,7 @@ const navLinks = [
   { href: "/blog", label: "Blog" },
   { href: "/passport", label: "CLT Passport" },
   { href: "/find-your-home", label: "Find Your Home" },
+  { href: "/business-pricing", label: "Business Pricing" },
 ];
 
 function getInitials(name: string | null | undefined): string {

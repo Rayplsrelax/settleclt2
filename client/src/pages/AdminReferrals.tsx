@@ -24,6 +24,14 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
   lost: { label: "Lost", color: "text-red-700", bg: "text-red-50 border-red-200", icon: XCircle },
 };
 
+const PRIORITY_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  hot: { label: "Hot", color: "text-red-700", bg: "bg-red-50 border-red-200" },
+  qualified: { label: "Qualified", color: "text-orange-700", bg: "bg-orange-50 border-orange-200" },
+  nurture: { label: "Nurture", color: "text-purple-700", bg: "bg-purple-50 border-purple-200" },
+  early: { label: "Early", color: "text-sky-700", bg: "bg-sky-50 border-sky-200" },
+  low: { label: "Low", color: "text-slate-700", bg: "bg-slate-50 border-slate-200" },
+};
+
 const TYPE_LABELS: Record<string, { label: string; icon: any; color: string }> = {
   buying: { label: "Buying a Home", icon: Home, color: "text-teal-600" },
   selling: { label: "Selling a Home", icon: DollarSign, color: "text-amber-600" },
@@ -86,6 +94,8 @@ export default function AdminReferrals() {
   const byStatus = (stats?.byStatus || {}) as Record<string, number>;
   const byType = (stats?.byType || {}) as Record<string, number>;
   const bySource = ((stats as any)?.bySource || {}) as Record<string, number>;
+  const byPriority = ((stats as any)?.byPriority || {}) as Record<string, number>;
+  const dueNextActions = ((stats as any)?.dueNextActions || []) as any[];
   const needsFollowUp = (stats as any)?.needsFollowUp || 0;
   const pipelineStages = [
     { key: "new", label: "New", count: byStatus['new'] || 0 },
@@ -222,6 +232,72 @@ export default function AdminReferrals() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Priority Queue */}
+            <div className="grid lg:grid-cols-2 gap-4 mb-6">
+              <Card className="border-0 shadow-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-semibold flex items-center gap-2">
+                    <Target className="w-4 h-4 text-red-600" />
+                    Lead Priority Queue
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-5 gap-2">
+                    {["hot", "qualified", "nurture", "early", "low"].map(priority => {
+                      const config = PRIORITY_CONFIG[priority];
+                      return (
+                        <div key={priority} className={`rounded-lg border ${config.bg} p-3 text-center`}>
+                          <div className={`text-2xl font-bold ${config.color}`}>{byPriority[priority] || 0}</div>
+                          <div className={`text-[11px] font-medium ${config.color}`}>{config.label}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-3">
+                    Hot and qualified leads should be worked first. Rent-only leads are kept in nurture unless they become buyer/seller ready.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-0 shadow-sm">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-semibold flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-amber-600" />
+                    Next Actions Due
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {dueNextActions.length > 0 ? (
+                    <div className="space-y-2">
+                      {dueNextActions.slice(0, 4).map((lead: any) => {
+                        const priorityConfig = PRIORITY_CONFIG[lead.leadPriority || "low"] || PRIORITY_CONFIG.low;
+                        return (
+                          <button
+                            key={lead.id}
+                            type="button"
+                            onClick={() => { setStatusFilter("all"); setView("list"); }}
+                            className="w-full text-left rounded-lg border border-border bg-white p-3 hover:bg-muted/40 transition-colors"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-sm font-semibold">{lead.name}</span>
+                              <Badge className={`${priorityConfig.bg} ${priorityConfig.color} border text-[10px]`}>
+                                {priorityConfig.label} · {lead.leadScore || 0}/25
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{lead.nextAction || "Follow up"}</p>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="h-28 flex items-center justify-center text-sm text-muted-foreground text-center">
+                      No due actions right now. New hot leads will appear here automatically.
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
             {/* Follow-up Alert */}
             {needsFollowUp > 0 && (
@@ -363,6 +439,11 @@ export default function AdminReferrals() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
+                            {lead.leadPriority && (
+                              <Badge className={`${(PRIORITY_CONFIG[lead.leadPriority] || PRIORITY_CONFIG.low).bg} ${(PRIORITY_CONFIG[lead.leadPriority] || PRIORITY_CONFIG.low).color} border text-[10px]`}>
+                                {(PRIORITY_CONFIG[lead.leadPriority] || PRIORITY_CONFIG.low).label} · {lead.leadScore || 0}/25
+                              </Badge>
+                            )}
                             {getUrgencyBadge(lead.status, lead.createdAt)}
                             <Badge className={`${STATUS_CONFIG[lead.status]?.bg || ""} ${STATUS_CONFIG[lead.status]?.color || ""} border text-[10px]`}>
                               {STATUS_CONFIG[lead.status]?.label || lead.status}
@@ -442,6 +523,11 @@ export default function AdminReferrals() {
                               <Badge className={`${STATUS_CONFIG[ref.status]?.bg || ""} ${STATUS_CONFIG[ref.status]?.color || ""} border`}>
                                 {STATUS_CONFIG[ref.status]?.label || ref.status}
                               </Badge>
+                              {ref.leadPriority && (
+                                <Badge className={`${(PRIORITY_CONFIG[ref.leadPriority] || PRIORITY_CONFIG.low).bg} ${(PRIORITY_CONFIG[ref.leadPriority] || PRIORITY_CONFIG.low).color} border`}>
+                                  {(PRIORITY_CONFIG[ref.leadPriority] || PRIORITY_CONFIG.low).label} · {ref.leadScore || 0}/25
+                                </Badge>
+                              )}
                               <Badge variant="outline" className="gap-1">
                                 <TypeIcon className={`w-3 h-3 ${typeConfig.color}`} />
                                 {typeConfig.label}
@@ -457,6 +543,11 @@ export default function AdminReferrals() {
                               {ref.currentCity && <span className="flex items-center gap-1.5"><ArrowRight className="w-3.5 h-3.5" />From: {ref.currentCity}</span>}
                             </div>
                             {ref.notes && <p className="text-sm text-muted-foreground mt-2 line-clamp-2 bg-gray-50 rounded px-2 py-1">{ref.notes}</p>}
+                            {ref.nextAction && (
+                              <p className="text-sm text-teal-700 mt-2 bg-teal-50 rounded px-2 py-1">
+                                Next: {ref.nextAction}{ref.nextActionDueAt ? ` · due ${new Date(ref.nextActionDueAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}
+                              </p>
+                            )}
                             {ref.adminNotes && <p className="text-sm text-amber-700 mt-2 italic bg-amber-50 rounded px-2 py-1">📝 {ref.adminNotes}</p>}
                           </div>
                           <div className="text-right flex-shrink-0">

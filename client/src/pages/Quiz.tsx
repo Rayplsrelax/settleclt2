@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import ShareButtons from "@/components/ShareButtons";
 import { useSEO } from "@/hooks/useSEO";
+import { trackFindHomeIntent, trackQuizComplete } from "@/lib/mixpanel";
 
 // ─── Progress Bar ─────────────────────────────────────────────────
 function ProgressBar({ current, total }: { current: number; total: number }) {
@@ -318,12 +319,12 @@ function HomeCTA({ topNeighborhoods, housingType }: { topNeighborhoods: string[]
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link href={homeUrl}>
-                  <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white">
+                  <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => trackFindHomeIntent({ surface: "quiz_results_buy_cta", source: "quiz", neighborhoods: neighborhoodParam, referral_type: housingType === "renting" ? "renting" : "buying" })}>
                     <HomeIcon className="w-4 h-4" /> Find Your Home
                   </Button>
                 </Link>
                 <Link href={`${homeUrl}&type=renting`}>
-                  <Button variant="outline" className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50">
+                  <Button variant="outline" className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50" onClick={() => trackFindHomeIntent({ surface: "quiz_results_rent_cta", source: "quiz", neighborhoods: neighborhoodParam, referral_type: "renting" })}>
                     <MapPin className="w-4 h-4" /> Find an Apartment
                   </Button>
                 </Link>
@@ -443,6 +444,11 @@ export default function Quiz() {
     } else {
       // Calculate results
       const scored = scoreNeighborhoods(answers);
+      trackQuizComplete({
+        top_neighborhood: scored[0]?.neighborhood.name,
+        top_matches: scored.slice(0, 3).map((r) => r.neighborhood.name),
+        answer_count: Object.keys(answers).length,
+      });
       setResults(scored);
       setPhase('results');
       window.scrollTo({ top: 0, behavior: 'smooth' });

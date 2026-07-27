@@ -106,7 +106,7 @@ describe("Sitemap Enhancement", () => {
     const content = await import("fs").then((fs) =>
       fs.readFileSync("./server/_core/index.ts", "utf-8")
     );
-    expect(content).toContain("directory?category=${cat}");
+    expect(content).toContain("/directory/category/${cat}");
   });
 });
 

@@ -11,8 +11,10 @@ const Home = lazy(() => import("./pages/Home"));
 const Neighborhoods = lazy(() => import("./pages/Neighborhoods"));
 const NeighborhoodDetail = lazy(() => import("./pages/NeighborhoodDetail"));
 const Directory = lazy(() => import("./pages/Directory"));
+const DirectoryCategory = lazy(() => import("./pages/DirectoryCategory"));
 const Blog = lazy(() => import("./pages/Blog"));
 const ListYourBusiness = lazy(() => import("./pages/ListYourBusiness"));
+const BusinessPricing = lazy(() => import("./pages/BusinessPricing"));
 const Compare = lazy(() => import("./pages/Compare"));
 const Quiz = lazy(() => import("./pages/Quiz"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -25,10 +27,12 @@ const BlogArticle = lazy(() => import("./pages/BlogArticle"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 const Events = lazy(() => import("./pages/Events"));
 const EventCategoryPage = lazy(() => import("./pages/EventCategoryPage"));
+const ThingsToDo = lazy(() => import("./pages/ThingsToDo"));
 const AdminEvents = lazy(() => import("./pages/AdminEvents"));
 const TagPage = lazy(() => import("./pages/TagPage"));
 const SubmitEvent = lazy(() => import("./pages/SubmitEvent"));
 const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics"));
+const AdminRevenueOps = lazy(() => import("./pages/AdminRevenueOps"));
 const AdminDigest = lazy(() => import("./pages/AdminDigest"));
 const FindYourHome = lazy(() => import("./pages/FindRealtor"));
 const AdminReferrals = lazy(() => import("./pages/AdminReferrals"));
@@ -61,6 +65,7 @@ function Router() {
         <Route path="/directory" component={Directory} />
         <Route path="/blog" component={Blog} />
         <Route path="/list-your-business" component={ListYourBusiness} />
+        <Route path="/business-pricing" component={BusinessPricing} />
         <Route path="/compare" component={Compare} />
         <Route path="/quiz" component={Quiz} />
         <Route path="/profile" component={Profile} />
@@ -69,12 +74,14 @@ function Router() {
         <Route path="/bingo" component={BingoCards} />
         <Route path="/events" component={Events} />
         <Route path="/events/category/:categoryId" component={EventCategoryPage} />
+        <Route path="/things-to-do" component={ThingsToDo} />
         <Route path="/leaderboard" component={Leaderboard} />
         <Route path="/admin/enrich" component={AdminEnrich} />
         <Route path="/admin/blog" component={AdminBlog} />
         <Route path="/admin/events" component={AdminEvents} />
         <Route path="/submit-event" component={SubmitEvent} />
         <Route path="/admin/analytics" component={AdminAnalytics} />
+        <Route path="/admin/revenue" component={AdminRevenueOps} />
         <Route path="/admin/digest" component={AdminDigest} />
         <Route path="/admin/referrals" component={AdminReferrals} />
         <Route path="/admin/claims" component={AdminClaims} />
@@ -85,6 +92,7 @@ function Router() {
         <Route path="/privacy" component={PrivacyPolicy} />
         <Route path="/terms" component={TermsOfService} />
         <Route path="/tag/:slug" component={TagPage} />
+        <Route path="/directory/category/:slug" component={DirectoryCategory} />
         <Route path="/directory/:slug" component={BusinessDetail} />
         <Route path="/blog/:slug" component={BlogArticle} />
         <Route path="/notifications" component={Notifications} />

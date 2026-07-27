@@ -113,6 +113,13 @@
       "when": 1775500954543,
       "tag": "0015_worthless_diamondback",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "5",
+      "when": 1784915376521,
+      "tag": "0016_loose_lyja",
+      "breakpoints": true
     }
   ]
 }
