@@ -11,6 +11,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { registerObsidianPublishRoute } from "../obsidian-publish";
 import { registerStorageProxy } from "./storageProxy";
+import { hermesRouter } from "../hermes-api";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -296,6 +297,8 @@ async function startServer() {
   registerOAuthRoutes(app);
   // Shared-secret endpoint for Obsidian/GitHub Actions blog publishing
   registerObsidianPublishRoute(app);
+  // Hermes revenue ops agent REST API (Bearer token auth)
+  app.use("/api/hermes", express.json({ limit: "2mb" }), hermesRouter);
   // Rate limiting for API endpoints
   const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes

@@ -637,3 +637,7 @@
 - [x] Generate cover images for all 28 published blog posts missing them
 - [x] Set up storage proxy (server/_core/storageProxy.ts) for /manus-storage/ paths
 - [x] Fix events not showing: added missing `active` column to DB + regenerated 21 recurring event dates to upcoming weeks
+- [x] Create HERMES_API_SECRET env variable
+- [x] Build /api/hermes/* REST endpoints (read: snapshot, tasks, draft; write: update lead, approve claim, mark task done, update event)
+- [x] Write vitest tests for Hermes API auth and operations (22 tests)
+- [x] Provide Hermes integration docs with endpoint URLs and payload examples
