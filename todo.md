@@ -634,3 +634,5 @@
 
 ## Bug Fixes (July 26, 2026)
 - [x] Fix nested button error on /events page (QuickStampButton inside EventCard's outer button)
+- [x] Generate cover images for all 28 published blog posts missing them
+- [x] Set up storage proxy (server/_core/storageProxy.ts) for /manus-storage/ paths
