@@ -251,34 +251,51 @@ export type InsertBlogPost = typeof blogPosts.$inferInsert;
 // --- Events: Charlotte happenings ---
 export const events = mysqlTable("events", {
   id: int("id").autoincrement().primaryKey(),
-  title: varchar("title", { length: 255 }).notNull(),
+  /** New: display name (preferred over title for new events system) */
+  name: varchar("name", { length: 255 }),
+  /** Legacy title field — kept for backward compat */
+  title: varchar("title", { length: 255 }),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
+  /** New: recurring vs one_time */
+  type: mysqlEnum("type", ["recurring", "one_time"]).default("one_time"),
   description: text("description"),
-  /** Event start as UTC ms timestamp */
-  startDate: timestamp("startDate").notNull(),
+  /** Event start as UTC ms timestamp (legacy) */
+  startDate: timestamp("startDate"),
   /** Event end (nullable for single-time events) */
   endDate: timestamp("endDate"),
+  /** New: string-based date for flexible event dates */
+  startDateStr: varchar("startDateStr", { length: 32 }),
+  endDateStr: varchar("endDateStr", { length: 32 }),
   venueName: varchar("venueName", { length: 255 }),
   venueAddress: varchar("venueAddress", { length: 500 }),
-  neighborhood: varchar("neighborhood", { length: 100 }),
+  /** New: simplified venue + area */
+  venue: varchar("venue", { length: 255 }),
+  venueArea: varchar("venueArea", { length: 128 }),
+  neighborhood: varchar("neighborhood", { length: 128 }),
   externalUrl: varchar("externalUrl", { length: 500 }),
   imageUrl: varchar("imageUrl", { length: 1024 }),
-  category: mysqlEnum("category", [
-    "concerts",
-    "food-drink",
-    "sports",
-    "arts-culture",
-    "festivals",
-    "family",
-    "nightlife",
-    "free",
-    "markets",
-    "community",
-  ]).notNull(),
+  /** New: organizer info */
+  organizer: varchar("organizer", { length: 255 }),
+  organizerWebsite: text("organizerWebsite"),
+  /** New: recurring pattern description */
+  recurringPattern: varchar("recurringPattern", { length: 255 }),
+  /** New: source verification */
+  sourceUrl: text("sourceUrl"),
+  sourceVerified: boolean("sourceVerified").default(false).notNull(),
+  newcomerFriendly: boolean("newcomerFriendly").default(false).notNull(),
+  category: varchar("category", { length: 128 }).notNull(),
+  /** New: cost enum */
+  cost: mysqlEnum("cost", ["free", "paid", "mixed"]).default("free"),
+  rsvpUrl: text("rsvpUrl"),
+  /** Legacy featured flag */
   isFeatured: mysqlEnum("isFeatured", ["yes", "no"]).default("no").notNull(),
+  /** New: boolean featured */
+  featured: boolean("featured").default(false).notNull(),
   isRecurring: mysqlEnum("isRecurring", ["yes", "no"]).default("no").notNull(),
   submittedBy: int("submittedBy"),
   status: mysqlEnum("status", ["draft", "published", "archived"]).default("draft").notNull(),
+  /** New: active flag (replaces status for new system) */
+  active: boolean("active").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

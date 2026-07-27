@@ -114,13 +114,15 @@ export default function GlobalSearch() {
     // DB events
     if (dbEvents) {
       for (const e of dbEvents) {
-        const date = new Date(e.startDate).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-        });
+        const date = e.startDate
+          ? new Date(e.startDate).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            })
+          : "TBD";
         results.push({
           id: `event-${e.id}`,
-          title: e.title,
+          title: e.title || e.name || "Untitled Event",
           subtitle: `${date} · ${e.venueName ?? e.neighborhood ?? "Charlotte"}`,
           type: "event",
           href: `/events?event=${e.slug}`,

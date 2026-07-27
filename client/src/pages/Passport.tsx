@@ -267,26 +267,26 @@ function PassportContent() {
                 {showEventDropdown && (
                   <div className="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-border bg-background shadow-lg">
                     {publishedEvents
-                      .filter(evt => !eventSearch || evt.title.toLowerCase().includes(eventSearch.toLowerCase()))
+                      .filter(evt => !eventSearch || (evt.title || evt.name || "").toLowerCase().includes(eventSearch.toLowerCase()))
                       .map(evt => (
                         <button
                           key={evt.slug}
                           disabled={stampedEventSlugs.has(evt.slug)}
                           onClick={() => {
                             setSelectedEvent(evt.slug);
-                            setEventSearch(evt.title);
+                            setEventSearch(evt.title || evt.name || "");
                             setShowEventDropdown(false);
                           }}
                           className={`w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors ${
                             stampedEventSlugs.has(evt.slug) ? "opacity-50 cursor-not-allowed" : ""
                           } ${selectedEvent === evt.slug ? "bg-purple-500/10 text-purple-600" : "text-foreground"}`}
                         >
-                          {evt.title}
+                          {evt.title || evt.name || "Untitled Event"}
                           {evt.neighborhood ? ` (${evt.neighborhood})` : ""}
                           {stampedEventSlugs.has(evt.slug) ? " ✓" : ""}
                         </button>
                       ))}
-                    {publishedEvents.filter(evt => !eventSearch || evt.title.toLowerCase().includes(eventSearch.toLowerCase())).length === 0 && (
+                    {publishedEvents.filter(evt => !eventSearch || (evt.title || evt.name || "").toLowerCase().includes(eventSearch.toLowerCase())).length === 0 && (
                       <div className="px-3 py-2 text-sm text-muted-foreground">No events found</div>
                     )}
                   </div>
