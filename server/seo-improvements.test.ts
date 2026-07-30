@@ -108,7 +108,19 @@ describe("Alt text on images", () => {
 
   for (const { file, expected } of pagesWithImages) {
     it(`${file} has descriptive alt text with location context`, () => {
-      const content = readFileSync(join(__dirname, `../client/src/pages/${file}`), "utf-8");
+      let content = readFileSync(
+        join(__dirname, `../client/src/pages/${file}`),
+        "utf-8"
+      );
+      if (file === "Home.tsx") {
+        content += readFileSync(
+          join(
+            __dirname,
+            "../client/src/components/home/FeaturedNeighborhoods.tsx"
+          ),
+          "utf-8"
+        );
+      }
       for (const keyword of expected) {
         expect(content).toContain(keyword);
       }

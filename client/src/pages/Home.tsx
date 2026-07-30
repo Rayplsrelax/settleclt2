@@ -1,13 +1,11 @@
 import PageLayout from "@/components/PageLayout";
+import DeferredSection from "@/components/DeferredSection";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Link } from "wouter";
-import { neighborhoods } from "@shared/neighborhoods";
-import { SERVICE_SUPER_GROUPS, SERVICE_CATEGORIES } from "@shared/services";
 import { articles } from "@shared/articles";
 import {
   ArrowRight,
   MapPin,
-  Search,
   Building2,
   BookOpen,
   ChevronRight,
@@ -23,13 +21,20 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useState, useMemo } from "react";
+import { lazy, Suspense, useState, useMemo } from "react";
 import { useSEO } from "@/hooks/useSEO";
 import { useStructuredData, buildOrganizationSchema, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import ActivityFeed from "@/components/ActivityFeed";
+
+const FeaturedNeighborhoods = lazy(
+  () => import("@/components/home/FeaturedNeighborhoods")
+);
+const DirectoryPreview = lazy(
+  () => import("@/components/home/DirectoryPreview")
+);
 
 const HERO_IMAGE =
   "https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/YJZXYMWOczYLllKW.jpg";
@@ -142,131 +147,6 @@ function QuizCTA() {
               </Button>
             </Link>
           </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function FeaturedNeighborhoods() {
-  const { trackClickByName } = useTagTrackingWithLookup();
-  const featured = neighborhoods.filter((n) => n.featured).slice(0, 4);
-  return (
-    <section className="py-16 md:py-20 bg-muted/50">
-      <div className="container">
-        <div className="flex items-end justify-between mb-8">
-          <div>
-            <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">
-              Popular Neighborhoods
-            </h2>
-            <p className="mt-2 text-muted-foreground">
-              Where most newcomers start their search
-            </p>
-          </div>
-          <Link
-            href="/neighborhoods"
-            className="hidden sm:flex items-center gap-1 text-sm font-medium text-primary hover:underline no-underline"
-          >
-            View all 20 <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {featured.map((n) => (
-            <Link
-              key={n.id}
-              href={`/neighborhood/${n.id}`}
-              className="no-underline group"
-            >
-              <div className="relative rounded-xl overflow-hidden h-72 border border-border bg-card transition-all group-hover:shadow-xl group-hover:-translate-y-1">
-                {/* Real photo background */}
-                <img loading="lazy"
-                  src={n.photoUrls[0]}
-                  alt={`${n.name} neighborhood in Charlotte NC`}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                <div className="relative h-full flex flex-col justify-end p-5">
-                  <h3 className="font-display font-bold text-lg text-white">
-                    {n.name}
-                  </h3>
-                  <p className="text-sm text-white/80 mt-1">{n.vibe}</p>
-                  <div className="flex flex-wrap gap-1.5 mt-3">
-                    {n.tags.slice(0, 3).map((tag) => (
-                      <span
-                        key={tag}
-                        className="px-2 py-0.5 rounded-full bg-white/15 backdrop-blur-sm text-white text-xs hover:bg-white/25 cursor-pointer transition-colors"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          trackClickByName(tag.replace(/[^\w\s]/g, '').trim(), 'home-neighborhood', n.id);
-                        }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-        <Link
-          href="/neighborhoods"
-          className="sm:hidden flex items-center justify-center gap-1 mt-6 text-sm font-medium text-primary no-underline"
-        >
-          View all 20 neighborhoods <ChevronRight className="w-4 h-4" />
-        </Link>
-      </div>
-    </section>
-  );
-}
-
-function DirectoryPreview() {
-  return (
-    <section className="py-16 md:py-20">
-      <div className="container">
-        <div className="text-center mb-10">
-          <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">
-            700+ Charlotte Services
-          </h2>
-          <p className="mt-2 text-muted-foreground max-w-xl mx-auto">
-            From movers to mechanics, barbers to breweries — every service you
-            need to get settled.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {SERVICE_SUPER_GROUPS.map((sg) => {
-            const catCount = SERVICE_CATEGORIES.filter(
-              (c) => c.group === sg.id
-            ).length;
-            return (
-              <Link
-                key={sg.id}
-                href={`/directory?group=${sg.id}`}
-                className="no-underline"
-              >
-                <div className="flex flex-col items-center gap-3 p-5 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-md transition-all text-center group">
-                  <span className="text-3xl">{sg.icon}</span>
-                  <div>
-                    <p className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">
-                      {sg.label.replace(sg.icon + " ", "")}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {catCount} categories
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-        <div className="text-center mt-8">
-          <Link href="/directory">
-            <Button variant="outline" size="lg" className="font-semibold">
-              <Search className="w-4 h-4 mr-2" />
-              Browse Full Directory
-            </Button>
-          </Link>
         </div>
       </div>
     </section>
@@ -871,8 +751,16 @@ export default function Home() {
       <ThisWeekInCLT />
       <TrendingInCLT />
       <QuizCTA />
-      <FeaturedNeighborhoods />
-      <DirectoryPreview />
+      <DeferredSection minHeight={416}>
+        <Suspense fallback={null}>
+          <FeaturedNeighborhoods />
+        </Suspense>
+      </DeferredSection>
+      <DeferredSection minHeight={392}>
+        <Suspense fallback={null}>
+          <DirectoryPreview />
+        </Suspense>
+      </DeferredSection>
       <CTABanner />
       <CommunityActivity />
       <NewsletterSignup />
