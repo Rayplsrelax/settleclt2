@@ -1,6 +1,5 @@
 import "dotenv/config";
 import express from "express";
-import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { createServer } from "http";
 import net from "net";
@@ -12,6 +11,7 @@ import { serveStatic, setupVite } from "./vite";
 import { registerObsidianPublishRoute } from "../obsidian-publish";
 import { registerStorageProxy } from "./storageProxy";
 import { hermesRouter } from "../hermes-api";
+import { createSecurityMiddleware } from "./security";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -36,6 +36,15 @@ async function startServer() {
   const app = express();
   app.set('trust proxy', 1);
   const server = createServer(app);
+
+  // Security headers must be mounted before every route, including webhooks.
+  // Environment-derived origins keep policy and runtime integrations aligned.
+  app.use(
+    createSecurityMiddleware({
+      analyticsEndpoint: process.env.VITE_ANALYTICS_ENDPOINT,
+      forgeApiUrl: process.env.VITE_FRONTEND_FORGE_API_URL,
+    })
+  );
 
   // Stripe webhook must be BEFORE express.json() for raw body signature verification
   app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async (req, res) => {
@@ -221,55 +230,6 @@ async function startServer() {
       console.error("[Obsidian Webhook] Error:", err.message);
       res.status(500).json({ error: err.message });
     }
-  });
-
-  // ── Security headers via helmet ──────────────────────────────────────────
-  // Two modes, selected per request by hostname:
-  //  • PREVIEW (manus.space / manus.computer / localhost): CSP disabled.
-  //    The Manus dashboard embeds these hosts in an iframe from its own origin
-  //    (manus.im), which we can't reliably enumerate — any frame-ancestors list
-  //    here blanks the preview. Other helmet headers still apply.
-  //  • PRODUCTION (settleclt.com): full CSP, including frame-ancestors 'self'
-  //    (nobody should frame the real site).
-  const isPreviewHost = (hostname: string) =>
-    hostname.includes("manus.space") ||
-    hostname.includes("manus.computer") ||
-    hostname === "localhost" ||
-    hostname === "127.0.0.1";
-
-  // Derive third-party origins the client actually uses from env, so CSP and
-  // reality can't drift apart. Falls back to the known Forge default.
-  const toOrigin = (u?: string): string | null => {
-    try { return u ? new URL(u).origin : null; } catch { return null; }
-  };
-  const forgeOrigin =
-    toOrigin(process.env.VITE_FRONTEND_FORGE_API_URL) ??
-    "https://forge.butterfly-effect.dev";
-  const analyticsOrigin = toOrigin(process.env.VITE_ANALYTICS_ENDPOINT);
-
-  // Use helmet for basic security headers but DISABLE CSP entirely.
-  // CSP was causing blank pages due to circular chunk imports and dynamic
-  // module loading issues. The other helmet headers (X-Content-Type-Options,
-  // X-Frame-Options, HSTS, etc.) still provide meaningful protection.
-  const commonHelmet = helmet({
-    contentSecurityPolicy: false,
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-    crossOriginOpenerPolicy: false, // don't isolate — breaks dynamic imports
-    frameguard: isPreviewHost("placeholder") ? false : undefined, // allow preview embedding
-  });
-
-  app.use((req, res, next) => {
-    // Disable frameguard on preview hosts so Manus dashboard can embed
-    if (isPreviewHost(req.hostname)) {
-      return helmet({
-        contentSecurityPolicy: false,
-        crossOriginResourcePolicy: { policy: "cross-origin" },
-        crossOriginOpenerPolicy: false,
-        frameguard: false,
-        hsts: false,
-      })(req, res, next);
-    }
-    return commonHelmet(req, res, next);
   });
 
   // SEO: Tell search engines not to index the manus.space subdomain
