@@ -51,8 +51,8 @@ function loadSdk(): Promise<MixpanelModule | null> {
   return loadPromise;
 }
 
-/** Schedule an op against the SDK. Loads it on first call; queues until ready. */
-function withSdk(op: (m: MixpanelModule) => void) {
+/** Schedule an op against the SDK. Queues until ready. */
+function withSdk(op: (m: MixpanelModule) => void, loadImmediately = true) {
   if (!MIXPANEL_TOKEN) return;
   if (initialized && mp) {
     try {
@@ -63,8 +63,10 @@ function withSdk(op: (m: MixpanelModule) => void) {
     return;
   }
   queue.push(op);
-  // Kick off the load (idempotent)
-  void loadSdk();
+  if (loadImmediately) {
+    // Engagement before page load should still initialize analytics.
+    void loadSdk();
+  }
 }
 
 /**
@@ -75,18 +77,21 @@ function withSdk(op: (m: MixpanelModule) => void) {
  */
 export function initMixpanel() {
   if (!MIXPANEL_TOKEN || loadPromise) return;
-  const schedule = (cb: () => void) => {
-    if (typeof window === "undefined") return cb();
+  const scheduleLoad = () => {
     const w = window as Window & { requestIdleCallback?: (cb: IdleRequestCallback) => number };
     if (w.requestIdleCallback) {
-      w.requestIdleCallback(() => cb(), { timeout: 4000 });
+      w.requestIdleCallback(() => void loadSdk(), { timeout: 2000 });
     } else {
-      setTimeout(cb, 1500);
+      setTimeout(() => void loadSdk(), 0);
     }
   };
-  schedule(() => {
-    void loadSdk();
-  });
+
+  if (typeof window === "undefined") return;
+  if (document.readyState === "complete") {
+    scheduleLoad();
+  } else {
+    window.addEventListener("load", scheduleLoad, { once: true });
+  }
 }
 
 /** Identify a logged-in user so events are attributed correctly. */
@@ -115,7 +120,8 @@ export function trackEvent(event: string, properties?: Record<string, unknown>) 
 // ─── Typed Event Helpers ────────────────────────────────────────
 
 export function trackPageView(page: string, properties?: Record<string, unknown>) {
-  trackEvent("Page View", { page, ...properties });
+  // Queue page views without forcing the SDK onto the LCP critical path.
+  withSdk((m) => m.track("Page View", { page, ...properties }), false);
 }
 
 export function trackSearch(query: string, resultCount: number, source = "global-search") {
