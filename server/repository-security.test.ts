@@ -19,6 +19,9 @@ describe("repository security configuration", () => {
     expect(workflow).not.toContain("pull_request_target");
     expect(workflow).toMatch(/permissions:\s*\n\s+contents: read/);
     expect(workflow).toContain("persist-credentials: false");
+    expect(workflow).not.toMatch(
+      /pnpm\/action-setup@[^\n]+\n\s+with:\n\s+version:/
+    );
     expect(workflow).toContain("pnpm install --frozen-lockfile");
     expect(workflow).toContain("pnpm audit --prod --audit-level high");
     expect(workflow).toContain("pnpm run test");
