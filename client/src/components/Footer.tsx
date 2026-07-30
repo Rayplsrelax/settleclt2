@@ -68,6 +68,7 @@ export default function Footer() {
               <Link href="/directory" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Services Directory</Link>
               <Link href="/events" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Events</Link>
               <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Blog & Guides</Link>
+              <Link href="/relocation-checklist" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Relocation Checklist</Link>
             </div>
           </div>
           <div>
@@ -84,6 +85,7 @@ export default function Footer() {
             <div className="flex flex-col gap-2">
               <Link href="/quiz" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Neighborhood Quiz</Link>
               <Link href="/neighborhoods" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Find Your Neighborhood</Link>
+              <Link href="/relocation-checklist" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Moving Checklist</Link>
               <Link href="/find-your-home" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Find Your Home</Link>
               <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Moving Guides</Link>
               <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Contact Us</Link>
