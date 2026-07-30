@@ -420,6 +420,7 @@ export default function Events() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 type="text"
+                aria-label="Search events, venues, and neighborhoods"
                 placeholder="Search events, venues, neighborhoods..."
                 value={searchQuery}
                 onChange={(e) => {
@@ -433,6 +434,7 @@ export default function Events() {
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
+                  aria-label="Clear event search"
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -443,6 +445,8 @@ export default function Events() {
               variant="outline"
               size="sm"
               onClick={() => setShowFilters(!showFilters)}
+              aria-expanded={showFilters}
+              aria-controls="events-date-filters"
               className={`gap-1.5 shrink-0 ${
                 showFilters || hasActiveFilters ? "border-primary text-primary" : ""
               }`}
@@ -468,10 +472,11 @@ export default function Events() {
 
           {/* Date range picker (collapsible) */}
           {showFilters && (
-            <div className="flex items-center gap-3 flex-wrap">
+            <div id="events-date-filters" className="flex items-center gap-3 flex-wrap">
               <div className="flex items-center gap-2">
-                <label className="text-xs font-medium text-muted-foreground">From</label>
+                <label htmlFor="events-date-from" className="text-xs font-medium text-muted-foreground">From</label>
                 <Input
+                  id="events-date-from"
                   type="date"
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
@@ -479,8 +484,9 @@ export default function Events() {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <label className="text-xs font-medium text-muted-foreground">To</label>
+                <label htmlFor="events-date-to" className="text-xs font-medium text-muted-foreground">To</label>
                 <Input
+                  id="events-date-to"
                   type="date"
                   value={dateTo}
                   onChange={(e) => setDateTo(e.target.value)}
@@ -504,6 +510,7 @@ export default function Events() {
           <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => setRecurringOnly(!recurringOnly)}
+              aria-pressed={recurringOnly}
               className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 recurringOnly
                   ? "bg-primary text-primary-foreground"
@@ -514,6 +521,7 @@ export default function Events() {
             </button>
             <button
               onClick={() => setNewcomerFriendlyOnly(!newcomerFriendlyOnly)}
+              aria-pressed={newcomerFriendlyOnly}
               className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 newcomerFriendlyOnly
                   ? "bg-primary text-primary-foreground"
@@ -530,6 +538,7 @@ export default function Events() {
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.value}
+                aria-pressed={selectedCategory === cat.value}
                 onClick={() => {
                   setSelectedCategory(cat.value);
                   if (cat.value) {

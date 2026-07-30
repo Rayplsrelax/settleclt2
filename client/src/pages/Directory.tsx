@@ -458,6 +458,7 @@ export default function Directory() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
+                aria-label="Search businesses and categories"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search businesses, categories..."
@@ -467,6 +468,7 @@ export default function Directory() {
             <div className="flex rounded-lg border border-input overflow-hidden">
               <button
                 onClick={() => setViewMode("list")}
+                aria-pressed={viewMode === "list"}
                 className={`px-3 py-2 flex items-center gap-1.5 text-sm transition-colors ${
                   viewMode === "list" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"
                 }`}
@@ -475,6 +477,7 @@ export default function Directory() {
               </button>
               <button
                 onClick={() => setViewMode("map")}
+                aria-pressed={viewMode === "map"}
                 className={`px-3 py-2 flex items-center gap-1.5 text-sm transition-colors ${
                   viewMode === "map" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"
                 }`}
@@ -486,6 +489,7 @@ export default function Directory() {
             <div className="relative">
               <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
               <select
+                aria-label="Sort directory results"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
                 className={`pl-9 pr-8 py-2.5 rounded-lg border text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring ${
@@ -503,6 +507,7 @@ export default function Directory() {
             <Button
               variant="outline"
               onClick={() => setShowFilters(!showFilters)}
+              aria-expanded={showFilters}
               className={showFilters ? "bg-primary/10 border-primary/30" : ""}
             >
               <Filter className="w-4 h-4 mr-2" />
@@ -574,6 +579,7 @@ export default function Directory() {
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-2">Area</label>
                 <select
+                  aria-label="Filter by area"
                   value={activeArea}
                   onChange={(e) => { setActiveArea(e.target.value); if (e.target.value) trackClickByName(e.target.value, 'directory-area'); }}
                   className="px-3 py-2 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring min-w-[200px]"

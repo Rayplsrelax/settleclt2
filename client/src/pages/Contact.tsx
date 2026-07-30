@@ -132,8 +132,9 @@ export default function Contact() {
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="text-sm font-medium text-foreground mb-1.5 block">Name *</label>
+                          <label htmlFor="contact-name" className="text-sm font-medium text-foreground mb-1.5 block">Name *</label>
                           <Input
+                            id="contact-name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="Your name"
@@ -141,8 +142,9 @@ export default function Contact() {
                           />
                         </div>
                         <div>
-                          <label className="text-sm font-medium text-foreground mb-1.5 block">Email *</label>
+                          <label htmlFor="contact-email" className="text-sm font-medium text-foreground mb-1.5 block">Email *</label>
                           <Input
+                            id="contact-email"
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -152,16 +154,18 @@ export default function Contact() {
                         </div>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-foreground mb-1.5 block">Subject</label>
+                        <label htmlFor="contact-subject" className="text-sm font-medium text-foreground mb-1.5 block">Subject</label>
                         <Input
+                          id="contact-subject"
                           value={subject}
                           onChange={(e) => setSubject(e.target.value)}
                           placeholder="What's this about?"
                         />
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-foreground mb-1.5 block">Message *</label>
+                        <label htmlFor="contact-message" className="text-sm font-medium text-foreground mb-1.5 block">Message *</label>
                         <Textarea
+                          id="contact-message"
                           value={message}
                           onChange={(e) => setMessage(e.target.value)}
                           placeholder="Tell us what's on your mind..."
