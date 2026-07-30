@@ -28,7 +28,7 @@ describe("repository security configuration", () => {
     expect(workflow).toContain("pnpm run check");
     expect(workflow).toContain("pnpm run build");
     expect(workflow).toContain(
-      "VITE_MIXPANEL_TOKEN: 00000000000000000000000000000000"
+      'VITE_MIXPANEL_TOKEN: "00000000000000000000000000000000"'
     );
     expect(workflow).not.toContain("${{ secrets.");
 

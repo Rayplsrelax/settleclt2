@@ -48,7 +48,7 @@ jobs:
         run: pnpm run test
         env:
           # Public-format placeholder required by the existing Mixpanel config tests.
-          VITE_MIXPANEL_TOKEN: 00000000000000000000000000000000
+          VITE_MIXPANEL_TOKEN: "00000000000000000000000000000000"
 
       - name: Type-check
         run: pnpm run check
