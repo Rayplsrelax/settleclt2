@@ -4,12 +4,12 @@ These files define the intended GitHub security posture. Committing them does no
 
 ## Safe activation order
 
-1. Merge the CI workflow and confirm `CI / quality` succeeds on `main`.
+1. Merge the CI workflow and confirm its `quality` check succeeds on `main`.
 2. Enable the dependency graph and Dependabot alerts with `PUT /repos/{owner}/{repo}/vulnerability-alerts`.
 3. Enable Dependabot security updates with the dedicated `PUT /repos/{owner}/{repo}/automated-security-fixes` endpoint.
 4. Apply `security-and-analysis.json` with `PATCH /repos/{owner}/{repo}` to enable secret scanning and push protection. The file intentionally contains only fields supported by the repository update endpoint.
 5. Replace the disabled `ray` ruleset with `rulesets/main.json`, or create the new ruleset and remove the disabled one after verification.
-6. Verify that direct pushes, force pushes, and branch deletion are blocked and that PRs require the strict `CI / quality` check.
+6. Verify that direct pushes, force pushes, and branch deletion are blocked and that PRs require the strict `quality` check.
 
 Do not activate the ruleset before the CI check has successfully run on `main`; requiring a status check that has never reported can block updates.
 

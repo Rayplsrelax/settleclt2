@@ -77,7 +77,7 @@ describe("repository security configuration", () => {
     ).toBe(0);
     expect(
       rules.get("required_status_checks").parameters.required_status_checks
-    ).toContainEqual({ context: "CI / quality" });
+    ).toContainEqual({ context: "quality" });
     expect(
       rules.get("required_status_checks").parameters
         .strict_required_status_checks_policy
