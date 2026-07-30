@@ -328,7 +328,11 @@ function NewsletterSignup() {
               onSubmit={handleSubmit}
               className="mt-8 flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
             >
+              <label htmlFor="newsletter-email" className="sr-only">
+                Email address
+              </label>
               <input
+                id="newsletter-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

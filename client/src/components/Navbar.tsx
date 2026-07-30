@@ -218,7 +218,9 @@ export default function Navbar() {
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="p-2 rounded-lg hover:bg-muted transition-colors text-foreground"
-            aria-label="Toggle menu"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-navigation"
           >
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -227,7 +229,10 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-lg">
+        <div
+          id="mobile-navigation"
+          className="md:hidden border-t border-border bg-background/95 backdrop-blur-lg"
+        >
           <div className="container py-4 flex flex-col gap-1">
             {navLinks.map((link) => (
               <Link
