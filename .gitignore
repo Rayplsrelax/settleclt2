@@ -113,3 +113,4 @@ temp/
 # DB query dumps — contain prod DB host/name/username
 .manus/
 .manus-logs/
+.hermes/

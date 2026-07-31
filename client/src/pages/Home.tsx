@@ -23,7 +23,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { lazy, Suspense, useState, useMemo } from "react";
 import { useSEO } from "@/hooks/useSEO";
-import { useStructuredData, buildOrganizationSchema, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
+import {
+  useStructuredData,
+  buildOrganizationSchema,
+  buildBreadcrumbSchema,
+} from "@/hooks/useStructuredData";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
@@ -44,7 +48,9 @@ function Hero() {
     <section className="relative overflow-hidden min-h-[520px] md:min-h-[600px] flex items-center">
       {/* Background image */}
       <div className="absolute inset-0">
-        <img loading="eager" fetchPriority="high"
+        <img
+          loading="eager"
+          fetchPriority="high"
           src={HERO_IMAGE}
           alt="Charlotte NC skyline - Settle CLT relocation guide"
           className="w-full h-full object-cover"
@@ -103,7 +109,7 @@ function Hero() {
               { value: "20", label: "Neighborhoods" },
               { value: "700+", label: "Local Services" },
               { value: "50+", label: "Categories" },
-            ].map((stat) => (
+            ].map(stat => (
               <div key={stat.label} className="text-center">
                 <div className="text-2xl md:text-3xl font-display font-extrabold text-clt-gold">
                   {stat.value}
@@ -138,14 +144,30 @@ function QuizCTA() {
                 Not sure where to live?
               </h2>
               <p className="text-white/70 max-w-md">
-                Answer 6 quick questions about your budget, lifestyle, and priorities — we'll match you with the best Charlotte neighborhoods.
+                Answer 6 quick questions about your budget, lifestyle, and
+                priorities — we'll match you with the best Charlotte
+                neighborhoods.
               </p>
             </div>
-            <Link href="/quiz">
-              <Button size="lg" className="bg-clt-gold hover:bg-clt-gold/90 text-clt-navy font-bold text-base px-8 py-6 rounded-xl shadow-lg gap-2 whitespace-nowrap">
-                Take the Quiz <ArrowRight className="w-5 h-5" />
-              </Button>
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link href="/quiz?source=homepage">
+                <Button
+                  size="lg"
+                  className="bg-clt-gold hover:bg-clt-gold/90 text-clt-navy font-bold text-base px-8 py-6 rounded-xl shadow-lg gap-2 whitespace-nowrap"
+                >
+                  Take the Quiz <ArrowRight className="w-5 h-5" />
+                </Button>
+              </Link>
+              <Link href="/newcomer-plan?source=homepage">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/40 text-white hover:bg-white/10 font-semibold text-base px-8 py-6 rounded-xl gap-2 whitespace-nowrap"
+                >
+                  Build My Plan <ArrowRight className="w-5 h-5" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -159,7 +181,7 @@ function NewsletterSignup() {
   const [submitted, setSubmitted] = useState(false);
 
   const subscribe = trpc.newsletter.subscribe.useMutation({
-    onSuccess: (data) => {
+    onSuccess: data => {
       setSubmitted(true);
       if (data.alreadySubscribed) {
         toast.info("You're already subscribed — welcome back!");
@@ -215,7 +237,7 @@ function NewsletterSignup() {
                 id="newsletter-email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
                 required
                 className="flex-1 px-4 py-3 rounded-xl border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring placeholder:text-muted-foreground"
                 placeholder="your@email.com"
@@ -242,22 +264,30 @@ function NewsletterSignup() {
 }
 
 function BlogPreview() {
-  const { data: dbPosts, isLoading } = trpc.blog.getRecent.useQuery({ limit: 3 });
+  const { data: dbPosts, isLoading } = trpc.blog.getRecent.useQuery({
+    limit: 3,
+  });
 
   // Merge DB posts with static articles as fallback
   const recent = useMemo(() => {
     const dbItems = (dbPosts || []).map(p => ({
       id: p.slug || String(p.id),
       title: p.title,
-      excerpt: p.excerpt || 'Read the full article on Settle CLT.',
-      category: p.category || 'Charlotte Guide',
+      excerpt: p.excerpt || "Read the full article on Settle CLT.",
+      category: p.category || "Charlotte Guide",
       date: p.publishedAt
-        ? new Date(p.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-        : '',
-      readTime: p.readTime || `${Math.ceil((p.content?.length || 800) / 1500)} min read`,
+        ? new Date(p.publishedAt).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })
+        : "",
+      readTime:
+        p.readTime ||
+        `${Math.ceil((p.content?.length || 800) / 1500)} min read`,
       image: p.coverImage || undefined,
       slug: p.slug,
-      source: 'db' as const,
+      source: "db" as const,
     }));
     if (dbItems.length >= 3) return dbItems.slice(0, 3);
     const staticItems = articles.slice(0, 3 - dbItems.length).map(a => ({
@@ -265,11 +295,11 @@ function BlogPreview() {
       title: a.title,
       excerpt: a.excerpt,
       category: a.category,
-      date: a.date || '',
+      date: a.date || "",
       readTime: a.readTime,
       image: a.image || undefined,
       slug: undefined as string | undefined,
-      source: 'static' as const,
+      source: "static" as const,
     }));
     return [...dbItems, ...staticItems];
   }, [dbPosts]);
@@ -282,13 +312,16 @@ function BlogPreview() {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <BookOpen className="w-5 h-5 text-primary" />
-              <span className="text-sm font-semibold text-primary uppercase tracking-wide">Charlotte Blog</span>
+              <span className="text-sm font-semibold text-primary uppercase tracking-wide">
+                Charlotte Blog
+              </span>
             </div>
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">
               Latest from Settle CLT
             </h2>
             <p className="mt-2 text-muted-foreground max-w-md">
-              Weekly guides, neighborhood deep-dives, and local intel for Charlotte newcomers
+              Weekly guides, neighborhood deep-dives, and local intel for
+              Charlotte newcomers
             </p>
           </div>
           <Link
@@ -303,7 +336,10 @@ function BlogPreview() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[0, 1, 2].map(i => (
-              <div key={i} className="rounded-xl border border-border bg-card overflow-hidden animate-pulse">
+              <div
+                key={i}
+                className="rounded-xl border border-border bg-card overflow-hidden animate-pulse"
+              >
                 <div className="h-44 bg-muted" />
                 <div className="p-5 space-y-3">
                   <div className="h-3 bg-muted rounded w-1/3" />
@@ -319,7 +355,11 @@ function BlogPreview() {
             {recent.map((a, idx) => (
               <Link
                 key={a.id}
-                href={a.source === 'db' && a.slug ? `/blog/${a.slug}` : `/blog#${a.id}`}
+                href={
+                  a.source === "db" && a.slug
+                    ? `/blog/${a.slug}`
+                    : `/blog#${a.id}`
+                }
                 className="no-underline group"
               >
                 <article className="rounded-xl overflow-hidden border border-border bg-card transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1.5 flex flex-col h-full">
@@ -433,7 +473,10 @@ function ThisWeekInCLT() {
       <div className="container">
         <div className="flex items-end justify-between mb-8">
           <div>
-            <Badge variant="outline" className="mb-3 text-primary border-primary/30">
+            <Badge
+              variant="outline"
+              className="mb-3 text-primary border-primary/30"
+            >
               <Sparkles className="w-3.5 h-3.5 mr-1.5" />
               Live Updates
             </Badge>
@@ -452,28 +495,45 @@ function ThisWeekInCLT() {
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {events.slice(0, 6).map((event) => {
+          {events.slice(0, 6).map(event => {
             const d = event.startDate ? new Date(event.startDate) : new Date(0);
             const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
-            const monthDay = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-            const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+            const monthDay = d.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            });
+            const time = d.toLocaleTimeString("en-US", {
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            });
             return (
-              <Link key={event.id} href={`/events?highlight=${event.slug}`} className="no-underline group">
+              <Link
+                key={event.id}
+                href={`/events?highlight=${event.slug}`}
+                className="no-underline group"
+              >
                 <div className="flex gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-md transition-all">
                   <div className="flex flex-col items-center justify-center w-14 h-14 rounded-lg bg-primary text-primary-foreground shrink-0">
-                    <span className="text-[10px] font-bold uppercase leading-none">{dayName}</span>
-                    <span className="text-lg font-extrabold leading-tight">{d.getDate()}</span>
+                    <span className="text-[10px] font-bold uppercase leading-none">
+                      {dayName}
+                    </span>
+                    <span className="text-lg font-extrabold leading-tight">
+                      {d.getDate()}
+                    </span>
                   </div>
                   <div className="min-w-0 flex-1">
                     <div
                       className="flex items-center gap-1.5 mb-1 cursor-pointer hover:text-primary transition-colors"
-                      onClick={(e) => {
+                      onClick={e => {
                         e.preventDefault();
                         e.stopPropagation();
-                        trackClickByName(event.category, 'home-event');
+                        trackClickByName(event.category, "home-event");
                       }}
                     >
-                      <span className="text-sm">{CATEGORY_EMOJI[event.category] ?? "📅"}</span>
+                      <span className="text-sm">
+                        {CATEGORY_EMOJI[event.category] ?? "📅"}
+                      </span>
                       <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
                         {event.category.replace("-", " ")}
                       </span>
@@ -511,14 +571,32 @@ function ThisWeekInCLT() {
 }
 
 function TrendingInCLT() {
-  const { data: trending, isLoading } = trpc.trending.getTrending.useQuery({ limit: 8, days: 30 });
+  const { data: trending, isLoading } = trpc.trending.getTrending.useQuery({
+    limit: 8,
+    days: 30,
+  });
   const { data: allTags } = trpc.tags.getAll.useQuery();
   const trackEngagement = trpc.trending.track.useMutation();
 
   // If no engagement data yet, show popular tags from the tags table as fallback
-  const displayTags = trending && trending.length > 0
-    ? trending.map(t => ({ id: t.tagId, name: t.tagName, slug: t.tagSlug, category: t.tagCategory, count: t.engagementCount }))
-    : (allTags || []).slice(0, 8).map(t => ({ id: t.id, name: t.name, slug: t.slug, category: t.category, count: 0 }));
+  const displayTags =
+    trending && trending.length > 0
+      ? trending.map(t => ({
+          id: t.tagId,
+          name: t.tagName,
+          slug: t.tagSlug,
+          category: t.tagCategory,
+          count: t.engagementCount,
+        }))
+      : (allTags || [])
+          .slice(0, 8)
+          .map(t => ({
+            id: t.id,
+            name: t.name,
+            slug: t.slug,
+            category: t.category,
+            count: 0,
+          }));
 
   if (isLoading || displayTags.length === 0) return null;
 
@@ -537,7 +615,7 @@ function TrendingInCLT() {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {displayTags.map((tag) => (
+          {displayTags.map(tag => (
             <Link
               key={tag.id}
               href={`/tag/${tag.slug}`}
@@ -545,7 +623,7 @@ function TrendingInCLT() {
               onClick={() => {
                 trackEngagement.mutate({
                   tagId: tag.id,
-                  engagementType: 'click',
+                  engagementType: "click",
                 });
               }}
             >
@@ -633,8 +711,12 @@ function ForYouSection() {
   const data = recommendations.data;
   if (!data) return null;
 
-  const hasContent = (data.neighborhoods?.length ?? 0) > 0 || (data.events?.length ?? 0) > 0 || (data.directory?.length ?? 0) > 0;
-  if (!hasContent && (!preferences.data || preferences.data.length === 0)) return null;
+  const hasContent =
+    (data.neighborhoods?.length ?? 0) > 0 ||
+    (data.events?.length ?? 0) > 0 ||
+    (data.directory?.length ?? 0) > 0;
+  if (!hasContent && (!preferences.data || preferences.data.length === 0))
+    return null;
 
   return (
     <section className="py-12 md:py-16">
@@ -645,22 +727,31 @@ function ForYouSection() {
           </div>
           <div>
             <h2 className="font-display font-bold text-xl md:text-2xl text-foreground">
-              For You, {user.name?.split(' ')[0] || 'Explorer'}
+              For You, {user.name?.split(" ")[0] || "Explorer"}
             </h2>
-            <p className="text-sm text-muted-foreground">Based on your browsing and engagement</p>
+            <p className="text-sm text-muted-foreground">
+              Based on your browsing and engagement
+            </p>
           </div>
         </div>
 
         {/* User's top interests */}
         {preferences.data && preferences.data.length > 0 && (
           <div className="mb-6">
-            <p className="text-xs text-muted-foreground mb-2">Your top interests</p>
+            <p className="text-xs text-muted-foreground mb-2">
+              Your top interests
+            </p>
             <div className="flex flex-wrap gap-2">
               {preferences.data.slice(0, 8).map((p, i) => (
                 <Link key={i} href={`/tag/${p.tagSlug}`}>
-                  <Badge variant="secondary" className="cursor-pointer hover:bg-accent">
+                  <Badge
+                    variant="secondary"
+                    className="cursor-pointer hover:bg-accent"
+                  >
                     {p.tagName}
-                    <span className="ml-1 text-xs text-muted-foreground">({p.score})</span>
+                    <span className="ml-1 text-xs text-muted-foreground">
+                      ({p.score})
+                    </span>
                   </Badge>
                 </Link>
               ))}
@@ -674,14 +765,22 @@ function ForYouSection() {
             <div className="bg-card border border-border rounded-xl p-5">
               <div className="flex items-center gap-2 mb-3">
                 <MapPin className="w-4 h-4 text-primary" />
-                <h3 className="font-semibold text-foreground text-sm">Neighborhoods for You</h3>
+                <h3 className="font-semibold text-foreground text-sm">
+                  Neighborhoods for You
+                </h3>
               </div>
               <div className="space-y-2">
                 {data.neighborhoods.slice(0, 4).map((n, i) => (
                   <Link key={i} href={`/neighborhood/${n.id}`}>
                     <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer">
-                      <span className="text-sm font-medium text-foreground">{n.id.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
-                      <Badge variant="outline" className="text-[10px]">{n.matchedTag}</Badge>
+                      <span className="text-sm font-medium text-foreground">
+                        {n.id
+                          .replace(/-/g, " ")
+                          .replace(/\b\w/g, l => l.toUpperCase())}
+                      </span>
+                      <Badge variant="outline" className="text-[10px]">
+                        {n.matchedTag}
+                      </Badge>
                     </div>
                   </Link>
                 ))}
@@ -694,14 +793,20 @@ function ForYouSection() {
             <div className="bg-card border border-border rounded-xl p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Calendar className="w-4 h-4 text-primary" />
-                <h3 className="font-semibold text-foreground text-sm">Events You'd Like</h3>
+                <h3 className="font-semibold text-foreground text-sm">
+                  Events You'd Like
+                </h3>
               </div>
               <div className="space-y-2">
                 {data.events.slice(0, 4).map((e, i) => (
                   <Link key={i} href={`/events?highlight=${e.id}`}>
                     <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer">
-                      <span className="text-sm font-medium text-foreground truncate">{e.id}</span>
-                      <Badge variant="outline" className="text-[10px]">{e.matchedTag}</Badge>
+                      <span className="text-sm font-medium text-foreground truncate">
+                        {e.id}
+                      </span>
+                      <Badge variant="outline" className="text-[10px]">
+                        {e.matchedTag}
+                      </Badge>
                     </div>
                   </Link>
                 ))}
@@ -714,14 +819,20 @@ function ForYouSection() {
             <div className="bg-card border border-border rounded-xl p-5">
               <div className="flex items-center gap-2 mb-3">
                 <Building2 className="w-4 h-4 text-primary" />
-                <h3 className="font-semibold text-foreground text-sm">Places to Check Out</h3>
+                <h3 className="font-semibold text-foreground text-sm">
+                  Places to Check Out
+                </h3>
               </div>
               <div className="space-y-2">
                 {data.directory.slice(0, 4).map((d, i) => (
                   <Link key={i} href={`/directory/${encodeURIComponent(d.id)}`}>
                     <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer">
-                      <span className="text-sm font-medium text-foreground truncate">{d.id}</span>
-                      <Badge variant="outline" className="text-[10px]">{d.matchedTag}</Badge>
+                      <span className="text-sm font-medium text-foreground truncate">
+                        {d.id}
+                      </span>
+                      <Badge variant="outline" className="text-[10px]">
+                        {d.matchedTag}
+                      </Badge>
                     </div>
                   </Link>
                 ))}
@@ -737,15 +848,22 @@ function ForYouSection() {
 export default function Home() {
   useSEO({
     title: "Settle CLT \u2014 Your Complete Guide to Living in Charlotte, NC",
-    description: "Explore 20 Charlotte neighborhoods, discover 700+ local businesses, find events, and get honest advice from locals.",
-    keywords: "Charlotte NC, moving to Charlotte, Charlotte neighborhoods, Charlotte local guide, CLT relocation",
+    description:
+      "Explore 20 Charlotte neighborhoods, discover 700+ local businesses, find events, and get honest advice from locals.",
+    keywords:
+      "Charlotte NC, moving to Charlotte, Charlotte neighborhoods, Charlotte local guide, CLT relocation",
     path: "/",
     noSuffix: true,
   });
 
   useStructuredData([
     { "@context": "https://schema.org", ...buildOrganizationSchema() },
-    { "@context": "https://schema.org", ...buildBreadcrumbSchema([{ name: "Home", url: "https://settleclt.com" }]) },
+    {
+      "@context": "https://schema.org",
+      ...buildBreadcrumbSchema([
+        { name: "Home", url: "https://settleclt.com" },
+      ]),
+    },
   ]);
 
   return (

@@ -1,13 +1,29 @@
 import { useState, useMemo, useCallback } from "react";
 import { Link } from "wouter";
 import {
-  QUIZ_QUESTIONS, scoreNeighborhoods, getMatchLabel,
-  type QuizAnswers, type QuizQuestion, type NeighborhoodScore,
+  QUIZ_QUESTIONS,
+  scoreNeighborhoods,
+  getMatchLabel,
+  type QuizAnswers,
+  type QuizQuestion,
+  type NeighborhoodScore,
 } from "@shared/quiz";
 import {
-  ArrowRight, ArrowLeft, RotateCcw, MapPin, DollarSign,
-  TrendingUp, Heart, Star, AlertTriangle, ChevronRight,
-  Sparkles, Home as HomeIcon, GitCompare, CheckCircle2
+  ArrowRight,
+  ArrowLeft,
+  RotateCcw,
+  MapPin,
+  DollarSign,
+  TrendingUp,
+  Heart,
+  Star,
+  AlertTriangle,
+  ChevronRight,
+  Sparkles,
+  Home as HomeIcon,
+  GitCompare,
+  CheckCircle2,
+  Compass,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ShareButtons from "@/components/ShareButtons";
@@ -16,11 +32,13 @@ import { trackFindHomeIntent, trackQuizComplete } from "@/lib/mixpanel";
 
 // ─── Progress Bar ─────────────────────────────────────────────────
 function ProgressBar({ current, total }: { current: number; total: number }) {
-  const pct = ((current) / total) * 100;
+  const pct = (current / total) * 100;
   return (
     <div className="w-full max-w-lg mx-auto mb-8">
       <div className="flex justify-between text-xs text-muted-foreground mb-2">
-        <span>Question {current + 1} of {total}</span>
+        <span>
+          Question {current + 1} of {total}
+        </span>
         <span>{Math.round(pct)}% complete</span>
       </div>
       <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -35,7 +53,13 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
 
 // ─── Single Question Step ─────────────────────────────────────────
 function QuestionStep({
-  question, answer, onAnswer, onNext, onBack, isFirst, isLast
+  question,
+  answer,
+  onAnswer,
+  onNext,
+  onBack,
+  isFirst,
+  isLast,
 }: {
   question: QuizQuestion;
   answer: string | string[] | undefined;
@@ -45,22 +69,30 @@ function QuestionStep({
   isFirst: boolean;
   isLast: boolean;
 }) {
-  const selected = question.type === 'multi'
-    ? (Array.isArray(answer) ? answer : [])
-    : (typeof answer === 'string' ? answer : '');
+  const selected =
+    question.type === "multi"
+      ? Array.isArray(answer)
+        ? answer
+        : []
+      : typeof answer === "string"
+        ? answer
+        : "";
 
   const handleSelect = (optionId: string) => {
-    if (question.type === 'single') {
+    if (question.type === "single") {
       onAnswer(question.id, optionId);
     } else {
       const arr = Array.isArray(selected) ? selected : [];
-      if (optionId === 'none') {
-        onAnswer(question.id, ['none']);
+      if (optionId === "none") {
+        onAnswer(question.id, ["none"]);
         return;
       }
-      const filtered = arr.filter(id => id !== 'none');
+      const filtered = arr.filter(id => id !== "none");
       if (filtered.includes(optionId)) {
-        onAnswer(question.id, filtered.filter(id => id !== optionId));
+        onAnswer(
+          question.id,
+          filtered.filter(id => id !== optionId)
+        );
       } else if (filtered.length < (question.maxSelections || 3)) {
         onAnswer(question.id, [...filtered, optionId]);
       }
@@ -68,13 +100,14 @@ function QuestionStep({
   };
 
   const isSelected = (optionId: string) => {
-    if (question.type === 'single') return selected === optionId;
+    if (question.type === "single") return selected === optionId;
     return Array.isArray(selected) && selected.includes(optionId);
   };
 
-  const canProceed = question.type === 'single'
-    ? typeof selected === 'string' && selected.length > 0
-    : Array.isArray(selected) && selected.length > 0;
+  const canProceed =
+    question.type === "single"
+      ? typeof selected === "string" && selected.length > 0
+      : Array.isArray(selected) && selected.length > 0;
 
   return (
     <div className="animate-in fade-in slide-in-from-right-4 duration-400">
@@ -85,17 +118,19 @@ function QuestionStep({
         <p className="text-muted-foreground text-sm md:text-base max-w-md mx-auto">
           {question.subtitle}
         </p>
-        {question.type === 'multi' && question.maxSelections && (
+        {question.type === "multi" && question.maxSelections && (
           <p className="text-xs text-clt-teal mt-2 font-medium">
             Select up to {question.maxSelections}
           </p>
         )}
       </div>
 
-      <div className={`grid gap-3 max-w-lg mx-auto ${
-        question.options.length > 5 ? 'grid-cols-2' : 'grid-cols-1'
-      }`}>
-        {question.options.map((opt) => {
+      <div
+        className={`grid gap-3 max-w-lg mx-auto ${
+          question.options.length > 5 ? "grid-cols-2" : "grid-cols-1"
+        }`}
+      >
+        {question.options.map(opt => {
           const active = isSelected(opt.id);
           return (
             <button
@@ -103,18 +138,22 @@ function QuestionStep({
               onClick={() => handleSelect(opt.id)}
               className={`group relative text-left p-4 rounded-xl border-2 transition-all duration-200 ${
                 active
-                  ? 'border-clt-teal bg-clt-teal/10 shadow-md shadow-clt-teal/10'
-                  : 'border-border bg-card hover:border-clt-teal/40 hover:bg-muted/50'
+                  ? "border-clt-teal bg-clt-teal/10 shadow-md shadow-clt-teal/10"
+                  : "border-border bg-card hover:border-clt-teal/40 hover:bg-muted/50"
               }`}
             >
               <div className="flex items-start gap-3">
                 <span className="text-2xl shrink-0 mt-0.5">{opt.emoji}</span>
                 <div className="min-w-0">
-                  <div className={`font-semibold text-sm ${active ? 'text-clt-teal' : 'text-foreground'}`}>
+                  <div
+                    className={`font-semibold text-sm ${active ? "text-clt-teal" : "text-foreground"}`}
+                  >
                     {opt.label}
                   </div>
                   {opt.description && (
-                    <div className="text-xs text-muted-foreground mt-0.5">{opt.description}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      {opt.description}
+                    </div>
                   )}
                 </div>
                 {active && (
@@ -140,7 +179,8 @@ function QuestionStep({
           disabled={!canProceed}
           className="gap-2 bg-clt-teal hover:bg-clt-teal-dark text-white"
         >
-          {isLast ? 'See My Matches' : 'Next'} <ArrowRight className="w-4 h-4" />
+          {isLast ? "See My Matches" : "Next"}{" "}
+          <ArrowRight className="w-4 h-4" />
         </Button>
       </div>
     </div>
@@ -158,7 +198,8 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
         Find Your Charlotte Neighborhood
       </h1>
       <p className="text-muted-foreground text-lg mb-2 max-w-md mx-auto">
-        Answer 7 quick questions and we'll match you with the best neighborhoods based on your budget, lifestyle, and priorities.
+        Answer 7 quick questions and we'll match you with the best neighborhoods
+        based on your budget, lifestyle, and priorities.
       </p>
       <p className="text-sm text-muted-foreground mb-8">
         Takes about 2 minutes. No signup required.
@@ -173,15 +214,29 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
 
       <div className="mt-12 grid grid-cols-3 gap-6 text-center">
         {[
-          { icon: <MapPin className="w-5 h-5" />, label: '20 Neighborhoods', sub: 'Core + Metro' },
-          { icon: <TrendingUp className="w-5 h-5" />, label: 'Smart Scoring', sub: '6 dimensions' },
-          { icon: <Heart className="w-5 h-5" />, label: 'Personalized', sub: 'Your priorities' },
+          {
+            icon: <MapPin className="w-5 h-5" />,
+            label: "20 Neighborhoods",
+            sub: "Core + Metro",
+          },
+          {
+            icon: <TrendingUp className="w-5 h-5" />,
+            label: "Smart Scoring",
+            sub: "6 dimensions",
+          },
+          {
+            icon: <Heart className="w-5 h-5" />,
+            label: "Personalized",
+            sub: "Your priorities",
+          },
         ].map((item, i) => (
           <div key={i} className="flex flex-col items-center gap-2">
             <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-clt-teal">
               {item.icon}
             </div>
-            <div className="text-xs font-semibold text-foreground">{item.label}</div>
+            <div className="text-xs font-semibold text-foreground">
+              {item.label}
+            </div>
             <div className="text-xs text-muted-foreground">{item.sub}</div>
           </div>
         ))}
@@ -191,17 +246,25 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
 }
 
 // ─── Result Card ──────────────────────────────────────────────────
-function ResultCard({ result, rank }: { result: NeighborhoodScore; rank: number }) {
+function ResultCard({
+  result,
+  rank,
+}: {
+  result: NeighborhoodScore;
+  rank: number;
+}) {
   const n = result.neighborhood;
   const matchInfo = getMatchLabel(result.percentage);
   const isTop = rank === 1;
 
   return (
-    <div className={`relative rounded-2xl border-2 overflow-hidden transition-all ${
-      isTop
-        ? 'border-clt-teal shadow-lg shadow-clt-teal/10 bg-card'
-        : 'border-border bg-card hover:border-clt-teal/30'
-    }`}>
+    <div
+      className={`relative rounded-2xl border-2 overflow-hidden transition-all ${
+        isTop
+          ? "border-clt-teal shadow-lg shadow-clt-teal/10 bg-card"
+          : "border-border bg-card hover:border-clt-teal/30"
+      }`}
+    >
       {isTop && (
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-clt-teal to-clt-gold" />
       )}
@@ -216,18 +279,18 @@ function ResultCard({ result, rank }: { result: NeighborhoodScore; rank: number 
             loading="lazy"
           />
           <div className="absolute top-3 left-3">
-            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold backdrop-blur-sm ${
-              isTop
-                ? 'bg-clt-teal/90 text-white'
-                : 'bg-black/60 text-white'
-            }`}>
+            <span
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold backdrop-blur-sm ${
+                isTop ? "bg-clt-teal/90 text-white" : "bg-black/60 text-white"
+              }`}
+            >
               #{rank}
             </span>
           </div>
-          {n.metroType && n.metroType !== 'core' && (
+          {n.metroType && n.metroType !== "core" && (
             <div className="absolute bottom-3 left-3">
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-black/60 text-white backdrop-blur-sm capitalize">
-                {n.metroType.replace('-', ' ')}
+                {n.metroType.replace("-", " ")}
               </span>
             </div>
           )}
@@ -237,12 +300,18 @@ function ResultCard({ result, rank }: { result: NeighborhoodScore; rank: number 
         <div className="flex-1 p-5">
           <div className="flex items-start justify-between gap-3 mb-3">
             <div>
-              <h3 className="font-display font-bold text-lg text-foreground">{n.name}</h3>
+              <h3 className="font-display font-bold text-lg text-foreground">
+                {n.name}
+              </h3>
               <p className="text-xs text-muted-foreground">{n.vibe}</p>
             </div>
             <div className="text-right shrink-0">
-              <div className={`text-2xl font-bold ${matchInfo.color}`}>{result.percentage}%</div>
-              <div className={`text-xs font-semibold ${matchInfo.color}`}>{matchInfo.label}</div>
+              <div className={`text-2xl font-bold ${matchInfo.color}`}>
+                {result.percentage}%
+              </div>
+              <div className={`text-xs font-semibold ${matchInfo.color}`}>
+                {matchInfo.label}
+              </div>
             </div>
           </div>
 
@@ -258,7 +327,10 @@ function ResultCard({ result, rank }: { result: NeighborhoodScore; rank: number 
           {result.matchReasons.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-3">
               {result.matchReasons.map((reason, i) => (
-                <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-clt-teal/10 text-clt-teal border border-clt-teal/20">
+                <span
+                  key={i}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-clt-teal/10 text-clt-teal border border-clt-teal/20"
+                >
                   <Star className="w-3 h-3" /> {reason}
                 </span>
               ))}
@@ -269,7 +341,10 @@ function ResultCard({ result, rank }: { result: NeighborhoodScore; rank: number 
           {result.warnings.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-3">
               {result.warnings.map((warning, i) => (
-                <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-orange-500/10 text-orange-600 border border-orange-500/20">
+                <span
+                  key={i}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-orange-500/10 text-orange-600 border border-orange-500/20"
+                >
                   <AlertTriangle className="w-3 h-3" /> {warning}
                 </span>
               ))}
@@ -278,9 +353,15 @@ function ResultCard({ result, rank }: { result: NeighborhoodScore; rank: number 
 
           {/* Quick stats */}
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground mb-4">
-            <span className="flex items-center gap-1"><DollarSign className="w-3 h-3" /> {n.stats.avgRent}/mo</span>
-            <span className="flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Walk {n.stats.walkScore}</span>
-            <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {n.stats.commuteToUptown}</span>
+            <span className="flex items-center gap-1">
+              <DollarSign className="w-3 h-3" /> {n.stats.avgRent}/mo
+            </span>
+            <span className="flex items-center gap-1">
+              <TrendingUp className="w-3 h-3" /> Walk {n.stats.walkScore}
+            </span>
+            <span className="flex items-center gap-1">
+              <MapPin className="w-3 h-3" /> {n.stats.commuteToUptown}
+            </span>
           </div>
 
           {/* CTA */}
@@ -296,9 +377,20 @@ function ResultCard({ result, rank }: { result: NeighborhoodScore; rank: number 
 }
 
 // ─── Find Your Home CTA Section ─────────────────────────────────
-function HomeCTA({ topNeighborhoods, housingType }: { topNeighborhoods: string[]; housingType?: string }) {
-  const neighborhoodParam = topNeighborhoods.slice(0, 3).join(', ');
-  const typeParam = housingType === 'renting' ? '&type=renting' : housingType === 'buying' ? '&type=buying' : '';
+function HomeCTA({
+  topNeighborhoods,
+  housingType,
+}: {
+  topNeighborhoods: string[];
+  housingType?: string;
+}) {
+  const neighborhoodParam = topNeighborhoods.slice(0, 3).join(", ");
+  const typeParam =
+    housingType === "renting"
+      ? "&type=renting"
+      : housingType === "buying"
+        ? "&type=buying"
+        : "";
   const homeUrl = `/find-your-home?neighborhoods=${encodeURIComponent(neighborhoodParam)}&source=quiz${typeParam}`;
 
   return (
@@ -315,22 +407,50 @@ function HomeCTA({ topNeighborhoods, housingType }: { topNeighborhoods: string[]
                 Ready to Make the Move?
               </h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Love your match? A local Charlotte expert can show you homes and apartments in {topNeighborhoods[0]}{topNeighborhoods.length > 1 ? ` and ${topNeighborhoods.length - 1} more area${topNeighborhoods.length > 2 ? 's' : ''}` : ''} — completely free.
+                Love your match? A local Charlotte expert can show you homes and
+                apartments in {topNeighborhoods[0]}
+                {topNeighborhoods.length > 1
+                  ? ` and ${topNeighborhoods.length - 1} more area${topNeighborhoods.length > 2 ? "s" : ""}`
+                  : ""}{" "}
+                — completely free.
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link href={homeUrl}>
-                  <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => trackFindHomeIntent({ surface: "quiz_results_buy_cta", source: "quiz", neighborhoods: neighborhoodParam, referral_type: housingType === "renting" ? "renting" : "buying" })}>
+                  <Button
+                    className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+                    onClick={() =>
+                      trackFindHomeIntent({
+                        surface: "quiz_results_buy_cta",
+                        source: "quiz",
+                        neighborhoods: neighborhoodParam,
+                        referral_type:
+                          housingType === "renting" ? "renting" : "buying",
+                      })
+                    }
+                  >
                     <HomeIcon className="w-4 h-4" /> Find Your Home
                   </Button>
                 </Link>
                 <Link href={`${homeUrl}&type=renting`}>
-                  <Button variant="outline" className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50" onClick={() => trackFindHomeIntent({ surface: "quiz_results_rent_cta", source: "quiz", neighborhoods: neighborhoodParam, referral_type: "renting" })}>
+                  <Button
+                    variant="outline"
+                    className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                    onClick={() =>
+                      trackFindHomeIntent({
+                        surface: "quiz_results_rent_cta",
+                        source: "quiz",
+                        neighborhoods: neighborhoodParam,
+                        referral_type: "renting",
+                      })
+                    }
+                  >
                     <MapPin className="w-4 h-4" /> Find an Apartment
                   </Button>
                 </Link>
               </div>
               <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Free service — no obligations. We match you with vetted local agents.
+                <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Free
+                service — no obligations. We match you with vetted local agents.
               </p>
             </div>
           </div>
@@ -341,9 +461,20 @@ function HomeCTA({ topNeighborhoods, housingType }: { topNeighborhoods: string[]
 }
 
 // ─── Results Screen ───────────────────────────────────────────────
-function ResultsScreen({ results, answers, onRetake }: { results: NeighborhoodScore[]; answers: QuizAnswers; onRetake: () => void }) {
+function ResultsScreen({
+  results,
+  answers,
+  onRetake,
+}: {
+  results: NeighborhoodScore[];
+  answers: QuizAnswers;
+  onRetake: () => void;
+}) {
   const top3 = results.slice(0, 3);
   const honorable = results.slice(3, 6);
+  const neighborhoodParam = top3
+    .map(result => result.neighborhood.id)
+    .join(",");
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -356,17 +487,25 @@ function ResultsScreen({ results, answers, onRetake }: { results: NeighborhoodSc
           Your Top Matches
         </h2>
         <p className="text-muted-foreground max-w-md mx-auto">
-          Based on your answers, here are the Charlotte neighborhoods that fit you best.
+          Based on your answers, here are the Charlotte neighborhoods that fit
+          you best.
         </p>
         <div className="mt-4 flex justify-center">
-          <ShareButtons title={`My top Charlotte neighborhood match: ${top3[0]?.neighborhood.name || 'Charlotte'}`} description="Take the quiz and find your perfect Charlotte neighborhood!" />
+          <ShareButtons
+            title={`My top Charlotte neighborhood match: ${top3[0]?.neighborhood.name || "Charlotte"}`}
+            description="Take the quiz and find your perfect Charlotte neighborhood!"
+          />
         </div>
       </div>
 
       {/* Top 3 cards */}
       <div className="space-y-4 max-w-2xl mx-auto mb-10">
         {top3.map((result, i) => (
-          <ResultCard key={result.neighborhood.id} result={result} rank={i + 1} />
+          <ResultCard
+            key={result.neighborhood.id}
+            result={result}
+            rank={i + 1}
+          />
         ))}
       </div>
 
@@ -384,11 +523,19 @@ function ResultsScreen({ results, answers, onRetake }: { results: NeighborhoodSc
                 <Link key={n.id} href={`/neighborhood/${n.id}`}>
                   <div className="group rounded-xl border border-border bg-card p-4 hover:border-clt-teal/40 transition-all cursor-pointer">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-xs font-bold text-muted-foreground">#{i + 4}</span>
-                      <span className={`text-sm font-bold ${matchInfo.color}`}>{result.percentage}%</span>
+                      <span className="text-xs font-bold text-muted-foreground">
+                        #{i + 4}
+                      </span>
+                      <span className={`text-sm font-bold ${matchInfo.color}`}>
+                        {result.percentage}%
+                      </span>
                     </div>
-                    <h4 className="font-semibold text-sm text-foreground group-hover:text-clt-teal transition-colors">{n.name}</h4>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{n.vibe}</p>
+                    <h4 className="font-semibold text-sm text-foreground group-hover:text-clt-teal transition-colors">
+                      {n.name}
+                    </h4>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                      {n.vibe}
+                    </p>
                   </div>
                 </Link>
               );
@@ -398,13 +545,23 @@ function ResultsScreen({ results, answers, onRetake }: { results: NeighborhoodSc
       )}
 
       {/* Find Your Home CTA */}
-      <HomeCTA topNeighborhoods={top3.map(r => r.neighborhood.name)} housingType={answers.housing_type as string} />
+      <HomeCTA
+        topNeighborhoods={top3.map(r => r.neighborhood.name)}
+        housingType={answers.housing_type as string}
+      />
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-2xl mx-auto">
         <Button variant="outline" onClick={onRetake} className="gap-2">
           <RotateCcw className="w-4 h-4" /> Retake Quiz
         </Button>
+        <Link
+          href={`/newcomer-plan?source=quiz-results&ids=${encodeURIComponent(neighborhoodParam)}`}
+        >
+          <Button variant="outline" className="gap-2">
+            <Compass className="w-4 h-4" /> Build My Newcomer Plan
+          </Button>
+        </Link>
         <Link href="/compare">
           <Button variant="outline" className="gap-2">
             <GitCompare className="w-4 h-4" /> Compare Neighborhoods
@@ -424,12 +581,16 @@ function ResultsScreen({ results, answers, onRetake }: { results: NeighborhoodSc
 export default function Quiz() {
   useSEO({
     title: "Neighborhood Quiz — Which Charlotte Area Fits You?",
-    description: "Take our 2-minute quiz to find your perfect Charlotte neighborhood. Answer questions about budget, lifestyle, and priorities for personalized results.",
-    keywords: "Charlotte neighborhood quiz, which Charlotte neighborhood, best neighborhood Charlotte NC, Charlotte relocation quiz, where to live Charlotte",
+    description:
+      "Take our 2-minute quiz to find your perfect Charlotte neighborhood. Answer questions about budget, lifestyle, and priorities for personalized results.",
+    keywords:
+      "Charlotte neighborhood quiz, which Charlotte neighborhood, best neighborhood Charlotte NC, Charlotte relocation quiz, where to live Charlotte",
     path: "/quiz",
   });
 
-  const [phase, setPhase] = useState<'intro' | 'questions' | 'results'>('intro');
+  const [phase, setPhase] = useState<"intro" | "questions" | "results">(
+    "intro"
+  );
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswers>({});
   const [results, setResults] = useState<NeighborhoodScore[]>([]);
@@ -446,12 +607,12 @@ export default function Quiz() {
       const scored = scoreNeighborhoods(answers);
       trackQuizComplete({
         top_neighborhood: scored[0]?.neighborhood.name,
-        top_matches: scored.slice(0, 3).map((r) => r.neighborhood.name),
+        top_matches: scored.slice(0, 3).map(r => r.neighborhood.name),
         answer_count: Object.keys(answers).length,
       });
       setResults(scored);
-      setPhase('results');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setPhase("results");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, [step, answers]);
 
@@ -460,11 +621,11 @@ export default function Quiz() {
   }, [step]);
 
   const handleRetake = useCallback(() => {
-    setPhase('intro');
+    setPhase("intro");
     setStep(0);
     setAnswers({});
     setResults([]);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const currentQuestion = QUIZ_QUESTIONS[step];
@@ -488,11 +649,11 @@ export default function Quiz() {
       </nav>
 
       <main className="container py-12 md:py-16 px-4">
-        {phase === 'intro' && (
-          <IntroScreen onStart={() => setPhase('questions')} />
+        {phase === "intro" && (
+          <IntroScreen onStart={() => setPhase("questions")} />
         )}
 
-        {phase === 'questions' && currentQuestion && (
+        {phase === "questions" && currentQuestion && (
           <>
             <ProgressBar current={step} total={QUIZ_QUESTIONS.length} />
             <QuestionStep
@@ -507,8 +668,12 @@ export default function Quiz() {
           </>
         )}
 
-        {phase === 'results' && (
-          <ResultsScreen results={results} answers={answers} onRetake={handleRetake} />
+        {phase === "results" && (
+          <ResultsScreen
+            results={results}
+            answers={answers}
+            onRetake={handleRetake}
+          />
         )}
       </main>
     </div>
