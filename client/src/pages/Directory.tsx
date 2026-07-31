@@ -602,7 +602,7 @@ export default function Directory() {
           )}
 
           {/* Results count */}
-          <p className="text-sm text-muted-foreground mb-4" aria-live="polite">
+          <p className="text-sm text-muted-foreground mb-4">
             Showing {Math.min(visibleCount, filteredServices.length)} of {filteredServices.length} {filteredServices.length === 1 ? "business" : "businesses"}
             {activeCategory && ` in ${SERVICE_CATEGORIES.find((c) => c.id === activeCategory)?.name || activeCategory}`}
             {activeArea && ` near ${activeArea}`}

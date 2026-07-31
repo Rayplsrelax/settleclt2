@@ -70,7 +70,7 @@ export default function WishlistButton({
   }
 
   const iconSize = size === "sm" ? "w-4 h-4" : "w-5 h-5";
-  const btnSize = size === "sm" ? "w-8 h-8" : "w-10 h-10";
+  const btnSize = "min-w-11 min-h-11";
 
   return (
     <button

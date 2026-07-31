@@ -2,14 +2,14 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const directory = readFileSync(
-  resolve(process.cwd(), "client/src/pages/Directory.tsx"),
-  "utf8"
-);
-const cookieConsent = readFileSync(
-  resolve(process.cwd(), "client/src/components/CookieConsent.tsx"),
-  "utf8"
-);
+function readSource(relativePath: string) {
+  return readFileSync(resolve(process.cwd(), relativePath), "utf8");
+}
+
+const directory = readSource("client/src/pages/Directory.tsx");
+const cookieConsent = readSource("client/src/components/CookieConsent.tsx");
+const quickStamp = readSource("client/src/components/QuickStampButton.tsx");
+const wishlist = readSource("client/src/components/WishlistButton.tsx");
 
 describe("Phase 3 directory UX contracts", () => {
   it("labels the default sort with the behavior users can expect", () => {
@@ -18,9 +18,9 @@ describe("Phase 3 directory UX contracts", () => {
   });
 
   it("exposes the visible result count and active filter count", () => {
-    expect(directory).toContain("Showing {Math.min(visibleCount, filteredServices.length)} of {filteredServices.length}");
+    expect(directory).toMatch(/Showing\s*\{Math\.min\(visibleCount, filteredServices\.length\)\}\s*of\s*\{filteredServices\.length\}/s);
     expect(directory).toContain("activeFilterCount");
-    expect(directory).toContain("Filters{activeFilterCount > 0");
+    expect(directory).toMatch(/Filters\s*\{activeFilterCount\s*>\s*0/);
   });
 
   it("keeps consent compact and its dismiss control touch accessible", () => {
@@ -28,5 +28,12 @@ describe("Phase 3 directory UX contracts", () => {
     expect(cookieConsent).toContain("min-h-11 min-w-11");
     expect(cookieConsent).toContain('role="region"');
     expect(cookieConsent).toContain('aria-label="Cookie consent"');
+  });
+
+  it("keeps every directory icon action at least 44px and accessibly named", () => {
+    for (const control of [quickStamp, wishlist]) {
+      expect(control).toContain('const btnSize = "min-w-11 min-h-11"');
+      expect(control).toContain("aria-label=");
+    }
   });
 });

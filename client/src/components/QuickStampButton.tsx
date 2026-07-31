@@ -83,7 +83,7 @@ export default function QuickStampButton({
   }
 
   const iconSize = size === "sm" ? "w-4 h-4" : "w-5 h-5";
-  const btnSize = size === "sm" ? "w-8 h-8" : "w-10 h-10";
+  const btnSize = "min-w-11 min-h-11";
 
   return (
     <span
@@ -98,7 +98,7 @@ export default function QuickStampButton({
       }}
       aria-disabled={isPending || loading}
       aria-label={isStamped ? "Already stamped" : "Add stamp to passport"}
-      className={`${size === "sm" ? "w-11 h-11" : btnSize} rounded-full inline-flex items-center justify-center transition-all duration-200 cursor-pointer ${
+      className={`${btnSize} rounded-full inline-flex items-center justify-center transition-all duration-200 cursor-pointer ${
         isStamped
           ? "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"
           : "bg-muted/50 text-muted-foreground hover:bg-amber-500/10 hover:text-amber-500"
