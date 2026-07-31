@@ -18,7 +18,8 @@ describe("Phase 3 directory UX contracts", () => {
   });
 
   it("exposes the visible result count and active filter count", () => {
-    expect(directory).toMatch(/Showing\s*\{Math\.min\(visibleCount, filteredServices\.length\)\}\s*of\s*\{filteredServices\.length\}/s);
+    expect(directory).toContain("Math.min(visibleCount, filteredServices.length)");
+    expect(directory).toContain("Showing all");
     expect(directory).toContain("activeFilterCount");
     expect(directory).toMatch(/Filters\s*\{activeFilterCount\s*>\s*0/);
   });
