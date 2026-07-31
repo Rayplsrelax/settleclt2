@@ -32,8 +32,8 @@ export default function QuickStampButton({
   });
 
   const isStamped = useMemo(() => {
-    if (eventSlug) return entries.some((e) => e.eventSlug === eventSlug);
-    if (serviceKey) return entries.some((e) => e.serviceKey === serviceKey);
+    if (eventSlug) return entries.some(e => e.eventSlug === eventSlug);
+    if (serviceKey) return entries.some(e => e.serviceKey === serviceKey);
     return false;
   }, [entries, serviceKey, eventSlug]);
 
@@ -64,7 +64,7 @@ export default function QuickStampButton({
     }
 
     const neighborhoodId = area
-      ? allNeighborhoods.find((n) => n.name === area)?.id
+      ? allNeighborhoods.find(n => n.name === area)?.id
       : undefined;
 
     if (eventSlug) {
@@ -90,9 +90,15 @@ export default function QuickStampButton({
       role="button"
       tabIndex={0}
       onClick={handleClick}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(e as any); } }}
+      onKeyDown={e => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleClick(e as any);
+        }
+      }}
       aria-disabled={isPending || loading}
-      className={`${btnSize} rounded-full inline-flex items-center justify-center transition-all duration-200 cursor-pointer ${
+      aria-label={isStamped ? "Already stamped" : "Add stamp to passport"}
+      className={`${size === "sm" ? "w-11 h-11" : btnSize} rounded-full inline-flex items-center justify-center transition-all duration-200 cursor-pointer ${
         isStamped
           ? "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"
           : "bg-muted/50 text-muted-foreground hover:bg-amber-500/10 hover:text-amber-500"

@@ -37,30 +37,46 @@ export default function CookieConsent() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 animate-in slide-in-from-bottom-4 duration-500">
-      <div className="max-w-2xl mx-auto bg-card border border-border rounded-xl shadow-lg p-4 sm:p-5">
+    <div
+      role="region"
+      aria-label="Cookie consent"
+      className="fixed bottom-4 right-4 z-50 w-[calc(100%-2rem)] max-w-md animate-in slide-in-from-bottom-4 duration-500 sm:bottom-6 sm:right-6"
+    >
+      <div className="bg-card border border-border rounded-xl shadow-lg p-3 sm:p-4">
         <div className="flex items-start gap-3">
           <Cookie className="w-5 h-5 text-primary mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-foreground font-medium mb-1">We use cookies</p>
+            <p className="text-sm text-foreground font-medium mb-1">
+              We use cookies
+            </p>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              We use cookies and analytics tools to understand how you use Settle CLT so we can improve your experience.
-              Read our{" "}
-              <a href="/privacy" className="text-primary underline underline-offset-2 hover:no-underline">Privacy Policy</a>
-              {" "}for details.
+              We use cookies and analytics tools to understand how you use
+              Settle CLT so we can improve your experience. Read our{" "}
+              <a
+                href="/privacy"
+                className="text-primary underline underline-offset-2 hover:no-underline"
+              >
+                Privacy Policy
+              </a>{" "}
+              for details.
             </p>
             <div className="flex items-center gap-2 mt-3">
               <Button size="sm" onClick={accept} className="text-xs h-8 px-4">
                 Accept All
               </Button>
-              <Button size="sm" variant="outline" onClick={decline} className="text-xs h-8 px-4">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={decline}
+                className="text-xs h-8 px-4"
+              >
                 Decline
               </Button>
             </div>
           </div>
           <button
             onClick={dismiss}
-            className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+            className="text-muted-foreground hover:text-foreground transition-colors shrink-0 min-h-11 min-w-11 inline-flex items-center justify-center"
             aria-label="Dismiss cookie banner (decide later)"
             title="Dismiss — we'll ask again next visit"
           >

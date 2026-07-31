@@ -11,7 +11,11 @@ interface WishlistButtonProps {
   size?: "sm" | "md";
 }
 
-export default function WishlistButton({ serviceKey, className = "", size = "sm" }: WishlistButtonProps) {
+export default function WishlistButton({
+  serviceKey,
+  className = "",
+  size = "sm",
+}: WishlistButtonProps) {
   const { user, loading } = useAuth();
   const utils = trpc.useUtils();
 
@@ -78,10 +82,9 @@ export default function WishlistButton({ serviceKey, className = "", size = "sm"
           : "bg-muted/50 text-muted-foreground hover:bg-rose-500/10 hover:text-rose-500"
       } ${isPending ? "opacity-50" : ""} ${className}`}
       title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+      aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
     >
-      <Heart
-        className={`${iconSize} ${isWishlisted ? "fill-rose-500" : ""}`}
-      />
+      <Heart className={`${iconSize} ${isWishlisted ? "fill-rose-500" : ""}`} />
     </button>
   );
 }

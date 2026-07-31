@@ -252,7 +252,8 @@ export default function Directory() {
     }
   };
 
-  const hasFilters = search || activeGroup || activeCategory || activeArea || sortBy !== "default";
+  const activeFilterCount = [search, activeGroup, activeCategory, activeArea].filter(Boolean).length;
+  const hasFilters = activeFilterCount > 0 || sortBy !== "default";
 
   // Reset visible count when filters change
   useEffect(() => {
@@ -498,7 +499,7 @@ export default function Directory() {
                     : "border-input bg-background text-foreground"
                 }`}
               >
-                <option value="default">Sort: Default</option>
+                <option value="default">Sort: Recommended</option>
                 <option value="top-rated">Top Rated</option>
                 <option value="most-reviewed">Most Reviewed</option>
                 <option value="newest">Newest First</option>
@@ -511,7 +512,7 @@ export default function Directory() {
               className={showFilters ? "bg-primary/10 border-primary/30" : ""}
             >
               <Filter className="w-4 h-4 mr-2" />
-              Filters
+              Filters{activeFilterCount > 0 && ` (${activeFilterCount})`}
             </Button>
             {hasFilters && (
               <Button variant="ghost" onClick={clearFilters} className="text-muted-foreground">
@@ -601,8 +602,8 @@ export default function Directory() {
           )}
 
           {/* Results count */}
-          <p className="text-sm text-muted-foreground mb-4">
-            {filteredServices.length} {filteredServices.length === 1 ? "business" : "businesses"} found
+          <p className="text-sm text-muted-foreground mb-4" aria-live="polite">
+            Showing {Math.min(visibleCount, filteredServices.length)} of {filteredServices.length} {filteredServices.length === 1 ? "business" : "businesses"}
             {activeCategory && ` in ${SERVICE_CATEGORIES.find((c) => c.id === activeCategory)?.name || activeCategory}`}
             {activeArea && ` near ${activeArea}`}
           </p>
