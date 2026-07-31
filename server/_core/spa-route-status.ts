@@ -39,6 +39,7 @@ const STATIC_ROUTES = new Set([
   "/privacy",
   "/terms",
   "/notifications",
+  "/newcomer-plan",
   "/contact",
   "/404",
 ]);

@@ -309,6 +309,7 @@ async function startServer() {
       { loc: "/bingo", priority: "0.7", changefreq: "monthly" },
       { loc: "/leaderboard", priority: "0.6", changefreq: "daily" },
       { loc: "/quiz", priority: "0.8", changefreq: "monthly" },
+      { loc: "/newcomer-plan", priority: "0.8", changefreq: "monthly" },
       { loc: "/compare", priority: "0.7", changefreq: "monthly" },
       { loc: "/find-your-home", priority: "0.8", changefreq: "monthly" },
       { loc: "/business-pricing", priority: "0.7", changefreq: "monthly" },

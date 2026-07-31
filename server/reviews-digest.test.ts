@@ -5,13 +5,19 @@ import { describe, it, expect, vi } from "vitest";
 describe("Reviews Router", () => {
   describe("reviews.getByTarget", () => {
     it("should accept neighborhood targetType and return reviews + stats", () => {
-      const input = { targetType: "neighborhood" as const, targetId: "south-end" };
+      const input = {
+        targetType: "neighborhood" as const,
+        targetId: "south-end",
+      };
       expect(input.targetType).toBe("neighborhood");
       expect(input.targetId).toBe("south-end");
     });
 
     it("should accept directory targetType", () => {
-      const input = { targetType: "directory" as const, targetId: "amelies-french-bakery" };
+      const input = {
+        targetType: "directory" as const,
+        targetId: "amelies-french-bakery",
+      };
       expect(input.targetType).toBe("directory");
       expect(input.targetId).toBe("amelies-french-bakery");
     });
@@ -20,7 +26,7 @@ describe("Reviews Router", () => {
   describe("reviews.create input validation", () => {
     it("should require rating between 1 and 5", () => {
       const validRatings = [1, 2, 3, 4, 5];
-      validRatings.forEach((r) => {
+      validRatings.forEach(r => {
         expect(r).toBeGreaterThanOrEqual(1);
         expect(r).toBeLessThanOrEqual(5);
       });
@@ -39,8 +45,16 @@ describe("Reviews Router", () => {
     });
 
     it("should accept valid aspect values", () => {
-      const validAspects = ["vibe", "food", "safety", "transit", "nightlife", "cost", "general"];
-      validAspects.forEach((a) => {
+      const validAspects = [
+        "vibe",
+        "food",
+        "safety",
+        "transit",
+        "nightlife",
+        "cost",
+        "general",
+      ];
+      validAspects.forEach(a => {
         expect(validAspects).toContain(a);
       });
     });
@@ -81,7 +95,7 @@ describe("Reviews Router", () => {
       const current = "yes";
       const toggled = current === "yes" ? "no" : "yes";
       expect(toggled).toBe("no");
-      
+
       const current2 = "no";
       const toggled2 = current2 === "yes" ? "no" : "yes";
       expect(toggled2).toBe("yes");
@@ -147,7 +161,7 @@ describe("Mixpanel Module", () => {
     const path = await import("path");
     const filePath = path.resolve(__dirname, "../client/src/lib/mixpanel.ts");
     expect(fs.existsSync(filePath)).toBe(true);
-    
+
     const content = fs.readFileSync(filePath, "utf-8");
     expect(content).toContain("export function initMixpanel");
     expect(content).toContain("export function identifyUser");
@@ -164,7 +178,7 @@ describe("Mixpanel Module", () => {
     expect(content).toContain("export function trackNeighborhoodView");
     expect(content).toContain("export function trackBlogView");
     expect(content).toContain("export function trackSignup");
-    expect(content).toContain("export function trackNewsletterOptIn");
+    expect(content).toContain("Newcomer Journey");
   });
 
   it("should use VITE_MIXPANEL_TOKEN env variable", async () => {
@@ -191,14 +205,20 @@ describe("ReviewSection Component", () => {
   it("should exist as a component file", async () => {
     const fs = await import("fs");
     const path = await import("path");
-    const filePath = path.resolve(__dirname, "../client/src/components/ReviewSection.tsx");
+    const filePath = path.resolve(
+      __dirname,
+      "../client/src/components/ReviewSection.tsx"
+    );
     expect(fs.existsSync(filePath)).toBe(true);
   });
 
   it("should export default ReviewSection and named ReviewStars", async () => {
     const fs = await import("fs");
     const path = await import("path");
-    const filePath = path.resolve(__dirname, "../client/src/components/ReviewSection.tsx");
+    const filePath = path.resolve(
+      __dirname,
+      "../client/src/components/ReviewSection.tsx"
+    );
     const content = fs.readFileSync(filePath, "utf-8");
     expect(content).toContain("export default function ReviewSection");
     expect(content).toContain("export function ReviewStars");
@@ -207,7 +227,10 @@ describe("ReviewSection Component", () => {
   it("should include star rating interactive component", async () => {
     const fs = await import("fs");
     const path = await import("path");
-    const filePath = path.resolve(__dirname, "../client/src/components/ReviewSection.tsx");
+    const filePath = path.resolve(
+      __dirname,
+      "../client/src/components/ReviewSection.tsx"
+    );
     const content = fs.readFileSync(filePath, "utf-8");
     expect(content).toContain("StarRating");
     expect(content).toContain("interactive");
@@ -216,10 +239,21 @@ describe("ReviewSection Component", () => {
   it("should include aspect selector with all valid aspects", async () => {
     const fs = await import("fs");
     const path = await import("path");
-    const filePath = path.resolve(__dirname, "../client/src/components/ReviewSection.tsx");
+    const filePath = path.resolve(
+      __dirname,
+      "../client/src/components/ReviewSection.tsx"
+    );
     const content = fs.readFileSync(filePath, "utf-8");
-    const aspects = ["vibe", "food", "safety", "transit", "nightlife", "cost", "general"];
-    aspects.forEach((a) => {
+    const aspects = [
+      "vibe",
+      "food",
+      "safety",
+      "transit",
+      "nightlife",
+      "cost",
+      "general",
+    ];
+    aspects.forEach(a => {
       expect(content).toContain(a);
     });
   });

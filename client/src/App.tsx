@@ -43,13 +43,16 @@ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const BusinessDetail = lazy(() => import("./pages/BusinessDetail"));
 const Contact = lazy(() => import("./pages/Contact"));
+const NewcomerPlan = lazy(() => import("./pages/NewcomerPlan"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 import CookieConsent from "./components/CookieConsent";
 
 function PageLoader() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="animate-pulse text-muted-foreground text-lg font-display">Loading...</div>
+      <div className="animate-pulse text-muted-foreground text-lg font-display">
+        Loading...
+      </div>
     </div>
   );
 }
@@ -73,7 +76,10 @@ function Router() {
         <Route path="/wishlist" component={Wishlist} />
         <Route path="/bingo" component={BingoCards} />
         <Route path="/events" component={Events} />
-        <Route path="/events/category/:categoryId" component={EventCategoryPage} />
+        <Route
+          path="/events/category/:categoryId"
+          component={EventCategoryPage}
+        />
         <Route path="/things-to-do" component={ThingsToDo} />
         <Route path="/leaderboard" component={Leaderboard} />
         <Route path="/admin/enrich" component={AdminEnrich} />
@@ -88,13 +94,16 @@ function Router() {
         <Route path="/admin/submissions" component={AdminSubmissions} />
         <Route path="/my-business" component={MyBusiness} />
         <Route path="/find-your-home" component={FindYourHome} />
-        <Route path="/find-a-realtor">{() => <Redirect to="/find-your-home" />}</Route>
+        <Route path="/find-a-realtor">
+          {() => <Redirect to="/find-your-home" />}
+        </Route>
         <Route path="/privacy" component={PrivacyPolicy} />
         <Route path="/terms" component={TermsOfService} />
         <Route path="/tag/:slug" component={TagPage} />
         <Route path="/directory/category/:slug" component={DirectoryCategory} />
         <Route path="/directory/:slug" component={BusinessDetail} />
         <Route path="/blog/:slug" component={BlogArticle} />
+        <Route path="/newcomer-plan" component={NewcomerPlan} />
         <Route path="/notifications" component={Notifications} />
         <Route path="/contact" component={Contact} />
         <Route path="/404" component={NotFound} />
@@ -107,9 +116,7 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-      >
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
           <Router />

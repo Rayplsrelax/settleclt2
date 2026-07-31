@@ -305,3 +305,10 @@ export function trackSignup() {
 export function trackNewsletterOptIn(optedIn: boolean) {
   trackEvent("Newsletter Toggle", { opted_in: optedIn });
 }
+
+export function trackNewcomerJourneyAction(
+  action: "start" | "step_click" | "progress_toggle",
+  properties: Record<string, unknown> = {}
+) {
+  trackEvent("Newcomer Journey", { action, ...properties });
+}
