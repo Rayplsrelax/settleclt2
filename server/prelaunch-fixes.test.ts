@@ -86,7 +86,7 @@ describe("Phase 2: Compliance & Trust", () => {
     });
 
     it("should disable analytics when declined", () => {
-      expect(cookieConsent).toContain("umami.disabled");
+      expect(cookieConsent).toContain("disableAnalytics");
     });
 
     it("should be included in App.tsx", () => {

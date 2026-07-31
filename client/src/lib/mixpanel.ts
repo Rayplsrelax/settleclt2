@@ -10,6 +10,7 @@
  */
 
 const MIXPANEL_TOKEN = import.meta.env.VITE_MIXPANEL_TOKEN as string | undefined;
+const CONSENT_KEY = "settle-clt-cookie-consent";
 
 type MixpanelModule = typeof import("mixpanel-browser").default;
 
@@ -54,6 +55,7 @@ function loadSdk(): Promise<MixpanelModule | null> {
 /** Schedule an op against the SDK. Queues until ready. */
 function withSdk(op: (m: MixpanelModule) => void, loadImmediately = true) {
   if (!MIXPANEL_TOKEN) return;
+  if (typeof window !== "undefined" && localStorage.getItem(CONSENT_KEY) !== "accepted") return;
   if (initialized && mp) {
     try {
       op(mp);
@@ -77,6 +79,8 @@ function withSdk(op: (m: MixpanelModule) => void, loadImmediately = true) {
  */
 export function initMixpanel() {
   if (!MIXPANEL_TOKEN || loadPromise) return;
+  if (typeof window === "undefined" || localStorage.getItem(CONSENT_KEY) !== "accepted") return;
+
   const scheduleLoad = () => {
     const w = window as Window & { requestIdleCallback?: (cb: IdleRequestCallback) => number };
     if (w.requestIdleCallback) {
@@ -86,11 +90,30 @@ export function initMixpanel() {
     }
   };
 
-  if (typeof window === "undefined") return;
   if (document.readyState === "complete") {
     scheduleLoad();
   } else {
     window.addEventListener("load", scheduleLoad, { once: true });
+  }
+}
+
+/** Begin analytics only after the user has explicitly accepted. */
+export function enableAnalytics() {
+  initMixpanel();
+}
+
+/** Stop future tracking and opt out an already-loaded Mixpanel instance. */
+export function disableAnalytics() {
+  queue.length = 0;
+  if (mp) {
+    try {
+      mp.opt_out_tracking();
+    } catch {
+      /* swallow analytics errors */
+    }
+  }
+  if (typeof window !== "undefined") {
+    (window as unknown as { [key: string]: unknown })["umami.disabled"] = true;
   }
 }
 

@@ -25,7 +25,8 @@ describe("mobile homepage performance", () => {
     const main = readProjectFile("client/src/main.tsx");
     const mixpanel = readProjectFile("client/src/lib/mixpanel.ts");
 
-    expect(main).toContain("initMixpanel();");
+    expect(main).not.toContain("initMixpanel();");
+    expect(mixpanel).toContain("enableAnalytics");
     expect(mixpanel).toContain('document.readyState === "complete"');
     expect(mixpanel).toContain(
       'window.addEventListener("load", scheduleLoad, { once: true })'
