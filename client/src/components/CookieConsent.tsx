@@ -2,14 +2,19 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Cookie, X } from "lucide-react";
 import { disableAnalytics, enableAnalytics } from "@/lib/mixpanel";
+import { ANALYTICS_CONSENT_KEY } from "@/lib/analytics-config";
 
-const COOKIE_CONSENT_KEY = "settle-clt-cookie-consent";
 const UMAMI_SCRIPT_ID = "settle-clt-umami";
 
 function loadUmami() {
+  if (typeof document === "undefined") return;
   if (document.getElementById(UMAMI_SCRIPT_ID)) return;
-  const endpoint = import.meta.env.VITE_ANALYTICS_ENDPOINT as string | undefined;
-  const websiteId = import.meta.env.VITE_ANALYTICS_WEBSITE_ID as string | undefined;
+  const endpoint = import.meta.env.VITE_ANALYTICS_ENDPOINT as
+    | string
+    | undefined;
+  const websiteId = import.meta.env.VITE_ANALYTICS_WEBSITE_ID as
+    | string
+    | undefined;
   if (!endpoint || !websiteId) return;
   const script = document.createElement("script");
   script.id = UMAMI_SCRIPT_ID;
@@ -28,24 +33,23 @@ export default function CookieConsent() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
+    const consent = localStorage.getItem(ANALYTICS_CONSENT_KEY);
     if (consent === "accepted") enableConsentedAnalytics();
     if (consent === "declined") disableAnalytics();
     if (!consent) {
-
       const timer = setTimeout(() => setVisible(true), 1500);
       return () => clearTimeout(timer);
     }
   }, []);
 
   const accept = () => {
-    localStorage.setItem(COOKIE_CONSENT_KEY, "accepted");
+    localStorage.setItem(ANALYTICS_CONSENT_KEY, "accepted");
     enableConsentedAnalytics();
     setVisible(false);
   };
 
   const decline = () => {
-    localStorage.setItem(COOKIE_CONSENT_KEY, "declined");
+    localStorage.setItem(ANALYTICS_CONSENT_KEY, "declined");
     setVisible(false);
     disableAnalytics();
   };
