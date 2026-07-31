@@ -4,7 +4,10 @@ import { resolve } from "path";
 
 describe("Phase 1: Launch Blockers", () => {
   describe("Sitemap URL fixes", () => {
-    const serverIndex = readFileSync(resolve(__dirname, "_core/index.ts"), "utf-8");
+    const serverIndex = readFileSync(
+      resolve(__dirname, "_core/index.ts"),
+      "utf-8"
+    );
 
     it("should use /privacy instead of /privacy-policy in sitemap", () => {
       expect(serverIndex).toContain('loc: "/privacy"');
@@ -22,7 +25,10 @@ describe("Phase 1: Launch Blockers", () => {
   });
 
   describe("Meta tags and OG image", () => {
-    const indexHtml = readFileSync(resolve(__dirname, "../client/index.html"), "utf-8");
+    const indexHtml = readFileSync(
+      resolve(__dirname, "../client/index.html"),
+      "utf-8"
+    );
 
     it("should have meta description with 700+ businesses", () => {
       expect(indexHtml).toContain("700+ local businesses");
@@ -53,7 +59,10 @@ describe("Phase 1: Launch Blockers", () => {
   });
 
   describe("Broken admin link fix", () => {
-    const adminClaims = readFileSync(resolve(__dirname, "../client/src/pages/AdminClaims.tsx"), "utf-8");
+    const adminClaims = readFileSync(
+      resolve(__dirname, "../client/src/pages/AdminClaims.tsx"),
+      "utf-8"
+    );
 
     it("should link to /admin/enrich instead of /admin", () => {
       expect(adminClaims).toContain('href="/admin/enrich"');
@@ -64,11 +73,17 @@ describe("Phase 1: Launch Blockers", () => {
 
 describe("Phase 2: Compliance & Trust", () => {
   describe("Cookie consent banner", () => {
-    const cookieConsent = readFileSync(resolve(__dirname, "../client/src/components/CookieConsent.tsx"), "utf-8");
-    const appTsx = readFileSync(resolve(__dirname, "../client/src/App.tsx"), "utf-8");
+    const cookieConsent = readFileSync(
+      resolve(__dirname, "../client/src/components/CookieConsent.tsx"),
+      "utf-8"
+    );
+    const appTsx = readFileSync(
+      resolve(__dirname, "../client/src/App.tsx"),
+      "utf-8"
+    );
 
     it("should have a CookieConsent component", () => {
-      expect(cookieConsent).toContain("settle-clt-cookie-consent");
+      expect(cookieConsent).toContain("ANALYTICS_CONSENT_KEY");
     });
 
     it("should have Accept All and Decline buttons", () => {
@@ -86,7 +101,7 @@ describe("Phase 2: Compliance & Trust", () => {
     });
 
     it("should disable analytics when declined", () => {
-      expect(cookieConsent).toContain("umami.disabled");
+      expect(cookieConsent).toContain("disableAnalytics");
     });
 
     it("should be included in App.tsx", () => {
@@ -95,7 +110,10 @@ describe("Phase 2: Compliance & Trust", () => {
   });
 
   describe("Account deletion", () => {
-    const profile = readFileSync(resolve(__dirname, "../client/src/pages/Profile.tsx"), "utf-8");
+    const profile = readFileSync(
+      resolve(__dirname, "../client/src/pages/Profile.tsx"),
+      "utf-8"
+    );
     const routers = readFileSync(resolve(__dirname, "routers.ts"), "utf-8");
     const dbFile = readFileSync(resolve(__dirname, "db.ts"), "utf-8");
 
@@ -142,8 +160,14 @@ describe("Phase 2: Compliance & Trust", () => {
   });
 
   describe("Contact page", () => {
-    const contact = readFileSync(resolve(__dirname, "../client/src/pages/Contact.tsx"), "utf-8");
-    const appTsx = readFileSync(resolve(__dirname, "../client/src/App.tsx"), "utf-8");
+    const contact = readFileSync(
+      resolve(__dirname, "../client/src/pages/Contact.tsx"),
+      "utf-8"
+    );
+    const appTsx = readFileSync(
+      resolve(__dirname, "../client/src/App.tsx"),
+      "utf-8"
+    );
 
     it("should have a Contact page component", () => {
       expect(contact).toContain("Contact");
@@ -175,7 +199,10 @@ describe("Phase 2: Compliance & Trust", () => {
   });
 
   describe("Footer links", () => {
-    const footer = readFileSync(resolve(__dirname, "../client/src/components/Footer.tsx"), "utf-8");
+    const footer = readFileSync(
+      resolve(__dirname, "../client/src/components/Footer.tsx"),
+      "utf-8"
+    );
 
     it("should have Find Your Home link", () => {
       expect(footer).toContain('href="/find-your-home"');

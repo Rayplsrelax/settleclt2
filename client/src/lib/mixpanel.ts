@@ -9,7 +9,11 @@
  * loading are queued and flushed once it's ready.
  */
 
-const MIXPANEL_TOKEN = import.meta.env.VITE_MIXPANEL_TOKEN as string | undefined;
+import { ANALYTICS_CONSENT_KEY } from "@/lib/analytics-config";
+
+const MIXPANEL_TOKEN = import.meta.env.VITE_MIXPANEL_TOKEN as
+  | string
+  | undefined;
 
 type MixpanelModule = typeof import("mixpanel-browser").default;
 
@@ -25,7 +29,7 @@ function loadSdk(): Promise<MixpanelModule | null> {
     return loadPromise;
   }
   loadPromise = import("mixpanel-browser")
-    .then((mod) => {
+    .then(mod => {
       mp = mod.default;
       mp.init(MIXPANEL_TOKEN, {
         track_pageview: false, // we track manually for SPA
@@ -54,6 +58,11 @@ function loadSdk(): Promise<MixpanelModule | null> {
 /** Schedule an op against the SDK. Queues until ready. */
 function withSdk(op: (m: MixpanelModule) => void, loadImmediately = true) {
   if (!MIXPANEL_TOKEN) return;
+  if (
+    typeof window !== "undefined" &&
+    localStorage.getItem(ANALYTICS_CONSENT_KEY) !== "accepted"
+  )
+    return;
   if (initialized && mp) {
     try {
       op(mp);
@@ -77,8 +86,16 @@ function withSdk(op: (m: MixpanelModule) => void, loadImmediately = true) {
  */
 export function initMixpanel() {
   if (!MIXPANEL_TOKEN || loadPromise) return;
+  if (
+    typeof window === "undefined" ||
+    localStorage.getItem(ANALYTICS_CONSENT_KEY) !== "accepted"
+  )
+    return;
+
   const scheduleLoad = () => {
-    const w = window as Window & { requestIdleCallback?: (cb: IdleRequestCallback) => number };
+    const w = window as Window & {
+      requestIdleCallback?: (cb: IdleRequestCallback) => number;
+    };
     if (w.requestIdleCallback) {
       w.requestIdleCallback(() => void loadSdk(), { timeout: 2000 });
     } else {
@@ -86,7 +103,6 @@ export function initMixpanel() {
     }
   };
 
-  if (typeof window === "undefined") return;
   if (document.readyState === "complete") {
     scheduleLoad();
   } else {
@@ -94,9 +110,38 @@ export function initMixpanel() {
   }
 }
 
+/** Begin analytics only after the user has explicitly accepted. */
+export function enableAnalytics() {
+  initMixpanel();
+  trackPageView(window.location.pathname, {
+    full_url: window.location.href,
+    referrer: document.referrer || undefined,
+  });
+}
+
+/** Stop future tracking and opt out an already-loaded Mixpanel instance. */
+export function disableAnalytics() {
+  queue.length = 0;
+  if (mp) {
+    try {
+      mp.opt_out_tracking();
+    } catch {
+      /* swallow analytics errors */
+    }
+  }
+  if (typeof window !== "undefined") {
+    (window as unknown as { [key: string]: unknown })["umami.disabled"] = true;
+  }
+}
+
 /** Identify a logged-in user so events are attributed correctly. */
-export function identifyUser(user: { id: number; name?: string | null; email?: string | null; role?: string }) {
-  withSdk((m) => {
+export function identifyUser(user: {
+  id: number;
+  name?: string | null;
+  email?: string | null;
+  role?: string;
+}) {
+  withSdk(m => {
     m.identify(String(user.id));
     m.people.set({
       $name: user.name ?? "Unknown",
@@ -109,31 +154,53 @@ export function identifyUser(user: { id: number; name?: string | null; email?: s
 
 /** Reset identity on logout. */
 export function resetUser() {
-  withSdk((m) => m.reset());
+  withSdk(m => m.reset());
 }
 
 /** Track a named event with optional properties. */
-export function trackEvent(event: string, properties?: Record<string, unknown>) {
-  withSdk((m) => m.track(event, properties));
+export function trackEvent(
+  event: string,
+  properties?: Record<string, unknown>
+) {
+  withSdk(m => m.track(event, properties));
 }
 
 // ─── Typed Event Helpers ────────────────────────────────────────
 
-export function trackPageView(page: string, properties?: Record<string, unknown>) {
+export function trackPageView(
+  page: string,
+  properties?: Record<string, unknown>
+) {
   // Queue page views without forcing the SDK onto the LCP critical path.
-  withSdk((m) => m.track("Page View", { page, ...properties }), false);
+  withSdk(m => m.track("Page View", { page, ...properties }), false);
 }
 
-export function trackSearch(query: string, resultCount: number, source = "global-search") {
+export function trackSearch(
+  query: string,
+  resultCount: number,
+  source = "global-search"
+) {
   trackEvent("Search", { query, result_count: resultCount, source });
 }
 
-export function trackTagClick(tagName: string, tagSlug: string, surface: string) {
+export function trackTagClick(
+  tagName: string,
+  tagSlug: string,
+  surface: string
+) {
   trackEvent("Tag Click", { tag_name: tagName, tag_slug: tagSlug, surface });
 }
 
-export function trackReviewSubmit(targetType: string, targetId: string, rating: number) {
-  trackEvent("Review Submit", { target_type: targetType, target_id: targetId, rating });
+export function trackReviewSubmit(
+  targetType: string,
+  targetId: string,
+  rating: number
+) {
+  trackEvent("Review Submit", {
+    target_type: targetType,
+    target_id: targetId,
+    rating,
+  });
 }
 
 export function trackStamp(serviceKey: string, neighborhood?: string) {
@@ -195,7 +262,13 @@ export function trackFindHomeIntent(properties: {
 }
 
 export function trackEventAction(
-  action: "event_view" | "directions_click" | "external_click" | "submit_event_click" | "filter_click" | "search",
+  action:
+    | "event_view"
+    | "directions_click"
+    | "external_click"
+    | "submit_event_click"
+    | "filter_click"
+    | "search",
   properties: {
     event_slug?: string;
     event_title?: string;
