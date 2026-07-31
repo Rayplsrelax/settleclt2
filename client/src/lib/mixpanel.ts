@@ -113,6 +113,10 @@ export function initMixpanel() {
 /** Begin analytics only after the user has explicitly accepted. */
 export function enableAnalytics() {
   initMixpanel();
+  trackPageView(window.location.pathname, {
+    full_url: window.location.href,
+    referrer: document.referrer || undefined,
+  });
 }
 
 /** Stop future tracking and opt out an already-loaded Mixpanel instance. */
