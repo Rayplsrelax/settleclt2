@@ -233,11 +233,19 @@ hermesRouter.post("/claims/:id", async (req, res) => {
 
     const { status, adminNotes } = req.body;
     const validStatuses = ["pending", "approved", "rejected"];
-    if (status && !validStatuses.includes(status)) {
+    if (!status) {
+      return res.status(400).json({ error: "Claim status is required" });
+    }
+    if (!validStatuses.includes(status)) {
       return res.status(400).json({ error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` });
     }
+    if (status === "approved") {
+      return res.status(403).json({
+        error: "Claim approval requires an authenticated administrator in the admin portal",
+      });
+    }
 
-    await updateBusinessClaimStatus(id, status || "pending", adminNotes);
+    await updateBusinessClaimStatus(id, status, adminNotes);
     console.log(`[Hermes API] Updated claim ${id}: status=${status}, notes=${adminNotes}`);
     res.json({ ok: true, id, updated: { status, adminNotes } });
   } catch (err: any) {

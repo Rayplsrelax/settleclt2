@@ -1,6 +1,6 @@
 import { eq, and, desc, asc, sql, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription } from "../drizzle/schema";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessMemberships, type InsertBusinessMembership, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription } from "../drizzle/schema";
 import { scoreRealtorLead } from "../shared/realtorLeadOps";
 import { ENV } from './_core/env';
 
@@ -1360,9 +1360,110 @@ export async function getBusinessClaims(opts?: { status?: string; serviceKey?: s
 export async function updateBusinessClaimStatus(id: number, status: string, adminNotes?: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.update(businessClaims)
-    .set({ status: status as any, ...(adminNotes !== undefined ? { adminNotes } : {}) })
-    .where(eq(businessClaims.id, id));
+  return db.transaction(async tx => {
+    await tx.update(businessClaims)
+      .set({ status: status as any, ...(adminNotes !== undefined ? { adminNotes } : {}) })
+      .where(eq(businessClaims.id, id));
+    if (status !== "approved") {
+      await tx.update(businessMemberships)
+        .set({ status: "revoked", activeOwnerKey: null, revokedAt: new Date() })
+        .where(and(
+          eq(businessMemberships.ownerClaimId, id),
+          eq(businessMemberships.role, "owner"),
+        ));
+    }
+    return { success: true };
+  });
+}
+
+export async function approveBusinessClaimAndCreateOwnerMembership(
+  id: number,
+  approvedByUserId: number,
+  adminNotes?: string,
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.transaction(async tx => {
+    const claims = await tx.select()
+      .from(businessClaims)
+      .where(eq(businessClaims.id, id))
+      .for("update");
+    const claim = claims[0];
+    if (!claim?.userId) throw new Error("Claim must be linked to a user before approval");
+
+    await tx.insert(businessMemberships).values({
+      serviceKey: claim.serviceKey,
+      userId: claim.userId,
+      ownerClaimId: claim.id,
+      activeOwnerKey: claim.serviceKey,
+      role: "owner",
+      status: "active",
+      createdBy: approvedByUserId,
+    }).onDuplicateKeyUpdate({ set: { updatedAt: new Date() } });
+
+    const memberships = await tx.select().from(businessMemberships).where(and(
+      eq(businessMemberships.serviceKey, claim.serviceKey),
+      eq(businessMemberships.userId, claim.userId),
+    ));
+    const membership = memberships[0];
+    if (!membership) {
+      throw new Error("This business already has an active owner");
+    }
+    await tx.update(businessMemberships).set({
+      role: "owner",
+      status: "active",
+      ownerClaimId: claim.id,
+      activeOwnerKey: claim.serviceKey,
+      revokedAt: null,
+    }).where(eq(businessMemberships.id, membership.id));
+
+    await tx.update(businessClaims).set({
+      status: "approved",
+      ...(adminNotes !== undefined ? { adminNotes } : {}),
+    }).where(eq(businessClaims.id, id));
+    return { success: true };
+  });
+}
+
+export async function getBusinessMembershipsForUser(userId: number, serviceKey?: string) {
+  const db = await getDb();
+  if (!db) return [];
+  const conditions = [eq(businessMemberships.userId, userId)];
+  if (serviceKey) conditions.push(eq(businessMemberships.serviceKey, serviceKey));
+  return db.select().from(businessMemberships).where(and(...conditions));
+}
+
+export async function ensureBusinessMembership(data: InsertBusinessMembership) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await db.select().from(businessMemberships).where(and(
+    eq(businessMemberships.serviceKey, data.serviceKey),
+    eq(businessMemberships.userId, data.userId),
+  ));
+  if (existing[0]) {
+    await db.update(businessMemberships).set({
+      role: data.role,
+      status: data.status ?? "active",
+      activeOwnerKey: data.role === "owner" && (data.status ?? "active") === "active"
+        ? data.serviceKey
+        : null,
+      revokedAt: data.revokedAt ?? null,
+    }).where(eq(businessMemberships.id, existing[0].id));
+    return { id: existing[0].id, updated: true };
+  }
+  const result = await db.insert(businessMemberships).values({
+    ...data,
+    activeOwnerKey: data.role === "owner" && (data.status ?? "active") === "active"
+      ? data.serviceKey
+      : null,
+  });
+  return { id: result[0].insertId, updated: false };
+}
+
+export async function revokeBusinessMembership(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(businessMemberships).set({ status: "revoked", activeOwnerKey: null, revokedAt: new Date() }).where(eq(businessMemberships.id, id));
   return { success: true };
 }
 
@@ -1474,23 +1575,33 @@ export async function deleteUserAccount(userId: number): Promise<boolean> {
   const db = await getDb();
   if (!db) return false;
 
-  // Delete all user-related data across tables (order matters for foreign keys)
-  await db.delete(commentVotes).where(eq(commentVotes.userId, userId));
-  await db.delete(comments).where(eq(comments.userId, userId));
-  await db.delete(passportEntries).where(eq(passportEntries.userId, userId));
-  await db.delete(bingoProgress).where(eq(bingoProgress.userId, userId));
-  await db.delete(wishlists).where(eq(wishlists.userId, userId));
-  await db.delete(reviews).where(eq(reviews.userId, userId));
-  await db.delete(userTagPreferences).where(eq(userTagPreferences.userId, userId));
-  await db.delete(searchQueries).where(eq(searchQueries.userId, userId));
-  // Anonymize events submitted by user (don't delete the events themselves)
-  await db.update(events).set({ submittedBy: null } as any).where(eq(events.submittedBy, userId));
-  // Anonymize business claims (keep for business continuity)
-  await db.update(businessClaims).set({ userId: null } as any).where(eq(businessClaims.userId, userId));
-  // Finally delete the user record
-  await db.delete(users).where(eq(users.id, userId));
-
-  return true;
+  return db.transaction(async tx => {
+    // Delete all user-related data across tables (order matters for foreign keys)
+    await tx.delete(commentVotes).where(eq(commentVotes.userId, userId));
+    await tx.delete(comments).where(eq(comments.userId, userId));
+    await tx.delete(passportEntries).where(eq(passportEntries.userId, userId));
+    await tx.delete(bingoProgress).where(eq(bingoProgress.userId, userId));
+    await tx.delete(wishlists).where(eq(wishlists.userId, userId));
+    await tx.delete(reviews).where(eq(reviews.userId, userId));
+    await tx.delete(userTagPreferences).where(eq(userTagPreferences.userId, userId));
+    await tx.delete(searchQueries).where(eq(searchQueries.userId, userId));
+    // Serialize deletion with claim approval, then detach retained claim audit rows.
+    await tx.select({ id: businessClaims.id })
+      .from(businessClaims)
+      .where(eq(businessClaims.userId, userId))
+      .for("update");
+    await tx.update(businessClaims)
+      .set({ userId: null } as any)
+      .where(eq(businessClaims.userId, userId));
+    // Revoke business authority before removing the account.
+    await tx.update(businessMemberships)
+      .set({ status: "revoked", activeOwnerKey: null, revokedAt: new Date() })
+      .where(eq(businessMemberships.userId, userId));
+    // Anonymize retained records for continuity.
+    await tx.update(events).set({ submittedBy: null } as any).where(eq(events.submittedBy, userId));
+    await tx.delete(users).where(eq(users.id, userId));
+    return true;
+  });
 }
 
 

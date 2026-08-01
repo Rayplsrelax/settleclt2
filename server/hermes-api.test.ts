@@ -196,15 +196,39 @@ describe("Hermes API", () => {
       expect(res.body.error).toContain("Invalid referral ID");
     });
 
-    it("POST /claims/:id updates claim status", async () => {
+    it("POST /claims/:id can reject a claim and revoke linked authority", async () => {
       const { updateBusinessClaimStatus } = await import("./db");
       const res = await request(app)
         .post("/api/hermes/claims/5")
         .set("Authorization", `Bearer ${VALID_TOKEN}`)
-        .send({ status: "approved", adminNotes: "Verified by Hermes" });
+        .send({ status: "rejected", adminNotes: "Rejected by Hermes" });
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
-      expect(updateBusinessClaimStatus).toHaveBeenCalledWith(5, "approved", "Verified by Hermes");
+      expect(updateBusinessClaimStatus).toHaveBeenCalledWith(5, "rejected", "Rejected by Hermes");
+    });
+
+    it("POST /claims/:id refuses approval without an authenticated admin user", async () => {
+      const { updateBusinessClaimStatus } = await import("./db");
+      vi.mocked(updateBusinessClaimStatus).mockClear();
+      const res = await request(app)
+        .post("/api/hermes/claims/5")
+        .set("Authorization", `Bearer ${VALID_TOKEN}`)
+        .send({ status: "approved", adminNotes: "Verified by Hermes" });
+      expect(res.status).toBe(403);
+      expect(res.body.error).toContain("admin portal");
+      expect(updateBusinessClaimStatus).not.toHaveBeenCalled();
+    });
+
+    it("POST /claims/:id requires an explicit status", async () => {
+      const { updateBusinessClaimStatus } = await import("./db");
+      vi.mocked(updateBusinessClaimStatus).mockClear();
+      const res = await request(app)
+        .post("/api/hermes/claims/5")
+        .set("Authorization", `Bearer ${VALID_TOKEN}`)
+        .send({ adminNotes: "Notes only" });
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain("status is required");
+      expect(updateBusinessClaimStatus).not.toHaveBeenCalled();
     });
 
     it("POST /claims/:id rejects invalid status", async () => {

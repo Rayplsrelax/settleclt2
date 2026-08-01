@@ -133,9 +133,6 @@ export default function MyBusiness() {
     createCheckout.mutate({
       tier,
       serviceKey: selectedClaim.serviceKey,
-      businessName: selectedClaim.businessName,
-      claimId: selectedClaim.id,
-      origin: window.location.origin,
     });
   }, [selectedClaim, createCheckout]);
 
@@ -166,7 +163,6 @@ export default function MyBusiness() {
     if (!selectedClaim) return;
     updateListing.mutate({
       serviceKey: selectedClaim.serviceKey,
-      claimId: selectedClaim.id,
       ...form,
     });
   }, [selectedClaim, form, updateListing]);
@@ -546,7 +542,6 @@ export default function MyBusiness() {
                       if (!selectedClaim) return;
                       manageSubscription.mutate({
                         serviceKey: selectedClaim.serviceKey,
-                        origin: window.location.origin,
                       });
                     }}
                     disabled={manageSubscription.isPending}

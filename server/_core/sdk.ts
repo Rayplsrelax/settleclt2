@@ -7,6 +7,7 @@ import { SignJWT, jwtVerify } from "jose";
 import type { User } from "../../drizzle/schema";
 import * as db from "../db";
 import { ENV } from "./env";
+import { getConfiguredOAuthServerUrl } from "./oauth-flow";
 import type {
   ExchangeTokenRequest,
   ExchangeTokenResponse,
@@ -42,42 +43,15 @@ class OAuthService {
     }
   }
 
-  private decodeState(state: string): string {
-    const redirectUri = atob(state);
-    // Restrict decoded redirect URI to known app domains to prevent open-redirect / SSRF
-    const ALLOWED_ORIGINS = [
-      "https://settleclt.com",
-      "https://www.settleclt.com",
-      "https://settleclt.manus.space",
-      "http://localhost:3000",
-      "http://localhost:5173",
-    ];
-    try {
-      const url = new URL(redirectUri);
-      const origin = url.origin;
-      // Allow any *.manus.space or *.manus.computer preview URL
-      const isManusPreview = origin.endsWith(".manus.space") || origin.endsWith(".manus.computer");
-      const isAllowed = isManusPreview || ALLOWED_ORIGINS.some(a => origin === a || redirectUri.startsWith(a));
-      if (!isAllowed) {
-        console.warn("[OAuth] Blocked redirect to disallowed origin:", origin);
-        return "https://settleclt.com";
-      }
-    } catch {
-      // Not a valid URL — fall back to home
-      return "https://settleclt.com";
-    }
-    return redirectUri;
-  }
-
   async getTokenByCode(
     code: string,
-    state: string
+    redirectUri: string
   ): Promise<ExchangeTokenResponse> {
     const payload: ExchangeTokenRequest = {
       clientId: ENV.appId,
       grantType: "authorization_code",
       code,
-      redirectUri: this.decodeState(state),
+      redirectUri,
     };
 
     const { data } = await this.client.post<ExchangeTokenResponse>(
@@ -104,17 +78,29 @@ class OAuthService {
 
 const createOAuthHttpClient = (): AxiosInstance =>
   axios.create({
-    baseURL: ENV.oAuthServerUrl,
+    baseURL: getConfiguredOAuthServerUrl(ENV.oAuthServerUrl),
     timeout: AXIOS_TIMEOUT_MS,
   });
 
 class SDKServer {
-  private readonly client: AxiosInstance;
-  private readonly oauthService: OAuthService;
+  private client: AxiosInstance | null;
+  private oauthService: OAuthService | null;
 
-  constructor(client: AxiosInstance = createOAuthHttpClient()) {
-    this.client = client;
-    this.oauthService = new OAuthService(this.client);
+  constructor(client?: AxiosInstance) {
+    this.client = client ?? null;
+    this.oauthService = client ? new OAuthService(client) : null;
+  }
+
+  private getOAuthClient(): AxiosInstance {
+    if (!this.client) this.client = createOAuthHttpClient();
+    return this.client;
+  }
+
+  private getOAuthService(): OAuthService {
+    if (!this.oauthService) {
+      this.oauthService = new OAuthService(this.getOAuthClient());
+    }
+    return this.oauthService;
   }
 
   private deriveLoginMethod(
@@ -142,13 +128,13 @@ class SDKServer {
   /**
    * Exchange OAuth authorization code for access token
    * @example
-   * const tokenResponse = await sdk.exchangeCodeForToken(code, state);
+   * const tokenResponse = await sdk.exchangeCodeForToken(code, redirectUri);
    */
   async exchangeCodeForToken(
     code: string,
-    state: string
+    redirectUri: string
   ): Promise<ExchangeTokenResponse> {
-    return this.oauthService.getTokenByCode(code, state);
+    return this.getOAuthService().getTokenByCode(code, redirectUri);
   }
 
   /**
@@ -157,7 +143,7 @@ class SDKServer {
    * const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
    */
   async getUserInfo(accessToken: string): Promise<GetUserInfoResponse> {
-    const data = await this.oauthService.getUserInfoByToken({
+    const data = await this.getOAuthService().getUserInfoByToken({
       accessToken,
     } as ExchangeTokenResponse);
     const loginMethod = this.deriveLoginMethod(
@@ -271,7 +257,7 @@ class SDKServer {
       projectId: ENV.appId,
     };
 
-    const { data } = await this.client.post<GetUserInfoWithJwtResponse>(
+    const { data } = await this.getOAuthClient().post<GetUserInfoWithJwtResponse>(
       GET_USER_INFO_WITH_JWT_PATH,
       payload
     );

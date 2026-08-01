@@ -1,4 +1,4 @@
-import { boolean, int, json, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, int, json, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -489,6 +489,31 @@ export const businessClaims = mysqlTable("business_claims", {
 
 export type BusinessClaim = typeof businessClaims.$inferSelect;
 export type InsertBusinessClaim = typeof businessClaims.$inferInsert;
+
+export const businessMemberships = mysqlTable(
+  "business_memberships",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    serviceKey: varchar("serviceKey", { length: 255 }).notNull(),
+    userId: int("userId").notNull(),
+    ownerClaimId: int("ownerClaimId"),
+    /** Equals serviceKey only for an active owner; NULL for every other membership. */
+    activeOwnerKey: varchar("activeOwnerKey", { length: 255 }),
+    role: mysqlEnum("role", ["owner", "manager", "editor", "viewer"]).notNull(),
+    status: mysqlEnum("status", ["active", "revoked"]).default("active").notNull(),
+    createdBy: int("createdBy").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+    revokedAt: timestamp("revokedAt"),
+  },
+  table => [
+    uniqueIndex("business_memberships_service_user_unique").on(table.serviceKey, table.userId),
+    uniqueIndex("business_memberships_active_owner_unique").on(table.activeOwnerKey),
+  ],
+);
+
+export type BusinessMembership = typeof businessMemberships.$inferSelect;
+export type InsertBusinessMembership = typeof businessMemberships.$inferInsert;
 
 // Business listing overrides - owner-managed data for claimed businesses
 export const businessListingOverrides = mysqlTable("business_listing_overrides", {
