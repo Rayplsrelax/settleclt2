@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { readFileSync } from "node:fs";
 import { businessClaims } from "../drizzle/schema";
 
 const getApprovedClaimForUser = vi.fn();
@@ -24,5 +25,14 @@ describe("claim approval membership binding", () => {
     expect(await getApprovedClaimForUser(7)).toEqual([
       { id: 1, serviceKey: "owner-business" },
     ]);
+  });
+
+  it("restores canonical claim provenance when an existing membership is updated", () => {
+    const source = readFileSync(new URL("./db.ts", import.meta.url), "utf8");
+    const body = source.slice(
+      source.indexOf("export async function ensureBusinessMembership"),
+      source.indexOf("export async function revokeBusinessMembership"),
+    );
+    expect(body).toContain("ownerClaimId: data.ownerClaimId");
   });
 });

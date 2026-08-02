@@ -12,6 +12,9 @@ describe("account deletion business authority", () => {
     expect(deletionBody).toContain("return db.transaction(async tx =>");
     expect(deletionBody).toContain("tx.select({ id: businessClaims.id })");
     expect(deletionBody).toContain('.for("update")');
+    expect(deletionBody).toContain("const ownedClaims = await tx.select");
+    expect(deletionBody).toContain("ownedClaims.map(claim => claim.id)");
+    expect(deletionBody).toContain("inArray(businessMemberships.ownerClaimId, ownedClaimIds)");
     expect(deletionBody).toContain("tx.update(businessClaims)");
     expect(deletionBody).toContain("tx.update(businessMemberships)");
     expect(deletionBody).toContain('status: "revoked"');
@@ -20,8 +23,8 @@ describe("account deletion business authority", () => {
     const anonymizeClaims = deletionBody.indexOf("tx.update(businessClaims)");
     const revokeMemberships = deletionBody.indexOf("tx.update(businessMemberships)");
     const deleteUser = deletionBody.indexOf("tx.delete(users)");
-    expect(lockClaims).toBeLessThan(anonymizeClaims);
-    expect(anonymizeClaims).toBeLessThan(revokeMemberships);
+    expect(lockClaims).toBeLessThan(revokeMemberships);
+    expect(revokeMemberships).toBeLessThan(anonymizeClaims);
     expect(revokeMemberships).toBeLessThan(deleteUser);
   });
 });

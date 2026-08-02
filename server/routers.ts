@@ -27,7 +27,7 @@ import {
   submitReferral, getReferrals, updateReferralStatus, getReferralStats,
   submitBusinessClaim, getBusinessClaims, updateBusinessClaimStatus, approveBusinessClaimAndCreateOwnerMembership, getBusinessClaimStats, hasExistingClaim,
   getListingOverride, upsertListingOverride, getApprovedClaimForUser, getBusinessMembershipsForUser,
-  getPremiumListing, upsertPremiumListing, getAllPremiumListings, incrementListingAnalytics,
+  getPremiumListing, getPremiumBillingForCheckout, upsertPremiumListing, upsertCanonicalPremiumListingForAdmin, getAllPremiumListings, incrementListingAnalytics,
   deleteUserAccount,
   createNotification, getUserNotifications, getUnreadNotificationCount,
   markNotificationRead, markAllNotificationsRead, deleteNotification,
@@ -1416,6 +1416,13 @@ export const appRouter = router({
         if (!claim) {
           throw new TRPCError({ code: "FORBIDDEN", message: "Business ownership record is unavailable." });
         }
+        const existingBilling = await getPremiumBillingForCheckout(input.serviceKey);
+        if (existingBilling?.stripeCustomerId || existingBilling?.stripeSubscriptionId) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Existing billing must be resolved before starting another checkout.",
+          });
+        }
         const result = await createCheckoutSession({
           tier: input.tier,
           serviceKey: input.serviceKey,
@@ -1433,10 +1440,21 @@ export const appRouter = router({
       }))
       .mutation(async ({ input, ctx }) => {
         const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        requireBusinessPermission(memberships, input.serviceKey, "manage_billing");
+        const membership = requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "manage_billing",
+        );
+        const claimId = selectEffectiveClaimId(membership.ownerClaimId);
         const listing = await getPremiumListing(input.serviceKey);
         if (!listing?.stripeCustomerId) {
           throw new TRPCError({ code: 'NOT_FOUND', message: 'No active subscription found.' });
+        }
+        if (listing.claimId !== claimId) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Billing account does not belong to the current owner.",
+          });
         }
         return createPortalSession({
           stripeCustomerId: listing.stripeCustomerId,
@@ -1449,13 +1467,11 @@ export const appRouter = router({
       .input(z.object({
         serviceKey: z.string(),
         tier: z.enum(['basic', 'featured', 'premium']),
-        claimId: z.number().optional(),
         billingEmail: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        return upsertPremiumListing(input.serviceKey, {
+        return upsertCanonicalPremiumListingForAdmin(input.serviceKey, {
           tier: input.tier,
-          claimId: input.claimId,
           billingEmail: input.billingEmail,
         });
       }),

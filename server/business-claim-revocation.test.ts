@@ -8,9 +8,10 @@ const body = source.slice(
 );
 
 describe("claim invalidation revokes authority", () => {
-  it("updates claim status and revokes its owner membership atomically", () => {
+  it("updates claim status and revokes every membership derived from it atomically", () => {
     expect(body).toContain("return db.transaction(async tx =>");
     expect(body).toContain("eq(businessMemberships.ownerClaimId, id)");
     expect(body).toContain('status: "revoked"');
+    expect(body).not.toContain('eq(businessMemberships.role, "owner")');
   });
 });

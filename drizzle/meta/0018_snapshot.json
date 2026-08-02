@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "a80ec795-45e1-41d0-9869-c53e3713d17a",
+  "id": "c0a247dd-1920-4360-a872-84c5bd886011",
   "prevId": "499e1f64-cb96-436c-b3d0-afaae0f57fde",
   "tables": {
     "bingo_cards": {
@@ -1939,7 +1939,29 @@
           "default": "(now())"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "premium_listings_service_key_unique": {
+          "name": "premium_listings_service_key_unique",
+          "columns": [
+            "serviceKey"
+          ],
+          "isUnique": true
+        },
+        "premium_listings_stripe_customer_unique": {
+          "name": "premium_listings_stripe_customer_unique",
+          "columns": [
+            "stripeCustomerId"
+          ],
+          "isUnique": true
+        },
+        "premium_listings_stripe_subscription_unique": {
+          "name": "premium_listings_stripe_subscription_unique",
+          "columns": [
+            "stripeSubscriptionId"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {
         "premium_listings_id": {
@@ -2326,6 +2348,155 @@
       "compositePrimaryKeys": {
         "search_queries_id": {
           "name": "search_queries_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "stripe_checkout_reconciliations": {
+      "name": "stripe_checkout_reconciliations",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "stripeEventId": {
+          "name": "stripeEventId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "checkoutSessionId": {
+          "name": "checkoutSessionId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "stripeSubscriptionId": {
+          "name": "stripeSubscriptionId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "stripeCustomerId": {
+          "name": "stripeCustomerId",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "serviceKey": {
+          "name": "serviceKey",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "claimId": {
+          "name": "claimId",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "reason": {
+          "name": "reason",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "enum('pending','succeeded','failed')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'pending'"
+        },
+        "attemptCount": {
+          "name": "attemptCount",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "leaseToken": {
+          "name": "leaseToken",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "leaseExpiresAt": {
+          "name": "leaseExpiresAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lastError": {
+          "name": "lastError",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "completedAt": {
+          "name": "completedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "(now())"
+        }
+      },
+      "indexes": {
+        "stripe_checkout_reconciliations_event_unique": {
+          "name": "stripe_checkout_reconciliations_event_unique",
+          "columns": [
+            "stripeEventId"
+          ],
+          "isUnique": true
+        },
+        "stripe_checkout_reconciliations_session_unique": {
+          "name": "stripe_checkout_reconciliations_session_unique",
+          "columns": [
+            "checkoutSessionId"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "stripe_checkout_reconciliations_id": {
+          "name": "stripe_checkout_reconciliations_id",
           "columns": [
             "id"
           ]

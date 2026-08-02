@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TrpcContext } from "./_core/context";
+import { readFileSync } from "node:fs";
 
 const getApprovedClaimForUser = vi.fn();
 const getListingOverride = vi.fn();
@@ -45,5 +46,14 @@ describe("business listing override authorization", () => {
         .businessPortal.getOverride({ serviceKey: "victim-business" })
     ).rejects.toMatchObject({ code: "FORBIDDEN" });
     expect(getListingOverride).not.toHaveBeenCalled();
+  });
+
+  it("updates existing overrides to the current canonical claim", () => {
+    const source = readFileSync(new URL("./db.ts", import.meta.url), "utf8");
+    const body = source.slice(
+      source.indexOf("export async function upsertListingOverride"),
+      source.indexOf("export async function getApprovedClaimForUser"),
+    );
+    expect(body).toContain(".set({ ...data, claimId })");
   });
 });

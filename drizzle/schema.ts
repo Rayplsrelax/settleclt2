@@ -574,10 +574,39 @@ export const premiumListings = mysqlTable("premium_listings", {
   leadsThisPeriod: int("leadsThisPeriod").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => [
+  uniqueIndex("premium_listings_service_key_unique").on(table.serviceKey),
+  uniqueIndex("premium_listings_stripe_customer_unique").on(table.stripeCustomerId),
+  uniqueIndex("premium_listings_stripe_subscription_unique").on(table.stripeSubscriptionId),
+]);
 
 export type PremiumListing = typeof premiumListings.$inferSelect;
 export type InsertPremiumListing = typeof premiumListings.$inferInsert;
+
+export const stripeCheckoutReconciliations = mysqlTable("stripe_checkout_reconciliations", {
+  id: int("id").autoincrement().primaryKey(),
+  stripeEventId: varchar("stripeEventId", { length: 255 }).notNull(),
+  checkoutSessionId: varchar("checkoutSessionId", { length: 255 }).notNull(),
+  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 255 }).notNull(),
+  stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
+  serviceKey: varchar("serviceKey", { length: 255 }),
+  claimId: int("claimId"),
+  reason: varchar("reason", { length: 64 }).notNull(),
+  status: mysqlEnum("status", ["pending", "succeeded", "failed"]).default("pending").notNull(),
+  attemptCount: int("attemptCount").default(1).notNull(),
+  leaseToken: varchar("leaseToken", { length: 64 }),
+  leaseExpiresAt: timestamp("leaseExpiresAt"),
+  lastError: text("lastError"),
+  completedAt: timestamp("completedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [
+  uniqueIndex("stripe_checkout_reconciliations_event_unique").on(table.stripeEventId),
+  uniqueIndex("stripe_checkout_reconciliations_session_unique").on(table.checkoutSessionId),
+]);
+
+export type StripeCheckoutReconciliation = typeof stripeCheckoutReconciliations.$inferSelect;
+export type InsertStripeCheckoutReconciliation = typeof stripeCheckoutReconciliations.$inferInsert;
 
 // ─── Notification System ───────────────────────────────────────
 
