@@ -26,7 +26,7 @@ import {
   createReview, getReviews, getReviewStats, getBulkReviewStats, deleteReview, toggleReviewVisibility, getAllReviews,
   submitReferral, getReferrals, updateReferralStatus, getReferralStats,
   submitBusinessClaim, getBusinessClaims, updateBusinessClaimStatus, approveBusinessClaimAndCreateOwnerMembership, getBusinessClaimStats, hasExistingClaim,
-  getListingOverride, upsertListingOverride, getApprovedClaimForUser, getBusinessMembershipsForUser,
+  getListingOverride, upsertListingOverride, getBusinessMembershipsForUser,
   getPremiumListing, getPremiumBillingForCheckout, upsertPremiumListing, upsertCanonicalPremiumListingForAdmin, getAllPremiumListings, incrementListingAnalytics,
   deleteUserAccount,
   createNotification, getUserNotifications, getUnreadNotificationCount,
@@ -39,7 +39,7 @@ import { makeRequest, type PlacesSearchResult, type PlaceDetailsResult } from ".
 import { notifyOwner } from "./_core/notification";
 import { storagePut } from "./storage";
 import { createCheckoutSession, createPortalSession } from "./stripe-helpers";
-import { requireApprovedBusinessClaim, requireBusinessPermission } from "./business-authorization";
+import { permissionsForBusinessRole, requireApprovedBusinessClaim, requireBusinessPermission } from "./business-authorization";
 import { selectEffectiveClaimId } from "./business-memberships";
 import { notifyClaimApproved, notifyClaimRejected, notifyNewReview, notifyBingoComplete, notifyWelcome } from "./notification-service";
 import { buildHermesRevenueOpsSummary, createHermesRevenueDraft, generateHermesRevenueTasks } from "../shared/hermesRevenueOps";
@@ -1297,11 +1297,16 @@ export const appRouter = router({
 
   // ============ Business Owner Portal ============
   businessPortal: router({
-    myClaims: protectedProcedure.query(async ({ ctx }) => {
-      return getApprovedClaimForUser(ctx.user.id);
-    }),
     myMemberships: protectedProcedure.query(async ({ ctx }) => {
-      return getBusinessMembershipsForUser(ctx.user.id);
+      const memberships = await getBusinessMembershipsForUser(ctx.user.id);
+      return memberships
+        .filter(membership => membership.status === "active")
+        .map(membership => ({
+          id: membership.id,
+          serviceKey: membership.serviceKey,
+          role: membership.role,
+          permissions: permissionsForBusinessRole(membership.role),
+        }));
     }),
     getOverride: protectedProcedure
       .input(z.object({ serviceKey: z.string() }))

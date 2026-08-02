@@ -102,6 +102,38 @@ describe("business router authorization", () => {
     upsertCanonicalPremiumListingForAdmin.mockResolvedValue({ id: 1, updated: true });
   });
 
+  it("lists only active portal memberships with server-derived permissions", async () => {
+    getBusinessMembershipsForUser.mockResolvedValue([
+      {
+        id: 21,
+        serviceKey: "viewer-business",
+        userId: 7,
+        ownerClaimId: 11,
+        role: "viewer",
+        status: "active",
+      },
+      {
+        id: 22,
+        serviceKey: "revoked-business",
+        userId: 7,
+        ownerClaimId: 12,
+        role: "owner",
+        status: "revoked",
+      },
+    ]);
+    const { appRouter } = await import("./routers");
+
+    await expect(appRouter.createCaller(authenticatedContext()).businessPortal.myMemberships())
+      .resolves.toEqual([
+        {
+          id: 21,
+          serviceKey: "viewer-business",
+          role: "viewer",
+          permissions: ["view_analytics"],
+        },
+      ]);
+  });
+
   it("denies billing portal access when the user does not own the business", async () => {
     getApprovedClaimForUser.mockResolvedValue([]);
     const { appRouter } = await import("./routers");

@@ -18,9 +18,25 @@ import { Link } from "wouter";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 import { useSEO } from "@/hooks/useSEO";
+import {
+  getDefaultPortalTab,
+  getPortalPermissionScopeKey,
+  getScopedPortalValue,
+  reconcileSelectedMembership,
+} from "@/lib/businessMembershipSelection";
 
 const DAY_LABELS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const EMPTY_LISTING_FORM = {
+  displayName: "",
+  description: "",
+  phone: "",
+  website: "",
+  email: "",
+  hours: "{}",
+  tagline: "",
+  socialLinks: "{}",
+};
 
 function HoursEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const parsed = (() => {
@@ -58,7 +74,11 @@ export default function MyBusiness() {
     path: "/my-business",
   });
   const authLoading = false;
-  const { data: claims, isLoading: claimsLoading } = trpc.businessPortal.myClaims.useQuery(
+  const {
+    data: memberships,
+    isLoading: membershipsLoading,
+    isFetching: membershipsFetching,
+  } = trpc.businessPortal.myMemberships.useQuery(
     undefined,
     { enabled: isAuthenticated }
   );
@@ -78,31 +98,41 @@ export default function MyBusiness() {
     }
   }, []);
 
-  const [selectedClaim, setSelectedClaim] = useState<any>(null);
-  const [form, setForm] = useState({
-    displayName: "",
-    description: "",
-    phone: "",
-    website: "",
-    email: "",
-    hours: "{}",
-    tagline: "",
-    socialLinks: "{}",
+  const [selectedMembershipId, setSelectedMembershipId] = useState<number | null>(null);
+  const selectedMembership = reconcileSelectedMembership(memberships, selectedMembershipId);
+  const [formState, setFormState] = useState({
+    scopeKey: null as string | null,
+    value: EMPTY_LISTING_FORM,
   });
 
+  const permissions = selectedMembership?.permissions ?? [];
+  const canEdit = permissions.includes("edit_listing");
+  const canViewAnalytics = permissions.includes("view_analytics");
+  const canManageBilling = permissions.includes("manage_billing");
+  const portalPermissionScopeKey = getPortalPermissionScopeKey(selectedMembership?.id, permissions);
+  const defaultPortalTab = getDefaultPortalTab(permissions);
+  const scopedForm = getScopedPortalValue(formState, selectedMembership?.serviceKey);
+  const form = scopedForm ?? EMPTY_LISTING_FORM;
+  const formIsCurrent = canEdit && scopedForm !== null;
+  const setForm = useCallback((value: typeof EMPTY_LISTING_FORM) => {
+    const scopeKey = selectedMembership?.serviceKey;
+    if (!canEdit || !scopeKey) return;
+    setFormState({ scopeKey, value });
+  }, [canEdit, selectedMembership?.serviceKey]);
+
   const { data: override, refetch: refetchOverride } = trpc.businessPortal.getOverride.useQuery(
-    { serviceKey: selectedClaim?.serviceKey ?? "" },
-    { enabled: !!selectedClaim }
+    { serviceKey: selectedMembership?.serviceKey ?? "" },
+    { enabled: !!selectedMembership && canEdit }
   );
 
   const { data: analytics } = trpc.premium.getAnalytics.useQuery(
-    { serviceKey: selectedClaim?.serviceKey ?? "" },
-    { enabled: !!selectedClaim }
+    { serviceKey: selectedMembership?.serviceKey ?? "" },
+    { enabled: !!selectedMembership && canViewAnalytics }
   );
 
   const { data: tierInfo } = trpc.premium.getTier.useQuery(
-    { serviceKey: selectedClaim?.serviceKey ?? "" },
-    { enabled: !!selectedClaim }
+    { serviceKey: selectedMembership?.serviceKey ?? "" },
+    { enabled: !!selectedMembership }
   );
 
   const updateListing = trpc.businessPortal.updateListing.useMutation({
@@ -129,16 +159,16 @@ export default function MyBusiness() {
   });
 
   const handleUpgrade = useCallback((tier: "featured" | "premium") => {
-    if (!selectedClaim) return;
+    if (!selectedMembership || !canManageBilling) return;
     createCheckout.mutate({
       tier,
-      serviceKey: selectedClaim.serviceKey,
+      serviceKey: selectedMembership.serviceKey,
     });
-  }, [selectedClaim, createCheckout]);
+  }, [selectedMembership, canManageBilling, createCheckout]);
 
   // Load override data into form when available
   useEffect(() => {
-    if (override) {
+    if (canEdit && override && override.serviceKey === selectedMembership?.serviceKey) {
       setForm({
         displayName: override.displayName || "",
         description: override.description || "",
@@ -149,25 +179,28 @@ export default function MyBusiness() {
         tagline: override.tagline || "",
         socialLinks: override.socialLinks || "{}",
       });
+    } else {
+      setFormState({ scopeKey: null, value: EMPTY_LISTING_FORM });
     }
-  }, [override]);
+  }, [canEdit, override, selectedMembership?.serviceKey, setForm]);
 
-  // Auto-select first claim
+  // Reconcile every refresh so revocation and role changes replace stale authority.
   useEffect(() => {
-    if (claims?.length && !selectedClaim) {
-      setSelectedClaim(claims[0]);
+    const nextMembershipId = selectedMembership?.id ?? null;
+    if (nextMembershipId !== selectedMembershipId) {
+      setSelectedMembershipId(nextMembershipId);
     }
-  }, [claims, selectedClaim]);
+  }, [selectedMembership, selectedMembershipId]);
 
   const handleSave = useCallback(() => {
-    if (!selectedClaim) return;
+    if (!selectedMembership || !canEdit || !formIsCurrent) return;
     updateListing.mutate({
-      serviceKey: selectedClaim.serviceKey,
+      serviceKey: selectedMembership.serviceKey,
       ...form,
     });
-  }, [selectedClaim, form, updateListing]);
+  }, [selectedMembership, canEdit, form, formIsCurrent, updateListing]);
 
-  if (authLoading || claimsLoading) {
+  if (authLoading || membershipsLoading || membershipsFetching) {
     return (
       <PageLayout>
         <div className="container py-20 text-center">
@@ -192,14 +225,14 @@ export default function MyBusiness() {
     );
   }
 
-  if (!claims?.length) {
+  if (!memberships?.length) {
     return (
       <PageLayout>
         <div className="container py-20 text-center max-w-lg mx-auto">
           <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h1 className="font-display font-bold text-2xl mb-2">No Claimed Businesses</h1>
+          <h1 className="font-display font-bold text-2xl mb-2">No Business Access</h1>
           <p className="text-muted-foreground mb-6">
-            You don't have any approved business claims yet. Visit the directory to claim your business.
+            You don't have an active business membership yet. Visit the directory to claim your business.
           </p>
           <Link href="/directory">
             <Button className="gap-2">Browse Directory <ArrowRight className="w-4 h-4" /></Button>
@@ -225,17 +258,17 @@ export default function MyBusiness() {
               Manage your listing details, hours, and photos
             </p>
           </div>
-          {claims.length > 1 && (
+          {memberships.length > 1 && (
             <select
               className="border rounded-md px-3 py-1.5 text-sm bg-background"
-              value={selectedClaim?.id}
+              value={selectedMembership?.id}
               onChange={(e) => {
-                const claim = claims.find((c: any) => c.id === Number(e.target.value));
-                setSelectedClaim(claim);
+                const membership = memberships.find(candidate => candidate.id === Number(e.target.value));
+                setSelectedMembershipId(membership?.id ?? null);
               }}
             >
-              {claims.map((c: any) => (
-                <option key={c.id} value={c.id}>{c.businessName}</option>
+              {memberships.map(membership => (
+                <option key={membership.id} value={membership.id}>{membership.serviceKey}</option>
               ))}
             </select>
           )}
@@ -247,9 +280,9 @@ export default function MyBusiness() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="font-display font-bold text-xl">{selectedClaim?.businessName}</h2>
+                  <h2 className="font-display font-bold text-xl">{selectedMembership?.serviceKey}</h2>
                   <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50 gap-1">
-                    <CheckCircle2 className="w-3 h-3" /> Verified Owner
+                    <CheckCircle2 className="w-3 h-3" /> {selectedMembership?.role}
                   </Badge>
                   {currentTier !== "basic" && (
                     <Badge className={currentTier === "premium" ? "bg-gradient-to-r from-purple-600 to-indigo-600 text-white gap-1" : "bg-clt-gold/20 text-clt-gold gap-1"}>
@@ -259,23 +292,25 @@ export default function MyBusiness() {
                   )}
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Service Key: <code className="bg-muted px-1.5 py-0.5 rounded text-xs">{selectedClaim?.serviceKey}</code>
+                  Service Key: <code className="bg-muted px-1.5 py-0.5 rounded text-xs">{selectedMembership?.serviceKey}</code>
                 </p>
               </div>
-              <Button onClick={handleSave} disabled={updateListing.isPending} className="gap-1.5 shrink-0">
-                <Save className="w-4 h-4" />
-                {updateListing.isPending ? "Saving..." : "Save Changes"}
-              </Button>
+              {canEdit && (
+                <Button onClick={handleSave} disabled={updateListing.isPending || !formIsCurrent} className="gap-1.5 shrink-0">
+                  <Save className="w-4 h-4" />
+                  {updateListing.isPending ? "Saving..." : "Save Changes"}
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="details" className="space-y-4">
+        <Tabs key={portalPermissionScopeKey} defaultValue={defaultPortalTab ?? undefined} className="space-y-4">
           <TabsList>
-            <TabsTrigger value="details" className="gap-1.5"><Building2 className="w-3.5 h-3.5" /> Details</TabsTrigger>
-            <TabsTrigger value="hours" className="gap-1.5"><Clock className="w-3.5 h-3.5" /> Hours</TabsTrigger>
-            <TabsTrigger value="analytics" className="gap-1.5"><BarChart3 className="w-3.5 h-3.5" /> Analytics</TabsTrigger>
-            <TabsTrigger value="upgrade" className="gap-1.5"><Crown className="w-3.5 h-3.5" /> Upgrade</TabsTrigger>
+            <TabsTrigger value="details" disabled={!canEdit} className="gap-1.5"><Building2 className="w-3.5 h-3.5" /> Details</TabsTrigger>
+            <TabsTrigger value="hours" disabled={!canEdit} className="gap-1.5"><Clock className="w-3.5 h-3.5" /> Hours</TabsTrigger>
+            <TabsTrigger value="analytics" disabled={!canViewAnalytics} className="gap-1.5"><BarChart3 className="w-3.5 h-3.5" /> Analytics</TabsTrigger>
+            <TabsTrigger value="upgrade" disabled={!canManageBilling} className="gap-1.5"><Crown className="w-3.5 h-3.5" /> Upgrade</TabsTrigger>
           </TabsList>
 
           {/* Details Tab */}
@@ -291,7 +326,7 @@ export default function MyBusiness() {
                     <Label htmlFor="displayName">Display Name</Label>
                     <Input
                       id="displayName"
-                      placeholder={selectedClaim?.businessName}
+                      placeholder={selectedMembership?.serviceKey}
                       value={form.displayName}
                       onChange={(e) => setForm({ ...form, displayName: e.target.value })}
                     />
@@ -378,7 +413,7 @@ export default function MyBusiness() {
               <CardContent>
                 <HoursEditor value={form.hours} onChange={(v) => setForm({ ...form, hours: v })} />
                 <div className="mt-4 flex justify-end">
-                  <Button onClick={handleSave} disabled={updateListing.isPending} size="sm" className="gap-1.5">
+                  <Button onClick={handleSave} disabled={updateListing.isPending || !formIsCurrent} size="sm" className="gap-1.5">
                     <Save className="w-3.5 h-3.5" /> Save Hours
                   </Button>
                 </div>
@@ -388,7 +423,7 @@ export default function MyBusiness() {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics">
-            {analytics ? (
+            {canViewAnalytics && analytics ? (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <Card>
@@ -528,7 +563,7 @@ export default function MyBusiness() {
             </div>
 
             {/* Manage existing subscription */}
-            {currentTier !== "basic" && (
+            {canManageBilling && currentTier !== "basic" && (
               <div className="mt-6 p-4 rounded-lg border bg-muted/30">
                 <div className="flex items-center justify-between">
                   <div>
@@ -539,9 +574,9 @@ export default function MyBusiness() {
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      if (!selectedClaim) return;
+                      if (!selectedMembership) return;
                       manageSubscription.mutate({
-                        serviceKey: selectedClaim.serviceKey,
+                        serviceKey: selectedMembership.serviceKey,
                       });
                     }}
                     disabled={manageSubscription.isPending}

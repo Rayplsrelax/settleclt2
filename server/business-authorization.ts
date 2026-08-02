@@ -45,6 +45,12 @@ export function canManageBusinessPermission(
   );
 }
 
+export function permissionsForBusinessRole(
+  role: BusinessMembership["role"]
+): readonly BusinessPermission[] {
+  return PERMISSIONS[role];
+}
+
 export function requireBusinessPermission<T extends BusinessMembership>(
   memberships: readonly T[],
   serviceKey: string,
