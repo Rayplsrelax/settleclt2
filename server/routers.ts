@@ -43,6 +43,7 @@ import { permissionsForBusinessRole, requireApprovedBusinessClaim, requireBusine
 import { selectEffectiveClaimId } from "./business-memberships";
 import { notifyClaimApproved, notifyClaimRejected, notifyNewReview, notifyBingoComplete, notifyWelcome } from "./notification-service";
 import { buildHermesRevenueOpsSummary, createHermesRevenueDraft, generateHermesRevenueTasks } from "../shared/hermesRevenueOps";
+import { operationsRouter } from "./operationsRouter";
 
 const SETTLE_CLT_MICROSITES = [
   { domain: "movingtocharlotteguide.com", campaign: "relocation", status: "ready_for_dns", primaryFunnel: "/find-your-home" },
@@ -54,6 +55,7 @@ const SETTLE_CLT_MICROSITES = [
 
 export const appRouter = router({
   system: systemRouter,
+  operations: operationsRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
