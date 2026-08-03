@@ -890,3 +890,45 @@ export const auditEvents = mysqlTable("audit_events", {
 });
 export type AuditEvent = typeof auditEvents.$inferSelect;
 export type InsertAuditEvent = typeof auditEvents.$inferInsert;
+
+// ─── Source Registry ───
+
+/** Managed list of sources for business discovery, event discovery, blog research, and Charlotte news. */
+export const sourceRegistry = mysqlTable("source_registry", {
+  id: int("id").autoincrement().primaryKey(),
+  /** What this source is used for. */
+  sourceType: mysqlEnum("sourceType", [
+    "business_discovery",
+    "event_discovery",
+    "blog_research",
+    "charlotte_news",
+    "government",
+    "license_verification",
+  ]).notNull(),
+  /** Human-readable name of the source. */
+  name: varchar("name", { length: 255 }).notNull(),
+  /** The source URL. */
+  url: text("url").notNull(),
+  /** Category or domain this source covers (e.g. "movers", "music_events", "relocation_guides"). */
+  sourceCategory: varchar("sourceCategory", { length: 128 }),
+  /** Priority: high-value sources are checked first. */
+  priority: mysqlEnum("priority", ["high", "medium", "low"]).default("medium").notNull(),
+  /** Trust level: official > aggregator > third_party. */
+  trustLevel: mysqlEnum("trustLevel", ["official", "aggregator", "third_party"]).default("third_party").notNull(),
+  /** Whether this source is currently being used. */
+  active: boolean("active").default(true).notNull(),
+  /** How often to check this source. */
+  checkFrequency: mysqlEnum("checkFrequency", ["daily", "weekly", "biweekly", "monthly", "quarterly"]).default("weekly").notNull(),
+  /** Last time this source was checked. */
+  lastCheckedAt: timestamp("lastCheckedAt"),
+  /** Last check result. */
+  lastCheckResult: mysqlEnum("lastCheckResult", ["ok", "changed", "broken", "blocked", "inconclusive"]),
+  /** Notes about this source (e.g. requires JS, rate-limited, needs auth). */
+  notes: text("notes"),
+  /** Who added this source. */
+  addedBy: varchar("addedBy", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type SourceRegistryEntry = typeof sourceRegistry.$inferSelect;
+export type InsertSourceRegistryEntry = typeof sourceRegistry.$inferInsert;

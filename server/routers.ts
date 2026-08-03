@@ -46,6 +46,9 @@ import { buildHermesRevenueOpsSummary, createHermesRevenueDraft, generateHermesR
 import { operationsRouter } from "./operationsRouter";
 import { directoryOpsRouter } from "./directoryOpsRouter";
 import { eventOpsRouter } from "./eventOpsRouter";
+import { editorialOpsRouter } from "./editorialOpsRouter";
+import { communityOpsRouter } from "./communityOpsRouter";
+import { sourceRegistryRouter } from "./sourceRegistryRouter";
 
 const SETTLE_CLT_MICROSITES = [
   { domain: "movingtocharlotteguide.com", campaign: "relocation", status: "ready_for_dns", primaryFunnel: "/find-your-home" },
@@ -60,6 +63,9 @@ export const appRouter = router({
   operations: operationsRouter,
   directoryOps: directoryOpsRouter,
   eventOps: eventOpsRouter,
+  editorialOps: editorialOpsRouter,
+  communityOps: communityOpsRouter,
+  sourceRegistry: sourceRegistryRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
