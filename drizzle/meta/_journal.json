@@ -141,6 +141,13 @@
       "when": 1785786345220,
       "tag": "0019_operations_system",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1785787658021,
+      "tag": "0020_listing_verifications",
+      "breakpoints": true
     }
   ]
 }

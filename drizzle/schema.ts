@@ -132,6 +132,71 @@ export const directoryListings = mysqlTable("directory_listings", {
 export type DirectoryListing = typeof directoryListings.$inferSelect;
 export type InsertDirectoryListing = typeof directoryListings.$inferInsert;
 
+/** Verification log for directory listing freshness and accuracy checks. */
+export const listingVerifications = mysqlTable("listing_verifications", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Service key of the listing checked. */
+  serviceKey: varchar("serviceKey", { length: 255 }).notNull(),
+  /** What was checked: website, phone, address, hours, closure, category, general. */
+  checkType: mysqlEnum("checkType", [
+    "website",
+    "phone",
+    "address",
+    "hours",
+    "closure",
+    "category",
+    "general",
+  ]).notNull(),
+  /** Result of the check. */
+  result: mysqlEnum("result", [
+    "ok",
+    "changed",
+    "broken_link",
+    "parked_domain",
+    "redirect_changed",
+    "closed",
+    "moved",
+    "rebranded",
+    "conflicting",
+    "inconclusive",
+  ]).notNull(),
+  /** Evidence level at time of check. */
+  evidenceLevel: mysqlEnum("evidenceLevel", [
+    "official_verified",
+    "owner_confirmed",
+    "government_verified",
+    "source_identified",
+    "third_party_clue",
+    "conflicting",
+    "stale",
+    "removed_confirmed",
+  ]).notNull(),
+  /** Source URL that was checked. */
+  sourceUrl: text("sourceUrl"),
+  /** Before value (if changed). */
+  beforeValue: text("beforeValue"),
+  /** After value (if changed). */
+  afterValue: text("afterValue"),
+  /** Agent role that performed the check. */
+  checkedBy: mysqlEnum("checkedBy", [
+    "manager",
+    "directory_curator",
+    "events_editor",
+    "content_editor",
+    "community_moderator",
+    "business_success",
+    "analyst",
+    "reliability_watchdog",
+  ]).notNull(),
+  /** Free-text notes. */
+  notes: text("notes"),
+  /** Link to agent task if one was created. */
+  taskId: int("taskId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ListingVerification = typeof listingVerifications.$inferSelect;
+export type InsertListingVerification = typeof listingVerifications.$inferInsert;
+
 // --- CLT Passport: visited places stamps ---
 export const passportEntries = mysqlTable("passport_entries", {
   id: int("id").autoincrement().primaryKey(),
