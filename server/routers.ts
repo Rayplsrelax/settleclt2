@@ -45,6 +45,7 @@ import { notifyClaimApproved, notifyClaimRejected, notifyNewReview, notifyBingoC
 import { buildHermesRevenueOpsSummary, createHermesRevenueDraft, generateHermesRevenueTasks } from "../shared/hermesRevenueOps";
 import { operationsRouter } from "./operationsRouter";
 import { directoryOpsRouter } from "./directoryOpsRouter";
+import { eventOpsRouter } from "./eventOpsRouter";
 
 const SETTLE_CLT_MICROSITES = [
   { domain: "movingtocharlotteguide.com", campaign: "relocation", status: "ready_for_dns", primaryFunnel: "/find-your-home" },
@@ -58,6 +59,7 @@ export const appRouter = router({
   system: systemRouter,
   operations: operationsRouter,
   directoryOps: directoryOpsRouter,
+  eventOps: eventOpsRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
