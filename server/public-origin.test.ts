@@ -33,7 +33,21 @@ describe("getConfiguredPublicOrigin", () => {
     );
   });
 
+  it("rejects HTTP origins in production", () => {
+    expect(() =>
+      getConfiguredPublicOrigin("http://settleclt.com", true)
+    ).toThrow("PUBLIC_APP_ORIGIN must use HTTPS in production");
+  });
+
+  it("allows HTTP origins outside production", () => {
+    expect(getConfiguredPublicOrigin("http://localhost:3000", false)).toBe(
+      "http://localhost:3000"
+    );
+  });
+
   it("uses a local-only default outside production", () => {
-    expect(getConfiguredPublicOrigin(undefined, false)).toBe("http://localhost:3000");
+    expect(getConfiguredPublicOrigin(undefined, false)).toBe(
+      "http://localhost:3000"
+    );
   });
 });

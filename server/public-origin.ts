@@ -17,6 +17,10 @@ export function getConfiguredPublicOrigin(
     throw new Error("PUBLIC_APP_ORIGIN must use HTTP or HTTPS");
   }
 
+  if (url.protocol === "http:" && isProduction) {
+    throw new Error("PUBLIC_APP_ORIGIN must use HTTPS in production");
+  }
+
   if (
     url.username ||
     url.password ||

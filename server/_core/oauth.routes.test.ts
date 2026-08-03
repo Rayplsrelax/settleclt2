@@ -2,6 +2,7 @@ import express from "express";
 import request from "supertest";
 import { describe, expect, it, vi } from "vitest";
 import { createOAuthState, verifyOAuthState } from "./oauth-state";
+import { clearOAuthNonceStore } from "./oauth-nonce-store";
 
 const mocks = vi.hoisted(() => ({
   exchangeCodeForToken: vi.fn(),
@@ -72,11 +73,14 @@ describe("OAuth start route", () => {
   });
 
   it("validates the nonce and returns to the signed local path", async () => {
+    clearOAuthNonceStore();
     const nonce = "nonce-123";
     const state = await createOAuthState(
       { returnTo: "/my-business", nonce },
       { secret: "test-secret-that-is-long-enough" }
     );
+    const { registerOAuthNonce } = await import("./oauth-nonce-store");
+    registerOAuthNonce(nonce, 10 * 60 * 1000);
     mocks.exchangeCodeForToken.mockResolvedValue({
       accessToken: "access-token",
     });
@@ -119,4 +123,46 @@ describe("OAuth start route", () => {
     expect(response.body.error).toBe("OAuth state cookie is missing");
   });
 
+  it("rejects a replayed callback even with a valid nonce cookie", async () => {
+    clearOAuthNonceStore();
+    const nonce = "replay-nonce-abc";
+    const state = await createOAuthState(
+      { returnTo: "/my-business", nonce },
+      { secret: "test-secret-that-is-long-enough" }
+    );
+    // Register the nonce server-side as the start route would
+    const { registerOAuthNonce } = await import("./oauth-nonce-store");
+    registerOAuthNonce(nonce, 10 * 60 * 1000);
+
+    mocks.exchangeCodeForToken.mockResolvedValue({
+      accessToken: "access-token",
+    });
+    mocks.getUserInfo.mockResolvedValue({
+      openId: "owner-open-id",
+      name: "Business Owner",
+      email: "owner@example.com",
+      loginMethod: "email",
+    });
+    mocks.getUserByOpenId.mockResolvedValue({ id: 7, openId: "owner-open-id" });
+    mocks.createSessionToken.mockResolvedValue("session-token");
+
+    const { registerOAuthRoutes } = await import("./oauth");
+    const app = express();
+    registerOAuthRoutes(app);
+
+    // First callback succeeds
+    const firstResponse = await request(app)
+      .get("/api/oauth/callback")
+      .query({ code: "authorization-code", state })
+      .set("Cookie", `settle_oauth_nonce=${nonce}`);
+    expect(firstResponse.status).toBe(302);
+
+    // Second callback with same nonce must be rejected — replay prevented
+    const secondResponse = await request(app)
+      .get("/api/oauth/callback")
+      .query({ code: "authorization-code", state })
+      .set("Cookie", `settle_oauth_nonce=${nonce}`);
+    expect(secondResponse.status).toBe(400);
+    expect(secondResponse.body.error).toBe("OAuth state has already been used");
+  });
 });

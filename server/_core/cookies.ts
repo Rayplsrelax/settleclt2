@@ -21,6 +21,10 @@ function isSecureRequest(req: Request) {
   return protoList.some(proto => proto.trim().toLowerCase() === "https");
 }
 
+function isProduction(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
 export function getSessionCookieOptions(
   req: Request
 ): Pick<CookieOptions, "domain" | "httpOnly" | "path" | "sameSite" | "secure"> {
@@ -47,6 +51,9 @@ export function getSessionCookieOptions(
     // origin). Use "none" only if you genuinely need cross-site auth, and if so
     // add an anti-CSRF token or Origin allow-listing on every mutation.
     sameSite: "lax",
-    secure: isSecureRequest(req),
+    // In production, always mark cookies secure regardless of forwarded
+    // headers — a misconfigured proxy must not be able to downgrade cookie
+    // security. In development, follow the actual request protocol.
+    secure: isProduction() ? true : isSecureRequest(req),
   };
 }

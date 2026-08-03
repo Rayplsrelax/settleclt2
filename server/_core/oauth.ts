@@ -12,6 +12,7 @@ import {
   normalizeOAuthReturnPath,
   verifyOAuthState,
 } from "./oauth-state";
+import { registerOAuthNonce, consumeOAuthNonce } from "./oauth-nonce-store";
 import { sdk } from "./sdk";
 
 const OAUTH_NONCE_COOKIE = "settle_oauth_nonce";
@@ -32,8 +33,15 @@ export function registerOAuthRoutes(app: Express) {
         { returnTo, nonce },
         { secret: ENV.cookieSecret }
       );
+      // Register the nonce server-side so it can be atomically consumed
+      // on callback, preventing replay attacks even if both the callback
+      // URL and the nonce cookie are captured.
+      registerOAuthNonce(nonce, OAUTH_STATE_TTL_MS);
       const callbackUrl = buildOAuthCallbackUrl(
-        getConfiguredPublicOrigin(ENV.publicAppOrigin || undefined, ENV.isProduction)
+        getConfiguredPublicOrigin(
+          ENV.publicAppOrigin || undefined,
+          ENV.isProduction
+        )
       );
       const loginUrl = buildOAuthLoginUrl({
         portalUrl: ENV.oAuthPortalUrl,
@@ -48,7 +56,10 @@ export function registerOAuthRoutes(app: Express) {
       });
       res.redirect(302, loginUrl);
     } catch (error) {
-      console.error("[OAuth] Unable to construct a safe sign-in request", error);
+      console.error(
+        "[OAuth] Unable to construct a safe sign-in request",
+        error
+      );
       res.status(503).json({ error: "Sign-in is temporarily unavailable" });
     }
   });
@@ -84,9 +95,19 @@ export function registerOAuthRoutes(app: Express) {
     }
     res.clearCookie(OAUTH_NONCE_COOKIE, cookieOptions);
 
+    // Atomically consume the nonce — if already consumed, this is a replay
+    // attack and must be rejected before any token exchange.
+    if (!consumeOAuthNonce(oauthState.nonce)) {
+      res.status(400).json({ error: "OAuth state has already been used" });
+      return;
+    }
+
     try {
       const callbackUrl = buildOAuthCallbackUrl(
-        getConfiguredPublicOrigin(ENV.publicAppOrigin || undefined, ENV.isProduction)
+        getConfiguredPublicOrigin(
+          ENV.publicAppOrigin || undefined,
+          ENV.isProduction
+        )
       );
       const tokenResponse = await sdk.exchangeCodeForToken(code, callbackUrl);
       const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
