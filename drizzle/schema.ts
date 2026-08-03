@@ -1,4 +1,4 @@
-import { boolean, int, json, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, int, json, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -490,6 +490,31 @@ export const businessClaims = mysqlTable("business_claims", {
 export type BusinessClaim = typeof businessClaims.$inferSelect;
 export type InsertBusinessClaim = typeof businessClaims.$inferInsert;
 
+export const businessMemberships = mysqlTable(
+  "business_memberships",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    serviceKey: varchar("serviceKey", { length: 255 }).notNull(),
+    userId: int("userId").notNull(),
+    ownerClaimId: int("ownerClaimId"),
+    /** Equals serviceKey only for an active owner; NULL for every other membership. */
+    activeOwnerKey: varchar("activeOwnerKey", { length: 255 }),
+    role: mysqlEnum("role", ["owner", "manager", "editor", "viewer"]).notNull(),
+    status: mysqlEnum("status", ["active", "revoked"]).default("active").notNull(),
+    createdBy: int("createdBy").notNull(),
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+    revokedAt: timestamp("revokedAt"),
+  },
+  table => [
+    uniqueIndex("business_memberships_service_user_unique").on(table.serviceKey, table.userId),
+    uniqueIndex("business_memberships_active_owner_unique").on(table.activeOwnerKey),
+  ],
+);
+
+export type BusinessMembership = typeof businessMemberships.$inferSelect;
+export type InsertBusinessMembership = typeof businessMemberships.$inferInsert;
+
 // Business listing overrides - owner-managed data for claimed businesses
 export const businessListingOverrides = mysqlTable("business_listing_overrides", {
   id: int("id").autoincrement().primaryKey(),
@@ -549,10 +574,39 @@ export const premiumListings = mysqlTable("premium_listings", {
   leadsThisPeriod: int("leadsThisPeriod").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => [
+  uniqueIndex("premium_listings_service_key_unique").on(table.serviceKey),
+  uniqueIndex("premium_listings_stripe_customer_unique").on(table.stripeCustomerId),
+  uniqueIndex("premium_listings_stripe_subscription_unique").on(table.stripeSubscriptionId),
+]);
 
 export type PremiumListing = typeof premiumListings.$inferSelect;
 export type InsertPremiumListing = typeof premiumListings.$inferInsert;
+
+export const stripeCheckoutReconciliations = mysqlTable("stripe_checkout_reconciliations", {
+  id: int("id").autoincrement().primaryKey(),
+  stripeEventId: varchar("stripeEventId", { length: 255 }).notNull(),
+  checkoutSessionId: varchar("checkoutSessionId", { length: 255 }).notNull(),
+  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 255 }).notNull(),
+  stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
+  serviceKey: varchar("serviceKey", { length: 255 }),
+  claimId: int("claimId"),
+  reason: varchar("reason", { length: 64 }).notNull(),
+  status: mysqlEnum("status", ["pending", "succeeded", "failed"]).default("pending").notNull(),
+  attemptCount: int("attemptCount").default(1).notNull(),
+  leaseToken: varchar("leaseToken", { length: 64 }),
+  leaseExpiresAt: timestamp("leaseExpiresAt"),
+  lastError: text("lastError"),
+  completedAt: timestamp("completedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [
+  uniqueIndex("stripe_checkout_reconciliations_event_unique").on(table.stripeEventId),
+  uniqueIndex("stripe_checkout_reconciliations_session_unique").on(table.checkoutSessionId),
+]);
+
+export type StripeCheckoutReconciliation = typeof stripeCheckoutReconciliations.$inferSelect;
+export type InsertStripeCheckoutReconciliation = typeof stripeCheckoutReconciliations.$inferInsert;
 
 // ─── Notification System ───────────────────────────────────────
 

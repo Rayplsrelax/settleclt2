@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { PREMIUM_TIERS, type PremiumTierKey } from "./stripe-products";
+import { getConfiguredPublicOrigin } from "./public-origin";
 
 let _stripe: Stripe | null = null;
 
@@ -16,7 +17,9 @@ export function getStripe(): Stripe {
  * Ensure a Stripe product + price exist for the given tier.
  * Uses metadata to find existing products to avoid duplicates.
  */
-async function ensureProduct(tier: PremiumTierKey): Promise<{ productId: string; priceId: string }> {
+async function ensureProduct(
+  tier: PremiumTierKey
+): Promise<{ productId: string; priceId: string }> {
   const stripe = getStripe();
   const tierConfig = PREMIUM_TIERS[tier];
 
@@ -46,7 +49,10 @@ async function ensureProduct(tier: PremiumTierKey): Promise<{ productId: string;
   });
 
   let priceId: string;
-  if (prices.data.length > 0 && prices.data[0].unit_amount === tierConfig.monthlyPrice) {
+  if (
+    prices.data.length > 0 &&
+    prices.data[0].unit_amount === tierConfig.monthlyPrice
+  ) {
     priceId = prices.data[0].id;
   } else {
     const price = await stripe.prices.create({
@@ -73,9 +79,9 @@ export async function createCheckoutSession(opts: {
   userId: number;
   userEmail: string;
   userName: string;
-  origin: string;
 }): Promise<{ url: string }> {
   const stripe = getStripe();
+  const publicOrigin = getConfiguredPublicOrigin();
   const { priceId } = await ensureProduct(opts.tier);
 
   const session = await stripe.checkout.sessions.create({
@@ -93,8 +99,8 @@ export async function createCheckoutSession(opts: {
       claim_id: opts.claimId.toString(),
       tier: opts.tier,
     },
-    success_url: `${opts.origin}/my-business?upgrade=success&tier=${opts.tier}`,
-    cancel_url: `${opts.origin}/my-business?upgrade=canceled`,
+    success_url: `${publicOrigin}/my-business?upgrade=success&tier=${opts.tier}`,
+    cancel_url: `${publicOrigin}/my-business?upgrade=canceled`,
   });
 
   return { url: session.url! };
@@ -105,12 +111,12 @@ export async function createCheckoutSession(opts: {
  */
 export async function createPortalSession(opts: {
   stripeCustomerId: string;
-  origin: string;
 }): Promise<{ url: string }> {
   const stripe = getStripe();
+  const publicOrigin = getConfiguredPublicOrigin();
   const session = await stripe.billingPortal.sessions.create({
     customer: opts.stripeCustomerId,
-    return_url: `${opts.origin}/my-business`,
+    return_url: `${publicOrigin}/my-business`,
   });
   return { url: session.url };
 }
@@ -118,7 +124,10 @@ export async function createPortalSession(opts: {
 /**
  * Verify and construct a Stripe webhook event.
  */
-export function constructWebhookEvent(payload: Buffer, sig: string): Stripe.Event {
+export function constructWebhookEvent(
+  payload: Buffer,
+  sig: string
+): Stripe.Event {
   const stripe = getStripe();
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret) throw new Error("STRIPE_WEBHOOK_SECRET is not configured");

@@ -49,8 +49,16 @@ async function startServer() {
   // Stripe webhook must be BEFORE express.json() for raw body signature verification
   app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async (req, res) => {
     try {
-      const { constructWebhookEvent } = await import("../stripe-helpers");
-      const { upsertPremiumListing } = await import("../db");
+      const { constructWebhookEvent, getStripe } = await import("../stripe-helpers");
+      const {
+        activateCanonicalCheckout,
+        markCheckoutReconciliationFailed,
+        markCheckoutReconciliationSucceeded,
+        reserveCheckoutReconciliation,
+        upsertPremiumListing,
+      } = await import("../db");
+      const { processCheckoutCompletion } = await import("../stripe-checkout-completion");
+      const { cancelSubscriptionIfActive, reconcileRejectedCheckout } = await import("../stripe-checkout-reconciliation");
       const sig = req.headers["stripe-signature"] as string;
       const event = constructWebhookEvent(req.body, sig);
 
@@ -65,27 +73,24 @@ async function startServer() {
       switch (event.type) {
         case "checkout.session.completed": {
           const session = event.data.object as any;
-          const serviceKey = session.metadata?.service_key;
-          const tier = session.metadata?.tier;
-          const claimId = session.metadata?.claim_id ? parseInt(session.metadata.claim_id) : undefined;
-          const billingEmail = session.metadata?.customer_email;
-          if (serviceKey && tier) {
-            await upsertPremiumListing(serviceKey, {
-              tier: tier as any,
-              stripeCustomerId: session.customer,
-              stripeSubscriptionId: session.subscription,
-              claimId,
-              billingEmail,
-              paymentStatus: "active" as any,
-            });
-            console.log(`[Stripe] Activated ${tier} tier for ${serviceKey}`);
+          const result = await processCheckoutCompletion(event.id, session, {
+            activateCanonicalCheckout,
+            reconcileRejectedCheckout: details => reconcileRejectedCheckout(details, {
+              reserve: reserveCheckoutReconciliation,
+              cancelSubscription: subscriptionId => cancelSubscriptionIfActive(subscriptionId, {
+                retrieve: id => getStripe().subscriptions.retrieve(id),
+                cancel: id => getStripe().subscriptions.cancel(id),
+              }),
+              markSucceeded: markCheckoutReconciliationSucceeded,
+              markFailed: markCheckoutReconciliationFailed,
+            }),
+          });
+          if (result.accepted) {
+            console.log(`[Stripe] Activated ${result.tier} tier for ${result.serviceKey}`);
             // Notify user about successful payment
             try {
-              const userId = session.metadata?.user_id ? parseInt(session.metadata.user_id) : null;
-              if (userId) {
-                const { notifyPaymentSuccess } = await import("../notification-service");
-                await notifyPaymentSuccess(userId, tier, serviceKey);
-              }
+              const { notifyPaymentSuccess } = await import("../notification-service");
+              await notifyPaymentSuccess(result.userId, result.tier, result.serviceKey);
             } catch (e) { console.error("[Webhook] Notification error:", e); }
           }
           break;

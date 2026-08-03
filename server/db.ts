@@ -1,6 +1,8 @@
-import { eq, and, desc, asc, sql, gte, lte } from "drizzle-orm";
+import { eq, and, desc, asc, sql, gte, lte, inArray } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription } from "../drizzle/schema";
+import { assertCheckoutIdentifiersCompatible, assertNoConflictingBillingOwner, assertUniquePremiumServiceKeys } from "./business-memberships";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessMemberships, type InsertBusinessMembership, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, stripeCheckoutReconciliations, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription } from "../drizzle/schema";
 import { scoreRealtorLead } from "../shared/realtorLeadOps";
 import { ENV } from './_core/env';
 
@@ -1360,9 +1362,135 @@ export async function getBusinessClaims(opts?: { status?: string; serviceKey?: s
 export async function updateBusinessClaimStatus(id: number, status: string, adminNotes?: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.update(businessClaims)
-    .set({ status: status as any, ...(adminNotes !== undefined ? { adminNotes } : {}) })
-    .where(eq(businessClaims.id, id));
+  return db.transaction(async tx => {
+    await tx.update(businessClaims)
+      .set({ status: status as any, ...(adminNotes !== undefined ? { adminNotes } : {}) })
+      .where(eq(businessClaims.id, id));
+    if (status !== "approved") {
+      await tx.update(businessMemberships)
+        .set({ status: "revoked", activeOwnerKey: null, revokedAt: new Date() })
+        .where(eq(businessMemberships.ownerClaimId, id));
+    }
+    return { success: true };
+  });
+}
+
+export async function approveBusinessClaimAndCreateOwnerMembership(
+  id: number,
+  approvedByUserId: number,
+  adminNotes?: string,
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.transaction(async tx => {
+    const claims = await tx.select()
+      .from(businessClaims)
+      .where(eq(businessClaims.id, id))
+      .for("update");
+    const claim = claims[0];
+    if (!claim?.userId) throw new Error("Claim must be linked to a user before approval");
+
+    const lockedMemberships = await tx.select({ id: businessMemberships.id })
+      .from(businessMemberships)
+      .where(eq(businessMemberships.serviceKey, claim.serviceKey))
+      .for("update");
+    void lockedMemberships;
+
+    const billingRecords = await tx.select()
+      .from(premiumListings)
+      .where(eq(premiumListings.serviceKey, claim.serviceKey))
+      .for("update");
+    if (billingRecords.length > 1) {
+      throw new Error("Duplicate premium listing records require reconciliation");
+    }
+    billingRecords.forEach(record => assertNoConflictingBillingOwner(claim.id, record));
+
+    await tx.insert(businessMemberships).values({
+      serviceKey: claim.serviceKey,
+      userId: claim.userId,
+      ownerClaimId: claim.id,
+      activeOwnerKey: claim.serviceKey,
+      role: "owner",
+      status: "active",
+      createdBy: approvedByUserId,
+    }).onDuplicateKeyUpdate({ set: { updatedAt: new Date() } });
+
+    const memberships = await tx.select().from(businessMemberships).where(and(
+      eq(businessMemberships.serviceKey, claim.serviceKey),
+      eq(businessMemberships.userId, claim.userId),
+    ));
+    const membership = memberships[0];
+    if (!membership) {
+      throw new Error("This business already has an active owner");
+    }
+    await tx.update(businessMemberships).set({
+      role: "owner",
+      status: "active",
+      ownerClaimId: claim.id,
+      activeOwnerKey: claim.serviceKey,
+      revokedAt: null,
+    }).where(eq(businessMemberships.id, membership.id));
+
+    await tx.update(businessClaims).set({
+      status: "approved",
+      ...(adminNotes !== undefined ? { adminNotes } : {}),
+    }).where(eq(businessClaims.id, id));
+    return { success: true };
+  });
+}
+
+export async function getBusinessMembershipsForUser(userId: number, serviceKey?: string) {
+  const db = await getDb();
+  if (!db) return [];
+  const conditions = [eq(businessMemberships.userId, userId)];
+  if (serviceKey) conditions.push(eq(businessMemberships.serviceKey, serviceKey));
+  return db.select().from(businessMemberships).where(and(...conditions));
+}
+
+export async function getActiveOwnerMembership(serviceKey: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const memberships = await db.select().from(businessMemberships).where(and(
+    eq(businessMemberships.serviceKey, serviceKey),
+    eq(businessMemberships.role, "owner"),
+    eq(businessMemberships.status, "active"),
+    eq(businessMemberships.activeOwnerKey, serviceKey),
+  ));
+  return memberships[0] ?? null;
+}
+
+export async function ensureBusinessMembership(data: InsertBusinessMembership) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await db.select().from(businessMemberships).where(and(
+    eq(businessMemberships.serviceKey, data.serviceKey),
+    eq(businessMemberships.userId, data.userId),
+  ));
+  if (existing[0]) {
+    await db.update(businessMemberships).set({
+      role: data.role,
+      status: data.status ?? "active",
+      ownerClaimId: data.ownerClaimId,
+      activeOwnerKey: data.role === "owner" && (data.status ?? "active") === "active"
+        ? data.serviceKey
+        : null,
+      revokedAt: data.revokedAt ?? null,
+    }).where(eq(businessMemberships.id, existing[0].id));
+    return { id: existing[0].id, updated: true };
+  }
+  const result = await db.insert(businessMemberships).values({
+    ...data,
+    activeOwnerKey: data.role === "owner" && (data.status ?? "active") === "active"
+      ? data.serviceKey
+      : null,
+  });
+  return { id: result[0].insertId, updated: false };
+}
+
+export async function revokeBusinessMembership(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(businessMemberships).set({ status: "revoked", activeOwnerKey: null, revokedAt: new Date() }).where(eq(businessMemberships.id, id));
   return { success: true };
 }
 
@@ -1405,7 +1533,7 @@ export async function upsertListingOverride(serviceKey: string, claimId: number,
     .where(eq(businessListingOverrides.serviceKey, serviceKey));
   if (existing.length > 0) {
     await db.update(businessListingOverrides)
-      .set({ ...data })
+      .set({ ...data, claimId })
       .where(eq(businessListingOverrides.serviceKey, serviceKey));
     return { id: existing[0].id, updated: true };
   } else {
@@ -1433,32 +1561,281 @@ export async function getAllListingOverrides() {
 
 // ============ Premium Listings ============
 
+export type CanonicalCheckoutActivation = {
+  serviceKey: string;
+  tier: "featured" | "premium";
+  claimId: number;
+  userId: number;
+  billingEmail?: string;
+  stripeCustomerId: string;
+  stripeSubscriptionId: string;
+};
+
+export async function activateCanonicalCheckout(input: CanonicalCheckoutActivation) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return db.transaction(async tx => {
+    const claims = await tx.select().from(businessClaims)
+      .where(eq(businessClaims.id, input.claimId))
+      .for("update");
+    const claim = claims[0];
+    if (
+      !claim ||
+      claim.status !== "approved" ||
+      claim.serviceKey !== input.serviceKey ||
+      claim.userId !== input.userId
+    ) {
+      return { accepted: false as const };
+    }
+
+    const memberships = await tx.select().from(businessMemberships)
+      .where(eq(businessMemberships.serviceKey, input.serviceKey))
+      .for("update");
+    const owner = memberships.find(membership =>
+      membership.role === "owner" &&
+      membership.status === "active" &&
+      membership.activeOwnerKey === input.serviceKey
+    );
+    if (owner?.ownerClaimId !== input.claimId || owner.userId !== input.userId) {
+      return { accepted: false as const };
+    }
+
+    const billingRecords = await tx.select().from(premiumListings)
+      .where(eq(premiumListings.serviceKey, input.serviceKey))
+      .for("update");
+    if (billingRecords.length > 1) {
+      throw new Error("Duplicate premium listing records require reconciliation");
+    }
+    assertCheckoutIdentifiersCompatible(billingRecords[0] ?? null, input);
+
+    const data = {
+      tier: input.tier,
+      claimId: input.claimId,
+      billingEmail: input.billingEmail,
+      stripeCustomerId: input.stripeCustomerId,
+      stripeSubscriptionId: input.stripeSubscriptionId,
+      paymentStatus: "active" as const,
+    };
+    if (billingRecords[0]) {
+      await tx.update(premiumListings).set(data)
+        .where(eq(premiumListings.id, billingRecords[0].id));
+    } else {
+      await tx.insert(premiumListings).values({ serviceKey: input.serviceKey, ...data });
+    }
+    return { accepted: true as const };
+  });
+}
+
+export type CheckoutReconciliationRecord = {
+  stripeEventId: string;
+  checkoutSessionId: string;
+  stripeSubscriptionId: string;
+  stripeCustomerId?: string;
+  serviceKey?: string;
+  claimId?: number;
+  reason: string;
+};
+
+export async function reserveCheckoutReconciliation(details: CheckoutReconciliationRecord) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.transaction(async tx => {
+    const now = new Date();
+    const leaseToken = randomUUID();
+    const leaseExpiresAt = new Date(now.getTime() + 5 * 60 * 1000);
+    await tx.insert(stripeCheckoutReconciliations)
+      .values({ ...details, status: "pending", leaseToken, leaseExpiresAt })
+      .onDuplicateKeyUpdate({
+        set: { updatedAt: sql`${stripeCheckoutReconciliations.updatedAt}` },
+      });
+
+    const sessionRows = await tx.select().from(stripeCheckoutReconciliations)
+      .where(eq(stripeCheckoutReconciliations.checkoutSessionId, details.checkoutSessionId))
+      .for("update");
+    const eventRows = await tx.select().from(stripeCheckoutReconciliations)
+      .where(eq(stripeCheckoutReconciliations.stripeEventId, details.stripeEventId))
+      .for("update");
+    if (
+      sessionRows.length !== 1 ||
+      eventRows.length !== 1 ||
+      sessionRows[0].id !== eventRows[0].id
+    ) {
+      throw new Error("Conflicting checkout reconciliation identifiers");
+    }
+    const row = sessionRows[0];
+    if (
+      row.stripeEventId !== details.stripeEventId ||
+      row.stripeSubscriptionId !== details.stripeSubscriptionId ||
+      (row.stripeCustomerId ?? undefined) !== details.stripeCustomerId
+    ) {
+      throw new Error("Conflicting checkout reconciliation identifiers");
+    }
+    if (row.status === "succeeded") {
+      return { status: row.status, acquired: false as const };
+    }
+    if (row.leaseToken === leaseToken) {
+      return { status: row.status, acquired: true as const, leaseToken };
+    }
+    const leaseExpired = !row.leaseExpiresAt || row.leaseExpiresAt.getTime() <= now.getTime();
+    if (row.status === "failed" || leaseExpired) {
+      await tx.update(stripeCheckoutReconciliations)
+        .set({
+          status: "pending",
+          leaseToken,
+          leaseExpiresAt,
+          attemptCount: sql`${stripeCheckoutReconciliations.attemptCount} + 1`,
+          lastError: null,
+          updatedAt: now,
+        })
+        .where(eq(stripeCheckoutReconciliations.id, row.id));
+      return { status: "pending" as const, acquired: true as const, leaseToken };
+    }
+    return { status: row.status, acquired: false as const };
+  });
+}
+
+export async function markCheckoutReconciliationSucceeded(stripeEventId: string, checkoutSessionId: string, leaseToken: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.update(stripeCheckoutReconciliations)
+    .set({ status: "succeeded", lastError: null, completedAt: new Date(), leaseToken: null, leaseExpiresAt: null, updatedAt: new Date() })
+    .where(and(
+      eq(stripeCheckoutReconciliations.checkoutSessionId, checkoutSessionId),
+      eq(stripeCheckoutReconciliations.stripeEventId, stripeEventId),
+      eq(stripeCheckoutReconciliations.leaseToken, leaseToken),
+      eq(stripeCheckoutReconciliations.status, "pending"),
+    ));
+  if (result[0].affectedRows !== 1) throw new Error("Checkout reconciliation success was not recorded");
+}
+
+export async function markCheckoutReconciliationFailed(stripeEventId: string, checkoutSessionId: string, leaseToken: string, error: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.update(stripeCheckoutReconciliations)
+    .set({ status: "failed", lastError: error.slice(0, 65535), leaseToken: null, leaseExpiresAt: null, updatedAt: new Date() })
+    .where(and(
+      eq(stripeCheckoutReconciliations.checkoutSessionId, checkoutSessionId),
+      eq(stripeCheckoutReconciliations.stripeEventId, stripeEventId),
+      eq(stripeCheckoutReconciliations.leaseToken, leaseToken),
+      eq(stripeCheckoutReconciliations.status, "pending"),
+    ));
+  if (result[0].affectedRows !== 1) throw new Error("Checkout reconciliation failure was not recorded");
+}
+
+export async function getPremiumBillingForCheckout(serviceKey: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const results = await db.select().from(premiumListings);
+  assertUniquePremiumServiceKeys(results);
+  const serviceResults = results.filter(result => result.serviceKey === serviceKey);
+  if (serviceResults.length > 1) {
+    throw new Error("Duplicate premium listing records require reconciliation");
+  }
+  return serviceResults[0] ?? null;
+}
+
 export async function getPremiumListing(serviceKey: string) {
   const db = await getDb();
   if (!db) return null;
-  const results = await db.select().from(premiumListings)
-    .where(and(eq(premiumListings.serviceKey, serviceKey), eq(premiumListings.paymentStatus, 'active' as any)));
-  return results[0] || null;
+  const results = await db.select().from(premiumListings);
+  assertUniquePremiumServiceKeys(results);
+  const serviceResults = results.filter(result => result.serviceKey === serviceKey);
+  if (serviceResults.length > 1) {
+    throw new Error("Duplicate premium listing records require reconciliation");
+  }
+  return serviceResults.find(result => result.paymentStatus === "active") || null;
 }
 
 export async function upsertPremiumListing(serviceKey: string, data: Partial<InsertPremiumListing>) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  const existing = await db.select().from(premiumListings)
-    .where(eq(premiumListings.serviceKey, serviceKey));
-  if (existing.length > 0) {
-    await db.update(premiumListings).set({ ...data }).where(eq(premiumListings.serviceKey, serviceKey));
-    return { id: existing[0].id, updated: true };
-  } else {
-    const result = await db.insert(premiumListings).values({ serviceKey, ...data });
-    return { id: result[0].insertId, updated: false };
+  if (data.stripeCustomerId !== undefined || data.stripeSubscriptionId !== undefined || data.claimId !== undefined) {
+    throw new Error("Provider identifiers require canonical checkout activation");
   }
+  const { id: _id, serviceKey: _serviceKey, ...safeData } = data;
+  const result = await db.update(premiumListings)
+    .set({ ...safeData, updatedAt: new Date() })
+    .where(eq(premiumListings.serviceKey, serviceKey));
+  return { updated: result[0].affectedRows > 0 };
+}
+
+export async function upsertCanonicalPremiumListingForAdmin(
+  serviceKey: string,
+  data: Pick<InsertPremiumListing, "tier" | "billingEmail">,
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return db.transaction(async tx => {
+    const ownerCandidates = await tx.select().from(businessMemberships)
+      .where(eq(businessMemberships.serviceKey, serviceKey));
+    const candidateOwners = ownerCandidates.filter(membership =>
+      membership.role === "owner" &&
+      membership.status === "active" &&
+      membership.activeOwnerKey === serviceKey
+    );
+    if (candidateOwners.length !== 1) {
+      throw new Error("Business does not have exactly one canonical active owner");
+    }
+    const candidateOwner = candidateOwners[0]!;
+    if (!candidateOwner.ownerClaimId) {
+      throw new Error("Business does not have exactly one canonical active owner");
+    }
+
+    const claims = await tx.select().from(businessClaims)
+      .where(eq(businessClaims.id, candidateOwner.ownerClaimId))
+      .for("update");
+    const claim = claims[0];
+    if (!claim || claim.status !== "approved" || claim.serviceKey !== serviceKey || claim.userId !== candidateOwner.userId) {
+      throw new Error("Canonical owner claim is invalid");
+    }
+
+    const memberships = await tx.select().from(businessMemberships)
+      .where(eq(businessMemberships.serviceKey, serviceKey))
+      .for("update");
+    const activeOwners = memberships.filter(membership =>
+      membership.role === "owner" &&
+      membership.status === "active" &&
+      membership.activeOwnerKey === serviceKey
+    );
+    if (activeOwners.length !== 1 || !activeOwners[0].ownerClaimId) {
+      throw new Error("Business does not have exactly one canonical active owner");
+    }
+    const canonicalOwner = activeOwners[0];
+    if (
+      canonicalOwner.id !== candidateOwner.id ||
+      canonicalOwner.ownerClaimId !== claim.id ||
+      claim.userId !== canonicalOwner.userId
+    ) {
+      throw new Error("Canonical ownership changed during update");
+    }
+
+    const billingRecords = await tx.select().from(premiumListings)
+      .where(eq(premiumListings.serviceKey, serviceKey))
+      .for("update");
+    if (billingRecords.length > 1) {
+      throw new Error("Duplicate premium listing records require reconciliation");
+    }
+    assertNoConflictingBillingOwner(canonicalOwner.ownerClaimId, billingRecords[0] ?? null);
+
+    const canonicalData = { ...data, claimId: canonicalOwner.ownerClaimId };
+    if (billingRecords[0]) {
+      await tx.update(premiumListings).set(canonicalData)
+        .where(eq(premiumListings.id, billingRecords[0].id));
+      return { id: billingRecords[0].id, updated: true };
+    }
+    const result = await tx.insert(premiumListings).values({ serviceKey, ...canonicalData });
+    return { id: result[0].insertId, updated: false };
+  });
 }
 
 export async function getAllPremiumListings() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(premiumListings).orderBy(desc(premiumListings.updatedAt));
+  const results = await db.select().from(premiumListings).orderBy(desc(premiumListings.updatedAt));
+  assertUniquePremiumServiceKeys(results);
+  return results;
 }
 
 export async function incrementListingAnalytics(serviceKey: string, field: 'viewsThisPeriod' | 'clicksThisPeriod' | 'leadsThisPeriod') {
@@ -1474,23 +1851,39 @@ export async function deleteUserAccount(userId: number): Promise<boolean> {
   const db = await getDb();
   if (!db) return false;
 
-  // Delete all user-related data across tables (order matters for foreign keys)
-  await db.delete(commentVotes).where(eq(commentVotes.userId, userId));
-  await db.delete(comments).where(eq(comments.userId, userId));
-  await db.delete(passportEntries).where(eq(passportEntries.userId, userId));
-  await db.delete(bingoProgress).where(eq(bingoProgress.userId, userId));
-  await db.delete(wishlists).where(eq(wishlists.userId, userId));
-  await db.delete(reviews).where(eq(reviews.userId, userId));
-  await db.delete(userTagPreferences).where(eq(userTagPreferences.userId, userId));
-  await db.delete(searchQueries).where(eq(searchQueries.userId, userId));
-  // Anonymize events submitted by user (don't delete the events themselves)
-  await db.update(events).set({ submittedBy: null } as any).where(eq(events.submittedBy, userId));
-  // Anonymize business claims (keep for business continuity)
-  await db.update(businessClaims).set({ userId: null } as any).where(eq(businessClaims.userId, userId));
-  // Finally delete the user record
-  await db.delete(users).where(eq(users.id, userId));
-
-  return true;
+  return db.transaction(async tx => {
+    // Delete all user-related data across tables (order matters for foreign keys)
+    await tx.delete(commentVotes).where(eq(commentVotes.userId, userId));
+    await tx.delete(comments).where(eq(comments.userId, userId));
+    await tx.delete(passportEntries).where(eq(passportEntries.userId, userId));
+    await tx.delete(bingoProgress).where(eq(bingoProgress.userId, userId));
+    await tx.delete(wishlists).where(eq(wishlists.userId, userId));
+    await tx.delete(reviews).where(eq(reviews.userId, userId));
+    await tx.delete(userTagPreferences).where(eq(userTagPreferences.userId, userId));
+    await tx.delete(searchQueries).where(eq(searchQueries.userId, userId));
+    // Serialize deletion with claim approval, then detach retained claim audit rows.
+    const ownedClaims = await tx.select({ id: businessClaims.id })
+      .from(businessClaims)
+      .where(eq(businessClaims.userId, userId))
+      .for("update");
+    const ownedClaimIds = ownedClaims.map(claim => claim.id);
+    if (ownedClaimIds.length > 0) {
+      await tx.update(businessMemberships)
+        .set({ status: "revoked", activeOwnerKey: null, revokedAt: new Date() })
+        .where(inArray(businessMemberships.ownerClaimId, ownedClaimIds));
+    }
+    // Revoke memberships held directly by the deleted user as well.
+    await tx.update(businessMemberships)
+      .set({ status: "revoked", activeOwnerKey: null, revokedAt: new Date() })
+      .where(eq(businessMemberships.userId, userId));
+    await tx.update(businessClaims)
+      .set({ userId: null } as any)
+      .where(eq(businessClaims.userId, userId));
+    // Anonymize retained records for continuity.
+    await tx.update(events).set({ submittedBy: null } as any).where(eq(events.submittedBy, userId));
+    await tx.delete(users).where(eq(users.id, userId));
+    return true;
+  });
 }
 
 
