@@ -1,9 +1,12 @@
 import { SERVICES, SERVICE_CATEGORIES, type Service } from "@shared/services";
 import { useMemo, useRef, useCallback, useState, useEffect } from "react";
 import { useRoute, Link } from "wouter";
-import { MapPin, Phone, ExternalLink, ArrowLeft, Clock, Star, Share2, Navigation, Building2, ChevronRight, Camera, ChevronLeft, X, Crown, Award } from "lucide-react";
+import { MapPin, Phone, ExternalLink, ArrowLeft, Clock, Star, Share2, Navigation, Building2, ChevronRight, Camera, ChevronLeft, X, Crown, Award, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
 import ReviewSection from "@/components/ReviewSection";
@@ -15,6 +18,7 @@ import { MapView } from "@/components/Map";
 import { useSEO } from "@/hooks/useSEO";
 import { useStructuredData, buildLocalBusinessSchema, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
 import { trackBusinessAction } from "@/lib/mixpanel";
+import { toast } from "sonner";
 import NotFound from "@/pages/NotFound";
 
 function toSlug(name: string): string {
@@ -47,6 +51,25 @@ export default function BusinessDetail() {
     { serviceKey: slug },
     { enabled: !!slug }
   );
+  const { data: publicProfile } = trpc.businessPortal.getPublicProfile.useQuery(
+    { serviceKey: slug },
+    { enabled: !!slug }
+  );
+
+  const emptyLeadForm = { name: "", email: "", phone: "", message: "" };
+  const [leadFormState, setLeadFormState] = useState({ scopeKey: slug, value: emptyLeadForm });
+  const leadForm = leadFormState.scopeKey === slug ? leadFormState.value : emptyLeadForm;
+  const setLeadForm = (value: typeof emptyLeadForm) => setLeadFormState({ scopeKey: slug, value });
+  useEffect(() => {
+    setLeadFormState({ scopeKey: slug, value: emptyLeadForm });
+  }, [slug]);
+  const trackLead = trpc.premium.trackLead.useMutation({
+    onSuccess: () => {
+      toast.success("Your inquiry was sent to the business.");
+      setLeadForm({ name: "", email: "", phone: "", message: "" });
+    },
+    onError: error => toast.error(error.message),
+  });
 
   // Track views and clicks for premium listings
   const trackView = trpc.premium.trackView.useMutation();
@@ -58,25 +81,44 @@ export default function BusinessDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug, premiumData?.active, premiumData?.tier]);
 
-  // Parse hours from enrichment
+  // Prefer owner-managed hours, then Google enrichment hours.
   const hours = useMemo(() => {
+    if (publicProfile?.hours) {
+      try {
+        const ownerHours = JSON.parse(publicProfile.hours) as Record<string, string>;
+        const labels: Record<string, string> = {
+          mon: "Monday", tue: "Tuesday", wed: "Wednesday", thu: "Thursday",
+          fri: "Friday", sat: "Saturday", sun: "Sunday",
+        };
+        const rows = Object.entries(ownerHours)
+          .filter(([, value]) => Boolean(value))
+          .map(([day, value]) => `${labels[day] ?? day}: ${value}`);
+        if (rows.length > 0) return rows;
+      } catch {
+        // Fall through to enrichment hours.
+      }
+    }
     if (!enrichment?.hoursJson) return null;
     try {
       return JSON.parse(enrichment.hoursJson) as string[];
     } catch {
       return null;
     }
-  }, [enrichment?.hoursJson]);
+  }, [enrichment?.hoursJson, publicProfile?.hours]);
 
-  // Parse photos from enrichment
-  const photos = useMemo(() => {
-    if (!enrichment?.photosJson) return null;
-    try {
-      return JSON.parse(enrichment.photosJson) as string[];
-    } catch {
-      return null;
+  // Prefer owner-managed photos, then include Google enrichment photos without duplicates.
+  const combinedPhotos = useMemo(() => {
+    let googlePhotos: string[] = [];
+    if (enrichment?.photosJson) {
+      try {
+        googlePhotos = JSON.parse(enrichment.photosJson) as string[];
+      } catch {
+        googlePhotos = [];
+      }
     }
-  }, [enrichment?.photosJson]);
+    return Array.from(new Set([...(publicProfile?.photoUrls ?? []), ...googlePhotos]));
+  }, [enrichment?.photosJson, publicProfile?.photoUrls]);
+  const photos = combinedPhotos;
 
   // Lightbox state
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -104,6 +146,11 @@ export default function BusinessDetail() {
     },
     [service, enrichment?.verifiedAddress]
   );
+
+  const displayName = publicProfile?.displayName || service?.name || "";
+  const description = publicProfile?.description || service?.description || "";
+  const phone = publicProfile?.phone || service?.phone || "";
+  const website = publicProfile?.website || service?.website || "";
 
   // SEO
   useSEO({
@@ -230,11 +277,23 @@ export default function BusinessDetail() {
   const trackListingAction = (action: "phone_click" | "website_click" | "directions_click" | "claim_click", surface: string) => {
     trackBusinessAction(action, {
       service_key: slug,
-      business_name: service.name,
+      business_name: displayName,
       category: category?.name || service.category,
       area: service.area,
       surface,
       premium_tier: premiumData?.active ? premiumData.tier : "basic",
+    });
+  };
+
+  const submitLead = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (leadFormState.scopeKey !== slug || !leadForm.name || !leadForm.email || !leadForm.message) return;
+    trackLead.mutate({
+      serviceKey: slug,
+      name: leadForm.name,
+      email: leadForm.email,
+      phone: leadForm.phone || undefined,
+      message: leadForm.message,
     });
   };
 
@@ -286,7 +345,7 @@ export default function BusinessDetail() {
                     >
                       <img loading="lazy"
                         src={photos[0]}
-                        alt={`${service.name} - Charlotte NC local business`}
+                        alt={`${displayName} - Charlotte NC local business`}
                         className="w-full h-[320px] object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
@@ -301,7 +360,7 @@ export default function BusinessDetail() {
                           >
                             <img loading="lazy"
                               src={photo}
-                              alt={`${service.name} in Charlotte NC - photo ${i + 2}`}
+                              alt={`${displayName} in Charlotte NC - photo ${i + 2}`}
                               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                               style={{ minHeight: '100px' }}
                             />
@@ -331,7 +390,7 @@ export default function BusinessDetail() {
                     <div className="flex items-center gap-3 mb-2">
                       {category && <span className="text-2xl">{category.icon}</span>}
                       <div>
-                        <h1 className="text-2xl font-display font-bold text-foreground">{service.name}</h1>
+                        <h1 className="text-2xl font-display font-bold text-foreground">{displayName}</h1>
                         {category && (
                           <Link href={`/directory?category=${category.id}`}>
                             <span className="text-sm text-primary hover:underline">{category.name}</span>
@@ -389,7 +448,8 @@ export default function BusinessDetail() {
                 </div>
 
                 {/* Description */}
-                <p className="text-muted-foreground mt-4 leading-relaxed">{service.description}</p>
+                {publicProfile?.tagline && <p className="font-medium text-primary mt-4">{publicProfile.tagline}</p>}
+                <p className="text-muted-foreground mt-4 leading-relaxed">{description}</p>
 
                 {/* Local SEO context for thin listings */}
                 <div className="mt-4 rounded-2xl bg-muted/40 border border-border p-4 text-sm text-muted-foreground leading-relaxed space-y-2">
@@ -413,20 +473,20 @@ export default function BusinessDetail() {
                       <Navigation className="w-3.5 h-3.5" /> Get Directions
                     </Button>
                   </a>
-                  {service.phone && (
-                    <a href={`tel:${service.phone}`} onClick={() => {
+                  {phone && (
+                    <a href={`tel:${phone}`} onClick={() => {
                       trackListingAction("phone_click", "hero_actions");
                       if (premiumData?.active && premiumData?.tier !== 'basic') {
                         trackClick.mutate({ serviceKey: slug });
                       }
                     }}>
                       <Button size="sm" variant="outline" className="gap-1.5">
-                        <Phone className="w-3.5 h-3.5" /> {service.phone}
+                        <Phone className="w-3.5 h-3.5" /> {phone}
                       </Button>
                     </a>
                   )}
-                  {service.website && (
-                    <a href={service.website} target="_blank" rel="noopener noreferrer" onClick={() => {
+                  {website && (
+                    <a href={website} target="_blank" rel="noopener noreferrer" onClick={() => {
                       trackListingAction("website_click", "hero_actions");
                       if (premiumData?.active && premiumData?.tier !== 'basic') {
                         trackClick.mutate({ serviceKey: slug });
@@ -503,6 +563,42 @@ export default function BusinessDetail() {
                 </div>
               </CardContent>
             </Card>
+
+            {premiumData?.active && premiumData?.tier === "premium" && (
+              <Card className="border-purple-200 bg-purple-50/30">
+                <CardContent className="p-6">
+                  <h2 className="font-display font-semibold text-lg text-foreground flex items-center gap-2">
+                    <Send className="w-5 h-5 text-purple-600" /> Send an Inquiry
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1 mb-4">
+                    Contact {displayName} directly through their Premium listing.
+                  </p>
+                  <form onSubmit={submitLead} className="space-y-3">
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="lead-name">Name</Label>
+                        <Input id="lead-name" value={leadForm.name} onChange={e => setLeadForm({ ...leadForm, name: e.target.value })} required />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label htmlFor="lead-email">Email</Label>
+                        <Input id="lead-email" type="email" value={leadForm.email} onChange={e => setLeadForm({ ...leadForm, email: e.target.value })} required />
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="lead-phone">Phone (optional)</Label>
+                      <Input id="lead-phone" type="tel" value={leadForm.phone} onChange={e => setLeadForm({ ...leadForm, phone: e.target.value })} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="lead-message">Message</Label>
+                      <Textarea id="lead-message" rows={4} value={leadForm.message} onChange={e => setLeadForm({ ...leadForm, message: e.target.value })} required />
+                    </div>
+                    <Button type="submit" disabled={trackLead.isPending} className="gap-2 bg-purple-600 hover:bg-purple-700">
+                      <Send className="w-4 h-4" /> {trackLead.isPending ? "Sending..." : "Send Inquiry"}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Reviews */}
             <Card>

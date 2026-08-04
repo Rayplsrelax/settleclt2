@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Building2, Save, Globe, Phone, Mail, Clock, Image, Tag,
   CheckCircle2, BarChart3, Eye, MousePointerClick, Users,
-  ExternalLink, ArrowRight, Crown, Sparkles, Shield
+  ExternalLink, ArrowRight, Crown, Sparkles, Shield, Trash2, Download, Inbox
 } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
@@ -99,7 +99,10 @@ export default function MyBusiness() {
   }, []);
 
   const [selectedMembershipId, setSelectedMembershipId] = useState<number | null>(null);
+  const [photoUrlState, setPhotoUrlState] = useState({ scopeKey: null as string | null, value: "" });
   const selectedMembership = reconcileSelectedMembership(memberships, selectedMembershipId);
+  const photoUrl = photoUrlState.scopeKey === selectedMembership?.serviceKey ? photoUrlState.value : "";
+  const setPhotoUrl = (value: string) => setPhotoUrlState({ scopeKey: selectedMembership?.serviceKey ?? null, value });
   const [formState, setFormState] = useState({
     scopeKey: null as string | null,
     value: EMPTY_LISTING_FORM,
@@ -134,6 +137,19 @@ export default function MyBusiness() {
     { serviceKey: selectedMembership?.serviceKey ?? "" },
     { enabled: !!selectedMembership }
   );
+  const { data: photoLimit } = trpc.premium.getPhotoLimit.useQuery(
+    { serviceKey: selectedMembership?.serviceKey ?? "" },
+    { enabled: !!selectedMembership }
+  );
+  const { data: leads, refetch: refetchLeads } = trpc.premium.getLeads.useQuery(
+    { serviceKey: selectedMembership?.serviceKey ?? "", limit: 50, offset: 0 },
+    { enabled: !!selectedMembership && canViewAnalytics && tierInfo?.tier === "premium" && tierInfo.active }
+  );
+  const reportQuery = trpc.premium.getReport.useQuery(
+    { serviceKey: selectedMembership?.serviceKey ?? "" },
+    { enabled: false }
+  );
+  const ownerPhotos = override?.photoUrls?.split(",").filter(Boolean) ?? [];
 
   const updateListing = trpc.businessPortal.updateListing.useMutation({
     onSuccess: () => {
@@ -141,6 +157,25 @@ export default function MyBusiness() {
       refetchOverride();
     },
     onError: (err) => toast.error(err.message),
+  });
+  const uploadPhoto = trpc.businessPortal.uploadPhoto.useMutation({
+    onSuccess: () => {
+      toast.success("Photo added to your gallery.");
+      setPhotoUrl("");
+      refetchOverride();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const removePhoto = trpc.businessPortal.removePhoto.useMutation({
+    onSuccess: () => {
+      toast.success("Photo removed.");
+      refetchOverride();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const updateLeadStatus = trpc.premium.updateLeadStatus.useMutation({
+    onSuccess: () => refetchLeads(),
+    onError: error => toast.error(error.message),
   });
 
   const createCheckout = trpc.premium.createCheckout.useMutation({
@@ -184,6 +219,10 @@ export default function MyBusiness() {
     }
   }, [canEdit, override, selectedMembership?.serviceKey, setForm]);
 
+  useEffect(() => {
+    setPhotoUrlState({ scopeKey: selectedMembership?.serviceKey ?? null, value: "" });
+  }, [selectedMembership?.serviceKey]);
+
   // Reconcile every refresh so revocation and role changes replace stale authority.
   useEffect(() => {
     const nextMembershipId = selectedMembership?.id ?? null;
@@ -199,6 +238,33 @@ export default function MyBusiness() {
       ...form,
     });
   }, [selectedMembership, canEdit, form, formIsCurrent, updateListing]);
+
+  const downloadMonthlyReport = async () => {
+    if (!selectedMembership) return;
+    const result = await reportQuery.refetch();
+    if (!result.data) {
+      toast.error(result.error?.message ?? "Report is unavailable.");
+      return;
+    }
+    const report = result.data;
+    const text = [
+      `Settle CLT Monthly Performance Report`,
+      `Business: ${report.serviceKey}`,
+      `Period: ${report.periodStart ?? "N/A"} to ${report.periodEnd ?? "N/A"}`,
+      `Views: ${report.metrics.views}`,
+      `Clicks: ${report.metrics.clicks}`,
+      `Leads: ${report.metrics.leads}`,
+      `Click-through rate: ${report.metrics.clickThroughRate}`,
+      `Lead conversion rate: ${report.metrics.leadConversionRate}`,
+      `Generated: ${report.generatedAt}`,
+    ].join("\n");
+    const url = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${report.serviceKey}-monthly-performance.txt`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
 
   if (authLoading || membershipsLoading || membershipsFetching) {
     return (
@@ -309,6 +375,7 @@ export default function MyBusiness() {
           <TabsList>
             <TabsTrigger value="details" disabled={!canEdit} className="gap-1.5"><Building2 className="w-3.5 h-3.5" /> Details</TabsTrigger>
             <TabsTrigger value="hours" disabled={!canEdit} className="gap-1.5"><Clock className="w-3.5 h-3.5" /> Hours</TabsTrigger>
+            <TabsTrigger value="photos" disabled={!canEdit} className="gap-1.5"><Image className="w-3.5 h-3.5" /> Photos</TabsTrigger>
             <TabsTrigger value="analytics" disabled={!canViewAnalytics} className="gap-1.5"><BarChart3 className="w-3.5 h-3.5" /> Analytics</TabsTrigger>
             <TabsTrigger value="upgrade" disabled={!canManageBilling} className="gap-1.5"><Crown className="w-3.5 h-3.5" /> Upgrade</TabsTrigger>
           </TabsList>
@@ -421,6 +488,56 @@ export default function MyBusiness() {
             </Card>
           </TabsContent>
 
+          <TabsContent value="photos">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2"><Image className="w-4 h-4" /> Photo Gallery</CardTitle>
+                <CardDescription>
+                  {photoLimit?.limit
+                    ? `${ownerPhotos.length} of ${photoLimit.limit} photos used on your ${photoLimit.tier} plan.`
+                    : "Upgrade to Featured or Premium to add owner-managed photos."}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {Boolean(photoLimit?.limit) && (
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Input value={photoUrl} onChange={event => setPhotoUrl(event.target.value)} placeholder="https://your-site.com/photo.jpg" type="url" />
+                    <Button
+                      onClick={() => {
+                        if (!selectedMembership || photoUrlState.scopeKey !== selectedMembership.serviceKey) return;
+                        uploadPhoto.mutate({ serviceKey: selectedMembership.serviceKey, photoUrl });
+                      }}
+                      disabled={!photoUrl || uploadPhoto.isPending || ownerPhotos.length >= (photoLimit?.limit ?? 0)}
+                    >
+                      {uploadPhoto.isPending ? "Adding..." : "Add Photo"}
+                    </Button>
+                  </div>
+                )}
+                {ownerPhotos.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {ownerPhotos.map(url => (
+                      <div key={url} className="relative overflow-hidden rounded-lg border bg-muted aspect-video">
+                        <img src={url} alt="Business gallery" className="w-full h-full object-cover" />
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-2 right-2 h-8 w-8"
+                          onClick={() => selectedMembership && removePhoto.mutate({ serviceKey: selectedMembership.serviceKey, photoUrl: url })}
+                          disabled={removePhoto.isPending}
+                          aria-label="Remove photo"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No owner-managed photos yet.</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Analytics Tab */}
           <TabsContent value="analytics">
             {canViewAnalytics && analytics ? (
@@ -448,6 +565,46 @@ export default function MyBusiness() {
                     </CardContent>
                   </Card>
                 </div>
+                {currentTier === "premium" && tierInfo?.active && (
+                  <div className="grid lg:grid-cols-[1fr_auto] gap-4 items-start">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2"><Inbox className="w-4 h-4" /> Lead Inbox</CardTitle>
+                        <CardDescription>Manage inquiries submitted through your Premium listing.</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {leads?.length ? (
+                          <div className="space-y-3">
+                            {leads.map(lead => (
+                              <div key={lead.id} className="rounded-lg border p-3 text-sm">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                  <div>
+                                    <p className="font-medium">{lead.name}</p>
+                                    <a href={`mailto:${lead.email}`} className="text-primary hover:underline">{lead.email}</a>
+                                    {lead.phone && <p className="text-muted-foreground">{lead.phone}</p>}
+                                  </div>
+                                  <select
+                                    className="border rounded-md px-2 py-1 bg-background"
+                                    value={lead.status}
+                                    onChange={event => updateLeadStatus.mutate({ leadId: lead.id, status: event.target.value as "new" | "contacted" | "qualified" | "closed" | "archived" })}
+                                  >
+                                    {['new', 'contacted', 'qualified', 'closed', 'archived'].map(status => <option key={status} value={status}>{status}</option>)}
+                                  </select>
+                                </div>
+                                <p className="mt-2 text-muted-foreground whitespace-pre-wrap">{lead.message}</p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">No leads yet.</p>
+                        )}
+                      </CardContent>
+                    </Card>
+                    <Button variant="outline" className="gap-2" onClick={downloadMonthlyReport} disabled={reportQuery.isFetching}>
+                      <Download className="w-4 h-4" /> {reportQuery.isFetching ? "Preparing..." : "Download Monthly Report"}
+                    </Button>
+                  </div>
+                )}
                 {currentTier === "basic" && (
                   <Card className="border-amber-200 bg-amber-50/50">
                     <CardContent className="p-4 flex items-center gap-3">

@@ -26,9 +26,10 @@ import {
   createReview, getReviews, getReviewStats, getBulkReviewStats, deleteReview, toggleReviewVisibility, getAllReviews,
   submitReferral, getReferrals, updateReferralStatus, getReferralStats,
   submitBusinessClaim, getBusinessClaims, updateBusinessClaimStatus, approveBusinessClaimAndCreateOwnerMembership, getBusinessClaimStats, hasExistingClaim,
-  getListingOverride, upsertListingOverride, getBusinessMembershipsForUser,
+  getListingOverride, upsertListingOverride, getBusinessMembershipsForUser, getActiveOwnerMembership,
   getPremiumListing, getPremiumBillingForCheckout, upsertPremiumListing, upsertCanonicalPremiumListingForAdmin, getAllPremiumListings, incrementListingAnalytics,
   deleteUserAccount,
+  createBusinessLead, getBusinessLeadsForService, getBusinessLeadById, updateBusinessLeadStatus,
   createNotification, getUserNotifications, getUnreadNotificationCount,
   markNotificationRead, markAllNotificationsRead, deleteNotification,
   getNotificationPreferences, upsertNotificationPreference, isNotificationEnabled,
@@ -43,6 +44,14 @@ import { permissionsForBusinessRole, requireApprovedBusinessClaim, requireBusine
 import { selectEffectiveClaimId } from "./business-memberships";
 import { notifyClaimApproved, notifyClaimRejected, notifyNewReview, notifyBingoComplete, notifyWelcome } from "./notification-service";
 import { buildHermesRevenueOpsSummary, createHermesRevenueDraft, generateHermesRevenueTasks } from "../shared/hermesRevenueOps";
+import { operationsRouter } from "./operationsRouter";
+import { directoryOpsRouter } from "./directoryOpsRouter";
+import { eventOpsRouter } from "./eventOpsRouter";
+import { editorialOpsRouter } from "./editorialOpsRouter";
+import { communityOpsRouter } from "./communityOpsRouter";
+import { sourceRegistryRouter } from "./sourceRegistryRouter";
+import { requireActivePremium, requirePremiumLeadAccess } from "./premium-access";
+import { createPremiumLeadWithNotification } from "./premium-lead-service";
 
 const SETTLE_CLT_MICROSITES = [
   { domain: "movingtocharlotteguide.com", campaign: "relocation", status: "ready_for_dns", primaryFunnel: "/find-your-home" },
@@ -54,6 +63,12 @@ const SETTLE_CLT_MICROSITES = [
 
 export const appRouter = router({
   system: systemRouter,
+  operations: operationsRouter,
+  directoryOps: directoryOpsRouter,
+  eventOps: eventOpsRouter,
+  editorialOps: editorialOpsRouter,
+  communityOps: communityOpsRouter,
+  sourceRegistry: sourceRegistryRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
@@ -1297,6 +1312,25 @@ export const appRouter = router({
 
   // ============ Business Owner Portal ============
   businessPortal: router({
+    getPublicProfile: publicProcedure
+      .input(z.object({ serviceKey: z.string().min(1) }))
+      .query(async ({ input }) => {
+        const override = await getListingOverride(input.serviceKey);
+        if (!override) return null;
+        return {
+          serviceKey: override.serviceKey,
+          displayName: override.displayName,
+          description: override.description,
+          phone: override.phone,
+          website: override.website,
+          hours: override.hours,
+          photoUrls: override.photoUrls
+            ? override.photoUrls.split(",").filter(Boolean)
+            : [],
+          socialLinks: override.socialLinks,
+          tagline: override.tagline,
+        };
+      }),
     myMemberships: protectedProcedure.query(async ({ ctx }) => {
       const memberships = await getBusinessMembershipsForUser(ctx.user.id);
       return memberships
@@ -1345,6 +1379,20 @@ export const appRouter = router({
         const effectiveClaimId = selectEffectiveClaimId(membership.ownerClaimId);
         const existing = await getListingOverride(input.serviceKey);
         const currentPhotos = existing?.photoUrls ? existing.photoUrls.split(',').filter(Boolean) : [];
+
+        // Tier-based photo limit enforcement
+        const premiumListing = await getPremiumListing(input.serviceKey);
+        const tier = premiumListing?.tier ?? "basic";
+        const isActive = premiumListing?.paymentStatus === "active";
+        const { canUploadPhoto, getPhotoLimit } = await import("../shared/premium-limits");
+        if (!canUploadPhoto(tier, isActive, currentPhotos.length)) {
+          const limit = getPhotoLimit(tier, isActive);
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: `Photo limit reached. Your ${tier === "basic" ? "free" : tier} tier allows ${limit} photo${limit !== 1 ? "s" : ""}.${tier === "basic" ? " Upgrade to Featured ($29/mo) for 5 photos or Premium ($79/mo) for 15 photos." : ""}`,
+          });
+        }
+
         currentPhotos.push(input.photoUrl);
         await upsertListingOverride(input.serviceKey, effectiveClaimId, { photoUrls: currentPhotos.join(',') });
         return { success: true, photos: currentPhotos };
@@ -1373,6 +1421,15 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const listing = await getPremiumListing(input.serviceKey);
         return listing ? { tier: listing.tier, active: listing.paymentStatus === 'active' } : { tier: 'basic' as const, active: false };
+      }),
+    getPhotoLimit: publicProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .query(async ({ input }) => {
+        const listing = await getPremiumListing(input.serviceKey);
+        const tier = listing?.tier ?? "basic";
+        const active = listing?.paymentStatus === "active";
+        const { getPhotoLimit } = await import("../shared/premium-limits");
+        return { limit: getPhotoLimit(tier as "basic" | "featured" | "premium", active), tier, active };
       }),
     getActiveTiers: publicProcedure.query(async () => {
       const all = await getAllPremiumListings();
@@ -1406,6 +1463,113 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await incrementListingAnalytics(input.serviceKey, 'clicksThisPeriod');
         return { success: true };
+      }),
+    trackLead: publicProcedure
+      .input(z.object({
+        serviceKey: z.string(),
+        name: z.string().min(1).max(255),
+        email: z.string().email(),
+        phone: z.string().max(32).optional(),
+        message: z.string().min(1).max(2000),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Only allow leads on active premium-tier businesses
+        const listing = await getPremiumListing(input.serviceKey);
+        requireActivePremium(listing);
+        const leadId = await createPremiumLeadWithNotification(
+          {
+            serviceKey: input.serviceKey,
+            name: input.name,
+            email: input.email,
+            phone: input.phone ?? null,
+            message: input.message,
+            userId: ctx.user?.id ?? null,
+          },
+          {
+            createLead: createBusinessLead,
+            getOwner: getActiveOwnerMembership,
+            notify: createNotification,
+          },
+        );
+        return { success: true as const, leadId };
+      }),
+    getLeads: protectedProcedure
+      .input(z.object({
+        serviceKey: z.string(),
+        limit: z.number().min(1).max(100).default(50),
+        offset: z.number().min(0).default(0),
+      }))
+      .query(async ({ input, ctx }) => {
+        const listing = await getPremiumListing(input.serviceKey);
+        if (ctx.user.role !== "admin") {
+          const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+          requirePremiumLeadAccess(memberships, input.serviceKey, listing);
+        } else {
+          requireActivePremium(listing);
+        }
+        return getBusinessLeadsForService(input.serviceKey, input);
+      }),
+    getReport: protectedProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") {
+          const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+          requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
+        }
+        const listing = await getPremiumListing(input.serviceKey);
+        if (!listing) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "No premium listing found for this business." });
+        }
+        if (listing.tier !== "premium" || listing.paymentStatus !== "active") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Monthly performance reports are only available for active Premium listings." });
+        }
+        const leads = await getBusinessLeadsForService(input.serviceKey, { limit: 100 });
+        const views = listing.viewsThisPeriod ?? 0;
+        const clicks = listing.clicksThisPeriod ?? 0;
+        const leadCount = listing.leadsThisPeriod ?? 0;
+        const ctr = views > 0 ? ((clicks / views) * 100).toFixed(1) : "0.0";
+        const conversionRate = clicks > 0 ? ((leadCount / clicks) * 100).toFixed(1) : "0.0";
+        return {
+          serviceKey: input.serviceKey,
+          tier: listing.tier,
+          periodStart: listing.currentPeriodStart,
+          periodEnd: listing.currentPeriodEnd,
+          metrics: {
+            views,
+            clicks,
+            leads: leadCount,
+            clickThroughRate: `${ctr}%`,
+            leadConversionRate: `${conversionRate}%`,
+          },
+          leads: leads.map(l => ({
+            id: l.id,
+            name: l.name,
+            email: l.email,
+            phone: l.phone,
+            message: l.message.substring(0, 200),
+            status: l.status,
+            createdAt: l.createdAt,
+          })),
+          generatedAt: new Date().toISOString(),
+        };
+      }),
+    updateLeadStatus: protectedProcedure
+      .input(z.object({
+        leadId: z.number(),
+        status: z.enum(["new", "contacted", "qualified", "closed", "archived"]),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const lead = await getBusinessLeadById(input.leadId);
+        if (!lead) throw new TRPCError({ code: "NOT_FOUND", message: "Lead not found" });
+        const listing = await getPremiumListing(lead.serviceKey);
+        if (ctx.user.role !== "admin") {
+          const memberships = await getBusinessMembershipsForUser(ctx.user.id, lead.serviceKey);
+          requirePremiumLeadAccess(memberships, lead.serviceKey, listing);
+        } else {
+          requireActivePremium(listing);
+        }
+        await updateBusinessLeadStatus(input.leadId, input.status);
+        return { success: true as const };
       }),
     createCheckout: protectedProcedure
       .input(z.object({

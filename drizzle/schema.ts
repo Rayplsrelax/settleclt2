@@ -132,6 +132,71 @@ export const directoryListings = mysqlTable("directory_listings", {
 export type DirectoryListing = typeof directoryListings.$inferSelect;
 export type InsertDirectoryListing = typeof directoryListings.$inferInsert;
 
+/** Verification log for directory listing freshness and accuracy checks. */
+export const listingVerifications = mysqlTable("listing_verifications", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Service key of the listing checked. */
+  serviceKey: varchar("serviceKey", { length: 255 }).notNull(),
+  /** What was checked: website, phone, address, hours, closure, category, general. */
+  checkType: mysqlEnum("checkType", [
+    "website",
+    "phone",
+    "address",
+    "hours",
+    "closure",
+    "category",
+    "general",
+  ]).notNull(),
+  /** Result of the check. */
+  result: mysqlEnum("result", [
+    "ok",
+    "changed",
+    "broken_link",
+    "parked_domain",
+    "redirect_changed",
+    "closed",
+    "moved",
+    "rebranded",
+    "conflicting",
+    "inconclusive",
+  ]).notNull(),
+  /** Evidence level at time of check. */
+  evidenceLevel: mysqlEnum("evidenceLevel", [
+    "official_verified",
+    "owner_confirmed",
+    "government_verified",
+    "source_identified",
+    "third_party_clue",
+    "conflicting",
+    "stale",
+    "removed_confirmed",
+  ]).notNull(),
+  /** Source URL that was checked. */
+  sourceUrl: text("sourceUrl"),
+  /** Before value (if changed). */
+  beforeValue: text("beforeValue"),
+  /** After value (if changed). */
+  afterValue: text("afterValue"),
+  /** Agent role that performed the check. */
+  checkedBy: mysqlEnum("checkedBy", [
+    "manager",
+    "directory_curator",
+    "events_editor",
+    "content_editor",
+    "community_moderator",
+    "business_success",
+    "analyst",
+    "reliability_watchdog",
+  ]).notNull(),
+  /** Free-text notes. */
+  notes: text("notes"),
+  /** Link to agent task if one was created. */
+  taskId: int("taskId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ListingVerification = typeof listingVerifications.$inferSelect;
+export type InsertListingVerification = typeof listingVerifications.$inferInsert;
+
 // --- CLT Passport: visited places stamps ---
 export const passportEntries = mysqlTable("passport_entries", {
   id: int("id").autoincrement().primaryKey(),
@@ -676,3 +741,218 @@ export const pushSubscriptions = mysqlTable("push_subscriptions", {
 });
 export type PushSubscription = typeof pushSubscriptions.$inferSelect;
 export type InsertPushSubscription = typeof pushSubscriptions.$inferInsert;
+
+// ─── Operations System (Agent Tasks, Approvals, Audit) ───
+
+/** Agent task types for the operations cockpit. */
+export const agentTasks = mysqlTable("agent_tasks", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Which agent role created this task. */
+  agentRole: mysqlEnum("agentRole", [
+    "manager",
+    "directory_curator",
+    "events_editor",
+    "content_editor",
+    "community_moderator",
+    "business_success",
+    "analyst",
+    "reliability_watchdog",
+  ]).notNull(),
+  /** Task type within the role. */
+  taskType: varchar("taskType", { length: 128 }).notNull(),
+  /** Risk level R0-R4. */
+  riskLevel: mysqlEnum("riskLevel", ["R0", "R1", "R2", "R3", "R4"]).notNull(),
+  /** Canonical entity this task targets (e.g. business serviceKey, event slug, blog slug). */
+  targetEntity: varchar("targetEntity", { length: 255 }),
+  /** Target entity type for scoping. */
+  targetType: mysqlEnum("targetType", [
+    "business",
+    "event",
+    "blog",
+    "claim",
+    "review",
+    "comment",
+    "submission",
+    "infrastructure",
+    "seo",
+    "other",
+  ]).notNull(),
+  /** Human-readable title for the cockpit. */
+  title: varchar("title", { length: 500 }).notNull(),
+  /** Structured payload: drafts, diffs, sources, evidence, recommendations. */
+  payload: json("payload"),
+  /** Evidence sources backing this task. */
+  evidence: json("evidence"),
+  /** Task lifecycle status. */
+  status: mysqlEnum("status", [
+    "discovered",
+    "source_identified",
+    "verified",
+    "draft_ready",
+    "pending_approval",
+    "approved",
+    "rejected",
+    "executed",
+    "failed",
+    "archived",
+  ]).default("discovered").notNull(),
+  /** Confidence score 0-100 for the agent's assessment. */
+  confidence: int("confidence").default(0),
+  /** Priority for queue ordering. */
+  priority: mysqlEnum("priority", ["low", "medium", "high", "urgent"]).default("medium").notNull(),
+  /** Assigned approver user ID (null = any admin). */
+  approverUserId: int("approverUserId"),
+  /** When the task was created. */
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  /** When the task was last updated. */
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  /** When the task was resolved (approved/rejected/executed/failed/archived). */
+  resolvedAt: timestamp("resolvedAt"),
+  /** Free-text resolution notes. */
+  resolutionNotes: text("resolutionNotes"),
+});
+export type AgentTask = typeof agentTasks.$inferSelect;
+export type InsertAgentTask = typeof agentTasks.$inferInsert;
+
+/** Durable, single-use approval records for R2-R4 agent actions. */
+export const approvalRecords = mysqlTable("approval_records", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Link to the agent task that requested this approval. */
+  taskId: int("taskId").notNull(),
+  /** The canonical target entity this approval covers. */
+  targetEntity: varchar("targetEntity", { length: 255 }).notNull(),
+  targetType: mysqlEnum("targetType", [
+    "business", "event", "blog", "claim", "review", "comment",
+    "submission", "infrastructure", "seo", "other",
+  ]).notNull(),
+  /** Action type being approved (e.g. "publish", "remove", "approve_claim"). */
+  actionType: varchar("actionType", { length: 128 }).notNull(),
+  /** Risk level. */
+  riskLevel: mysqlEnum("riskLevel", ["R0", "R1", "R2", "R3", "R4"]).notNull(),
+  /** SHA-256 hash of the exact payload that was approved. */
+  payloadHash: varchar("payloadHash", { length: 64 }).notNull(),
+  /** The exact payload that was reviewed (for reconstruction). */
+  payloadSnapshot: json("payloadSnapshot"),
+  /** Evidence supporting the approval decision. */
+  evidence: json("evidence"),
+  /** Who approved it. Null until decided. */
+  approverUserId: int("approverUserId"),
+  /** Decision: approved or rejected. */
+  decision: mysqlEnum("decision", ["approved", "rejected", "expired"]).notNull(),
+  /** When the approval was requested. */
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  /** When the approval was decided. */
+  decidedAt: timestamp("decidedAt"),
+  /** Expiry timestamp — approval is void after this. */
+  expiresAt: timestamp("expiresAt").notNull(),
+  /** Execution ID if the approved action was executed. */
+  executionId: varchar("executionId", { length: 64 }),
+  /** Execution outcome. */
+  executionOutcome: mysqlEnum("executionOutcome", ["pending", "success", "failed", "rolled_back"]),
+  /** Execution result notes. */
+  executionNotes: text("executionNotes"),
+  /** Rollback reference if execution was reversed. */
+  rollbackRef: varchar("rollbackRef", { length: 255 }),
+});
+export type ApprovalRecord = typeof approvalRecords.$inferSelect;
+export type InsertApprovalRecord = typeof approvalRecords.$inferInsert;
+
+/** Immutable audit log for every agent action. */
+export const auditEvents = mysqlTable("audit_events", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Agent role that performed the action. */
+  agentRole: mysqlEnum("agentRole", [
+    "manager", "directory_curator", "events_editor", "content_editor",
+    "community_moderator", "business_success", "analyst", "reliability_watchdog",
+  ]).notNull(),
+  /** Action type. */
+  actionType: varchar("actionType", { length: 128 }).notNull(),
+  /** Risk level. */
+  riskLevel: mysqlEnum("riskLevel", ["R0", "R1", "R2", "R3", "R4"]).notNull(),
+  /** Target entity. */
+  targetEntity: varchar("targetEntity", { length: 255 }),
+  targetType: mysqlEnum("targetType", [
+    "business", "event", "blog", "claim", "review", "comment",
+    "submission", "infrastructure", "seo", "other",
+  ]).notNull(),
+  /** Outcome of the action. */
+  outcome: mysqlEnum("outcome", ["success", "failed", "blocked", "skipped"]).notNull(),
+  /** Redacted summary (no secrets, no PII beyond what's necessary). */
+  summary: text("summary").notNull(),
+  /** Structured details (redacted). */
+  details: json("details"),
+  /** Link to approval record if one was required. */
+  approvalId: int("approvalId"),
+  /** Link to agent task. */
+  taskId: int("taskId"),
+  /** When the event occurred. */
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type AuditEvent = typeof auditEvents.$inferSelect;
+export type InsertAuditEvent = typeof auditEvents.$inferInsert;
+
+// ─── Source Registry ───
+
+/** Managed list of sources for business discovery, event discovery, blog research, and Charlotte news. */
+export const sourceRegistry = mysqlTable("source_registry", {
+  id: int("id").autoincrement().primaryKey(),
+  /** What this source is used for. */
+  sourceType: mysqlEnum("sourceType", [
+    "business_discovery",
+    "event_discovery",
+    "blog_research",
+    "charlotte_news",
+    "government",
+    "license_verification",
+  ]).notNull(),
+  /** Human-readable name of the source. */
+  name: varchar("name", { length: 255 }).notNull(),
+  /** The source URL. */
+  url: text("url").notNull(),
+  /** Category or domain this source covers (e.g. "movers", "music_events", "relocation_guides"). */
+  sourceCategory: varchar("sourceCategory", { length: 128 }),
+  /** Priority: high-value sources are checked first. */
+  priority: mysqlEnum("priority", ["high", "medium", "low"]).default("medium").notNull(),
+  /** Trust level: official > aggregator > third_party. */
+  trustLevel: mysqlEnum("trustLevel", ["official", "aggregator", "third_party"]).default("third_party").notNull(),
+  /** Whether this source is currently being used. */
+  active: boolean("active").default(true).notNull(),
+  /** How often to check this source. */
+  checkFrequency: mysqlEnum("checkFrequency", ["daily", "weekly", "biweekly", "monthly", "quarterly"]).default("weekly").notNull(),
+  /** Last time this source was checked. */
+  lastCheckedAt: timestamp("lastCheckedAt"),
+  /** Last check result. */
+  lastCheckResult: mysqlEnum("lastCheckResult", ["ok", "changed", "broken", "blocked", "inconclusive"]),
+  /** Notes about this source (e.g. requires JS, rate-limited, needs auth). */
+  notes: text("notes"),
+  /** Who added this source. */
+  addedBy: varchar("addedBy", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type SourceRegistryEntry = typeof sourceRegistry.$inferSelect;
+export type InsertSourceRegistryEntry = typeof sourceRegistry.$inferInsert;
+
+// ─── Business Leads (Premium tier lead capture) ───
+
+/** Lead captured from a premium-tier business detail page. */
+export const businessLeads = mysqlTable("business_leads", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Service key of the business. */
+  serviceKey: varchar("serviceKey", { length: 255 }).notNull(),
+  /** Lead submitter name. */
+  name: varchar("name", { length: 255 }).notNull(),
+  /** Lead submitter email. */
+  email: varchar("email", { length: 320 }).notNull(),
+  /** Lead submitter phone (optional). */
+  phone: varchar("phone", { length: 32 }),
+  /** Lead message. */
+  message: text("message").notNull(),
+  /** Authenticated user ID if the lead submitter was logged in. */
+  userId: int("userId"),
+  /** Lead status lifecycle. */
+  status: mysqlEnum("status", ["new", "contacted", "qualified", "closed", "archived"]).default("new").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type BusinessLead = typeof businessLeads.$inferSelect;
+export type InsertBusinessLead = typeof businessLeads.$inferInsert;

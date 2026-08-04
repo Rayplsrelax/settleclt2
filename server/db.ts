@@ -2,7 +2,7 @@ import { eq, and, desc, asc, sql, gte, lte, inArray } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import { assertCheckoutIdentifiersCompatible, assertNoConflictingBillingOwner, assertUniquePremiumServiceKeys } from "./business-memberships";
-import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessMemberships, type InsertBusinessMembership, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, stripeCheckoutReconciliations, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription } from "../drizzle/schema";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessMemberships, type InsertBusinessMembership, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, stripeCheckoutReconciliations, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription, businessLeads, type BusinessLead, type InsertBusinessLead } from "../drizzle/schema";
 import { scoreRealtorLead } from "../shared/realtorLeadOps";
 import { ENV } from './_core/env';
 
@@ -1437,6 +1437,55 @@ export async function approveBusinessClaimAndCreateOwnerMembership(
     }).where(eq(businessClaims.id, id));
     return { success: true };
   });
+}
+
+// ─── Business Leads (Premium tier) ───
+
+export async function createBusinessLead(data: InsertBusinessLead): Promise<number | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  return db.transaction(async tx => {
+    const [result] = await tx.insert(businessLeads).values(data);
+    await tx.update(premiumListings)
+      .set({ leadsThisPeriod: sql`${premiumListings.leadsThisPeriod} + 1` })
+      .where(eq(premiumListings.serviceKey, data.serviceKey));
+    return result.insertId;
+  });
+}
+
+export async function getBusinessLeadsForService(serviceKey: string, opts: {
+  limit?: number;
+  offset?: number;
+}): Promise<BusinessLead[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(businessLeads)
+    .where(eq(businessLeads.serviceKey, serviceKey))
+    .orderBy(desc(businessLeads.createdAt))
+    .limit(opts.limit ?? 50)
+    .offset(opts.offset ?? 0);
+}
+
+export async function getBusinessLeadById(id: number): Promise<BusinessLead | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const [lead] = await db.select().from(businessLeads).where(eq(businessLeads.id, id));
+  return lead;
+}
+
+export async function updateBusinessLeadStatus(id: number, status: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(businessLeads).set({ status: status as any }).where(eq(businessLeads.id, id));
+}
+
+export async function getBusinessLeadsForUser(userId: number, serviceKey: string): Promise<BusinessLead[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(businessLeads)
+    .where(and(eq(businessLeads.serviceKey, serviceKey)))
+    .orderBy(desc(businessLeads.createdAt))
+    .limit(100);
 }
 
 export async function getBusinessMembershipsForUser(userId: number, serviceKey?: string) {

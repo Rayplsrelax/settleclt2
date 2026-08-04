@@ -216,10 +216,21 @@ export default function Directory() {
     } else if (sortBy === "newest") {
       result.reverse();
     } else {
-      // Default: affiliate partners first, then personalization, then alphabetical
+      // Default: premium > featured > affiliate partners > personalization > alphabetical
+      const tierRank = (key: string) => {
+        const tier = premiumMap[key];
+        if (tier === "premium") return 0;
+        if (tier === "featured") return 1;
+        return 2;
+      };
       if (myNeighborhoodData) {
         const myArea = myNeighborhoodData.name;
         result.sort((a, b) => {
+          const aKey = toSlug(a.name);
+          const bKey = toSlug(b.name);
+          const aTier = tierRank(aKey);
+          const bTier = tierRank(bKey);
+          if (aTier !== bTier) return aTier - bTier;
           const aLocal = a.area.includes(myArea) ? 0 : 1;
           const bLocal = b.area.includes(myArea) ? 0 : 1;
           if (aLocal !== bLocal) return aLocal - bLocal;
@@ -230,6 +241,11 @@ export default function Directory() {
         });
       } else {
         result.sort((a, b) => {
+          const aKey = toSlug(a.name);
+          const bKey = toSlug(b.name);
+          const aTier = tierRank(aKey);
+          const bTier = tierRank(bKey);
+          if (aTier !== bTier) return aTier - bTier;
           const aPartner = a.featured && a.affiliate ? 0 : 1;
           const bPartner = b.featured && b.affiliate ? 0 : 1;
           if (aPartner !== bPartner) return aPartner - bPartner;
