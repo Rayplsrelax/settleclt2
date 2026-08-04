@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { adminProcedure, router } from "./_core/trpc";
+import { adminProcedure, operationsProcedure, router } from "./_core/trpc";
 import {
   getDirectoryGapAnalysis,
   recordListingVerification,
@@ -14,12 +14,12 @@ import {
 
 export const directoryOpsRouter = router({
   /** Item 4: Directory gap analysis — category counts and thin categories. */
-  gapAnalysis: adminProcedure.query(async () => {
+  gapAnalysis: operationsProcedure.query(async () => {
     return getDirectoryGapAnalysis();
   }),
 
   /** Item 5-6: Record a listing verification check. */
-  recordVerification: adminProcedure
+  recordVerification: operationsProcedure
     .input(
       z.object({
         serviceKey: z.string().min(1),
@@ -77,7 +77,7 @@ export const directoryOpsRouter = router({
     }),
 
   /** Item 7: Get listing verification history. */
-  verificationHistory: adminProcedure
+  verificationHistory: operationsProcedure
     .input(
       z.object({
         serviceKey: z.string().optional(),
@@ -91,7 +91,7 @@ export const directoryOpsRouter = router({
     }),
 
   /** Item 7: Get stale listings needing freshness checks. */
-  staleListings: adminProcedure
+  staleListings: operationsProcedure
     .input(
       z.object({
         daysSinceUpdate: z.number().min(1).max(365).default(90),
@@ -103,7 +103,7 @@ export const directoryOpsRouter = router({
     }),
 
   /** Item 8: Get closure candidates — listings with closure signals. */
-  closureCandidates: adminProcedure
+  closureCandidates: operationsProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(100).default(50),
@@ -127,7 +127,7 @@ export const directoryOpsRouter = router({
     }),
 
   /** Item 19: Get broken link candidates. */
-  brokenLinks: adminProcedure
+  brokenLinks: operationsProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(200).default(100),
@@ -138,7 +138,7 @@ export const directoryOpsRouter = router({
     }),
 
   /** Item 10: Get profile completeness for a listing. */
-  profileCompleteness: adminProcedure
+  profileCompleteness: operationsProcedure
     .input(z.object({ serviceKey: z.string().min(1) }))
     .query(async ({ input }) => {
       return getProfileCompleteness(input.serviceKey);

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { adminProcedure, router } from "./_core/trpc";
+import { adminProcedure, operationsProcedure, router } from "./_core/trpc";
 import {
   createAgentTask,
   getAgentTasks,
@@ -18,12 +18,12 @@ import {
 
 export const operationsRouter = router({
   /** Cockpit summary: queue counts, recent audit events, tasks by role. */
-  summary: adminProcedure.query(async () => {
+  summary: operationsProcedure.query(async () => {
     return getCockpitSummary();
   }),
 
   /** List agent tasks with filters. */
-  listTasks: adminProcedure
+  listTasks: operationsProcedure
     .input(
       z.object({
         status: z.string().optional(),
@@ -39,19 +39,19 @@ export const operationsRouter = router({
     }),
 
   /** Get a single task by ID. */
-  getTask: adminProcedure
+  getTask: operationsProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
       return getAgentTaskById(input.id);
     }),
 
   /** Get all tasks pending approval. */
-  pendingApprovals: adminProcedure.query(async () => {
+  pendingApprovals: operationsProcedure.query(async () => {
     return getPendingApprovalTasks();
   }),
 
   /** Create a new agent task (used by agents or operators). */
-  createTask: adminProcedure
+  createTask: operationsProcedure
     .input(
       z.object({
         agentRole: z.enum([
@@ -139,7 +139,7 @@ export const operationsRouter = router({
     }),
 
   /** Request approval for an agent task (R2-R4). */
-  requestApproval: adminProcedure
+  requestApproval: operationsProcedure
     .input(
       z.object({
         taskId: z.number(),
@@ -232,7 +232,7 @@ export const operationsRouter = router({
     }),
 
   /** List audit events. */
-  listAuditEvents: adminProcedure
+  listAuditEvents: operationsProcedure
     .input(
       z.object({
         agentRole: z.string().optional(),

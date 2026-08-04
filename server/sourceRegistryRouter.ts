@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { adminProcedure, router } from "./_core/trpc";
+import { adminProcedure, operationsProcedure, router } from "./_core/trpc";
 import {
   addSource,
   getSources,
@@ -11,10 +11,10 @@ import {
 } from "./source-registry";
 
 export const sourceRegistryRouter = router({
-  stats: adminProcedure.query(async () => {
+  stats: operationsProcedure.query(async () => {
     return getSourceStats();
   }),
-  list: adminProcedure
+  list: operationsProcedure
     .input(z.object({
       sourceType: z.string().optional(),
       active: z.boolean().optional(),
@@ -26,7 +26,7 @@ export const sourceRegistryRouter = router({
     .query(async ({ input }) => {
       return getSources(input);
     }),
-  getById: adminProcedure
+  getById: operationsProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
       return getSourceById(input.id);
@@ -69,7 +69,7 @@ export const sourceRegistryRouter = router({
       await deactivateSource(input.id);
       return { success: true as const };
     }),
-  needingCheck: adminProcedure
+  needingCheck: operationsProcedure
     .input(z.object({
       sourceType: z.string().optional(),
       limit: z.number().min(1).max(200).default(100),

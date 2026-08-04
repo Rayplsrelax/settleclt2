@@ -1444,12 +1444,13 @@ export async function approveBusinessClaimAndCreateOwnerMembership(
 export async function createBusinessLead(data: InsertBusinessLead): Promise<number | undefined> {
   const db = await getDb();
   if (!db) return undefined;
-  const [result] = await db.insert(businessLeads).values(data);
-  // Also increment the premium listing leads counter
-  await db.update(premiumListings)
-    .set({ leadsThisPeriod: sql`${premiumListings.leadsThisPeriod} + 1` })
-    .where(eq(premiumListings.serviceKey, data.serviceKey));
-  return result.insertId;
+  return db.transaction(async tx => {
+    const [result] = await tx.insert(businessLeads).values(data);
+    await tx.update(premiumListings)
+      .set({ leadsThisPeriod: sql`${premiumListings.leadsThisPeriod} + 1` })
+      .where(eq(premiumListings.serviceKey, data.serviceKey));
+    return result.insertId;
+  });
 }
 
 export async function getBusinessLeadsForService(serviceKey: string, opts: {

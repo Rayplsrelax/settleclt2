@@ -12,11 +12,11 @@
 | Commits | 7 |
 | Migrations | 22 (was 19 — added 0019-0022) |
 | Schema tables | 35 (was 29 — added 6) |
-| Test files | 93 (was 85) |
-| Tests | 817 passed / 23 skipped (was 746) |
+| Test files | 100 (was 85) |
+| Tests | 832 passed / 23 skipped (was 746) |
 | TypeScript | Clean |
-| Build | 760.1kb |
-| Lint | Clean |
+| Build | 762.9kb |
+| Production audit | No known vulnerabilities |
 
 ### New Tables
 
@@ -49,6 +49,19 @@
 | `premium.getLeads` | View leads for a business |
 | `premium.updateLeadStatus` | Manage lead lifecycle |
 | `premium.getReport` | Monthly performance report with CTR/conversion |
+
+### Premium Portal and Operations Auth Addendum
+
+The uncommitted follow-up release adds the customer-facing Premium portal surface and restricted machine access:
+
+- Public owner-managed profile fields and photos are projected without private claim, membership, billing, or owner-email fields.
+- Active Premium businesses receive public inquiry capture; lead creation is tier-gated and resolves the canonical active owner.
+- Owner photo limits, lead inbox/status controls, and Premium reports remain server-authoritative and membership-scoped.
+- Lead persistence is authoritative: owner lookup and notification failures are logged without turning a saved lead into a failed submission.
+- `operationsProcedure` accepts an exact constant-time Bearer credential or an admin session; human approval and consequential mutations remain admin-only.
+- VM 101 Hermes has active Settle CLT schedules, a read-only systemd health timer, and a secret-free API reference.
+
+These changes are included in the feature-branch update below and require a fresh `quality` CI pass before merge.
 
 ### Commits in This Release
 

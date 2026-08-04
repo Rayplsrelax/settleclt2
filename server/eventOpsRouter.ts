@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { adminProcedure, router } from "./_core/trpc";
+import { adminProcedure, operationsProcedure, router } from "./_core/trpc";
 import {
   getExpiredEvents,
   getUpcomingEventsForCheck,
@@ -15,12 +15,12 @@ import {
 
 export const eventOpsRouter = router({
   /** Item 12: Event operations summary for cockpit. */
-  summary: adminProcedure.query(async () => {
+  summary: operationsProcedure.query(async () => {
     return getEventOpsSummary();
   }),
 
   /** Item 12: Get expired events needing archive. */
-  expiredEvents: adminProcedure
+  expiredEvents: operationsProcedure
     .input(
       z.object({
         gracePeriodDays: z.number().min(0).max(30).default(3),
@@ -32,7 +32,7 @@ export const eventOpsRouter = router({
     }),
 
   /** Item 12: Get upcoming events for source verification. */
-  upcomingForCheck: adminProcedure
+  upcomingForCheck: operationsProcedure
     .input(
       z.object({
         daysAhead: z.number().min(1).max(30).default(7),
@@ -70,12 +70,12 @@ export const eventOpsRouter = router({
     }),
 
   /** Item 13: Get all recurring events. */
-  recurringEvents: adminProcedure.query(async () => {
+  recurringEvents: operationsProcedure.query(async () => {
     return getRecurringEvents();
   }),
 
   /** Item 13: Get recurring events needing refresh (not updated in N days). */
-  recurringStale: adminProcedure
+  recurringStale: operationsProcedure
     .input(
       z.object({
         daysSinceUpdate: z.number().min(1).max(365).default(30),
@@ -87,12 +87,12 @@ export const eventOpsRouter = router({
     }),
 
   /** Item 13: Get recurring events with past dates that need updating. */
-  recurringStaleDates: adminProcedure.query(async () => {
+  recurringStaleDates: operationsProcedure.query(async () => {
     return getRecurringEventsWithStaleDates();
   }),
 
   /** Item 11: Get unverified events (no source verification). */
-  unverifiedEvents: adminProcedure
+  unverifiedEvents: operationsProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(100).default(50),
@@ -103,7 +103,7 @@ export const eventOpsRouter = router({
     }),
 
   /** Item 19: Get events with source URLs that need link checking. */
-  eventsWithSources: adminProcedure
+  eventsWithSources: operationsProcedure
     .input(
       z.object({
         limit: z.number().min(1).max(200).default(100),
