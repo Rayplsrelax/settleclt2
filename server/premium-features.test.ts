@@ -71,6 +71,11 @@ describe("Premium Feature: Lead Capture", () => {
     const { appRouter } = await import("./routers");
     expect(appRouter._def.procedures).toHaveProperty("premium.getPhotoLimit");
   });
+
+  it("appRouter includes premium.getReport procedure", async () => {
+    const { appRouter } = await import("./routers");
+    expect(appRouter._def.procedures).toHaveProperty("premium.getReport");
+  });
 });
 
 describe("Premium Feature: Schema and Migration", () => {

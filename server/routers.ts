@@ -1489,6 +1489,50 @@ export const appRouter = router({
         }
         return getBusinessLeadsForService(input.serviceKey, input);
       }),
+    getReport: protectedProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") {
+          const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+          requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
+        }
+        const listing = await getPremiumListing(input.serviceKey);
+        if (!listing) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "No premium listing found for this business." });
+        }
+        if (listing.tier !== "premium" || listing.paymentStatus !== "active") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Monthly performance reports are only available for active Premium listings." });
+        }
+        const leads = await getBusinessLeadsForService(input.serviceKey, { limit: 100 });
+        const views = listing.viewsThisPeriod ?? 0;
+        const clicks = listing.clicksThisPeriod ?? 0;
+        const leadCount = listing.leadsThisPeriod ?? 0;
+        const ctr = views > 0 ? ((clicks / views) * 100).toFixed(1) : "0.0";
+        const conversionRate = clicks > 0 ? ((leadCount / clicks) * 100).toFixed(1) : "0.0";
+        return {
+          serviceKey: input.serviceKey,
+          tier: listing.tier,
+          periodStart: listing.currentPeriodStart,
+          periodEnd: listing.currentPeriodEnd,
+          metrics: {
+            views,
+            clicks,
+            leads: leadCount,
+            clickThroughRate: `${ctr}%`,
+            leadConversionRate: `${conversionRate}%`,
+          },
+          leads: leads.map(l => ({
+            id: l.id,
+            name: l.name,
+            email: l.email,
+            phone: l.phone,
+            message: l.message.substring(0, 200),
+            status: l.status,
+            createdAt: l.createdAt,
+          })),
+          generatedAt: new Date().toISOString(),
+        };
+      }),
     updateLeadStatus: protectedProcedure
       .input(z.object({
         leadId: z.number(),
