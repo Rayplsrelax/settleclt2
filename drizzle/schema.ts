@@ -932,3 +932,27 @@ export const sourceRegistry = mysqlTable("source_registry", {
 });
 export type SourceRegistryEntry = typeof sourceRegistry.$inferSelect;
 export type InsertSourceRegistryEntry = typeof sourceRegistry.$inferInsert;
+
+// ─── Business Leads (Premium tier lead capture) ───
+
+/** Lead captured from a premium-tier business detail page. */
+export const businessLeads = mysqlTable("business_leads", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Service key of the business. */
+  serviceKey: varchar("serviceKey", { length: 255 }).notNull(),
+  /** Lead submitter name. */
+  name: varchar("name", { length: 255 }).notNull(),
+  /** Lead submitter email. */
+  email: varchar("email", { length: 320 }).notNull(),
+  /** Lead submitter phone (optional). */
+  phone: varchar("phone", { length: 32 }),
+  /** Lead message. */
+  message: text("message").notNull(),
+  /** Authenticated user ID if the lead submitter was logged in. */
+  userId: int("userId"),
+  /** Lead status lifecycle. */
+  status: mysqlEnum("status", ["new", "contacted", "qualified", "closed", "archived"]).default("new").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type BusinessLead = typeof businessLeads.$inferSelect;
+export type InsertBusinessLead = typeof businessLeads.$inferInsert;

@@ -29,6 +29,7 @@ import {
   getListingOverride, upsertListingOverride, getBusinessMembershipsForUser,
   getPremiumListing, getPremiumBillingForCheckout, upsertPremiumListing, upsertCanonicalPremiumListingForAdmin, getAllPremiumListings, incrementListingAnalytics,
   deleteUserAccount,
+  createBusinessLead, getBusinessLeadsForService, getBusinessLeadById, updateBusinessLeadStatus,
   createNotification, getUserNotifications, getUnreadNotificationCount,
   markNotificationRead, markAllNotificationsRead, deleteNotification,
   getNotificationPreferences, upsertNotificationPreference, isNotificationEnabled,
@@ -1357,6 +1358,20 @@ export const appRouter = router({
         const effectiveClaimId = selectEffectiveClaimId(membership.ownerClaimId);
         const existing = await getListingOverride(input.serviceKey);
         const currentPhotos = existing?.photoUrls ? existing.photoUrls.split(',').filter(Boolean) : [];
+
+        // Tier-based photo limit enforcement
+        const premiumListing = await getPremiumListing(input.serviceKey);
+        const tier = premiumListing?.tier ?? "basic";
+        const isActive = premiumListing?.paymentStatus === "active";
+        const { canUploadPhoto, getPhotoLimit } = await import("../shared/premium-limits");
+        if (!canUploadPhoto(tier, isActive, currentPhotos.length)) {
+          const limit = getPhotoLimit(tier, isActive);
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: `Photo limit reached. Your ${tier === "basic" ? "free" : tier} tier allows ${limit} photo${limit !== 1 ? "s" : ""}.${tier === "basic" ? " Upgrade to Featured ($29/mo) for 5 photos or Premium ($79/mo) for 15 photos." : ""}`,
+          });
+        }
+
         currentPhotos.push(input.photoUrl);
         await upsertListingOverride(input.serviceKey, effectiveClaimId, { photoUrls: currentPhotos.join(',') });
         return { success: true, photos: currentPhotos };
@@ -1385,6 +1400,15 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const listing = await getPremiumListing(input.serviceKey);
         return listing ? { tier: listing.tier, active: listing.paymentStatus === 'active' } : { tier: 'basic' as const, active: false };
+      }),
+    getPhotoLimit: publicProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .query(async ({ input }) => {
+        const listing = await getPremiumListing(input.serviceKey);
+        const tier = listing?.tier ?? "basic";
+        const active = listing?.paymentStatus === "active";
+        const { getPhotoLimit } = await import("../shared/premium-limits");
+        return { limit: getPhotoLimit(tier as "basic" | "featured" | "premium", active), tier, active };
       }),
     getActiveTiers: publicProcedure.query(async () => {
       const all = await getAllPremiumListings();
@@ -1418,6 +1442,67 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await incrementListingAnalytics(input.serviceKey, 'clicksThisPeriod');
         return { success: true };
+      }),
+    trackLead: publicProcedure
+      .input(z.object({
+        serviceKey: z.string(),
+        name: z.string().min(1).max(255),
+        email: z.string().email(),
+        phone: z.string().max(32).optional(),
+        message: z.string().min(1).max(2000),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Only allow leads on active premium-tier businesses
+        const listing = await getPremiumListing(input.serviceKey);
+        if (!listing || listing.tier !== "premium" || listing.paymentStatus !== "active") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Lead capture is only available for Premium listings." });
+        }
+        const leadId = await createBusinessLead({
+          serviceKey: input.serviceKey,
+          name: input.name,
+          email: input.email,
+          phone: input.phone ?? null,
+          message: input.message,
+          userId: ctx.user?.id ?? null,
+        });
+        // Notify the business owner
+        const memberships = await getBusinessMembershipsForUser(ctx.user?.id ?? 0, input.serviceKey);
+        const owner = memberships.find(m => m.role === "owner");
+        if (owner) {
+          notifyOwner({
+            title: "🔔 New lead from your listing",
+            content: `${input.name} (${input.email}) sent you a message: "${input.message.substring(0, 200)}"`,
+          }).catch(() => {});
+        }
+        return { success: true as const, leadId };
+      }),
+    getLeads: protectedProcedure
+      .input(z.object({
+        serviceKey: z.string(),
+        limit: z.number().min(1).max(100).default(50),
+        offset: z.number().min(0).default(0),
+      }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") {
+          const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+          requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
+        }
+        return getBusinessLeadsForService(input.serviceKey, input);
+      }),
+    updateLeadStatus: protectedProcedure
+      .input(z.object({
+        leadId: z.number(),
+        status: z.enum(["new", "contacted", "qualified", "closed", "archived"]),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const lead = await getBusinessLeadById(input.leadId);
+        if (!lead) throw new TRPCError({ code: "NOT_FOUND", message: "Lead not found" });
+        if (ctx.user.role !== "admin") {
+          const memberships = await getBusinessMembershipsForUser(ctx.user.id, lead.serviceKey);
+          requireBusinessPermission(memberships, lead.serviceKey, "view_analytics");
+        }
+        await updateBusinessLeadStatus(input.leadId, input.status);
+        return { success: true as const };
       }),
     createCheckout: protectedProcedure
       .input(z.object({
