@@ -33,7 +33,6 @@ export function BusinessChatWidget({ serviceKey, businessName, businessPhone }: 
     },
   ]);
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [bookingName, setBookingName] = useState("");
   const [bookingContact, setBookingContact] = useState("");
@@ -43,7 +42,6 @@ export function BusinessChatWidget({ serviceKey, businessName, businessPhone }: 
 
   const { data: status } = trpc.businessAssistant.getStatus.useQuery(
     { serviceKey },
-    { enabled: false },
   );
 
   const askMutation = trpc.businessAssistant.ask.useMutation({
@@ -76,18 +74,16 @@ export function BusinessChatWidget({ serviceKey, businessName, businessPhone }: 
   }, [messages]);
 
   const handleSend = useCallback(() => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || askMutation.isPending) return;
     const question = input.trim();
     setInput("");
-    setIsLoading(true);
     setMessages(prev => [...prev, { role: "user", content: question }]);
     askMutation.mutate({
       serviceKey,
       question,
       history: messages.map(m => ({ role: m.role, content: m.content })),
     });
-    setIsLoading(false);
-  }, [input, isLoading, askMutation, serviceKey, messages]);
+  }, [input, askMutation, serviceKey, messages]);
 
   const handleQuickSuggestion = useCallback((suggestion: string) => {
     setInput(suggestion);

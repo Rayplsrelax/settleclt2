@@ -99,7 +99,7 @@ export async function askBusinessAssistant(
 
   // Use the Nous Portal API (OpenAI-compatible) if configured
   const apiUrl = process.env.OPENAI_API_BASE_URL || process.env.OPENAI_BASE_URL;
-  const apiKey = process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY;
 
   if (!apiUrl || !apiKey) {
     return {
