@@ -14,7 +14,7 @@ import fs from "fs";
 const STORAGE_DIR = path.resolve(process.cwd(), "public", "manus-storage");
 
 function normalizeKey(relKey: string): string {
-  return relKey.replace(/^\/+/, "").replace(/\.\.\//g, "");
+  return path.normalize(relKey).replace(/^[/\\]+/, "");
 }
 
 export async function storagePut(
@@ -23,17 +23,16 @@ export async function storagePut(
   contentType = "application/octet-stream"
 ): Promise<{ key: string; url: string }> {
   const key = normalizeKey(relKey);
-
-  // Ensure the storage directory exists
-  const dir = path.dirname(path.resolve(STORAGE_DIR, key));
-  fs.mkdirSync(dir, { recursive: true });
-
   const filePath = path.resolve(STORAGE_DIR, key);
 
-  // Ensure resolved path stays within storage dir
+  // Validate path traversal BEFORE any filesystem operations
   if (!filePath.startsWith(STORAGE_DIR + path.sep)) {
     throw new Error("Invalid storage key: path traversal detected");
   }
+
+  // Ensure the storage directory exists
+  const dir = path.dirname(filePath);
+  await fs.promises.mkdir(dir, { recursive: true });
 
   const buffer = Buffer.isBuffer(data)
     ? data
@@ -41,7 +40,7 @@ export async function storagePut(
       ? Buffer.from(data, "utf-8")
       : Buffer.from(data);
 
-  fs.writeFileSync(filePath, buffer);
+  await fs.promises.writeFile(filePath, buffer);
 
   // Return a URL that the browser can fetch — served by the storage proxy route
   const url = `/manus-storage/${key}`;
@@ -56,7 +55,9 @@ export async function storageGet(relKey: string): Promise<{ key: string; url: st
     throw new Error("Invalid storage key: path traversal detected");
   }
 
-  if (!fs.existsSync(filePath)) {
+  try {
+    await fs.promises.access(filePath, fs.constants.F_OK);
+  } catch {
     throw new Error(`File not found: ${key}`);
   }
 

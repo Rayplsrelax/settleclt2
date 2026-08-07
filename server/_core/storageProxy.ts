@@ -21,8 +21,8 @@ export function registerStorageProxy(app: Express) {
       return;
     }
 
-    // Normalize the key — prevent path traversal
-    const normalizedKey = key.replace(/\.+\//g, "").replace(/^\/+/, "");
+    // Normalize the key while preserving valid path segments
+    const normalizedKey = path.normalize(key).replace(/^[/\\]+/, "");
     const storageDir = path.resolve(
       process.cwd(),
       "public",
@@ -36,7 +36,9 @@ export function registerStorageProxy(app: Express) {
       return;
     }
 
-    if (!fs.existsSync(filePath)) {
+    try {
+      await fs.promises.access(filePath, fs.constants.F_OK);
+    } catch {
       res.status(404).send("File not found");
       return;
     }
