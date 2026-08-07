@@ -3,6 +3,7 @@ import { useMemo, useRef, useCallback, useState, useEffect } from "react";
 import { useRoute, Link } from "wouter";
 import { MapPin, Phone, ExternalLink, ArrowLeft, Clock, Star, Share2, Navigation, Building2, ChevronRight, Camera, ChevronLeft, X, Crown, Award, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BusinessChatWidget } from "@/components/BusinessChatWidget";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -298,6 +299,7 @@ export default function BusinessDetail() {
   };
 
   return (
+    <>
     <div className="min-h-screen bg-background">
       {lightboxModal}
       {/* Breadcrumb */}
@@ -686,5 +688,11 @@ export default function BusinessDetail() {
         </div>
       </div>
     </div>
+    <BusinessChatWidget
+      serviceKey={slug}
+      businessName={displayName || service.name}
+      businessPhone={phone || service.phone}
+    />
+    </>
   );
 }

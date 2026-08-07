@@ -63,6 +63,26 @@ const plans = [
     cta: "Claim First, Then Upgrade",
     href: "/directory",
   },
+  {
+    name: "Business Pro",
+    price: "$149",
+    cadence: "/mo",
+    description: "AI-powered business management — your listing runs itself 24/7.",
+    badge: "AI-powered",
+    icon: Sparkles,
+    accent: "border-indigo-400 bg-indigo-50/60 ring-1 ring-indigo-400/20",
+    features: [
+      "Everything in Premium",
+      "AI Business Assistant (24/7 chat widget)",
+      "Smart scheduling capture",
+      "Social content draft generation",
+      "Reputation autopilot (review response drafts)",
+      "One-page web presence",
+      "Photo gallery up to 30 photos",
+    ],
+    cta: "Claim First, Then Upgrade",
+    href: "/directory",
+  },
 ];
 
 const proofPoints = [

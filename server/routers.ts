@@ -31,6 +31,7 @@ import {
   deleteUserAccount,
   createBusinessLead, getBusinessLeadsForService, getBusinessLeadById, updateBusinessLeadStatus,
   getDailyAnalytics, snapshotDailyAnalytics,
+  getBusinessFaqs, createBusinessFaq, deleteBusinessFaq,
   createNotification, getUserNotifications, getUnreadNotificationCount,
   markNotificationRead, markAllNotificationsRead, deleteNotification,
   getNotificationPreferences, upsertNotificationPreference, isNotificationEnabled,
@@ -53,6 +54,7 @@ import { communityOpsRouter } from "./communityOpsRouter";
 import { sourceRegistryRouter } from "./sourceRegistryRouter";
 import { requireActivePremium, requirePremiumLeadAccess } from "./premium-access";
 import { createPremiumLeadWithNotification } from "./premium-lead-service";
+import { askBusinessAssistant } from "./business-assistant";
 
 const SETTLE_CLT_MICROSITES = [
   { domain: "movingtocharlotteguide.com", campaign: "relocation", status: "ready_for_dns", primaryFunnel: "/find-your-home" },
@@ -1492,7 +1494,7 @@ export const appRouter = router({
         const tier = listing?.tier ?? "basic";
         const active = listing?.paymentStatus === "active";
         const { getPhotoLimit } = await import("../shared/premium-limits");
-        return { limit: getPhotoLimit(tier as "basic" | "featured" | "premium", active), tier, active };
+        return { limit: getPhotoLimit(tier as "basic" | "featured" | "premium" | "pro", active), tier, active };
       }),
     getActiveTiers: publicProcedure.query(async () => {
       const all = await getAllPremiumListings();
@@ -1638,7 +1640,7 @@ export const appRouter = router({
       }),
     createCheckout: protectedProcedure
       .input(z.object({
-        tier: z.enum(['featured', 'premium']),
+        tier: z.enum(['featured', 'premium', 'pro']),
         serviceKey: z.string(),
       }))
       .mutation(async ({ input, ctx }) => {
@@ -1700,7 +1702,7 @@ export const appRouter = router({
     adminUpdate: adminProcedure
       .input(z.object({
         serviceKey: z.string(),
-        tier: z.enum(['basic', 'featured', 'premium']),
+        tier: z.enum(['basic', 'featured', 'premium', 'pro']),
         billingEmail: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
@@ -1834,6 +1836,102 @@ export const appRouter = router({
           }
         }
         return { sent };
+      }),
+  }),
+
+  // ─── AI Business Assistant ──────────────────────────────────
+  businessAssistant: router({
+    ask: publicProcedure
+      .input(z.object({
+        serviceKey: z.string().min(1),
+        question: z.string().min(1).max(500),
+        history: z.array(z.object({
+          role: z.enum(["user", "assistant"]),
+          content: z.string(),
+        })).max(10).default([]),
+      }))
+      .mutation(async ({ input }) => {
+        // Verify the business has an active Pro tier
+        const listing = await getPremiumListing(input.serviceKey);
+        if (!listing || listing.tier !== "pro" || listing.paymentStatus !== "active") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "AI assistant is only available for Business Pro listings." });
+        }
+
+        // Gather business context
+        const override = await getListingOverride(input.serviceKey);
+        const enriched = await getEnrichedService(input.serviceKey);
+        const faqs = await getBusinessFaqs(input.serviceKey);
+
+        const businessContext = {
+          serviceKey: input.serviceKey,
+          displayName: override?.displayName ?? null,
+          description: override?.description ?? enriched?.verifiedAddress ?? null,
+          phone: override?.phone ?? enriched?.verifiedPhone ?? null,
+          website: override?.website ?? null,
+          hours: override?.hours ?? enriched?.hoursJson ?? null,
+          tagline: override?.tagline ?? null,
+          category: enriched?.googleTypes ?? "local business",
+          googleRating: enriched?.googleRating ?? null,
+          reviewCount: enriched?.reviewCount ?? null,
+          verifiedAddress: enriched?.verifiedAddress ?? null,
+        };
+
+        const faqEntries = faqs.map(f => ({ question: f.question, answer: f.answer }));
+
+        const result = await askBusinessAssistant(
+          businessContext,
+          faqEntries,
+          input.question,
+          input.history,
+        );
+
+        return result;
+      }),
+
+    getStatus: publicProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .query(async ({ input }) => {
+        const listing = await getPremiumListing(input.serviceKey);
+        return {
+          enabled: listing?.tier === "pro" && listing.paymentStatus === "active",
+        };
+      }),
+  }),
+
+  // ─── Business FAQ Management (owner) ────────────────────────
+  businessFaqs: router({
+    list: protectedProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .query(async ({ input, ctx }) => {
+        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+        requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        return getBusinessFaqs(input.serviceKey);
+      }),
+
+    create: protectedProcedure
+      .input(z.object({
+        serviceKey: z.string(),
+        question: z.string().min(1).max(500),
+        answer: z.string().min(1).max(2000),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+        requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        const id = await createBusinessFaq({
+          serviceKey: input.serviceKey,
+          question: input.question,
+          answer: input.answer,
+        });
+        return { id };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number(), serviceKey: z.string() }))
+      .mutation(async ({ input, ctx }) => {
+        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+        requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        await deleteBusinessFaq(input.id, input.serviceKey);
+        return { success: true };
       }),
   }),
 });

@@ -2,7 +2,7 @@ import { eq, and, desc, asc, sql, gte, lte, inArray } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import { assertCheckoutIdentifiersCompatible, assertNoConflictingBillingOwner, assertUniquePremiumServiceKeys } from "./business-memberships";
-import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessMemberships, type InsertBusinessMembership, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, stripeCheckoutReconciliations, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription, businessLeads, type BusinessLead, type InsertBusinessLead, listingAnalyticsDaily } from "../drizzle/schema";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessMemberships, type InsertBusinessMembership, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, stripeCheckoutReconciliations, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription, businessLeads, type BusinessLead, type InsertBusinessLead, listingAnalyticsDaily, businessFaqs, type BusinessFaq, type InsertBusinessFaq } from "../drizzle/schema";
 import { scoreRealtorLead } from "../shared/realtorLeadOps";
 import { ENV } from './_core/env';
 
@@ -1530,6 +1530,29 @@ export async function snapshotDailyAnalytics(): Promise<void> {
       },
     });
   }
+}
+
+// ─── Business FAQs ───
+
+export async function getBusinessFaqs(serviceKey: string): Promise<BusinessFaq[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(businessFaqs)
+    .where(eq(businessFaqs.serviceKey, serviceKey))
+    .orderBy(desc(businessFaqs.createdAt));
+}
+
+export async function createBusinessFaq(data: InsertBusinessFaq): Promise<number | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const [result] = await db.insert(businessFaqs).values(data);
+  return result.insertId;
+}
+
+export async function deleteBusinessFaq(id: number, serviceKey: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(businessFaqs).where(and(eq(businessFaqs.id, id), eq(businessFaqs.serviceKey, serviceKey)));
 }
 
 export async function getBusinessMembershipsForUser(userId: number, serviceKey?: string) {

@@ -5,7 +5,7 @@ describe("Stripe Integration", () => {
   describe("Product Configuration", () => {
     it("should have exactly two tiers: featured and premium", () => {
       const keys = Object.keys(PREMIUM_TIERS);
-      expect(keys).toEqual(["featured", "premium"]);
+      expect(keys).toEqual(["featured", "premium", "pro"]);
     });
 
     it("featured tier should be $29/mo (2900 cents)", () => {
