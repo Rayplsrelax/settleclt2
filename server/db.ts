@@ -2,7 +2,7 @@ import { eq, and, desc, asc, sql, gte, lte, inArray } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import { assertCheckoutIdentifiersCompatible, assertNoConflictingBillingOwner, assertUniquePremiumServiceKeys } from "./business-memberships";
-import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessMemberships, type InsertBusinessMembership, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, stripeCheckoutReconciliations, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription, businessLeads, type BusinessLead, type InsertBusinessLead } from "../drizzle/schema";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessMemberships, type InsertBusinessMembership, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, stripeCheckoutReconciliations, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription, businessLeads, type BusinessLead, type InsertBusinessLead, listingAnalyticsDaily } from "../drizzle/schema";
 import { scoreRealtorLead } from "../shared/realtorLeadOps";
 import { ENV } from './_core/env';
 
@@ -1486,6 +1486,50 @@ export async function getBusinessLeadsForUser(userId: number, serviceKey: string
     .where(and(eq(businessLeads.serviceKey, serviceKey)))
     .orderBy(desc(businessLeads.createdAt))
     .limit(100);
+}
+
+// ─── Daily Analytics Snapshots ───
+
+export async function getDailyAnalytics(serviceKey: string, days: number = 30): Promise<{
+  date: string;
+  views: number;
+  clicks: number;
+  leads: number;
+}[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  const rows = await db.select().from(listingAnalyticsDaily)
+    .where(and(
+      eq(listingAnalyticsDaily.serviceKey, serviceKey),
+      gte(listingAnalyticsDaily.date, cutoff),
+    ))
+    .orderBy(asc(listingAnalyticsDaily.date));
+  return rows.map(r => ({ date: r.date.toISOString().split("T")[0], views: r.views, clicks: r.clicks, leads: r.leads }));
+}
+
+export async function snapshotDailyAnalytics(): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  const today = new Date().toISOString().split("T")[0];
+  // Get all premium listings and snapshot their current period counters
+  const allListings = await db.select().from(premiumListings);
+  for (const listing of allListings) {
+    await db.insert(listingAnalyticsDaily).values({
+      serviceKey: listing.serviceKey,
+      date: new Date(today),
+      views: listing.viewsThisPeriod ?? 0,
+      clicks: listing.clicksThisPeriod ?? 0,
+      leads: listing.leadsThisPeriod ?? 0,
+    }).onDuplicateKeyUpdate({
+      set: {
+        views: listing.viewsThisPeriod ?? 0,
+        clicks: listing.clicksThisPeriod ?? 0,
+        leads: listing.leadsThisPeriod ?? 0,
+      },
+    });
+  }
 }
 
 export async function getBusinessMembershipsForUser(userId: number, serviceKey?: string) {

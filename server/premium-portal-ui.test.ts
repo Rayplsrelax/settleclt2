@@ -35,8 +35,8 @@ describe("paid business portal UI contract", () => {
     expect(myBusiness).toContain("photoUrlState.scopeKey !== selectedMembership.serviceKey");
     expect(myBusiness).toContain("setPhotoUrlState({ scopeKey: selectedMembership?.serviceKey");
     expect(myBusiness).toContain("uploadPhotoFile");
-    expect(myBusiness).toContain("handleFileSelect");
-    expect(myBusiness).toContain('type="file"');
+    expect(myBusiness).toContain("PhotoUploader");
+    expect(myBusiness).toContain("AnalyticsChart");
     expect(myBusiness).toContain("Download Monthly Report");
     expect(myBusiness).toContain("Photo Gallery");
     expect(myBusiness).toContain("Lead Inbox");

@@ -30,6 +30,7 @@ import {
   getPremiumListing, getPremiumBillingForCheckout, upsertPremiumListing, upsertCanonicalPremiumListingForAdmin, getAllPremiumListings, incrementListingAnalytics,
   deleteUserAccount,
   createBusinessLead, getBusinessLeadsForService, getBusinessLeadById, updateBusinessLeadStatus,
+  getDailyAnalytics, snapshotDailyAnalytics,
   createNotification, getUserNotifications, getUnreadNotificationCount,
   markNotificationRead, markAllNotificationsRead, deleteNotification,
   getNotificationPreferences, upsertNotificationPreference, isNotificationEnabled,
@@ -1586,6 +1587,7 @@ export const appRouter = router({
           throw new TRPCError({ code: "FORBIDDEN", message: "Monthly performance reports are only available for active Premium listings." });
         }
         const leads = await getBusinessLeadsForService(input.serviceKey, { limit: 100 });
+        const dailyAnalytics = await getDailyAnalytics(input.serviceKey, 30);
         const views = listing.viewsThisPeriod ?? 0;
         const clicks = listing.clicksThisPeriod ?? 0;
         const leadCount = listing.leadsThisPeriod ?? 0;
@@ -1603,6 +1605,7 @@ export const appRouter = router({
             clickThroughRate: `${ctr}%`,
             leadConversionRate: `${conversionRate}%`,
           },
+          daily: dailyAnalytics,
           leads: leads.map(l => ({
             id: l.id,
             name: l.name,
