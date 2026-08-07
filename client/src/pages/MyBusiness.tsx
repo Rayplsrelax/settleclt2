@@ -545,7 +545,6 @@ export default function MyBusiness() {
               <CardContent>
                 {photoLimit?.limit && selectedMembership ? (
                   <PhotoUploader
-                    serviceKey={selectedMembership.serviceKey}
                     photos={ownerPhotos}
                     photoLimit={photoLimit.limit}
                     tier={photoLimit.tier}

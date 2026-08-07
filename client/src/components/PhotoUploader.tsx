@@ -5,7 +5,6 @@ import { Upload, Link2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface PhotoUploaderProps {
-  serviceKey: string;
   photos: string[];
   photoLimit: number;
   tier: string;
@@ -79,11 +78,12 @@ export function PhotoUploader({
         data: base64,
       });
       setPendingFile(null);
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
       setPreviewUrl(null);
     };
     reader.onerror = () => toast.error("Failed to read image file.");
     reader.readAsDataURL(pendingFile);
-  }, [pendingFile, onUploadFile]);
+  }, [pendingFile, onUploadFile, previewUrl]);
 
   const handleCancelPreview = useCallback(() => {
     setPendingFile(null);

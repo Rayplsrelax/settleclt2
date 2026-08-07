@@ -28,9 +28,6 @@ export function AnalyticsChart({
 
   const values = data.map((d) => d[metric]);
   const maxVal = Math.max(...values, 1);
-  const barWidth = 100 / data.length;
-  const barGap = barWidth * 0.15;
-  const actualBarWidth = barWidth - barGap;
 
   return (
     <div className="w-full">
