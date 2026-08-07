@@ -1,5 +1,18 @@
 import type { Express } from "express";
-import { ENV } from "./env";
+import path from "path";
+import fs from "fs";
+
+/**
+ * Storage proxy — serves files from the local filesystem.
+ *
+ * Originally proxied to Manus Forge API for presigned URLs. After migration
+ * to self-hosted infrastructure, blog cover images and other stored assets
+ * are served directly from `public/manus-storage/` on disk.
+ *
+ * New uploads via `storagePut()` also write to this directory, so the
+ * `/manus-storage/*` route handles both legacy blog covers and new
+ * business photos.
+ */
 export function registerStorageProxy(app: Express) {
   app.get("/manus-storage/*", async (req, res) => {
     const key = (req.params as any)[0] as string;
@@ -7,35 +20,47 @@ export function registerStorageProxy(app: Express) {
       res.status(400).send("Missing storage key");
       return;
     }
-    if (!ENV.forgeApiUrl || !ENV.forgeApiKey) {
-      res.status(500).send("Storage proxy not configured");
+
+    // Normalize the key — prevent path traversal
+    const normalizedKey = key.replace(/\.+\//g, "").replace(/^\/+/, "");
+    const storageDir = path.resolve(
+      process.cwd(),
+      "public",
+      "manus-storage",
+    );
+    const filePath = path.resolve(storageDir, normalizedKey);
+
+    // Ensure the resolved path is still inside the storage directory
+    if (!filePath.startsWith(storageDir + path.sep)) {
+      res.status(403).send("Forbidden");
       return;
     }
-    try {
-      const forgeUrl = new URL(
-        "v1/storage/presign/get",
-        ENV.forgeApiUrl.replace(/\/+$/, "") + "/",
-      );
-      forgeUrl.searchParams.set("path", key);
-      const forgeResp = await fetch(forgeUrl, {
-        headers: { Authorization: `Bearer ${ENV.forgeApiKey}` },
-      });
-      if (!forgeResp.ok) {
-        const body = await forgeResp.text().catch(() => "");
-        console.error(`[StorageProxy] forge error: ${forgeResp.status} ${body}`);
-        res.status(502).send("Storage backend error");
-        return;
-      }
-      const { url } = (await forgeResp.json()) as { url: string };
-      if (!url) {
-        res.status(502).send("Empty signed URL from backend");
-        return;
-      }
-      res.set("Cache-Control", "no-store");
-      res.redirect(307, url);
-    } catch (err) {
-      console.error("[StorageProxy] failed:", err);
-      res.status(502).send("Storage proxy error");
+
+    if (!fs.existsSync(filePath)) {
+      res.status(404).send("File not found");
+      return;
     }
+
+    // Set appropriate content type based on extension
+    const ext = path.extname(filePath).toLowerCase();
+    const contentTypes: Record<string, string> = {
+      ".png": "image/png",
+      ".jpg": "image/jpeg",
+      ".jpeg": "image/jpeg",
+      ".gif": "image/gif",
+      ".webp": "image/webp",
+      ".svg": "image/svg+xml",
+    };
+    res.set("Content-Type", contentTypes[ext] || "application/octet-stream");
+    res.set("Cache-Control", "public, max-age=31536000, immutable");
+
+    const stream = fs.createReadStream(filePath);
+    stream.on("error", (err) => {
+      console.error("[StorageProxy] stream error:", err);
+      if (!res.headersSent) {
+        res.status(500).send("Error reading file");
+      }
+    });
+    stream.pipe(res);
   });
 }
