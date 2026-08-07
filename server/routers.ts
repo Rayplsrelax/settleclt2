@@ -1424,9 +1424,35 @@ export const appRouter = router({
           });
         }
 
-        // Decode base64 and upload to storage
+        // Decode base64 and validate server-side file size (5MB max)
         const buffer = Buffer.from(input.data, "base64");
-        const storageKey = `business-photos/${input.serviceKey}/${Date.now()}-${input.fileName.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
+        const MAX_FILE_SIZE = 5 * 1024 * 1024;
+        if (buffer.byteLength > MAX_FILE_SIZE) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Image must be under 5MB.",
+          });
+        }
+
+        // Validate image magic bytes to prevent disguised non-image uploads
+        const ALLOWED_MAGIC: Record<string, number[]> = {
+          "image/jpeg": [0xff, 0xd8, 0xff],
+          "image/png": [0x89, 0x50, 0x4e, 0x47],
+          "image/gif": [0x47, 0x49, 0x46],
+          "image/webp": [0x52, 0x49, 0x46, 0x46], // RIFF header (WebP starts with RIFF)
+        };
+        const expectedMagic = ALLOWED_MAGIC[input.contentType];
+        if (expectedMagic && !expectedMagic.every((byte, i) => buffer[i] === byte)) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "File content does not match the declared image type.",
+          });
+        }
+
+        // Generate unique storage key with random suffix to prevent collisions
+        const safeFileName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, "-");
+        const randomSuffix = Math.random().toString(36).slice(2, 10);
+        const storageKey = `business-photos/${input.serviceKey}/${Date.now()}-${randomSuffix}-${safeFileName}`;
         const { url } = await storagePut(storageKey, buffer, input.contentType);
 
         currentPhotos.push(url);

@@ -188,4 +188,37 @@ describe("businessPortal.uploadPhotoFile", () => {
 
     expect(storagePut).not.toHaveBeenCalled();
   });
+
+  it("rejects oversized files server-side", async () => {
+    // Create a base64 string larger than 5MB (decode to ~6MB buffer)
+    const largeData = "A".repeat(6 * 1024 * 1024);
+
+    const caller = appRouter.createCaller({
+      user: {
+        id: 7,
+        openId: "user-7",
+        email: "owner@example.com",
+        name: "Owner",
+        loginMethod: "manus",
+        role: "user",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastSignedIn: new Date(),
+        newsletterOptIn: true,
+      },
+      req: { protocol: "https", headers: {} } as any,
+      res: {} as any,
+    });
+
+    await expect(
+      caller.businessPortal.uploadPhotoFile({
+        serviceKey: "hornet-moving",
+        fileName: "big.png",
+        contentType: "image/png",
+        data: largeData,
+      }),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+
+    expect(storagePut).not.toHaveBeenCalled();
+  });
 });
