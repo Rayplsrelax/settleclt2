@@ -1,4 +1,4 @@
-import { boolean, int, json, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
+import { boolean, int, json, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar, date } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -956,3 +956,18 @@ export const businessLeads = mysqlTable("business_leads", {
 });
 export type BusinessLead = typeof businessLeads.$inferSelect;
 export type InsertBusinessLead = typeof businessLeads.$inferInsert;
+
+// ─── Daily Analytics Snapshots ───
+
+/** Daily view/click/lead counts for premium listing charts. */
+export const listingAnalyticsDaily = mysqlTable("listing_analytics_daily", {
+  id: int("id").autoincrement().primaryKey(),
+  serviceKey: varchar("serviceKey", { length: 255 }).notNull(),
+  date: date("date").notNull(),
+  views: int("views").default(0).notNull(),
+  clicks: int("clicks").default(0).notNull(),
+  leads: int("leads").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type ListingAnalyticsDaily = typeof listingAnalyticsDaily.$inferSelect;
+export type InsertListingAnalyticsDaily = typeof listingAnalyticsDaily.$inferInsert;

@@ -14,6 +14,8 @@ import {
   CheckCircle2, BarChart3, Eye, MousePointerClick, Users,
   ExternalLink, ArrowRight, Crown, Sparkles, Shield, Trash2, Download, Inbox, Upload
 } from "lucide-react";
+import { PhotoUploader } from "@/components/PhotoUploader";
+import { AnalyticsChart } from "@/components/AnalyticsChart";
 import { Link } from "wouter";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
@@ -536,67 +538,37 @@ export default function MyBusiness() {
                 <CardTitle className="text-base flex items-center gap-2"><Image className="w-4 h-4" /> Photo Gallery</CardTitle>
                 <CardDescription>
                   {photoLimit?.limit
-                    ? `${ownerPhotos.length} of ${photoLimit.limit} photos used on your ${photoLimit.tier} plan.`
+                    ? "Drag and drop photos to showcase your business."
                     : "Upgrade to Featured or Premium to add owner-managed photos."}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {Boolean(photoLimit?.limit) && (
-                  <>
-                    <div className="flex flex-col gap-2">
-                      <Button
-                        variant="default"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={uploadPhotoFile.isPending || ownerPhotos.length >= (photoLimit?.limit ?? 0)}
-                        className="gap-1.5 w-fit"
-                      >
-                        <Upload className="w-4 h-4" />
-                        {uploadPhotoFile.isPending ? "Uploading..." : "Upload Photo"}
-                      </Button>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp,image/gif"
-                        onChange={handleFileSelect}
-                        className="hidden"
-                      />
-                      <p className="text-xs text-muted-foreground">JPEG, PNG, WebP, or GIF — max 5MB</p>
-                    </div>
-                    <details className="text-sm">
-                      <summary className="text-muted-foreground cursor-pointer hover:text-foreground">Or add from URL</summary>
-                      <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                        <Input value={photoUrl} onChange={event => setPhotoUrl(event.target.value)} placeholder="https://your-site.com/photo.jpg" type="url" />
-                        <Button
-                          onClick={() => {
-                            if (!selectedMembership || photoUrlState.scopeKey !== selectedMembership.serviceKey) return;
-                            uploadPhoto.mutate({ serviceKey: selectedMembership.serviceKey, photoUrl });
-                          }}
-                          disabled={!photoUrl || uploadPhoto.isPending || ownerPhotos.length >= (photoLimit?.limit ?? 0)}
-                        >
-                          {uploadPhoto.isPending ? "Adding..." : "Add URL"}
-                        </Button>
-                      </div>
-                    </details>
-                  </>
-                )}
-                {ownerPhotos.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {ownerPhotos.map(url => (
-                      <div key={url} className="relative overflow-hidden rounded-lg border bg-muted aspect-video">
-                        <img src={url} alt="Business gallery" className="w-full h-full object-cover" />
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-2 right-2 h-8 w-8"
-                          onClick={() => selectedMembership && removePhoto.mutate({ serviceKey: selectedMembership.serviceKey, photoUrl: url })}
-                          disabled={removePhoto.isPending}
-                          aria-label="Remove photo"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
+              <CardContent>
+                {photoLimit?.limit && selectedMembership ? (
+                  <PhotoUploader
+                    serviceKey={selectedMembership.serviceKey}
+                    photos={ownerPhotos}
+                    photoLimit={photoLimit.limit}
+                    tier={photoLimit.tier}
+                    canEdit={canEdit}
+                    onUploadFile={(data) =>
+                      uploadPhotoFile.mutate({
+                        serviceKey: selectedMembership.serviceKey,
+                        fileName: data.fileName,
+                        contentType: data.contentType as "image/jpeg" | "image/png" | "image/webp" | "image/gif",
+                        data: data.data,
+                      })
+                    }
+                    onUploadUrl={(url) => {
+                      if (photoUrlState.scopeKey !== selectedMembership.serviceKey) return;
+                      uploadPhoto.mutate({ serviceKey: selectedMembership.serviceKey, photoUrl: url });
+                    }}
+                    onRemove={(url) =>
+                      removePhoto.mutate({ serviceKey: selectedMembership.serviceKey, photoUrl: url })
+                    }
+                    isUploadingFile={uploadPhotoFile.isPending}
+                    isUploadingUrl={uploadPhoto.isPending}
+                    isRemoving={removePhoto.isPending}
+                  />
                 ) : (
                   <p className="text-sm text-muted-foreground">No owner-managed photos yet.</p>
                 )}
@@ -608,35 +580,95 @@ export default function MyBusiness() {
           <TabsContent value="analytics">
             {canViewAnalytics && analytics ? (
               <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Metric cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   <Card>
-                    <CardContent className="pt-5 pb-4 text-center">
-                      <Eye className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-                      <p className="text-3xl font-bold">{analytics.views}</p>
-                      <p className="text-sm text-muted-foreground">Views This Period</p>
+                    <CardContent className="pt-4 pb-3 text-center">
+                      <Eye className="w-6 h-6 text-blue-500 mx-auto mb-1" />
+                      <p className="text-2xl font-bold">{analytics.views}</p>
+                      <p className="text-xs text-muted-foreground">Views</p>
                     </CardContent>
                   </Card>
                   <Card>
-                    <CardContent className="pt-5 pb-4 text-center">
-                      <MousePointerClick className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                      <p className="text-3xl font-bold">{analytics.clicks}</p>
-                      <p className="text-sm text-muted-foreground">Clicks This Period</p>
+                    <CardContent className="pt-4 pb-3 text-center">
+                      <MousePointerClick className="w-6 h-6 text-green-500 mx-auto mb-1" />
+                      <p className="text-2xl font-bold">{analytics.clicks}</p>
+                      <p className="text-xs text-muted-foreground">Clicks</p>
                     </CardContent>
                   </Card>
                   <Card>
-                    <CardContent className="pt-5 pb-4 text-center">
-                      <Users className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-                      <p className="text-3xl font-bold">{analytics.leads}</p>
-                      <p className="text-sm text-muted-foreground">Leads This Period</p>
+                    <CardContent className="pt-4 pb-3 text-center">
+                      <Users className="w-6 h-6 text-purple-500 mx-auto mb-1" />
+                      <p className="text-2xl font-bold">{analytics.leads}</p>
+                      <p className="text-xs text-muted-foreground">Leads</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4 pb-3 text-center">
+                      <BarChart3 className="w-6 h-6 text-orange-500 mx-auto mb-1" />
+                      <p className="text-2xl font-bold">
+                        {analytics.views > 0 ? ((analytics.clicks / analytics.views) * 100).toFixed(1) : "0.0"}%
+                      </p>
+                      <p className="text-xs text-muted-foreground">CTR</p>
                     </CardContent>
                   </Card>
                 </div>
+
+                {/* Daily chart */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Views Over Time</CardTitle>
+                    <CardDescription>Daily listing views for the last 30 days</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <AnalyticsChart data={reportQuery.data?.daily ?? []} metric="views" color="#0d9488" />
+                  </CardContent>
+                </Card>
+
+                {/* Conversion funnel */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <Card>
+                    <CardContent className="pt-4 pb-3">
+                      <p className="text-xs text-muted-foreground mb-1">Click-through rate</p>
+                      <p className="text-xl font-bold">
+                        {analytics.views > 0 ? ((analytics.clicks / analytics.views) * 100).toFixed(1) : "0.0"}%
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">Views → Clicks</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4 pb-3">
+                      <p className="text-xs text-muted-foreground mb-1">Lead conversion</p>
+                      <p className="text-xl font-bold">
+                        {analytics.clicks > 0 ? ((analytics.leads / analytics.clicks) * 100).toFixed(1) : "0.0"}%
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">Clicks → Leads</p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="pt-4 pb-3">
+                      <p className="text-xs text-muted-foreground mb-1">Overall conversion</p>
+                      <p className="text-xl font-bold">
+                        {analytics.views > 0 ? ((analytics.leads / analytics.views) * 100).toFixed(1) : "0.0"}%
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">Views → Leads</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Lead pipeline + inbox */}
                 {currentTier === "premium" && tierInfo?.active && (
                   <div className="grid lg:grid-cols-[1fr_auto] gap-4 items-start">
                     <Card>
                       <CardHeader>
-                        <CardTitle className="text-base flex items-center gap-2"><Inbox className="w-4 h-4" /> Lead Inbox</CardTitle>
-                        <CardDescription>Manage inquiries submitted through your Premium listing.</CardDescription>
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-base flex items-center gap-2"><Inbox className="w-4 h-4" /> Lead Inbox</CardTitle>
+                          {leads?.length ? (
+                            <span className="text-xs text-muted-foreground">
+                              {leads.filter(l => l.status === "new").length} new · {leads.length} total
+                            </span>
+                          ) : null}
+                        </div>
                       </CardHeader>
                       <CardContent>
                         {leads?.length ? (
@@ -650,7 +682,7 @@ export default function MyBusiness() {
                                     {lead.phone && <p className="text-muted-foreground">{lead.phone}</p>}
                                   </div>
                                   <select
-                                    className="border rounded-md px-2 py-1 bg-background"
+                                    className="border rounded-md px-2 py-1 bg-background text-xs"
                                     value={lead.status}
                                     onChange={event => updateLeadStatus.mutate({ leadId: lead.id, status: event.target.value as "new" | "contacted" | "qualified" | "closed" | "archived" })}
                                   >
@@ -677,7 +709,7 @@ export default function MyBusiness() {
                       <Crown className="w-5 h-5 text-amber-600 shrink-0" />
                       <div className="flex-1">
                         <p className="font-medium text-sm">Upgrade for detailed analytics</p>
-                        <p className="text-xs text-muted-foreground">Featured and Premium tiers include click-through rates, visitor demographics, and weekly reports.</p>
+                        <p className="text-xs text-muted-foreground">Featured and Premium tiers include charts, CTR, lead pipeline, and monthly reports.</p>
                       </div>
                     </CardContent>
                   </Card>
