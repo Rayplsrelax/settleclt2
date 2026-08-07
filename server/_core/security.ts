@@ -3,7 +3,6 @@ import type { RequestHandler } from "express";
 
 export type SecurityMiddlewareOptions = {
   analyticsEndpoint?: string;
-  forgeApiUrl?: string;
 };
 
 const PREVIEW_DOMAINS = [
@@ -55,8 +54,6 @@ export function createSecurityMiddleware(
   options: SecurityMiddlewareOptions = {}
 ): RequestHandler {
   const analyticsOrigin = toOrigin(options.analyticsEndpoint);
-  const forgeOrigin =
-    toOrigin(options.forgeApiUrl) ?? "https://forge.butterfly-effect.dev";
   const optionalAnalytics = analyticsOrigin ? [analyticsOrigin] : [];
 
   const productionHelmet = helmet({
@@ -67,7 +64,6 @@ export function createSecurityMiddleware(
         connectSrc: [
           "'self'",
           ...optionalAnalytics,
-          forgeOrigin,
           "https://maps.googleapis.com",
           "https://maps.gstatic.com",
           "https://*.mixpanel.com",
@@ -83,7 +79,6 @@ export function createSecurityMiddleware(
         scriptSrc: [
           "'self'",
           ...optionalAnalytics,
-          forgeOrigin,
           "https://maps.googleapis.com",
           "https://maps.gstatic.com",
         ],

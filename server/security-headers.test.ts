@@ -9,7 +9,6 @@ function createApp() {
   app.use(
     createSecurityMiddleware({
       analyticsEndpoint: "https://analytics.example.com/umami",
-      forgeApiUrl: "https://forge.example.com/v1",
     })
   );
   app.get("/", (_req, res) => res.send("ok"));
@@ -27,10 +26,10 @@ describe("production security headers", () => {
     expect(csp).toContain("default-src 'self'");
     expect(csp).toContain("script-src 'self' https://analytics.example.com");
     expect(csp).toContain(
-      "connect-src 'self' https://analytics.example.com https://forge.example.com"
+      "connect-src 'self' https://analytics.example.com https://maps.googleapis.com https://maps.gstatic.com https://*.mixpanel.com"
     );
     expect(csp).toContain(
-      "script-src 'self' https://analytics.example.com https://forge.example.com https://maps.googleapis.com https://maps.gstatic.com"
+      "script-src 'self' https://analytics.example.com https://maps.googleapis.com https://maps.gstatic.com"
     );
     expect(csp).toContain("frame-ancestors 'self'");
     expect(csp).toContain("object-src 'none'");

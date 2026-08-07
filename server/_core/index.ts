@@ -42,7 +42,6 @@ async function startServer() {
   app.use(
     createSecurityMiddleware({
       analyticsEndpoint: process.env.VITE_ANALYTICS_ENDPOINT,
-      forgeApiUrl: process.env.VITE_FRONTEND_FORGE_API_URL,
     })
   );
 
