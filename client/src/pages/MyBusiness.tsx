@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import PageLayout from "@/components/PageLayout";
@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Building2, Save, Globe, Phone, Mail, Clock, Image, Tag,
   CheckCircle2, BarChart3, Eye, MousePointerClick, Users,
-  ExternalLink, ArrowRight, Crown, Sparkles, Shield, Trash2, Download, Inbox
+  ExternalLink, ArrowRight, Crown, Sparkles, Shield, Trash2, Download, Inbox, Upload
 } from "lucide-react";
 import { Link } from "wouter";
 import { toast } from "sonner";
@@ -166,6 +166,48 @@ export default function MyBusiness() {
     },
     onError: error => toast.error(error.message),
   });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const uploadPhotoFile = trpc.businessPortal.uploadPhotoFile.useMutation({
+    onSuccess: () => {
+      toast.success("Photo uploaded to your gallery.");
+      refetchOverride();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const handleFileSelect = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file || !selectedMembership) return;
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image must be under 5MB.");
+        return;
+      }
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error("Only JPEG, PNG, WebP, and GIF images are allowed.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = (reader.result as string).split(",")[1];
+        if (!base64) {
+          toast.error("Failed to read image file.");
+          return;
+        }
+        uploadPhotoFile.mutate({
+          serviceKey: selectedMembership.serviceKey,
+          fileName: file.name,
+          contentType: file.type as "image/jpeg" | "image/png" | "image/webp" | "image/gif",
+          data: base64,
+        });
+      };
+      reader.onerror = () => toast.error("Failed to read image file.");
+      reader.readAsDataURL(file);
+      // Reset input so the same file can be selected again
+      event.target.value = "";
+    },
+    [selectedMembership, uploadPhotoFile],
+  );
   const removePhoto = trpc.businessPortal.removePhoto.useMutation({
     onSuccess: () => {
       toast.success("Photo removed.");
@@ -500,18 +542,42 @@ export default function MyBusiness() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {Boolean(photoLimit?.limit) && (
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Input value={photoUrl} onChange={event => setPhotoUrl(event.target.value)} placeholder="https://your-site.com/photo.jpg" type="url" />
-                    <Button
-                      onClick={() => {
-                        if (!selectedMembership || photoUrlState.scopeKey !== selectedMembership.serviceKey) return;
-                        uploadPhoto.mutate({ serviceKey: selectedMembership.serviceKey, photoUrl });
-                      }}
-                      disabled={!photoUrl || uploadPhoto.isPending || ownerPhotos.length >= (photoLimit?.limit ?? 0)}
-                    >
-                      {uploadPhoto.isPending ? "Adding..." : "Add Photo"}
-                    </Button>
-                  </div>
+                  <>
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        variant="default"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploadPhotoFile.isPending || ownerPhotos.length >= (photoLimit?.limit ?? 0)}
+                        className="gap-1.5 w-fit"
+                      >
+                        <Upload className="w-4 h-4" />
+                        {uploadPhotoFile.isPending ? "Uploading..." : "Upload Photo"}
+                      </Button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                      <p className="text-xs text-muted-foreground">JPEG, PNG, WebP, or GIF — max 5MB</p>
+                    </div>
+                    <details className="text-sm">
+                      <summary className="text-muted-foreground cursor-pointer hover:text-foreground">Or add from URL</summary>
+                      <div className="flex flex-col sm:flex-row gap-2 mt-2">
+                        <Input value={photoUrl} onChange={event => setPhotoUrl(event.target.value)} placeholder="https://your-site.com/photo.jpg" type="url" />
+                        <Button
+                          onClick={() => {
+                            if (!selectedMembership || photoUrlState.scopeKey !== selectedMembership.serviceKey) return;
+                            uploadPhoto.mutate({ serviceKey: selectedMembership.serviceKey, photoUrl });
+                          }}
+                          disabled={!photoUrl || uploadPhoto.isPending || ownerPhotos.length >= (photoLimit?.limit ?? 0)}
+                        >
+                          {uploadPhoto.isPending ? "Adding..." : "Add URL"}
+                        </Button>
+                      </div>
+                    </details>
+                  </>
                 )}
                 {ownerPhotos.length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">

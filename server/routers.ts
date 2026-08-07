@@ -1397,6 +1397,42 @@ export const appRouter = router({
         await upsertListingOverride(input.serviceKey, effectiveClaimId, { photoUrls: currentPhotos.join(',') });
         return { success: true, photos: currentPhotos };
       }),
+    uploadPhotoFile: protectedProcedure
+      .input(z.object({
+        serviceKey: z.string(),
+        fileName: z.string().min(1).max(255),
+        contentType: z.enum(["image/jpeg", "image/png", "image/webp", "image/gif"]),
+        data: z.string().min(1),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+        const membership = requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        const effectiveClaimId = selectEffectiveClaimId(membership.ownerClaimId);
+        const existing = await getListingOverride(input.serviceKey);
+        const currentPhotos = existing?.photoUrls ? existing.photoUrls.split(',').filter(Boolean) : [];
+
+        // Tier-based photo limit enforcement
+        const premiumListing = await getPremiumListing(input.serviceKey);
+        const tier = premiumListing?.tier ?? "basic";
+        const isActive = premiumListing?.paymentStatus === "active";
+        const { canUploadPhoto, getPhotoLimit } = await import("../shared/premium-limits");
+        if (!canUploadPhoto(tier, isActive, currentPhotos.length)) {
+          const limit = getPhotoLimit(tier, isActive);
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: `Photo limit reached. Your ${tier === "basic" ? "free" : tier} tier allows ${limit} photo${limit !== 1 ? "s" : ""}.${tier === "basic" ? " Upgrade to Featured ($29/mo) for 5 photos or Premium ($79/mo) for 15 photos." : ""}`,
+          });
+        }
+
+        // Decode base64 and upload to storage
+        const buffer = Buffer.from(input.data, "base64");
+        const storageKey = `business-photos/${input.serviceKey}/${Date.now()}-${input.fileName.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
+        const { url } = await storagePut(storageKey, buffer, input.contentType);
+
+        currentPhotos.push(url);
+        await upsertListingOverride(input.serviceKey, effectiveClaimId, { photoUrls: currentPhotos.join(',') });
+        return { success: true, photos: currentPhotos };
+      }),
     removePhoto: protectedProcedure
       .input(z.object({
         serviceKey: z.string(),

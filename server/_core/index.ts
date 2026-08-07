@@ -256,6 +256,7 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "1mb", extended: true }));
   // Upload-specific routes that need a larger body limit
   app.use("/api/trpc/storage", express.json({ limit: "50mb" }));
+  app.use("/api/trpc/businessPortal.uploadPhotoFile", express.json({ limit: "10mb" }));
   app.use("/api/upload", express.json({ limit: "50mb" }));
   // OAuth callback under /api/oauth/callback
   registerStorageProxy(app);
