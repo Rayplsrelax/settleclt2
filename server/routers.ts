@@ -1397,6 +1397,68 @@ export const appRouter = router({
         await upsertListingOverride(input.serviceKey, effectiveClaimId, { photoUrls: currentPhotos.join(',') });
         return { success: true, photos: currentPhotos };
       }),
+    uploadPhotoFile: protectedProcedure
+      .input(z.object({
+        serviceKey: z.string(),
+        fileName: z.string().min(1).max(255),
+        contentType: z.enum(["image/jpeg", "image/png", "image/webp", "image/gif"]),
+        data: z.string().min(1),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+        const membership = requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        const effectiveClaimId = selectEffectiveClaimId(membership.ownerClaimId);
+        const existing = await getListingOverride(input.serviceKey);
+        const currentPhotos = existing?.photoUrls ? existing.photoUrls.split(',').filter(Boolean) : [];
+
+        // Tier-based photo limit enforcement
+        const premiumListing = await getPremiumListing(input.serviceKey);
+        const tier = premiumListing?.tier ?? "basic";
+        const isActive = premiumListing?.paymentStatus === "active";
+        const { canUploadPhoto, getPhotoLimit } = await import("../shared/premium-limits");
+        if (!canUploadPhoto(tier, isActive, currentPhotos.length)) {
+          const limit = getPhotoLimit(tier, isActive);
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: `Photo limit reached. Your ${tier === "basic" ? "free" : tier} tier allows ${limit} photo${limit !== 1 ? "s" : ""}.${tier === "basic" ? " Upgrade to Featured ($29/mo) for 5 photos or Premium ($79/mo) for 15 photos." : ""}`,
+          });
+        }
+
+        // Decode base64 and validate server-side file size (5MB max)
+        const buffer = Buffer.from(input.data, "base64");
+        const MAX_FILE_SIZE = 5 * 1024 * 1024;
+        if (buffer.byteLength > MAX_FILE_SIZE) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Image must be under 5MB.",
+          });
+        }
+
+        // Validate image magic bytes to prevent disguised non-image uploads
+        const ALLOWED_MAGIC: Record<string, number[]> = {
+          "image/jpeg": [0xff, 0xd8, 0xff],
+          "image/png": [0x89, 0x50, 0x4e, 0x47],
+          "image/gif": [0x47, 0x49, 0x46],
+          "image/webp": [0x52, 0x49, 0x46, 0x46], // RIFF header (WebP starts with RIFF)
+        };
+        const expectedMagic = ALLOWED_MAGIC[input.contentType];
+        if (expectedMagic && !expectedMagic.every((byte, i) => buffer[i] === byte)) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "File content does not match the declared image type.",
+          });
+        }
+
+        // Generate unique storage key with random suffix to prevent collisions
+        const safeFileName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, "-");
+        const randomSuffix = Math.random().toString(36).slice(2, 10);
+        const storageKey = `business-photos/${input.serviceKey}/${Date.now()}-${randomSuffix}-${safeFileName}`;
+        const { url } = await storagePut(storageKey, buffer, input.contentType);
+
+        currentPhotos.push(url);
+        await upsertListingOverride(input.serviceKey, effectiveClaimId, { photoUrls: currentPhotos.join(',') });
+        return { success: true, photos: currentPhotos };
+      }),
     removePhoto: protectedProcedure
       .input(z.object({
         serviceKey: z.string(),
