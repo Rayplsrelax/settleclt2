@@ -1,70 +1,20 @@
-// Preconfigured storage helpers for Manus WebDev templates
-// Uses the Biz-provided storage proxy (Authorization: Bearer <token>)
+// Local filesystem storage helpers.
+//
+// Originally used Manus Forge API for cloud storage. After migration to
+// self-hosted infrastructure, files are stored on local disk under
+// `public/manus-storage/` and served via the `/manus-storage/*` route
+// registered in `_core/storageProxy.ts`.
+//
+// The return shape ({ key, url }) is kept the same so callers in routers.ts,
+// imageGeneration.ts, etc. don't need changes.
 
-import { ENV } from './_core/env';
+import path from "path";
+import fs from "fs";
 
-type StorageConfig = { baseUrl: string; apiKey: string };
-
-function getStorageConfig(): StorageConfig {
-  const baseUrl = ENV.forgeApiUrl;
-  const apiKey = ENV.forgeApiKey;
-
-  if (!baseUrl || !apiKey) {
-    throw new Error(
-      "Storage proxy credentials missing: set BUILT_IN_FORGE_API_URL and BUILT_IN_FORGE_API_KEY"
-    );
-  }
-
-  return { baseUrl: baseUrl.replace(/\/+$/, ""), apiKey };
-}
-
-function buildUploadUrl(baseUrl: string, relKey: string): URL {
-  const url = new URL("v1/storage/upload", ensureTrailingSlash(baseUrl));
-  url.searchParams.set("path", normalizeKey(relKey));
-  return url;
-}
-
-async function buildDownloadUrl(
-  baseUrl: string,
-  relKey: string,
-  apiKey: string
-): Promise<string> {
-  const downloadApiUrl = new URL(
-    "v1/storage/downloadUrl",
-    ensureTrailingSlash(baseUrl)
-  );
-  downloadApiUrl.searchParams.set("path", normalizeKey(relKey));
-  const response = await fetch(downloadApiUrl, {
-    method: "GET",
-    headers: buildAuthHeaders(apiKey),
-  });
-  return (await response.json()).url;
-}
-
-function ensureTrailingSlash(value: string): string {
-  return value.endsWith("/") ? value : `${value}/`;
-}
+const STORAGE_DIR = path.resolve(process.cwd(), "public", "manus-storage");
 
 function normalizeKey(relKey: string): string {
-  return relKey.replace(/^\/+/, "");
-}
-
-function toFormData(
-  data: Buffer | Uint8Array | string,
-  contentType: string,
-  fileName: string
-): FormData {
-  const blob =
-    typeof data === "string"
-      ? new Blob([data], { type: contentType })
-      : new Blob([data as any], { type: contentType });
-  const form = new FormData();
-  form.append("file", blob, fileName || "file");
-  return form;
-}
-
-function buildAuthHeaders(apiKey: string): HeadersInit {
-  return { Authorization: `Bearer ${apiKey}` };
+  return path.normalize(relKey).replace(/^[/\\]+/, "");
 }
 
 export async function storagePut(
@@ -72,31 +22,44 @@ export async function storagePut(
   data: Buffer | Uint8Array | string,
   contentType = "application/octet-stream"
 ): Promise<{ key: string; url: string }> {
-  const { baseUrl, apiKey } = getStorageConfig();
   const key = normalizeKey(relKey);
-  const uploadUrl = buildUploadUrl(baseUrl, key);
-  const formData = toFormData(data, contentType, key.split("/").pop() ?? key);
-  const response = await fetch(uploadUrl, {
-    method: "POST",
-    headers: buildAuthHeaders(apiKey),
-    body: formData,
-  });
+  const filePath = path.resolve(STORAGE_DIR, key);
 
-  if (!response.ok) {
-    const message = await response.text().catch(() => response.statusText);
-    throw new Error(
-      `Storage upload failed (${response.status} ${response.statusText}): ${message}`
-    );
+  // Validate path traversal BEFORE any filesystem operations
+  if (!filePath.startsWith(STORAGE_DIR + path.sep)) {
+    throw new Error("Invalid storage key: path traversal detected");
   }
-  const url = (await response.json()).url;
+
+  // Ensure the storage directory exists
+  const dir = path.dirname(filePath);
+  await fs.promises.mkdir(dir, { recursive: true });
+
+  const buffer = Buffer.isBuffer(data)
+    ? data
+    : typeof data === "string"
+      ? Buffer.from(data, "utf-8")
+      : Buffer.from(data);
+
+  await fs.promises.writeFile(filePath, buffer);
+
+  // Return a URL that the browser can fetch — served by the storage proxy route
+  const url = `/manus-storage/${key}`;
   return { key, url };
 }
 
-export async function storageGet(relKey: string): Promise<{ key: string; url: string; }> {
-  const { baseUrl, apiKey } = getStorageConfig();
+export async function storageGet(relKey: string): Promise<{ key: string; url: string }> {
   const key = normalizeKey(relKey);
-  return {
-    key,
-    url: await buildDownloadUrl(baseUrl, key, apiKey),
-  };
+  const filePath = path.resolve(STORAGE_DIR, key);
+
+  if (!filePath.startsWith(STORAGE_DIR + path.sep)) {
+    throw new Error("Invalid storage key: path traversal detected");
+  }
+
+  try {
+    await fs.promises.access(filePath, fs.constants.F_OK);
+  } catch {
+    throw new Error(`File not found: ${key}`);
+  }
+
+  return { key, url: `/manus-storage/${key}` };
 }
