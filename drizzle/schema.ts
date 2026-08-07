@@ -615,7 +615,7 @@ export const premiumListings = mysqlTable("premium_listings", {
   id: int("id").autoincrement().primaryKey(),
   serviceKey: varchar("serviceKey", { length: 255 }).notNull(),
   /** Tier: basic (free), featured, premium */
-  tier: mysqlEnum("tier", ["basic", "featured", "premium"]).default("basic").notNull(),
+  tier: mysqlEnum("tier", ["basic", "featured", "premium", "pro"]).default("basic").notNull(),
   /** Stripe customer ID */
   stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
   /** Stripe subscription ID */
@@ -971,3 +971,17 @@ export const listingAnalyticsDaily = mysqlTable("listing_analytics_daily", {
 });
 export type ListingAnalyticsDaily = typeof listingAnalyticsDaily.$inferSelect;
 export type InsertListingAnalyticsDaily = typeof listingAnalyticsDaily.$inferInsert;
+
+// ─── Business FAQs (AI Assistant grounding) ───
+
+/** Owner-managed FAQs that ground the AI Business Assistant's responses. */
+export const businessFaqs = mysqlTable("business_faqs", {
+  id: int("id").autoincrement().primaryKey(),
+  serviceKey: varchar("serviceKey", { length: 255 }).notNull(),
+  question: varchar("question", { length: 500 }).notNull(),
+  answer: text("answer").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type BusinessFaq = typeof businessFaqs.$inferSelect;
+export type InsertBusinessFaq = typeof businessFaqs.$inferInsert;

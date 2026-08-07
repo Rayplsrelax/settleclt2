@@ -29,6 +29,20 @@ export const PREMIUM_TIERS = {
       "Monthly performance report",
     ],
   },
+  pro: {
+    name: "Business Pro",
+    description: "Full AI-powered business management — 24/7 AI assistant, smart scheduling, social content drafts, reputation monitoring, and a one-page web presence.",
+    monthlyPrice: 14900, // $149/mo in cents
+    features: [
+      "Everything in Premium",
+      "AI Business Assistant (24/7 chat widget)",
+      "Smart scheduling capture",
+      "Social content draft generation",
+      "Reputation autopilot (review response drafts)",
+      "One-page web presence",
+      "Photo gallery (up to 30 photos)",
+    ],
+  },
 } as const;
 
 export type PremiumTierKey = keyof typeof PREMIUM_TIERS;

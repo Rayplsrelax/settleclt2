@@ -237,7 +237,7 @@ export default function MyBusiness() {
     onError: (err) => toast.error(err.message),
   });
 
-  const handleUpgrade = useCallback((tier: "featured" | "premium") => {
+  const handleUpgrade = useCallback((tier: "featured" | "premium" | "pro") => {
     if (!selectedMembership || !canManageBilling) return;
     createCheckout.mutate({
       tier,
@@ -810,6 +810,43 @@ export default function MyBusiness() {
                       disabled={createCheckout.isPending}
                     >
                       {createCheckout.isPending ? "Loading..." : "Upgrade to Premium"} <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Business Pro Tier */}
+              <Card className={`${currentTier === "pro" ? "border-indigo-500 ring-1 ring-indigo-500/20" : "border-indigo-400/40"} relative`}>
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <Badge className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">AI-Powered</Badge>
+                </div>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-indigo-600" /> Business Pro
+                    </CardTitle>
+                    {currentTier === "pro" && <Badge className="bg-indigo-100 text-indigo-700">Current</Badge>}
+                  </div>
+                  <CardDescription>AI assistant, scheduling, content, and reputation automation</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold mb-4">$149<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> Everything in Premium</li>
+                    <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-600" /> AI Business Assistant (24/7 chat)</li>
+                    <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-600" /> Smart scheduling capture</li>
+                    <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-600" /> Social content drafts</li>
+                    <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-600" /> Reputation autopilot</li>
+                    <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-600" /> One-page web presence</li>
+                    <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-600" /> Photo gallery (up to 30)</li>
+                  </ul>
+                  {currentTier !== "pro" && (
+                    <Button
+                      className="w-full mt-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white gap-1.5"
+                      onClick={() => handleUpgrade("pro")}
+                      disabled={createCheckout.isPending}
+                    >
+                      {createCheckout.isPending ? "Loading..." : "Upgrade to Business Pro"} <ArrowRight className="w-4 h-4" />
                     </Button>
                   )}
                 </CardContent>

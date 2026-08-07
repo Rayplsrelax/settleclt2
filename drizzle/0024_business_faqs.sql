@@ -1,0 +1,10 @@
+-- Owner-managed FAQs for AI Business Assistant grounding
+CREATE TABLE IF NOT EXISTS business_faqs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  serviceKey VARCHAR(255) NOT NULL,
+  question VARCHAR(500) NOT NULL,
+  answer TEXT NOT NULL,
+  createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_servicekey (serviceKey)
+);

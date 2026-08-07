@@ -10,9 +10,10 @@ export const PHOTO_LIMITS = {
   basic: 0,
   featured: 5,
   premium: 15,
+  pro: 30,
 } as const;
 
-export type PremiumTier = "basic" | "featured" | "premium";
+export type PremiumTier = "basic" | "featured" | "premium" | "pro";
 
 /**
  * Returns the max number of owner-uploaded photos allowed for a tier.
