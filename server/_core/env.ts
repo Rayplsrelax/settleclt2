@@ -19,7 +19,44 @@ export const ENV = {
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
   hermesApiSecret: process.env.HERMES_API_SECRET ?? "",
+  googleClientId: process.env.GOOGLE_CLIENT_ID ?? "",
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+  resendApiKey: process.env.RESEND_API_KEY ?? "",
+  authFromEmail: process.env.AUTH_FROM_EMAIL ?? "",
 };
+
+export function assertSelfHostedPublicOrigin(env = ENV): void {
+  if (!env.publicAppOrigin) throw new Error("Missing PUBLIC_APP_ORIGIN");
+  const origin = new URL(env.publicAppOrigin);
+  if (origin.username || origin.password || origin.pathname !== "/" || origin.search || origin.hash) {
+    throw new Error("PUBLIC_APP_ORIGIN must be an origin only");
+  }
+  if (env.isProduction && origin.origin !== "https://settleclt.com") {
+    throw new Error("Production auth origin must be https://settleclt.com");
+  }
+  if (env.isProduction && origin.protocol !== "https:") {
+    throw new Error("Production auth requires HTTPS");
+  }
+}
+
+export function assertGoogleAuthConfiguration(env = ENV): void {
+  assertSelfHostedPublicOrigin(env);
+  if (!env.googleClientId || !env.googleClientSecret) {
+    throw new Error("Missing Google OAuth configuration");
+  }
+}
+
+export function assertEmailAuthConfiguration(env = ENV): void {
+  assertSelfHostedPublicOrigin(env);
+  if (!env.resendApiKey || !env.authFromEmail || !env.authFromEmail.includes("@settleclt.com")) {
+    throw new Error("Missing transactional email configuration");
+  }
+}
+
+export function assertSelfHostedAuthConfiguration(env = ENV): void {
+  assertGoogleAuthConfiguration(env);
+  assertEmailAuthConfiguration(env);
+}
 
 export function assertOAuthRuntimeConfiguration(env = ENV): void {
   const missing = [

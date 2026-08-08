@@ -45,6 +45,7 @@ const BusinessDetail = lazy(() => import("./pages/BusinessDetail"));
 const Contact = lazy(() => import("./pages/Contact"));
 const NewcomerPlan = lazy(() => import("./pages/NewcomerPlan"));
 const Notifications = lazy(() => import("./pages/Notifications"));
+const Auth = lazy(() => import("./pages/Auth"));
 import CookieConsent from "./components/CookieConsent";
 
 function PageLoader() {
@@ -105,6 +106,7 @@ function Router() {
         <Route path="/blog/:slug" component={BlogArticle} />
         <Route path="/newcomer-plan" component={NewcomerPlan} />
         <Route path="/notifications" component={Notifications} />
+        <Route path="/auth" component={Auth} />
         <Route path="/contact" component={Contact} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />

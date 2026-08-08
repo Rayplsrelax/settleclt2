@@ -23,6 +23,7 @@ export type SessionPayload = {
   openId: string;
   appId: string;
   name: string;
+  authVersion: number;
 };
 
 // Identifies tokens minted by this app. Verified on every request so a token
@@ -178,13 +179,14 @@ class SDKServer {
    */
   async createSessionToken(
     openId: string,
-    options: { expiresInMs?: number; name?: string } = {}
+    options: { expiresInMs?: number; name?: string; authVersion?: number } = {}
   ): Promise<string> {
     return this.signSession(
       {
         openId,
         appId: ENV.appId,
         name: options.name || "",
+        authVersion: options.authVersion ?? 1,
       },
       options
     );
@@ -203,6 +205,7 @@ class SDKServer {
       openId: payload.openId,
       appId: payload.appId,
       name: payload.name,
+      authVersion: payload.authVersion,
     })
       .setProtectedHeader({ alg: "HS256", typ: "JWT" })
       .setIssuedAt()
@@ -214,7 +217,7 @@ class SDKServer {
 
   async verifySession(
     cookieValue: string | undefined | null
-  ): Promise<{ openId: string; appId: string; name: string } | null> {
+  ): Promise<{ openId: string; appId: string; name: string; authVersion: number } | null> {
     if (!cookieValue) {
       console.warn("[Auth] Missing session cookie");
       return null;
@@ -227,12 +230,13 @@ class SDKServer {
         issuer: SESSION_ISSUER,
         audience: ENV.appId,
       });
-      const { openId, appId, name } = payload as Record<string, unknown>;
+      const { openId, appId, name, authVersion } = payload as Record<string, unknown>;
 
       if (
         !isNonEmptyString(openId) ||
         !isNonEmptyString(appId) ||
         !isNonEmptyString(name)
+        || typeof authVersion !== "number"
       ) {
         console.warn("[Auth] Session payload missing required fields");
         return null;
@@ -242,6 +246,7 @@ class SDKServer {
         openId,
         appId,
         name,
+        authVersion,
       };
     } catch (error) {
       console.warn("[Auth] Session verification failed", String(error));
@@ -286,6 +291,10 @@ class SDKServer {
     const sessionUserId = session.openId;
     const signedInAt = new Date();
     let user = await db.getUserByOpenId(sessionUserId);
+
+    if (user && user.authVersion !== session.authVersion) {
+      throw ForbiddenError("Session has been revoked");
+    }
 
     // If user not in DB, sync from OAuth server automatically
     if (!user) {

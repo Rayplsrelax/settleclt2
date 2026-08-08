@@ -10,6 +10,8 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { registerObsidianPublishRoute } from "../obsidian-publish";
 import { registerStorageProxy } from "./storageProxy";
+import { registerLocalAuthRoutes } from "../local-auth-routes";
+import { installAuthOriginGuard } from "./auth-origin";
 import { hermesRouter } from "../hermes-api";
 import { createSecurityMiddleware } from "./security";
 
@@ -257,21 +259,24 @@ async function startServer() {
   app.use("/api/trpc/storage", express.json({ limit: "50mb" }));
   app.use("/api/trpc/businessPortal.uploadPhotoFile", express.json({ limit: "10mb" }));
   app.use("/api/upload", express.json({ limit: "50mb" }));
+  // Rate limiting for all API endpoints, including authentication routes.
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many requests, please try again later." },
+  });
+  app.use("/api", apiLimiter);
+  installAuthOriginGuard(app);
   // OAuth callback under /api/oauth/callback
   registerStorageProxy(app);
+  registerLocalAuthRoutes(app);
   registerOAuthRoutes(app);
   // Shared-secret endpoint for Obsidian/GitHub Actions blog publishing
   registerObsidianPublishRoute(app);
   // Hermes revenue ops agent REST API (Bearer token auth)
   app.use("/api/hermes", express.json({ limit: "2mb" }), hermesRouter);
-  // Rate limiting for API endpoints
-  const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 200, // limit each IP to 200 requests per windowMs
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { error: "Too many requests, please try again later." },
-  });
 
   // Stricter rate limit for form submissions (contact, event submit, business claim)
   const formLimiter = rateLimit({
