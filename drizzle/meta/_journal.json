@@ -162,6 +162,27 @@
       "when": 1785862825684,
       "tag": "0022_business_leads",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1786130000000,
+      "tag": "0023_listing_analytics_daily",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1786130001000,
+      "tag": "0024_business_faqs",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "5",
+      "when": 1786130002000,
+      "tag": "0025_self_hosted_auth",
+      "breakpoints": true
     }
   ]
 }

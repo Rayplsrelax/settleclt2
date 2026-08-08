@@ -2,7 +2,7 @@ import { eq, and, desc, asc, sql, gte, lte, inArray } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import { assertCheckoutIdentifiersCompatible, assertNoConflictingBillingOwner, assertUniquePremiumServiceKeys } from "./business-memberships";
-import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessMemberships, type InsertBusinessMembership, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, stripeCheckoutReconciliations, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription, businessLeads, type BusinessLead, type InsertBusinessLead, listingAnalyticsDaily, businessFaqs, type BusinessFaq, type InsertBusinessFaq } from "../drizzle/schema";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessMemberships, type InsertBusinessMembership, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, stripeCheckoutReconciliations, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription, businessLeads, type BusinessLead, type InsertBusinessLead, listingAnalyticsDaily, businessFaqs, authTokens, type InsertAuthToken, type BusinessFaq, type InsertBusinessFaq } from "../drizzle/schema";
 import { scoreRealtorLead } from "../shared/realtorLeadOps";
 import { ENV } from './_core/env';
 
@@ -97,6 +97,83 @@ export async function getUserById(id: number) {
   if (!db) return undefined;
   const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
   return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getUserByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getUserByGoogleSubject(googleSubject: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(users).where(eq(users.googleSubject, googleSubject)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createLocalUser(data: { email: string; name: string; passwordHash: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const openId = `local:${randomUUID()}`;
+  await db.insert(users).values({ openId, email: data.email, name: data.name, passwordHash: data.passwordHash, loginMethod: "email", lastSignedIn: new Date() });
+  return getUserByOpenId(openId);
+}
+
+export async function updateUserAuth(userId: number, data: { passwordHash?: string; emailVerifiedAt?: Date | null; googleSubject?: string | null; name?: string | null; loginMethod?: string | null }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(users).set(data).where(eq(users.id, userId));
+  return getUserById(userId);
+}
+
+export async function createAuthToken(data: InsertAuthToken) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(authTokens).values(data);
+}
+
+export async function consumeAuthToken(tokenHash: string, purpose: "verify_email" | "reset_password" | "google_oauth") {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.update(authTokens).set({ consumedAt: new Date() }).where(and(
+    eq(authTokens.tokenHash, tokenHash),
+    eq(authTokens.purpose, purpose),
+    sql`${authTokens.consumedAt} IS NULL`,
+    sql`${authTokens.expiresAt} > CURRENT_TIMESTAMP`,
+  ));
+  if (result[0]?.affectedRows !== 1) return undefined;
+  const rows = await db.select().from(authTokens).where(and(eq(authTokens.tokenHash, tokenHash), eq(authTokens.purpose, purpose))).limit(1);
+  return rows[0];
+}
+
+export async function verifyEmailWithToken(tokenHash: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.transaction(async tx => {
+    const rows = await tx.select().from(authTokens).where(and(eq(authTokens.tokenHash, tokenHash), eq(authTokens.purpose, "verify_email"), sql`${authTokens.consumedAt} IS NULL`, sql`${authTokens.expiresAt} > CURRENT_TIMESTAMP`)).limit(1);
+    const token = rows[0];
+    if (!token || token.userId === null) return false;
+    const consumeResult = await tx.update(authTokens).set({ consumedAt: new Date() }).where(and(eq(authTokens.id, token.id), sql`${authTokens.consumedAt} IS NULL`));
+    if (consumeResult[0]?.affectedRows !== 1) return false;
+    await tx.update(users).set({ emailVerifiedAt: new Date() }).where(eq(users.id, token.userId));
+    return true;
+  });
+}
+
+export async function resetPasswordWithToken(tokenHash: string, passwordHash: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.transaction(async tx => {
+    const rows = await tx.select().from(authTokens).where(and(eq(authTokens.tokenHash, tokenHash), eq(authTokens.purpose, "reset_password"), sql`${authTokens.consumedAt} IS NULL`, sql`${authTokens.expiresAt} > CURRENT_TIMESTAMP`)).limit(1);
+    const token = rows[0];
+    if (!token || token.userId === null) return false;
+    const consumeResult = await tx.update(authTokens).set({ consumedAt: new Date() }).where(and(eq(authTokens.id, token.id), sql`${authTokens.consumedAt} IS NULL`));
+    if (consumeResult[0]?.affectedRows !== 1) return false;
+    await tx.update(users).set({ passwordHash, emailVerifiedAt: new Date(), authVersion: sql`${users.authVersion} + 1`, loginMethod: "email" }).where(eq(users.id, token.userId));
+    return true;
+  });
 }
 
 // --- Business listing submissions ---
