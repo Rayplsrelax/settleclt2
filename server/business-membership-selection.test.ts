@@ -3,6 +3,7 @@ import {
   getDefaultPortalTab,
   getPortalPermissionScopeKey,
   getRequestedUpgradeTier,
+  getUpgradeBillingAction,
   getScopedPortalValue,
   reconcileSelectedMembership,
 } from "../client/src/lib/businessMembershipSelection";
@@ -69,6 +70,14 @@ describe("portal membership selection reconciliation", () => {
     expect(getRequestedUpgradeTier("?upgrade=invalid")).toBeNull();
     expect(getDefaultPortalTab(["edit_listing", "manage_billing"], "premium")).toBe("upgrade");
     expect(getDefaultPortalTab(["edit_listing"], "premium")).toBe("details");
+  });
+
+  it("routes active subscribers to the billing portal for plan changes", () => {
+    expect(getUpgradeBillingAction("featured", true)).toBe("portal");
+    expect(getUpgradeBillingAction("premium", true)).toBe("portal");
+    expect(getUpgradeBillingAction("pro", true)).toBe("portal");
+    expect(getUpgradeBillingAction("basic", false)).toBe("checkout");
+    expect(getUpgradeBillingAction("featured", false)).toBe("checkout");
   });
 
   it("does not expose one business form value under another business scope", () => {

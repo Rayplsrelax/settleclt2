@@ -24,6 +24,7 @@ import {
   getDefaultPortalTab,
   getPortalPermissionScopeKey,
   getRequestedUpgradeTier,
+  getUpgradeBillingAction,
   getScopedPortalValue,
   reconcileSelectedMembership,
 } from "@/lib/businessMembershipSelection";
@@ -241,11 +242,13 @@ export default function MyBusiness() {
 
   const handleUpgrade = useCallback((tier: "featured" | "premium" | "pro") => {
     if (!selectedMembership || !canManageBilling) return;
-    createCheckout.mutate({
-      tier,
-      serviceKey: selectedMembership.serviceKey,
-    });
-  }, [selectedMembership, canManageBilling, createCheckout]);
+    const serviceKey = selectedMembership.serviceKey;
+    if (getUpgradeBillingAction(tierInfo?.tier ?? "basic", Boolean(tierInfo?.active)) === "portal") {
+      manageSubscription.mutate({ serviceKey });
+      return;
+    }
+    createCheckout.mutate({ tier, serviceKey });
+  }, [selectedMembership, canManageBilling, tierInfo?.tier, tierInfo?.active, manageSubscription, createCheckout]);
 
   // Load override data into form when available
   useEffect(() => {
@@ -355,6 +358,7 @@ export default function MyBusiness() {
   }
 
   const currentTier = tierInfo?.tier || "basic";
+  const billingMutationPending = createCheckout.isPending || manageSubscription.isPending;
 
   return (
     <PageLayout>
@@ -784,9 +788,9 @@ export default function MyBusiness() {
                     <Button
                       className="w-full mt-4 bg-clt-gold hover:bg-clt-gold/90 text-white gap-1.5"
                       onClick={() => handleUpgrade("featured")}
-                      disabled={createCheckout.isPending}
+                      disabled={billingMutationPending}
                     >
-                      {createCheckout.isPending ? "Loading..." : "Upgrade to Featured"} <ArrowRight className="w-4 h-4" />
+                      {billingMutationPending ? "Loading..." : "Upgrade to Featured"} <ArrowRight className="w-4 h-4" />
                     </Button>
                   )}
                 </CardContent>
@@ -817,9 +821,9 @@ export default function MyBusiness() {
                     <Button
                       className="w-full mt-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white gap-1.5"
                       onClick={() => handleUpgrade("premium")}
-                      disabled={createCheckout.isPending}
+                      disabled={billingMutationPending}
                     >
-                      {createCheckout.isPending ? "Loading..." : "Upgrade to Premium"} <ArrowRight className="w-4 h-4" />
+                      {billingMutationPending ? "Loading..." : "Upgrade to Premium"} <ArrowRight className="w-4 h-4" />
                     </Button>
                   )}
                 </CardContent>
@@ -854,9 +858,9 @@ export default function MyBusiness() {
                     <Button
                       className="w-full mt-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white gap-1.5"
                       onClick={() => handleUpgrade("pro")}
-                      disabled={createCheckout.isPending}
+                      disabled={billingMutationPending}
                     >
-                      {createCheckout.isPending ? "Loading..." : "Upgrade to Business Pro"} <ArrowRight className="w-4 h-4" />
+                      {billingMutationPending ? "Loading..." : "Upgrade to Business Pro"} <ArrowRight className="w-4 h-4" />
                     </Button>
                   )}
                 </CardContent>

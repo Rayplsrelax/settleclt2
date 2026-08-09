@@ -16,6 +16,13 @@ export function getPortalPermissionScopeKey(
 
 export type RequestedUpgradeTier = "featured" | "premium" | "pro";
 
+export function getUpgradeBillingAction(
+  currentTier: "basic" | RequestedUpgradeTier,
+  isActive: boolean,
+): "checkout" | "portal" {
+  return isActive && currentTier !== "basic" ? "portal" : "checkout";
+}
+
 export function getRequestedUpgradeTier(search: string): RequestedUpgradeTier | null {
   const requestedTier = new URLSearchParams(search).get("upgrade");
   return requestedTier === "featured" || requestedTier === "premium" || requestedTier === "pro"
