@@ -109,6 +109,9 @@ export function createSecurityMiddleware(
     const middleware = isPreviewHost(hostname)
       ? previewHelmet
       : productionHelmet;
-    return middleware(req, res, next);
+    return middleware(req, res, () => {
+      res.setHeader("Permissions-Policy", "camera=(), geolocation=(), microphone=()");
+      next();
+    });
   };
 }

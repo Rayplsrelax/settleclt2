@@ -56,6 +56,7 @@ describe("SPA HTTP status resolution", () => {
   it("recognizes static routes and rejects unknown root paths", async () => {
     await expect(resolveSpaStatus("/")).resolves.toBe(200);
     await expect(resolveSpaStatus("/events")).resolves.toBe(200);
+    await expect(resolveSpaStatus("/auth")).resolves.toBe(200);
     await expect(resolveSpaStatus("/find-a-realtor")).resolves.toBe(301);
     await expect(resolveSpaStatus("/hermes-phase8-missing")).resolves.toBe(404);
     await expect(resolveSpaStatus("/404")).resolves.toBe(200);

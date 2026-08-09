@@ -35,6 +35,9 @@ describe("production security headers", () => {
     expect(csp).toContain("object-src 'none'");
     expect(csp).toContain("upgrade-insecure-requests");
     expect(csp).not.toContain("'unsafe-eval'");
+    expect(response.headers["permissions-policy"]).toBe(
+      "camera=(), geolocation=(), microphone=()"
+    );
   });
 
   it.each([
