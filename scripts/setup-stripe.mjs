@@ -34,7 +34,7 @@ async function setupProducts() {
   for (const [tier, config] of Object.entries(TIERS)) {
     // Check if product already exists
     const existing = await stripe.products.search({
-      query: `metadata["settle_tier"]:"${tier}"`,
+      query: `metadata["settle_tier"]:"${tier}" AND active:'true'`,
     });
 
     let product;
@@ -83,25 +83,41 @@ async function setupProducts() {
 async function setupBillingPortal() {
   console.log("\n=== Setting up Billing Portal ===\n");
 
-  // Get all active prices for our products to configure subscription updates
-  const allProducts = await stripe.products.search({
-    query: 'metadata["settle_tier"]:"featured" OR metadata["settle_tier"]:"premium" OR metadata["settle_tier"]:"pro"',
-  });
-  
   const productPrices = [];
-  for (const product of allProducts.data) {
+  for (const tier of Object.keys(TIERS)) {
+    const products = await stripe.products.search({
+      query: `metadata["settle_tier"]:"${tier}" AND active:'true'`,
+    });
+    if (products.data.length !== 1) {
+      throw new Error(
+        `Expected one active Stripe product for ${tier}, found ${products.data.length}`
+      );
+    }
+
+    const product = products.data[0];
     const prices = await stripe.prices.list({
       product: product.id,
       active: true,
       type: "recurring",
-      limit: 5,
+      limit: 100,
     });
-    if (prices.data.length > 0) {
-      productPrices.push({
-        product: product.id,
-        prices: prices.data.map((p) => p.id),
-      });
+    const matchingPrices = prices.data.filter(
+      (price) =>
+        price.unit_amount === TIERS[tier].monthlyPrice &&
+        price.currency === "usd" &&
+        price.recurring?.interval === "month" &&
+        price.recurring?.interval_count === 1
+    );
+    if (matchingPrices.length !== 1) {
+      throw new Error(
+        `Expected one active monthly Stripe price for ${tier}, found ${matchingPrices.length}`
+      );
     }
+
+    productPrices.push({
+      product: product.id,
+      prices: [matchingPrices[0].id],
+    });
   }
 
   const portalConfiguration = {
