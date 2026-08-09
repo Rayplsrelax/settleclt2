@@ -48,8 +48,12 @@ export function assertGoogleAuthConfiguration(env = ENV): void {
 
 export function assertEmailAuthConfiguration(env = ENV): void {
   assertSelfHostedPublicOrigin(env);
-  if (!env.resendApiKey || !env.authFromEmail || !env.authFromEmail.includes("@settleclt.com")) {
+  if (!env.resendApiKey || !env.authFromEmail) {
     throw new Error("Missing transactional email configuration");
+  }
+  // Accept any subdomain of settleclt.com (including the root domain)
+  if (!/@(.*\.)?settleclt\.com$/.test(env.authFromEmail)) {
+    throw new Error("Auth sender must use a settleclt.com (sub)domain");
   }
 }
 
