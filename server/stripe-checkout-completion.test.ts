@@ -46,6 +46,18 @@ describe("Stripe checkout completion ownership", () => {
     expect(dependencies.reconcileRejectedCheckout).not.toHaveBeenCalled();
   });
 
+  it("activates a completed Business Pro subscription", async () => {
+    const dependencies = deps({ accepted: true });
+    const proSession = {
+      ...staleSession,
+      metadata: { ...staleSession.metadata, tier: "pro" },
+    };
+    await expect(processCheckoutCompletion("evt_pro", proSession, dependencies))
+      .resolves.toEqual({ accepted: true, userId: 7, tier: "pro", serviceKey: "owner-business" });
+    expect(dependencies.activateCanonicalCheckout).toHaveBeenCalledWith(expect.objectContaining({ tier: "pro" }));
+    expect(dependencies.reconcileRejectedCheckout).not.toHaveBeenCalled();
+  });
+
   it("reconciles a valid subscription even when canonical metadata is malformed", async () => {
     const dependencies = deps();
     await expect(processCheckoutCompletion("evt_bad", { ...staleSession, metadata: {} }, dependencies))

@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   getDefaultPortalTab,
   getPortalPermissionScopeKey,
+  getRequestedUpgradeTier,
+  getUpgradeBillingAction,
   getScopedPortalValue,
   reconcileSelectedMembership,
 } from "../client/src/lib/businessMembershipSelection";
@@ -58,6 +60,24 @@ describe("portal membership selection reconciliation", () => {
 
   it("has no active portal tab when no permission remains", () => {
     expect(getDefaultPortalTab([])).toBeNull();
+  });
+
+  it("opens billing for a valid paid-tier intent only when billing is allowed", () => {
+    expect(getRequestedUpgradeTier("?upgrade=featured")).toBe("featured");
+    expect(getRequestedUpgradeTier("?upgrade=premium")).toBe("premium");
+    expect(getRequestedUpgradeTier("?upgrade=pro")).toBe("pro");
+    expect(getRequestedUpgradeTier("?upgrade=success&tier=premium")).toBeNull();
+    expect(getRequestedUpgradeTier("?upgrade=invalid")).toBeNull();
+    expect(getDefaultPortalTab(["edit_listing", "manage_billing"], "premium")).toBe("upgrade");
+    expect(getDefaultPortalTab(["edit_listing"], "premium")).toBe("details");
+  });
+
+  it("routes active subscribers to the billing portal for plan changes", () => {
+    expect(getUpgradeBillingAction("featured", true)).toBe("portal");
+    expect(getUpgradeBillingAction("premium", true)).toBe("portal");
+    expect(getUpgradeBillingAction("pro", true)).toBe("portal");
+    expect(getUpgradeBillingAction("basic", false)).toBe("checkout");
+    expect(getUpgradeBillingAction("featured", false)).toBe("checkout");
   });
 
   it("does not expose one business form value under another business scope", () => {

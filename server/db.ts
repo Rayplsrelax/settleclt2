@@ -1756,7 +1756,7 @@ export async function getAllListingOverrides() {
 
 export type CanonicalCheckoutActivation = {
   serviceKey: string;
-  tier: "featured" | "premium";
+  tier: "featured" | "premium" | "pro";
   claimId: number;
   userId: number;
   billingEmail?: string;

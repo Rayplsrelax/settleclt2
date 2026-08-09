@@ -31,6 +31,25 @@ describe("Business claim monetization funnel", () => {
     expect(page).toContain("Claim Your Business");
   });
 
+  it("preserves the selected paid tier when entering the owner checkout flow", () => {
+    const page = readFileSync("client/src/pages/BusinessPricing.tsx", "utf8");
+    expect(page).toContain('href: "/my-business?upgrade=featured"');
+    expect(page).toContain('href: "/my-business?upgrade=premium"');
+    expect(page).toContain('href: "/my-business?upgrade=pro"');
+  });
+
+  it("provisions every public paid tier in the Stripe setup script", () => {
+    const setup = readFileSync("scripts/setup-stripe.mjs", "utf8");
+    expect(setup).toContain("pro: {");
+    expect(setup).not.toContain('"customer.subscription.trial_will_end"');
+  });
+
+  it("updates an existing billing portal with the complete catalog", () => {
+    const setup = readFileSync("scripts/setup-stripe.mjs", "utf8");
+    expect(setup).toContain("billingPortal.configurations.update");
+    expect(setup).not.toContain("Billing portal already configured");
+  });
+
   it("gives admins a claim-to-revenue workflow prompt", () => {
     const adminClaims = readFileSync("client/src/pages/AdminClaims.tsx", "utf8");
     expect(adminClaims).toContain("Claim-to-revenue workflow");

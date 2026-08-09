@@ -59,6 +59,7 @@ async function startServer() {
         upsertPremiumListing,
       } = await import("../db");
       const { processCheckoutCompletion } = await import("../stripe-checkout-completion");
+      const { getInvoiceSubscriptionId, getSubscriptionBillingUpdate } = await import("../stripe-webhook-fields");
       const { cancelSubscriptionIfActive, reconcileRejectedCheckout } = await import("../stripe-checkout-reconciliation");
       const sig = req.headers["stripe-signature"] as string;
       const event = constructWebhookEvent(req.body, sig);
@@ -98,20 +99,12 @@ async function startServer() {
         }
         case "customer.subscription.updated": {
           const sub = event.data.object as any;
-          const { getStripe } = await import("../stripe-helpers");
           // Find the premium listing by subscription ID
           const { getAllPremiumListings } = await import("../db");
           const all = await getAllPremiumListings();
           const listing = all.find((l: any) => l.stripeSubscriptionId === sub.id);
           if (listing) {
-            const statusMap: Record<string, string> = {
-              active: "active", past_due: "past_due", canceled: "canceled", trialing: "trialing",
-            };
-            await upsertPremiumListing(listing.serviceKey, {
-              paymentStatus: (statusMap[sub.status] || "active") as any,
-              currentPeriodStart: new Date(sub.current_period_start * 1000),
-              currentPeriodEnd: new Date(sub.current_period_end * 1000),
-            });
+            await upsertPremiumListing(listing.serviceKey, getSubscriptionBillingUpdate(sub));
           }
           break;
         }
@@ -131,7 +124,7 @@ async function startServer() {
         }
         case "invoice.payment_succeeded": {
           const invoice = event.data.object as any;
-          const subId = invoice.subscription;
+          const subId = getInvoiceSubscriptionId(invoice);
           if (subId) {
             const { getAllPremiumListings } = await import("../db");
             const all = await getAllPremiumListings();
@@ -147,7 +140,7 @@ async function startServer() {
         }
         case "invoice.payment_failed": {
           const invoice = event.data.object as any;
-          const subId = invoice.subscription;
+          const subId = getInvoiceSubscriptionId(invoice);
           if (subId) {
             const { getAllPremiumListings } = await import("../db");
             const { notifyOwner } = await import("./notification");
