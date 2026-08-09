@@ -14,6 +14,8 @@ const PREVIEW_DOMAINS = [
   "manusvm.computer",
 ];
 
+const PERMISSIONS_POLICY = "camera=(), geolocation=(), microphone=()";
+
 export function isPreviewHost(hostname: string): boolean {
   const normalizedHostname = hostname.toLowerCase().replace(/\.$/, "");
   return (
@@ -109,9 +111,12 @@ export function createSecurityMiddleware(
     const middleware = isPreviewHost(hostname)
       ? previewHelmet
       : productionHelmet;
-    return middleware(req, res, () => {
-      res.setHeader("Permissions-Policy", "camera=(), geolocation=(), microphone=()");
-      next();
+    return middleware(req, res, (err?: unknown) => {
+      if (err) return next(err);
+      if (!res.headersSent) {
+        res.setHeader("Permissions-Policy", PERMISSIONS_POLICY);
+      }
+      return next();
     });
   };
 }
