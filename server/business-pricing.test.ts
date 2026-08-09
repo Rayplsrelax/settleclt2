@@ -50,6 +50,22 @@ describe("Business claim monetization funnel", () => {
     expect(setup).not.toContain("Billing portal already configured");
   });
 
+  it("resolves billing portal products with one reliable lookup per tier", () => {
+    const setup = readFileSync("scripts/setup-stripe.mjs", "utf8");
+    expect(setup).not.toContain(
+      'metadata["settle_tier"]:"featured" OR metadata["settle_tier"]:"premium" OR metadata["settle_tier"]:"pro"'
+    );
+    expect(setup).toContain("for (const tier of Object.keys(TIERS))");
+  });
+
+  it("ignores archived products during catalog and portal reconciliation", () => {
+    const setup = readFileSync("scripts/setup-stripe.mjs", "utf8");
+    const activeTierSearches = setup.match(
+      /query: `metadata\["settle_tier"\]:"\$\{tier\}" AND active:'true'`/g
+    );
+    expect(activeTierSearches).toHaveLength(2);
+  });
+
   it("gives admins a claim-to-revenue workflow prompt", () => {
     const adminClaims = readFileSync("client/src/pages/AdminClaims.tsx", "utf8");
     expect(adminClaims).toContain("Claim-to-revenue workflow");
