@@ -9,7 +9,7 @@ type CheckoutSession = {
 
 type CanonicalCheckoutInput = {
   serviceKey: string;
-  tier: "featured" | "premium";
+  tier: "featured" | "premium" | "pro";
   claimId: number;
   userId: number;
   billingEmail?: string;
@@ -64,7 +64,7 @@ export async function processCheckoutCompletion(
 
   if (
     !serviceKey ||
-    (tier !== "featured" && tier !== "premium") ||
+    (tier !== "featured" && tier !== "premium" && tier !== "pro") ||
     !Number.isSafeInteger(claimId) || claimId <= 0 ||
     !Number.isSafeInteger(userId) || userId <= 0 ||
     !stripeCustomerId

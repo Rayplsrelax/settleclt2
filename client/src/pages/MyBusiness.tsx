@@ -23,6 +23,7 @@ import { useSEO } from "@/hooks/useSEO";
 import {
   getDefaultPortalTab,
   getPortalPermissionScopeKey,
+  getRequestedUpgradeTier,
   getScopedPortalValue,
   reconcileSelectedMembership,
 } from "@/lib/businessMembershipSelection";
@@ -114,8 +115,9 @@ export default function MyBusiness() {
   const canEdit = permissions.includes("edit_listing");
   const canViewAnalytics = permissions.includes("view_analytics");
   const canManageBilling = permissions.includes("manage_billing");
+  const requestedUpgradeTier = getRequestedUpgradeTier(window.location.search);
   const portalPermissionScopeKey = getPortalPermissionScopeKey(selectedMembership?.id, permissions);
-  const defaultPortalTab = getDefaultPortalTab(permissions);
+  const defaultPortalTab = getDefaultPortalTab(permissions, requestedUpgradeTier);
   const scopedForm = getScopedPortalValue(formState, selectedMembership?.serviceKey);
   const form = scopedForm ?? EMPTY_LISTING_FORM;
   const formIsCurrent = canEdit && scopedForm !== null;
@@ -726,6 +728,14 @@ export default function MyBusiness() {
 
           {/* Upgrade Tab */}
           <TabsContent value="upgrade">
+            {requestedUpgradeTier && (
+              <div className="mb-6 rounded-lg border border-primary/20 bg-primary/5 p-4">
+                <p className="font-medium">Your selected plan is ready</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Confirm the selected plan below to continue to secure Stripe Checkout.
+                </p>
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Basic Tier */}
               <Card className={currentTier === "basic" ? "border-primary ring-1 ring-primary/20" : ""}>

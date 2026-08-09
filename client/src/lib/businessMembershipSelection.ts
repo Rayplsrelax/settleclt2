@@ -14,7 +14,20 @@ export function getPortalPermissionScopeKey(
   return `${membershipId ?? "none"}:${[...permissions].sort().join(",")}`;
 }
 
-export function getDefaultPortalTab(permissions: readonly string[]): string | null {
+export type RequestedUpgradeTier = "featured" | "premium" | "pro";
+
+export function getRequestedUpgradeTier(search: string): RequestedUpgradeTier | null {
+  const requestedTier = new URLSearchParams(search).get("upgrade");
+  return requestedTier === "featured" || requestedTier === "premium" || requestedTier === "pro"
+    ? requestedTier
+    : null;
+}
+
+export function getDefaultPortalTab(
+  permissions: readonly string[],
+  requestedUpgradeTier: RequestedUpgradeTier | null = null,
+): string | null {
+  if (requestedUpgradeTier && permissions.includes("manage_billing")) return "upgrade";
   if (permissions.includes("edit_listing")) return "details";
   if (permissions.includes("view_analytics")) return "analytics";
   if (permissions.includes("manage_billing")) return "upgrade";

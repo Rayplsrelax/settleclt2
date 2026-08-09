@@ -41,8 +41,8 @@ const plans = [
       "Detailed click analytics",
       "Good fit for local service businesses testing demand",
     ],
-    cta: "Claim First, Then Upgrade",
-    href: "/directory",
+    cta: "Choose Featured",
+    href: "/my-business?upgrade=featured",
   },
   {
     name: "Premium Listing",
@@ -60,8 +60,8 @@ const plans = [
       "Lead generation analytics",
       "Monthly performance report",
     ],
-    cta: "Claim First, Then Upgrade",
-    href: "/directory",
+    cta: "Choose Premium",
+    href: "/my-business?upgrade=premium",
   },
   {
     name: "Business Pro",
@@ -80,8 +80,8 @@ const plans = [
       "One-page web presence",
       "Photo gallery up to 30 photos",
     ],
-    cta: "Claim First, Then Upgrade",
-    href: "/directory",
+    cta: "Choose Business Pro",
+    href: "/my-business?upgrade=pro",
   },
 ];
 

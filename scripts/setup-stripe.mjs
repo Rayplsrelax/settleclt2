@@ -20,6 +20,12 @@ const TIERS = {
       "Maximum visibility with Premium badge, top of search results, expanded photo gallery (up to 15), lead generation analytics, and monthly performance reports.",
     monthlyPrice: 7900, // $79/mo
   },
+  pro: {
+    name: "Settle CLT - Business Pro",
+    description:
+      "Full AI-powered business management with a 24/7 assistant, smart scheduling, social content drafts, reputation monitoring, and a one-page web presence.",
+    monthlyPrice: 14900, // $149/mo
+  },
 };
 
 async function setupProducts() {
@@ -77,18 +83,9 @@ async function setupProducts() {
 async function setupBillingPortal() {
   console.log("\n=== Setting up Billing Portal ===\n");
 
-  const configs = await stripe.billingPortal.configurations.list({ limit: 1 });
-
-  if (configs.data.length > 0 && configs.data[0].active) {
-    console.log(
-      `✓ Billing portal already configured: ${configs.data[0].id}`
-    );
-    return;
-  }
-
   // Get all active prices for our products to configure subscription updates
   const allProducts = await stripe.products.search({
-    query: 'metadata["settle_tier"]:"featured" OR metadata["settle_tier"]:"premium"',
+    query: 'metadata["settle_tier"]:"featured" OR metadata["settle_tier"]:"premium" OR metadata["settle_tier"]:"pro"',
   });
   
   const productPrices = [];
@@ -107,7 +104,7 @@ async function setupBillingPortal() {
     }
   }
 
-  const config = await stripe.billingPortal.configurations.create({
+  const portalConfiguration = {
     business_profile: {
       headline: "Manage your Settle CLT subscription",
     },
@@ -139,8 +136,23 @@ async function setupBillingPortal() {
         enabled: true,
       },
     },
-  });
+  };
 
+  const configs = await stripe.billingPortal.configurations.list({ limit: 100 });
+  const existingConfig =
+    configs.data.find((config) => config.is_default) ??
+    configs.data.find((config) => config.active);
+
+  if (existingConfig) {
+    await stripe.billingPortal.configurations.update(existingConfig.id, {
+      ...portalConfiguration,
+      active: true,
+    });
+    console.log(`✓ Updated billing portal configuration: ${existingConfig.id}`);
+    return;
+  }
+
+  const config = await stripe.billingPortal.configurations.create(portalConfiguration);
   console.log(`✓ Created billing portal configuration: ${config.id}`);
 }
 
@@ -154,7 +166,6 @@ async function setupWebhook() {
     "customer.subscription.deleted",
     "invoice.payment_succeeded",
     "invoice.payment_failed",
-    "customer.subscription.trial_will_end",
   ];
 
   // List existing webhooks
@@ -194,9 +205,7 @@ async function setupWebhook() {
 
 async function main() {
   console.log("🔧 Settle CLT — Stripe Setup\n");
-  console.log(
-    `Using Stripe key: ${process.env.STRIPE_SECRET_KEY?.substring(0, 12)}...`
-  );
+  console.log(`Using Stripe mode: ${process.env.STRIPE_SECRET_KEY?.startsWith("sk_live_") ? "live" : "test"}`);
 
   await setupProducts();
   await setupBillingPortal();
