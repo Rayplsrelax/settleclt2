@@ -503,7 +503,7 @@ export default function BusinessDetail() {
                       if (premiumData?.active && premiumData?.tier !== 'basic') trackClick.mutate({ serviceKey: slug });
                     }}>
                       <Button size="sm" className="gap-1.5 bg-primary hover:bg-primary/90">
-                        <Calendar className="w-3.5 h-3.5" /> {publicProfile.bookingProvider ? `Book via ${publicProfile.bookingProvider}` : "Book or Request a Quote"}
+                        <Calendar className="w-3.5 h-3.5" /> {publicProfile.bookingProvider ? `Book or Pay via ${publicProfile.bookingProvider}` : "Book or Request a Quote"}
                       </Button>
                     </a>
                   )}
