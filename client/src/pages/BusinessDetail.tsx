@@ -424,6 +424,11 @@ export default function BusinessDetail() {
                           {"$".repeat(enrichment.priceLevel)}
                         </Badge>
                       )}
+                      {publicProfile?.newcomerAttributes?.map((attr: string) => (
+                        <Badge key={attr} className="bg-green-100 text-green-700 border-green-200 text-xs gap-1 capitalize">
+                          {attr.replace(/-/g, " ")}
+                        </Badge>
+                      ))}
                     </div>
 
                     {/* Google rating */}

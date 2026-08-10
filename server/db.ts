@@ -2,7 +2,7 @@ import { eq, and, desc, asc, sql, gte, lte, inArray } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import { assertCheckoutIdentifiersCompatible, assertNoConflictingBillingOwner, assertUniquePremiumServiceKeys } from "./business-memberships";
-import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessMemberships, type InsertBusinessMembership, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, stripeCheckoutReconciliations, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription, businessLeads, type BusinessLead, type InsertBusinessLead, listingAnalyticsDaily, businessFaqs, authTokens, type InsertAuthToken, type BusinessFaq, type InsertBusinessFaq, businessPromotions, type BusinessPromotion, type InsertBusinessPromotion } from "../drizzle/schema";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessMemberships, type InsertBusinessMembership, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, stripeCheckoutReconciliations, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription, businessLeads, type BusinessLead, type InsertBusinessLead, listingAnalyticsDaily, businessFaqs, authTokens, type InsertAuthToken, type BusinessFaq, type InsertBusinessFaq, businessPromotions, type BusinessPromotion, type InsertBusinessPromotion, eventSponsorships, type EventSponsorship, type InsertEventSponsorship, businessReferrals, type BusinessReferral, type InsertBusinessReferral } from "../drizzle/schema";
 import { scoreRealtorLead } from "../shared/realtorLeadOps";
 import { ENV } from './_core/env';
 
@@ -1575,6 +1575,68 @@ export async function getBusinessLeadsForUser(userId: number, serviceKey: string
     .where(and(eq(businessLeads.serviceKey, serviceKey)))
     .orderBy(desc(businessLeads.createdAt))
     .limit(100);
+}
+
+// ─── Event Sponsorships ───
+
+export async function createEventSponsorship(data: InsertEventSponsorship) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(eventSponsorships).values(data);
+  return { id: result.insertId };
+}
+
+export async function getActiveSponsorshipsForEvent(eventId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(eventSponsorships)
+    .where(and(
+      eq(eventSponsorships.eventId, eventId),
+      eq(eventSponsorships.status, "active"),
+    ))
+    .orderBy(desc(eventSponsorships.level))
+    .limit(20);
+}
+
+export async function getSponsorshipsForBusiness(serviceKey: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(eventSponsorships)
+    .where(eq(eventSponsorships.serviceKey, serviceKey))
+    .orderBy(desc(eventSponsorships.createdAt))
+    .limit(20);
+}
+
+// ─── Business Referrals (general) ───
+
+export async function createBusinessReferral(data: InsertBusinessReferral) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(businessReferrals).values(data);
+  return { id: result.insertId };
+}
+
+export async function getBusinessReferralsForService(serviceKey: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(businessReferrals)
+    .where(eq(businessReferrals.serviceKey, serviceKey))
+    .orderBy(desc(businessReferrals.createdAt))
+    .limit(50);
+}
+
+export async function getBusinessReferralById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(businessReferrals)
+    .where(eq(businessReferrals.id, id)).limit(1);
+  return rows[0] ?? null;
+}
+
+export async function updateBusinessReferralStatus(id: number, status: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(businessReferrals).set({ status: status as any }).where(eq(businessReferrals.id, id));
 }
 
 // ─── Business Promotions ───

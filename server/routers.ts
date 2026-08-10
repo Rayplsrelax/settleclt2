@@ -31,6 +31,8 @@ import {
   deleteUserAccount,
   createBusinessLead, getBusinessLeadsForService, getBusinessLeadById, updateBusinessLeadStatus, updateBusinessLeadDetails,
   createBusinessPromotion, getActivePromotions, getPromotionsForBusiness, updatePromotionStatus,
+  createEventSponsorship, getActiveSponsorshipsForEvent, getSponsorshipsForBusiness,
+  createBusinessReferral, getBusinessReferralsForService, getBusinessReferralById, updateBusinessReferralStatus,
   getDailyAnalytics, snapshotDailyAnalytics,
   getBusinessFaqs, createBusinessFaq, deleteBusinessFaq,
   createNotification, getUserNotifications, getUnreadNotificationCount,
@@ -1906,7 +1908,8 @@ export const appRouter = router({
           subtitle: input.subtitle ?? null,
           targetCategory: input.targetCategory ?? null,
           targetNeighborhood: input.targetNeighborhood ?? null,
-          status: "active",
+          // Activation must happen after a verified payment/webhook.
+          status: "pending",
           priceCents: input.priceCents,
           startsAt: now,
           endsAt,
@@ -1928,6 +1931,82 @@ export const appRouter = router({
         targetNeighborhood: p.targetNeighborhood,
       }));
     }),
+    // ─── Event Sponsorships ───
+    getSponsorships: protectedProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .query(async ({ input, ctx }) => {
+        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+        requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        return getSponsorshipsForBusiness(input.serviceKey);
+      }),
+    createSponsorship: protectedProcedure
+      .input(z.object({
+        serviceKey: z.string(),
+        eventId: z.number(),
+        level: z.enum(["gold", "silver", "bronze"]),
+        message: z.string().max(500).optional(),
+        priceCents: z.number().int().min(0),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+        requireBusinessPermission(memberships, input.serviceKey, "manage_billing");
+        return createEventSponsorship({
+          serviceKey: input.serviceKey,
+          eventId: input.eventId,
+          level: input.level,
+          message: input.message ?? null,
+          // Activation must happen after a verified payment/webhook.
+          status: "pending",
+          priceCents: input.priceCents,
+          userId: ctx.user.id,
+        });
+      }),
+    getEventSponsors: publicProcedure
+      .input(z.object({ eventId: z.number() }))
+      .query(async ({ input }) => {
+        return getActiveSponsorshipsForEvent(input.eventId);
+      }),
+    // ─── Business Referrals (general) ───
+    submitBizReferral: publicProcedure
+      .input(z.object({
+        serviceKey: z.string(),
+        name: z.string().min(1).max(255),
+        email: z.string().email(),
+        phone: z.string().max(32).optional(),
+        need: z.string().min(1).max(500),
+        source: z.string().max(128).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return createBusinessReferral({
+          serviceKey: input.serviceKey,
+          name: input.name,
+          email: input.email,
+          phone: input.phone ?? null,
+          need: input.need,
+          source: input.source ?? "directory",
+          userId: ctx.user?.id ?? null,
+        });
+      }),
+    getBizReferrals: protectedProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .query(async ({ input, ctx }) => {
+        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+        requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        return getBusinessReferralsForService(input.serviceKey);
+      }),
+    updateBizReferralStatus: protectedProcedure
+      .input(z.object({
+        referralId: z.number(),
+        status: z.enum(["new", "referred", "connected", "completed", "archived"]),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const referral = await getBusinessReferralById(input.referralId);
+        if (!referral) throw new TRPCError({ code: "NOT_FOUND", message: "Referral not found." });
+        const memberships = await getBusinessMembershipsForUser(ctx.user.id, referral.serviceKey);
+        requireBusinessPermission(memberships, referral.serviceKey, "edit_listing");
+        await updateBusinessReferralStatus(input.referralId, input.status);
+        return { success: true as const };
+      }),
     adminListPremium: adminProcedure.query(async () => {
       return getAllPremiumListings();
     }),

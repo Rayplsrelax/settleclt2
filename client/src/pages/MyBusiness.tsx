@@ -44,6 +44,7 @@ const EMPTY_LISTING_FORM: {
   serviceMenu: string;
   bookingProvider: "" | "Booksy" | "Square Appointments" | "Calendly" | "Acuity" | "Google booking" | "Stripe Payment Links" | "QuickBooks" | "Other";
   bookingUrl: string;
+  newcomerAttributes: string;
 } = {
   displayName: "",
   description: "",
@@ -56,7 +57,60 @@ const EMPTY_LISTING_FORM: {
   serviceMenu: "[]",
   bookingProvider: "",
   bookingUrl: "",
+  newcomerAttributes: "[]",
 };
+
+const NEWCOMER_ATTRIBUTE_OPTIONS = [
+  { value: "family-friendly", label: "Family-friendly" },
+  { value: "new-mover-favorite", label: "New-mover favorite" },
+  { value: "budget-friendly", label: "Budget-friendly" },
+  { value: "english-spanish", label: "Bilingual (English/Spanish)" },
+  { value: "walkable", label: "Walkable location" },
+  { value: "quick-service", label: "Quick service" },
+  { value: "veteran-owned", label: "Veteran-owned" },
+  { value: "woman-owned", label: "Woman-owned" },
+  { value: "locally-grown", label: "Locally grown" },
+  { value: "kid-friendly", label: "Kid-friendly" },
+  { value: "pet-friendly", label: "Pet-friendly" },
+  { value: "open-weekends", label: "Open weekends" },
+];
+
+function NewcomerAttributesEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const selected = (() => {
+    try {
+      const parsed = JSON.parse(value || "[]");
+      return Array.isArray(parsed) ? parsed as string[] : [];
+    } catch {
+      return [];
+    }
+  })();
+
+  const toggle = (attr: string) => {
+    const next = selected.includes(attr)
+      ? selected.filter(a => a !== attr)
+      : [...selected, attr];
+    onChange(JSON.stringify(next));
+  };
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {NEWCOMER_ATTRIBUTE_OPTIONS.map(opt => (
+        <button
+          key={opt.value}
+          type="button"
+          onClick={() => toggle(opt.value)}
+          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+            selected.includes(opt.value)
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted text-muted-foreground hover:bg-muted/80"
+          }`}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 type ServiceMenuItem = {
   name: string;
@@ -202,10 +256,18 @@ export default function MyBusiness() {
     { enabled: !!selectedMembership && canViewAnalytics }
   );
 
+  const trpcUtils = trpc.useUtils();
   const { data: tierInfo } = trpc.premium.getTier.useQuery(
     { serviceKey: selectedMembership?.serviceKey ?? "" },
     { enabled: !!selectedMembership }
   );
+  const { data: businessReferrals = [] } = trpc.premium.getBizReferrals.useQuery(
+    { serviceKey: selectedMembership?.serviceKey ?? "" },
+    { enabled: !!selectedMembership && canEdit }
+  );
+  const updateBizReferralStatus = trpc.premium.updateBizReferralStatus.useMutation({
+    onSuccess: () => selectedMembership?.serviceKey && void trpcUtils.premium.getBizReferrals.invalidate({ serviceKey: selectedMembership.serviceKey }),
+  });
   const tierLevel = tierInfo?.tier || "basic";
   const isTierActive = Boolean(tierInfo?.active);
   const isFeaturedPlus = isTierActive && (tierLevel === "featured" || tierLevel === "premium" || tierLevel === "pro");
@@ -340,6 +402,7 @@ export default function MyBusiness() {
         serviceMenu: override.serviceMenu || "[]",
         bookingProvider: (override.bookingProvider || "") as typeof EMPTY_LISTING_FORM.bookingProvider,
         bookingUrl: override.bookingUrl || "",
+        newcomerAttributes: override.newcomerAttributes || "[]",
       });
     } else {
       setFormState({ scopeKey: null, value: EMPTY_LISTING_FORM });
@@ -513,6 +576,7 @@ export default function MyBusiness() {
             <TabsTrigger value="hours" disabled={!canEdit} className="gap-1.5"><Clock className="w-3.5 h-3.5" /> Hours</TabsTrigger>
             <TabsTrigger value="photos" disabled={!canEdit} className="gap-1.5"><Image className="w-3.5 h-3.5" /> Photos</TabsTrigger>
             <TabsTrigger value="analytics" disabled={!canViewAnalytics} className="gap-1.5"><BarChart3 className="w-3.5 h-3.5" /> Analytics</TabsTrigger>
+            <TabsTrigger value="referrals" disabled={!canEdit} className="gap-1.5"><Users className="w-3.5 h-3.5" /> Referrals</TabsTrigger>
             <TabsTrigger value="upgrade" disabled={!canManageBilling} className="gap-1.5"><Crown className="w-3.5 h-3.5" /> Upgrade</TabsTrigger>
           </TabsList>
 
@@ -669,6 +733,23 @@ export default function MyBusiness() {
                   </CardContent>
                 </Card>
               )}
+              {/* Newcomer attributes — free for all tiers */}
+              <Card className="md:col-span-2 border-green-200/50">
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-green-600" /> Newcomer attributes
+                  </CardTitle>
+                  <CardDescription>Help newcomers find businesses like yours. Select all that apply — these show on your public listing.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <NewcomerAttributesEditor value={form.newcomerAttributes} onChange={(newcomerAttributes) => setForm({ ...form, newcomerAttributes })} />
+                  <div className="mt-4 flex justify-end">
+                    <Button onClick={handleSave} disabled={updateListing.isPending || !formIsCurrent} size="sm" className="gap-1.5">
+                      <Save className="w-3.5 h-3.5" /> Save Attributes
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
@@ -936,6 +1017,38 @@ export default function MyBusiness() {
           </TabsContent>
 
           {/* Upgrade Tab */}
+          <TabsContent value="referrals">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2"><Users className="w-4 h-4" /> Referral requests</CardTitle>
+                <CardDescription>Track customers referred to your business from Settle CLT.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {businessReferrals.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No referral requests yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {businessReferrals.map((referral) => (
+                      <div key={referral.id} className="rounded-lg border p-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                        <div>
+                          <p className="font-medium text-sm">{referral.name} · {referral.need}</p>
+                          <p className="text-xs text-muted-foreground">{referral.email}{referral.phone ? ` · ${referral.phone}` : ""}</p>
+                        </div>
+                        <select
+                          value={referral.status}
+                          onChange={(event) => updateBizReferralStatus.mutate({ referralId: referral.id, status: event.target.value as "new" | "referred" | "connected" | "completed" | "archived" })}
+                          className="rounded-md border bg-background px-2 py-1.5 text-xs"
+                        >
+                          {(["new", "referred", "connected", "completed", "archived"] as const).map(status => <option key={status} value={status}>{status}</option>)}
+                        </select>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="upgrade">
             {requestedUpgradeTier && (
               <div className="mb-6 rounded-lg border border-primary/20 bg-primary/5 p-4">

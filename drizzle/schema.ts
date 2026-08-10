@@ -1025,6 +1025,49 @@ export const businessPromotions = mysqlTable("business_promotions", {
 export type BusinessPromotion = typeof businessPromotions.$inferSelect;
 export type InsertBusinessPromotion = typeof businessPromotions.$inferInsert;
 
+// ─── Event Sponsorships ───
+
+export const eventSponsorships = mysqlTable("event_sponsorships", {
+  id: int("id").autoincrement().primaryKey(),
+  eventId: int("eventId").notNull(),
+  serviceKey: varchar("serviceKey", { length: 255 }).notNull(),
+  /** Sponsorship level: gold, silver, bronze */
+  level: mysqlEnum("level", ["gold", "silver", "bronze"]).default("bronze").notNull(),
+  /** Optional sponsor message */
+  message: varchar("message", { length: 500 }),
+  status: mysqlEnum("status", ["pending", "active", "expired", "canceled"]).default("pending").notNull(),
+  stripePaymentRef: varchar("stripePaymentRef", { length: 255 }),
+  priceCents: int("priceCents").default(0).notNull(),
+  userId: int("userId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type EventSponsorship = typeof eventSponsorships.$inferSelect;
+export type InsertEventSponsorship = typeof eventSponsorships.$inferInsert;
+
+// ─── Business Referrals (general, extends real estate referrals) ───
+
+export const businessReferrals = mysqlTable("business_referrals", {
+  id: int("id").autoincrement().primaryKey(),
+  serviceKey: varchar("serviceKey", { length: 255 }).notNull(),
+  /** Customer name */
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  phone: varchar("phone", { length: 32 }),
+  /** What they need (free text, e.g. "Need a plumber", "Looking for a dentist") */
+  need: varchar("need", { length: 500 }).notNull(),
+  /** Referral source page */
+  source: varchar("source", { length: 128 }),
+  status: mysqlEnum("status", ["new", "referred", "connected", "completed", "archived"]).default("new").notNull(),
+  userId: int("userId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BusinessReferral = typeof businessReferrals.$inferSelect;
+export type InsertBusinessReferral = typeof businessReferrals.$inferInsert;
+
 // ─── Daily Analytics Snapshots ───
 
 /** Daily view/click/lead counts for premium listing charts. */

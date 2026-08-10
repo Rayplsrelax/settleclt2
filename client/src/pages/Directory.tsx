@@ -271,6 +271,33 @@ export default function Directory() {
   const activeFilterCount = [search, activeGroup, activeCategory, activeArea].filter(Boolean).length;
   const hasFilters = activeFilterCount > 0 || sortBy !== "default";
 
+  // Fetch active promotions for boosted placements
+  const promotionsQuery = trpc.premium.getActiveDirectoryPromotions.useQuery();
+  const boostedKeys = useMemo(() => {
+    if (!promotionsQuery.data) return new Set<string>();
+    return new Set(promotionsQuery.data.map(p => p.serviceKey));
+  }, [promotionsQuery.data]);
+  const activePromotionMap = useMemo(() => {
+    if (!promotionsQuery.data) return {} as Record<string, { headline: string; subtitle?: string | null }>;
+    const map: Record<string, { headline: string; subtitle?: string | null }> = {};
+    for (const p of promotionsQuery.data) {
+      map[p.serviceKey] = { headline: p.headline ?? "", subtitle: p.subtitle };
+    }
+    return map;
+  }, [promotionsQuery.data]);
+
+  // Sort boosted listings to the top when no filters are active
+  const sortedWithBoosts = useMemo(() => {
+    if (!hasFilters && boostedKeys.size > 0) {
+      return [...filteredServices].sort((a, b) => {
+        const aBoost = boostedKeys.has(toSlug(a.name)) ? 1 : 0;
+        const bBoost = boostedKeys.has(toSlug(b.name)) ? 1 : 0;
+        return bBoost - aBoost;
+      });
+    }
+    return filteredServices;
+  }, [filteredServices, boostedKeys, hasFilters]);
+
   // Reset visible count when filters change
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
@@ -278,10 +305,10 @@ export default function Directory() {
 
   // Paginated slice of filtered services
   const visibleServices = useMemo(() => {
-    return filteredServices.slice(0, visibleCount);
-  }, [filteredServices, visibleCount]);
+    return sortedWithBoosts.slice(0, visibleCount);
+  }, [sortedWithBoosts, visibleCount]);
 
-  const hasMore = visibleCount < filteredServices.length;
+  const hasMore = visibleCount < sortedWithBoosts.length;
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -291,7 +318,7 @@ export default function Directory() {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, filteredServices.length));
+          setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, sortedWithBoosts.length));
         }
       },
       { rootMargin: "400px" }
@@ -692,7 +719,15 @@ export default function Directory() {
                             {!premiumTier && s.featured && s.affiliate && (
                               <span className="px-1.5 py-0.5 rounded bg-clt-gold/20 text-clt-gold text-[10px] font-bold uppercase">Featured</span>
                             )}
+                            {boostedKeys.has(sSlug) && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold uppercase">
+                                Promoted
+                              </span>
+                            )}
                           </div>
+                          {boostedKeys.has(sSlug) && activePromotionMap[sSlug]?.headline && (
+                            <p className="text-xs font-medium text-blue-600 mt-0.5">{activePromotionMap[sSlug].headline}</p>
+                          )}
                           <p className="text-xs text-muted-foreground mt-1">{s.description}</p>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
