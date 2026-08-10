@@ -1217,6 +1217,26 @@ export async function getReviews(targetType: "neighborhood" | "directory", targe
   return rows;
 }
 
+export async function getVisibleDirectoryReviewForService(reviewId: number, serviceKey: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select({
+    id: reviews.id,
+    rating: reviews.rating,
+    tip: reviews.tip,
+    aspect: reviews.aspect,
+  })
+    .from(reviews)
+    .where(and(
+      eq(reviews.id, reviewId),
+      eq(reviews.targetType, "directory"),
+      eq(reviews.targetId, serviceKey),
+      eq(reviews.visible, "yes"),
+    ))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
 /** Get average rating and count for a target */
 export async function getReviewStats(targetType: "neighborhood" | "directory", targetId: string) {
   const db = await getDb();
