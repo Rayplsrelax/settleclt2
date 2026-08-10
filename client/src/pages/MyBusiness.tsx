@@ -1154,7 +1154,7 @@ function LeadAnalyticsSection({ serviceKey }: { serviceKey: string }) {
                 <div key={source} className="flex items-center gap-3">
                   <span className="text-sm text-muted-foreground w-32 shrink-0 capitalize">{source.replace(/_/g, " ")}</span>
                   <div className="flex-1 h-6 rounded-md bg-muted overflow-hidden">
-                    <div className="h-full bg-primary/70 rounded-md flex items-center justify-end px-2" style={{ width: `${Math.max(pct, 5)}%` }}>
+                    <div className="h-full bg-primary/70 rounded-md flex items-center justify-end px-2" style={{ width: `${pct > 0 ? Math.max(Math.min(pct, 100), 5) : 0}%` }}>
                       <span className="text-[10px] font-medium text-primary-foreground">{pct}%</span>
                     </div>
                   </div>
