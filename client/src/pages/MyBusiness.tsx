@@ -205,6 +205,10 @@ export default function MyBusiness() {
     { serviceKey: selectedMembership?.serviceKey ?? "" },
     { enabled: !!selectedMembership }
   );
+  const tierLevel = tierInfo?.tier || "basic";
+  const isTierActive = Boolean(tierInfo?.active);
+  const isFeaturedPlus = isTierActive && (tierLevel === "featured" || tierLevel === "premium" || tierLevel === "pro");
+  const isPremiumPlus = isTierActive && (tierLevel === "premium" || tierLevel === "pro");
   const { data: photoLimit } = trpc.premium.getPhotoLimit.useQuery(
     { serviceKey: selectedMembership?.serviceKey ?? "" },
     { enabled: !!selectedMembership }
@@ -355,11 +359,19 @@ export default function MyBusiness() {
 
   const handleSave = useCallback(() => {
     if (!selectedMembership || !canEdit || !formIsCurrent) return;
+    const payload: Record<string, unknown> = { ...form };
+    if (!isFeaturedPlus) {
+      delete payload.serviceMenu;
+    }
+    if (!isPremiumPlus) {
+      delete payload.bookingProvider;
+      delete payload.bookingUrl;
+    }
     updateListing.mutate({
       serviceKey: selectedMembership.serviceKey,
-      ...form,
-    });
-  }, [selectedMembership, canEdit, form, formIsCurrent, updateListing]);
+      ...payload,
+    } as Parameters<typeof updateListing.mutate>[0]);
+  }, [selectedMembership, canEdit, form, formIsCurrent, updateListing, isFeaturedPlus, isPremiumPlus]);
 
   const downloadMonthlyReport = async () => {
     if (!selectedMembership) return;
@@ -430,10 +442,7 @@ export default function MyBusiness() {
     );
   }
 
-  const currentTier = tierInfo?.tier || "basic";
-  const isTierActive = Boolean(tierInfo?.active);
-  const isFeaturedPlus = isTierActive && (currentTier === "featured" || currentTier === "premium" || currentTier === "pro");
-  const isPremiumPlus = isTierActive && (currentTier === "premium" || currentTier === "pro");
+  const currentTier = tierLevel;
   const billingMutationPending = createCheckout.isPending || manageSubscription.isPending;
 
   return (
