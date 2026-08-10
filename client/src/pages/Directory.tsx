@@ -216,7 +216,7 @@ export default function Directory() {
     } else if (sortBy === "newest") {
       result.reverse();
     } else {
-      // Default: premium > featured > affiliate partners > personalization > alphabetical
+      // Default: active Premium > active Featured > personalization > alphabetical
       const tierRank = (key: string) => {
         const tier = premiumMap[key];
         if (tier === "premium") return 0;
@@ -234,9 +234,6 @@ export default function Directory() {
           const aLocal = a.area.includes(myArea) ? 0 : 1;
           const bLocal = b.area.includes(myArea) ? 0 : 1;
           if (aLocal !== bLocal) return aLocal - bLocal;
-          const aPartner = a.featured && a.affiliate ? 0 : 1;
-          const bPartner = b.featured && b.affiliate ? 0 : 1;
-          if (aPartner !== bPartner) return aPartner - bPartner;
           return a.name.localeCompare(b.name);
         });
       } else {
@@ -246,9 +243,6 @@ export default function Directory() {
           const aTier = tierRank(aKey);
           const bTier = tierRank(bKey);
           if (aTier !== bTier) return aTier - bTier;
-          const aPartner = a.featured && a.affiliate ? 0 : 1;
-          const bPartner = b.featured && b.affiliate ? 0 : 1;
-          if (aPartner !== bPartner) return aPartner - bPartner;
           return a.name.localeCompare(b.name);
         });
       }
@@ -726,9 +720,6 @@ export default function Directory() {
                               <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold uppercase">
                                 <Award className="w-2.5 h-2.5" /> Featured
                               </span>
-                            )}
-                            {!premiumTier && s.featured && s.affiliate && (
-                              <span className="px-1.5 py-0.5 rounded bg-clt-gold/20 text-clt-gold text-[10px] font-bold uppercase">Featured</span>
                             )}
                             {boostedKeys.has(sSlug) && (
                               <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold uppercase">

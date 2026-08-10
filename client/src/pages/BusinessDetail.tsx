@@ -413,9 +413,7 @@ export default function BusinessDetail() {
                           <Award className="w-3 h-3" /> Featured Listing
                         </Badge>
                       )}
-                      {(!premiumData?.active || premiumData?.tier === 'basic') && service.featured && service.affiliate && (
-                        <Badge className="bg-clt-gold/20 text-clt-gold border-clt-gold/30 text-xs">Featured Partner</Badge>
-                      )}
+
                       <Badge variant="outline" className="gap-1 text-xs">
                         <MapPin className="w-3 h-3" /> {service.area}
                       </Badge>
