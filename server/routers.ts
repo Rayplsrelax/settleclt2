@@ -1321,6 +1321,11 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const override = await getListingOverride(input.serviceKey);
         if (!override) return null;
+        const listing = await getPremiumListing(input.serviceKey);
+        const tier = listing?.tier ?? "basic";
+        const isActive = listing?.paymentStatus === "active";
+        const isFeaturedPlus = isActive && (tier === "featured" || tier === "premium" || tier === "pro");
+        const isPremiumPlus = isActive && (tier === "premium" || tier === "pro");
         return {
           serviceKey: override.serviceKey,
           displayName: override.displayName,
@@ -1333,16 +1338,16 @@ export const appRouter = router({
             : [],
           socialLinks: override.socialLinks,
           tagline: override.tagline,
-          serviceMenu: (() => {
+          serviceMenu: isFeaturedPlus ? (() => {
             try {
               const parsed = JSON.parse(override.serviceMenu || "[]");
               return Array.isArray(parsed) ? parsed : [];
             } catch {
               return [];
             }
-          })(),
-          bookingProvider: override.bookingProvider,
-          bookingUrl: override.bookingUrl,
+          })() : [],
+          bookingProvider: isPremiumPlus ? override.bookingProvider : null,
+          bookingUrl: isPremiumPlus ? override.bookingUrl : null,
         };
       }),
     myMemberships: protectedProcedure.query(async ({ ctx }) => {
@@ -1385,6 +1390,45 @@ export const appRouter = router({
         const membership = requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
         const { serviceKey, ...data } = input;
         const effectiveClaimId = selectEffectiveClaimId(membership.ownerClaimId);
+
+        // Tier-gate service menu (Featured+) and booking link (Premium+)
+        const premiumListing = await getPremiumListing(serviceKey);
+        const tier = premiumListing?.tier ?? "basic";
+        const isActive = premiumListing?.paymentStatus === "active";
+        const isFeaturedPlus = isActive && (tier === "featured" || tier === "premium" || tier === "pro");
+        const isPremiumPlus = isActive && (tier === "premium" || tier === "pro");
+
+        if (data.serviceMenu !== undefined && !isFeaturedPlus) {
+          // Allow clearing (empty array) but block setting non-empty values
+          try {
+            const parsed = JSON.parse(data.serviceMenu || "[]");
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              throw new TRPCError({
+                code: "FORBIDDEN",
+                message: "Service menu is a Featured-tier feature. Upgrade to Featured ($29/mo) or higher to display services.",
+              });
+            }
+          } catch (e) {
+            if (e instanceof TRPCError) throw e;
+            // Invalid JSON — block it
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Service menu must be a valid JSON array.",
+            });
+          }
+        }
+        if ((data.bookingProvider !== undefined || data.bookingUrl !== undefined) && !isPremiumPlus) {
+          // Allow clearing (empty string) but block setting non-empty values
+          const provider = (data.bookingProvider ?? "").trim();
+          const url = (data.bookingUrl ?? "").trim();
+          if (provider || url) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: "External booking links are a Premium-tier feature. Upgrade to Premium ($79/mo) or higher.",
+            });
+          }
+        }
+
         return upsertListingOverride(serviceKey, effectiveClaimId, data);
       }),
     uploadPhoto: protectedProcedure

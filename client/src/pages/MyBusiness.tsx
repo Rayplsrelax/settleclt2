@@ -205,6 +205,10 @@ export default function MyBusiness() {
     { serviceKey: selectedMembership?.serviceKey ?? "" },
     { enabled: !!selectedMembership }
   );
+  const tierLevel = tierInfo?.tier || "basic";
+  const isTierActive = Boolean(tierInfo?.active);
+  const isFeaturedPlus = isTierActive && (tierLevel === "featured" || tierLevel === "premium" || tierLevel === "pro");
+  const isPremiumPlus = isTierActive && (tierLevel === "premium" || tierLevel === "pro");
   const { data: photoLimit } = trpc.premium.getPhotoLimit.useQuery(
     { serviceKey: selectedMembership?.serviceKey ?? "" },
     { enabled: !!selectedMembership }
@@ -355,11 +359,19 @@ export default function MyBusiness() {
 
   const handleSave = useCallback(() => {
     if (!selectedMembership || !canEdit || !formIsCurrent) return;
+    const payload: Record<string, unknown> = { ...form };
+    if (!isFeaturedPlus) {
+      delete payload.serviceMenu;
+    }
+    if (!isPremiumPlus) {
+      delete payload.bookingProvider;
+      delete payload.bookingUrl;
+    }
     updateListing.mutate({
       serviceKey: selectedMembership.serviceKey,
-      ...form,
-    });
-  }, [selectedMembership, canEdit, form, formIsCurrent, updateListing]);
+      ...payload,
+    } as Parameters<typeof updateListing.mutate>[0]);
+  }, [selectedMembership, canEdit, form, formIsCurrent, updateListing, isFeaturedPlus, isPremiumPlus]);
 
   const downloadMonthlyReport = async () => {
     if (!selectedMembership) return;
@@ -430,7 +442,7 @@ export default function MyBusiness() {
     );
   }
 
-  const currentTier = tierInfo?.tier || "basic";
+  const currentTier = tierLevel;
   const billingMutationPending = createCheckout.isPending || manageSubscription.isPending;
 
   return (
@@ -588,38 +600,72 @@ export default function MyBusiness() {
                   </div>
                 </CardContent>
               </Card>
-              <Card className="md:col-span-2">
-                <CardHeader>
-                  <CardTitle className="text-base">Services and booking</CardTitle>
-                  <CardDescription>Show what you offer and send visitors to your existing booking or quote page.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                  <ServiceMenuEditor value={form.serviceMenu} onChange={(serviceMenu) => setForm({ ...form, serviceMenu })} />
-                  <div className="grid sm:grid-cols-2 gap-4 border-t pt-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="bookingProvider">Booking or quote provider</Label>
-                      <select id="bookingProvider" className="w-full h-10 rounded-md border bg-background px-3 text-sm" value={form.bookingProvider} onChange={e => setForm({ ...form, bookingProvider: e.target.value as typeof form.bookingProvider })}>
-                        <option value="">No external booking link</option>
-                        <option value="Booksy">Booksy</option>
-                        <option value="Square Appointments">Square Appointments</option>
-                        <option value="Calendly">Calendly</option>
-                        <option value="Acuity">Acuity</option>
-                        <option value="Google booking">Google booking</option>
-                        <option value="Other">Other business booking page</option>
-                      </select>
+              {/* Services and booking — tier gated */}
+              {isFeaturedPlus ? (
+                <Card className="md:col-span-2">
+                  <CardHeader>
+                    <CardTitle className="text-base">Services and booking</CardTitle>
+                    <CardDescription>
+                      Show what you offer and send visitors to your existing booking or quote page.
+                      {!isPremiumPlus && " Booking link requires Premium tier."}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <ServiceMenuEditor value={form.serviceMenu} onChange={(serviceMenu) => setForm({ ...form, serviceMenu })} />
+                    {isPremiumPlus ? (
+                      <div className="grid sm:grid-cols-2 gap-4 border-t pt-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="bookingProvider">Booking or quote provider</Label>
+                          <select id="bookingProvider" className="w-full h-10 rounded-md border bg-background px-3 text-sm" value={form.bookingProvider} onChange={e => setForm({ ...form, bookingProvider: e.target.value as typeof form.bookingProvider })}>
+                            <option value="">No external booking link</option>
+                            <option value="Booksy">Booksy</option>
+                            <option value="Square Appointments">Square Appointments</option>
+                            <option value="Calendly">Calendly</option>
+                            <option value="Acuity">Acuity</option>
+                            <option value="Google booking">Google booking</option>
+                            <option value="Other">Other business booking page</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="bookingUrl">Booking or request-a-quote URL</Label>
+                          <Input id="bookingUrl" type="url" placeholder="https://..." value={form.bookingUrl} onChange={e => setForm({ ...form, bookingUrl: e.target.value })} />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-4 flex items-center gap-3">
+                        <Crown className="w-5 h-5 text-amber-600 shrink-0" />
+                        <div>
+                          <p className="font-medium text-sm">External booking links require Premium</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">Upgrade to Premium ($79/mo) to connect Booksy, Calendly, Square Appointments, and other booking providers.</p>
+                        </div>
+                      </div>
+                    )}
+                    <div className="flex justify-end">
+                      <Button onClick={handleSave} disabled={updateListing.isPending || !formIsCurrent} size="sm" className="gap-1.5">
+                        <Save className="w-3.5 h-3.5" /> Save Services and Booking
+                      </Button>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="bookingUrl">Booking or request-a-quote URL</Label>
-                      <Input id="bookingUrl" type="url" placeholder="https://..." value={form.bookingUrl} onChange={e => setForm({ ...form, bookingUrl: e.target.value })} />
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="md:col-span-2 border-amber-200 bg-amber-50/30">
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Crown className="w-4 h-4 text-amber-600" /> Services and booking
+                    </CardTitle>
+                    <CardDescription>Display your services with starting prices and connect your booking page.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-3">
+                      <Crown className="w-5 h-5 text-amber-600 shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">Upgrade to Featured to unlock services and booking</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Featured ($29/mo) lets you display services and prices. Premium ($79/mo) adds external booking links for Booksy, Calendly, and more.</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex justify-end">
-                    <Button onClick={handleSave} disabled={updateListing.isPending || !formIsCurrent} size="sm" className="gap-1.5">
-                      <Save className="w-3.5 h-3.5" /> Save Services and Booking
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
