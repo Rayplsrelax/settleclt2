@@ -278,25 +278,36 @@ export default function Directory() {
     return new Set(promotionsQuery.data.map(p => p.serviceKey));
   }, [promotionsQuery.data]);
   const activePromotionMap = useMemo(() => {
-    if (!promotionsQuery.data) return {} as Record<string, { headline: string; subtitle?: string | null }>;
-    const map: Record<string, { headline: string; subtitle?: string | null }> = {};
+    if (!promotionsQuery.data) return {} as Record<string, { headline: string; subtitle?: string | null; type: string; targetCategory?: string | null; targetNeighborhood?: string | null }>;
+    const map: Record<string, { headline: string; subtitle?: string | null; type: string; targetCategory?: string | null; targetNeighborhood?: string | null }> = {};
     for (const p of promotionsQuery.data) {
-      map[p.serviceKey] = { headline: p.headline ?? "", subtitle: p.subtitle };
+      map[p.serviceKey] = {
+        headline: p.headline ?? "",
+        subtitle: p.subtitle,
+        type: p.type,
+        targetCategory: p.targetCategory,
+        targetNeighborhood: p.targetNeighborhood,
+      };
     }
     return map;
   }, [promotionsQuery.data]);
 
-  // Sort boosted listings to the top when no filters are active
+  const isPromotionRelevant = useCallback((service: typeof SERVICES[number]) => {
+    const promotion = activePromotionMap[toSlug(service.name)];
+    if (!promotion) return false;
+    if (promotion.type === "directory_boost") return true;
+    if (promotion.type === "category_spotlight") return !promotion.targetCategory || promotion.targetCategory === service.category;
+    if (promotion.type === "neighborhood_spotlight") return !promotion.targetNeighborhood || service.area.toLowerCase() === promotion.targetNeighborhood.toLowerCase();
+    return false;
+  }, [activePromotionMap]);
+
+  // Sort paid placements to the top, including their category/neighborhood targets.
   const sortedWithBoosts = useMemo(() => {
-    if (!hasFilters && boostedKeys.size > 0) {
-      return [...filteredServices].sort((a, b) => {
-        const aBoost = boostedKeys.has(toSlug(a.name)) ? 1 : 0;
-        const bBoost = boostedKeys.has(toSlug(b.name)) ? 1 : 0;
-        return bBoost - aBoost;
-      });
+    if (activePromotionMap && Object.keys(activePromotionMap).length > 0) {
+      return [...filteredServices].sort((a, b) => Number(isPromotionRelevant(b)) - Number(isPromotionRelevant(a)));
     }
     return filteredServices;
-  }, [filteredServices, boostedKeys, hasFilters]);
+  }, [filteredServices, activePromotionMap, isPromotionRelevant]);
 
   // Reset visible count when filters change
   useEffect(() => {

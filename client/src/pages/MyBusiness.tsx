@@ -268,6 +268,24 @@ export default function MyBusiness() {
   const updateBizReferralStatus = trpc.premium.updateBizReferralStatus.useMutation({
     onSuccess: () => selectedMembership?.serviceKey && void trpcUtils.premium.getBizReferrals.invalidate({ serviceKey: selectedMembership.serviceKey }),
   });
+  const { data: referralAnalytics } = trpc.premium.getBizReferralAnalytics.useQuery(
+    { serviceKey: selectedMembership?.serviceKey ?? "" },
+    { enabled: !!selectedMembership && canEdit }
+  );
+  const { data: referralInvitations = [] } = trpc.premium.getBizReferralInvitations.useQuery(
+    { serviceKey: selectedMembership?.serviceKey ?? "" },
+    { enabled: !!selectedMembership && canEdit }
+  );
+  const [invitationTarget, setInvitationTarget] = useState("");
+  const [invitationReferralId, setInvitationReferralId] = useState<number | null>(null);
+  const inviteBusiness = trpc.premium.inviteBusinessToReferral.useMutation({
+    onSuccess: () => { toast.success("Referral invitation sent."); setInvitationTarget(""); setInvitationReferralId(null); },
+    onError: error => toast.error(error.message),
+  });
+  const respondToInvitation = trpc.premium.respondToReferralInvitation.useMutation({
+    onSuccess: () => selectedMembership?.serviceKey && void trpcUtils.premium.getBizReferralInvitations.invalidate({ serviceKey: selectedMembership.serviceKey }),
+    onError: error => toast.error(error.message),
+  });
   const tierLevel = tierInfo?.tier || "basic";
   const isTierActive = Boolean(tierInfo?.active);
   const isFeaturedPlus = isTierActive && (tierLevel === "featured" || tierLevel === "premium" || tierLevel === "pro");
@@ -1023,24 +1041,34 @@ export default function MyBusiness() {
                 <CardTitle className="text-base flex items-center gap-2"><Users className="w-4 h-4" /> Referral requests</CardTitle>
                 <CardDescription>Track customers referred to your business from Settle CLT.</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-5">
+                {referralAnalytics && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="rounded-lg bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Total requests</p><p className="text-xl font-semibold">{referralAnalytics.total}</p></div>
+                    <div className="rounded-lg bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Completed</p><p className="text-xl font-semibold">{referralAnalytics.byStatus.completed ?? 0}</p></div>
+                    <div className="rounded-lg bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Sources</p><p className="text-xl font-semibold">{Object.keys(referralAnalytics.bySource).length}</p></div>
+                    <div className="rounded-lg bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Payout ledger</p><p className="text-xl font-semibold">${(referralAnalytics.pendingPayoutCents / 100).toFixed(2)}</p></div>
+                  </div>
+                )}
+                {referralInvitations.length > 0 && (
+                  <div className="rounded-lg border border-blue-200 bg-blue-50/40 p-4">
+                    <p className="font-medium text-sm mb-2">Business referral invitations</p>
+                    <div className="space-y-2">
+                      {referralInvitations.map(invitation => <div key={invitation.id} className="flex items-center justify-between gap-3 text-sm"><span>{invitation.fromServiceKey}{invitation.message ? ` · ${invitation.message}` : ""}</span>{invitation.status === "pending" ? <div className="flex gap-2"><Button size="sm" variant="outline" onClick={() => selectedMembership?.serviceKey && respondToInvitation.mutate({ invitationId: invitation.id, serviceKey: selectedMembership.serviceKey, status: "declined" })}>Decline</Button><Button size="sm" onClick={() => selectedMembership?.serviceKey && respondToInvitation.mutate({ invitationId: invitation.id, serviceKey: selectedMembership.serviceKey, status: "accepted" })}>Accept</Button></div> : <Badge variant="outline">{invitation.status}</Badge>}</div>)}
+                    </div>
+                  </div>
+                )}
                 {businessReferrals.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No referral requests yet.</p>
                 ) : (
                   <div className="space-y-3">
                     {businessReferrals.map((referral) => (
-                      <div key={referral.id} className="rounded-lg border p-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                        <div>
-                          <p className="font-medium text-sm">{referral.name} · {referral.need}</p>
-                          <p className="text-xs text-muted-foreground">{referral.email}{referral.phone ? ` · ${referral.phone}` : ""}</p>
+                      <div key={referral.id} className="rounded-lg border p-3 space-y-3">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                          <div><p className="font-medium text-sm">{referral.name} · {referral.need}</p><p className="text-xs text-muted-foreground">{referral.email}{referral.phone ? ` · ${referral.phone}` : ""}</p><p className="text-xs text-muted-foreground">Attribution: {referral.attributionType} · Match: {referral.matchStatus}</p></div>
+                          <select value={referral.status} onChange={(event) => updateBizReferralStatus.mutate({ referralId: referral.id, status: event.target.value as "new" | "referred" | "connected" | "completed" | "archived" })} className="rounded-md border bg-background px-2 py-1.5 text-xs">{(["new", "referred", "connected", "completed", "archived"] as const).map(status => <option key={status} value={status}>{status}</option>)}</select>
                         </div>
-                        <select
-                          value={referral.status}
-                          onChange={(event) => updateBizReferralStatus.mutate({ referralId: referral.id, status: event.target.value as "new" | "referred" | "connected" | "completed" | "archived" })}
-                          className="rounded-md border bg-background px-2 py-1.5 text-xs"
-                        >
-                          {(["new", "referred", "connected", "completed", "archived"] as const).map(status => <option key={status} value={status}>{status}</option>)}
-                        </select>
+                        {selectedMembership?.serviceKey && <div className="flex flex-wrap gap-2"><Input className="max-w-xs" placeholder="Recipient business key" value={invitationReferralId === referral.id ? invitationTarget : ""} onChange={event => { setInvitationReferralId(referral.id); setInvitationTarget(event.target.value); }} /><Button size="sm" variant="outline" disabled={!invitationTarget || invitationReferralId !== referral.id || inviteBusiness.isPending} onClick={() => inviteBusiness.mutate({ referralId: referral.id, fromServiceKey: selectedMembership.serviceKey, toServiceKey: invitationTarget })}>Invite partner</Button></div>}
                       </div>
                     ))}
                   </div>

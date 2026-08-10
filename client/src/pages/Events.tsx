@@ -236,10 +236,7 @@ export default function Events() {
 
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
-  const eventSponsorsQuery = trpc.premium.getEventSponsors.useQuery(
-    { eventId: selectedEvent?.id ?? 0 },
-    { enabled: !!selectedEvent }
-  );
+
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -753,22 +750,6 @@ export default function Events() {
                   <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
                     {selectedEvent.description}
                   </p>
-                )}
-
-                {eventSponsorsQuery.data && eventSponsorsQuery.data.length > 0 && (
-                  <div className="rounded-lg border bg-amber-50/50 p-4">
-                    <h3 className="font-semibold text-sm mb-2">Community sponsors</h3>
-                    <div className="space-y-2">
-                      {eventSponsorsQuery.data.map((sponsor) => (
-                        <div key={sponsor.id} className="flex items-center justify-between gap-3 text-sm">
-                          <Link href={`/directory/${sponsor.serviceKey}`} className="font-medium text-primary hover:underline">
-                            {sponsor.serviceKey}
-                          </Link>
-                          <Badge variant="outline" className="capitalize">{sponsor.level} sponsor</Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
                 )}
 
                 {selectedEvent.externalUrl && (

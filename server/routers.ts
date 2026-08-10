@@ -4,6 +4,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router, adminProcedure } from "./_core/trpc";
 import { z } from "zod";
+import { recommendBusinessMatches } from "./business-referral-matching";
 import {
   insertBusinessSubmission, getBusinessSubmissions, getBusinessSubmissionCount, updateBusinessSubmissionStatus, deleteBusinessSubmission, insertNewsletterSubscriber,
   upsertEnrichedService, getEnrichedService, getAllEnrichedServices,
@@ -31,8 +32,8 @@ import {
   deleteUserAccount,
   createBusinessLead, getBusinessLeadsForService, getBusinessLeadById, updateBusinessLeadStatus, updateBusinessLeadDetails,
   createBusinessPromotion, getActivePromotions, getPromotionsForBusiness, updatePromotionStatus,
-  createEventSponsorship, getActiveSponsorshipsForEvent, getSponsorshipsForBusiness,
-  createBusinessReferral, getBusinessReferralsForService, getBusinessReferralById, updateBusinessReferralStatus,
+  createEventSponsorship, getSponsorshipsForBusiness,
+  createBusinessReferral, getBusinessReferralsForService, getBusinessReferralById, updateBusinessReferralStatus, updateBusinessReferralMatch, createBusinessReferralInvitation, getReferralInvitationsForBusiness, getReferralInvitationById, updateReferralInvitationStatus, getBusinessReferralAnalytics,
   getDailyAnalytics, snapshotDailyAnalytics,
   getBusinessFaqs, createBusinessFaq, deleteBusinessFaq,
   createNotification, getUserNotifications, getUnreadNotificationCount,
@@ -67,6 +68,12 @@ const SETTLE_CLT_MICROSITES = [
   { domain: "charlotteneighborhoodsguide.com", campaign: "neighborhoods", status: "ready_for_dns", primaryFunnel: "/neighborhoods" },
   { domain: "charlottehomepros.org", campaign: "home_pros", status: "ready_for_dns", primaryFunnel: "/directory" },
 ];
+
+const NEWCOMER_ATTRIBUTE_VALUES = new Set([
+  "family-friendly", "new-mover-favorite", "budget-friendly", "english-spanish",
+  "walkable", "quick-service", "veteran-owned", "woman-owned", "locally-grown",
+  "kid-friendly", "pet-friendly", "open-weekends",
+]);
 
 export const appRouter = router({
   system: systemRouter,
@@ -1396,8 +1403,11 @@ export const appRouter = router({
         bookingProvider: z.enum(["Booksy", "Square Appointments", "Calendly", "Acuity", "Google booking", "Stripe Payment Links", "QuickBooks", "Other"]).optional().or(z.literal("")),
         bookingUrl: z.string().url().max(512).optional().or(z.literal("")),
         newcomerAttributes: z.string().max(5000).refine(value => {
-          try { return Array.isArray(JSON.parse(value)); } catch { return false; }
-        }, "Newcomer attributes must be a valid JSON array").optional(),
+          try {
+            const parsed = JSON.parse(value);
+            return Array.isArray(parsed) && parsed.every(item => typeof item === "string" && NEWCOMER_ATTRIBUTE_VALUES.has(item));
+          } catch { return false; }
+        }, "Newcomer attributes must be an allowed JSON string array").optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
@@ -1964,12 +1974,15 @@ export const appRouter = router({
     getEventSponsors: publicProcedure
       .input(z.object({ eventId: z.number() }))
       .query(async ({ input }) => {
-        return getActiveSponsorshipsForEvent(input.eventId);
+        // Sponsorships remain intentionally hidden until organizer payout and payment routing are approved.
+        return [];
+
       }),
     // ─── Business Referrals (general) ───
     submitBizReferral: publicProcedure
       .input(z.object({
-        serviceKey: z.string(),
+        serviceKey: z.string().optional(),
+        category: z.string().max(128).optional(),
         name: z.string().min(1).max(255),
         email: z.string().email(),
         phone: z.string().max(32).optional(),
@@ -1977,21 +1990,37 @@ export const appRouter = router({
         source: z.string().max(128).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
-        return createBusinessReferral({
-          serviceKey: input.serviceKey,
+        const matches = await recommendBusinessMatches(input.need, input.category, input.serviceKey);
+        const referral = await createBusinessReferral({
+          serviceKey: input.serviceKey ?? null,
+          category: input.category ?? null,
           name: input.name,
           email: input.email,
           phone: input.phone ?? null,
           need: input.need,
-          source: input.source ?? "directory",
+          source: input.source ?? "referral_network",
+          matchStatus: matches.length > 0 ? "suggested" : "unmatched",
+          matchedServiceKey: matches[0]?.serviceKey ?? null,
+          matchReason: matches[0]?.reason ?? null,
+          attributionToken: `ref-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+          attributionType: input.serviceKey ? "direct" : "matched",
           userId: ctx.user?.id ?? null,
         });
+        if (referral?.id && matches[0]) {
+          await updateBusinessReferralMatch(referral.id, {
+            matchStatus: "suggested",
+            matchedServiceKey: matches[0].serviceKey,
+            matchReason: matches[0].reason,
+            attributionType: input.serviceKey ? "direct" : "matched",
+          });
+        }
+        return { referralId: referral?.id ?? null, matches };
       }),
     getBizReferrals: protectedProcedure
       .input(z.object({ serviceKey: z.string() }))
       .query(async ({ input, ctx }) => {
         const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
         return getBusinessReferralsForService(input.serviceKey);
       }),
     updateBizReferralStatus: protectedProcedure
@@ -2002,9 +2031,61 @@ export const appRouter = router({
       .mutation(async ({ input, ctx }) => {
         const referral = await getBusinessReferralById(input.referralId);
         if (!referral) throw new TRPCError({ code: "NOT_FOUND", message: "Referral not found." });
+        if (!referral?.serviceKey) throw new TRPCError({ code: "BAD_REQUEST", message: "This referral has not been assigned to a business." });
         const memberships = await getBusinessMembershipsForUser(ctx.user.id, referral.serviceKey);
-        requireBusinessPermission(memberships, referral.serviceKey, "edit_listing");
+        requireBusinessPermission(memberships, referral.serviceKey, "view_analytics");
         await updateBusinessReferralStatus(input.referralId, input.status);
+        return { success: true as const };
+      }),
+    getBizReferralAnalytics: protectedProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .query(async ({ input, ctx }) => {
+        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+        requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
+        return getBusinessReferralAnalytics(input.serviceKey);
+      }),
+    getBizReferralInvitations: protectedProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .query(async ({ input, ctx }) => {
+        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+        requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
+        return getReferralInvitationsForBusiness(input.serviceKey);
+      }),
+    inviteBusinessToReferral: protectedProcedure
+      .input(z.object({ referralId: z.number(), fromServiceKey: z.string(), toServiceKey: z.string(), message: z.string().max(500).optional() }))
+      .mutation(async ({ input, ctx }) => {
+        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.fromServiceKey);
+        requireBusinessPermission(memberships, input.fromServiceKey, "view_analytics");
+        const referral = await getBusinessReferralById(input.referralId);
+        if (!referral) throw new TRPCError({ code: "NOT_FOUND", message: "Referral not found." });
+        if (referral.serviceKey !== input.fromServiceKey) throw new TRPCError({ code: "FORBIDDEN", message: "You can only invite partners for referrals assigned to your business." });
+        const invitation = await createBusinessReferralInvitation({
+          referralId: referral.id,
+          fromServiceKey: input.fromServiceKey,
+          toServiceKey: input.toServiceKey,
+          message: input.message ?? null,
+          status: "pending",
+        });
+        return invitation;
+      }),
+    respondToReferralInvitation: protectedProcedure
+      .input(z.object({ invitationId: z.number(), serviceKey: z.string(), status: z.enum(["accepted", "declined"]) }))
+      .mutation(async ({ input, ctx }) => {
+        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+        requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
+        const invitation = await getReferralInvitationById(input.invitationId);
+        if (!invitation || invitation.toServiceKey !== input.serviceKey) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Referral invitation not found." });
+        }
+        await updateReferralInvitationStatus(input.invitationId, input.status);
+        if (input.status === "accepted") {
+          await updateBusinessReferralMatch(invitation.referralId, {
+            matchStatus: "accepted",
+            matchedServiceKey: input.serviceKey,
+            matchReason: "Accepted by invited business",
+            attributionType: "business_invitation",
+          });
+        }
         return { success: true as const };
       }),
     adminListPremium: adminProcedure.query(async () => {

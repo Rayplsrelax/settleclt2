@@ -42,6 +42,7 @@ const MyBusiness = lazy(() => import("./pages/MyBusiness"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const BusinessDetail = lazy(() => import("./pages/BusinessDetail"));
+const ReferralIntake = lazy(() => import("./pages/ReferralIntake"));
 const Contact = lazy(() => import("./pages/Contact"));
 const NewcomerPlan = lazy(() => import("./pages/NewcomerPlan"));
 const Notifications = lazy(() => import("./pages/Notifications"));
@@ -76,6 +77,7 @@ function Router() {
         <Route path="/passport" component={Passport} />
         <Route path="/wishlist" component={Wishlist} />
         <Route path="/bingo" component={BingoCards} />
+        <Route path="/referrals" component={ReferralIntake} />
         <Route path="/events" component={Events} />
         <Route
           path="/events/category/:categoryId"
