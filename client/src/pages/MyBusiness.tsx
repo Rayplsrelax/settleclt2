@@ -1460,7 +1460,7 @@ function BusinessReviewDrafts({ serviceKey }: { serviceKey: string }) {
               <p className="text-sm font-medium">{review.rating}/5 · {review.userName || "Community member"}</p>
               {review.tip && <p className="text-sm text-muted-foreground mt-1">{review.tip}</p>}
               <div className="flex gap-2 mt-3">
-                <Button type="button" size="sm" variant="outline" disabled={generate.isPending} onClick={() => generate.mutate({ reviewId: review.id, serviceKey, rating: review.rating, tip: review.tip, aspect: review.aspect })}>
+                <Button type="button" size="sm" variant="outline" disabled={generate.isPending} onClick={() => generate.mutate({ reviewId: review.id, serviceKey })}>
                   {generate.isPending ? "Drafting..." : "Draft response"}
                 </Button>
                 {draft && <Button type="button" size="sm" onClick={() => void copyDraft(draft)}>Copy draft</Button>}

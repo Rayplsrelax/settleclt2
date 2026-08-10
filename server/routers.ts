@@ -24,7 +24,7 @@ import {
   getTagAnalytics,
   updateUserTagPreference, getUserTagPreferences, getRecommendedContent,
   getNewListings, getUpcomingEvents, getRecentBlogPosts, getNewsletterRecipients,
-  createReview, getReviews, getReviewStats, getBulkReviewStats, deleteReview, toggleReviewVisibility, getAllReviews,
+  createReview, getReviews, getReviewStats, getBulkReviewStats, getVisibleDirectoryReviewForService, deleteReview, toggleReviewVisibility, getAllReviews,
   submitReferral, getReferrals, updateReferralStatus, getReferralStats,
   submitBusinessClaim, getBusinessClaims, updateBusinessClaimStatus, approveBusinessClaimAndCreateOwnerMembership, getBusinessClaimStats, hasExistingClaim,
   getListingOverride, upsertListingOverride, getBusinessMembershipsForUser, getActiveOwnerMembership,
@@ -1669,16 +1669,18 @@ export const appRouter = router({
         });
       }),
     generateReviewResponse: protectedProcedure
-      .input(z.object({ reviewId: z.number().int().positive(), serviceKey: z.string(), rating: z.number().int().min(1).max(5), tip: z.string().nullable(), aspect: z.string().nullable() }))
+      .input(z.object({ reviewId: z.number().int().positive(), serviceKey: z.string() }))
       .mutation(async ({ input, ctx }) => {
         const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
         requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
-        const [listing, override, enriched] = await Promise.all([
+        const [listing, override, enriched, review] = await Promise.all([
           getPremiumListing(input.serviceKey),
           getListingOverride(input.serviceKey),
           getEnrichedService(input.serviceKey),
+          getVisibleDirectoryReviewForService(input.reviewId, input.serviceKey),
         ]);
         if (!listing || listing.tier !== "pro" || listing.paymentStatus !== "active") return { draft: "" };
+        if (!review) throw new TRPCError({ code: "NOT_FOUND", message: "Visible review not found for this business." });
         return {
           draft: await generateBusinessReviewResponse({
             serviceKey: input.serviceKey,
@@ -1692,7 +1694,7 @@ export const appRouter = router({
             googleRating: enriched?.googleRating ?? null,
             reviewCount: enriched?.reviewCount ?? null,
             verifiedAddress: enriched?.verifiedAddress ?? null,
-          }, input),
+          }, review),
         };
       }),
     trackView: publicProcedure

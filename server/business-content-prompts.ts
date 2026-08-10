@@ -30,37 +30,37 @@ export async function generateBusinessContentPrompts(
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiUrl || !apiKey) return fallbackPrompts(business);
 
-  const response = await fetch(
-    `${apiUrl.replace(/\/+$/, "")}/chat/completions`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      signal: AbortSignal.timeout(20000),
-      body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || "claude-sonnet-4-5",
-        temperature: 0.4,
-        max_tokens: 900,
-        response_format: { type: "json_object" },
-        messages: [
-          {
-            role: "system",
-            content:
-              "Return JSON only with a prompts array containing exactly four objects: channel, title, prompt. Channels must be instagram, facebook, google_business_profile, or newsletter. Create prompts, not finished posts. Use only the supplied business facts. Never invent pricing, availability, guarantees, reviews, or credentials.",
-          },
-          { role: "user", content: JSON.stringify({ business }) },
-        ],
-      }),
-    }
-  );
-  if (!response.ok) return fallbackPrompts(business);
-
-  const data = (await response.json()) as {
-    choices?: { message?: { content?: string } }[];
-  };
   try {
+    const response = await fetch(
+      `${apiUrl.replace(/\/+$/, "")}/chat/completions`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        signal: AbortSignal.timeout(20000),
+        body: JSON.stringify({
+          model: process.env.OPENAI_MODEL || "claude-sonnet-4-5",
+          temperature: 0.4,
+          max_tokens: 900,
+          response_format: { type: "json_object" },
+          messages: [
+            {
+              role: "system",
+              content:
+                "Return JSON only with a prompts array containing exactly four objects: channel, title, prompt. Channels must be instagram, facebook, google_business_profile, or newsletter. Create prompts, not finished posts. Use only the supplied business facts. Never invent pricing, availability, guarantees, reviews, or credentials.",
+            },
+            { role: "user", content: JSON.stringify({ business }) },
+          ],
+        }),
+      }
+    );
+    if (!response.ok) return fallbackPrompts(business);
+
+    const data = (await response.json()) as {
+      choices?: { message?: { content?: string } }[];
+    };
     const parsed = JSON.parse(data.choices?.[0]?.message?.content ?? "{}");
     if (!Array.isArray(parsed.prompts) || parsed.prompts.length !== 4)
       return fallbackPrompts(business);

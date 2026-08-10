@@ -64,4 +64,46 @@ describe("Business Pro automation contracts", () => {
     expect(draft).toContain("Test Business");
     expect(draft).not.toContain("publish");
   });
+
+  it("falls back when the configured LLM provider rejects", async () => {
+    const previousFetch = globalThis.fetch;
+    const previousBase = process.env.OPENAI_API_BASE_URL;
+    const previousKey = process.env.OPENAI_API_KEY;
+    process.env.OPENAI_API_BASE_URL = "https://provider.invalid";
+    process.env.OPENAI_API_KEY = "test-only-key";
+    globalThis.fetch = async () => { throw new Error("provider unavailable"); };
+    const prompts = await generateBusinessContentPrompts({
+      serviceKey: "test-business",
+      displayName: "Test Business",
+      description: null,
+      phone: null,
+      website: null,
+      hours: null,
+      tagline: null,
+      category: "moving",
+      googleRating: null,
+      reviewCount: null,
+      verifiedAddress: null,
+    });
+    const draft = await generateBusinessReviewResponse({
+      serviceKey: "test-business",
+      displayName: "Test Business",
+      description: null,
+      phone: null,
+      website: null,
+      hours: null,
+      tagline: null,
+      category: "moving",
+      googleRating: null,
+      reviewCount: null,
+      verifiedAddress: null,
+    }, { rating: 5, tip: null, aspect: null });
+    globalThis.fetch = previousFetch;
+    if (previousBase === undefined) delete process.env.OPENAI_API_BASE_URL;
+    else process.env.OPENAI_API_BASE_URL = previousBase;
+    if (previousKey === undefined) delete process.env.OPENAI_API_KEY;
+    else process.env.OPENAI_API_KEY = previousKey;
+    expect(prompts).toHaveLength(4);
+    expect(draft).toContain("Test Business");
+  });
 });
