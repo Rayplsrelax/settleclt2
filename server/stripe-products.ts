@@ -8,6 +8,7 @@ export const PREMIUM_TIERS = {
     name: "Featured Listing",
     description: "Stand out with a Featured badge, priority placement, photo gallery (up to 5), and detailed click analytics.",
     monthlyPrice: 2900, // $29/mo in cents
+    trialDays: 14,
     features: [
       "Featured badge on listing",
       "Priority placement in category",
@@ -20,6 +21,7 @@ export const PREMIUM_TIERS = {
     name: "Premium Listing",
     description: "Maximum directory visibility with Premium badge, top of search results, expanded photo gallery (up to 15), lead inbox, lead analytics, and monthly performance reports.",
     monthlyPrice: 7900, // $79/mo in cents
+    trialDays: 14,
     features: [
       "Everything in Featured",
       "Premium badge + highlight",
@@ -34,6 +36,7 @@ export const PREMIUM_TIERS = {
     name: "Business Pro",
     description: "AI-assisted business growth — 24/7 assistant, inquiry capture, data-informed recommendations, and practical post-topic suggestions without automatic publishing.",
     monthlyPrice: 14900, // $149/mo in cents
+    trialDays: 7,
     features: [
       "Everything in Premium",
       "AI Business Assistant (24/7 chat widget)",
