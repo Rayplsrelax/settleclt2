@@ -2,7 +2,7 @@ import { eq, and, desc, asc, sql, gte, lte, inArray } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import { assertCheckoutIdentifiersCompatible, assertNoConflictingBillingOwner, assertUniquePremiumServiceKeys } from "./business-memberships";
-import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessMemberships, type InsertBusinessMembership, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, stripeCheckoutReconciliations, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription, businessLeads, type BusinessLead, type InsertBusinessLead, listingAnalyticsDaily, businessFaqs, authTokens, type InsertAuthToken, type BusinessFaq, type InsertBusinessFaq } from "../drizzle/schema";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessMemberships, type InsertBusinessMembership, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, stripeCheckoutReconciliations, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription, businessLeads, type BusinessLead, type InsertBusinessLead, listingAnalyticsDaily, businessFaqs, authTokens, type InsertAuthToken, type BusinessFaq, type InsertBusinessFaq, businessPromotions, type BusinessPromotion, type InsertBusinessPromotion } from "../drizzle/schema";
 import { scoreRealtorLead } from "../shared/realtorLeadOps";
 import { ENV } from './_core/env';
 
@@ -1575,6 +1575,41 @@ export async function getBusinessLeadsForUser(userId: number, serviceKey: string
     .where(and(eq(businessLeads.serviceKey, serviceKey)))
     .orderBy(desc(businessLeads.createdAt))
     .limit(100);
+}
+
+// ─── Business Promotions ───
+
+export async function createBusinessPromotion(data: InsertBusinessPromotion) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(businessPromotions).values(data);
+  return { id: result.insertId };
+}
+
+export async function getActivePromotions(): Promise<BusinessPromotion[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const now = new Date();
+  return db.select().from(businessPromotions)
+    .where(and(
+      eq(businessPromotions.status, "active"),
+    ))
+    .limit(50);
+}
+
+export async function getPromotionsForBusiness(serviceKey: string): Promise<BusinessPromotion[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(businessPromotions)
+    .where(eq(businessPromotions.serviceKey, serviceKey))
+    .orderBy(desc(businessPromotions.createdAt))
+    .limit(20);
+}
+
+export async function updatePromotionStatus(id: number, status: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(businessPromotions).set({ status: status as any }).where(eq(businessPromotions.id, id));
 }
 
 // ─── Daily Analytics Snapshots ───

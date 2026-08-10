@@ -30,6 +30,7 @@ import {
   getPremiumListing, getPremiumBillingForCheckout, upsertPremiumListing, upsertCanonicalPremiumListingForAdmin, getAllPremiumListings, incrementListingAnalytics,
   deleteUserAccount,
   createBusinessLead, getBusinessLeadsForService, getBusinessLeadById, updateBusinessLeadStatus, updateBusinessLeadDetails,
+  createBusinessPromotion, getActivePromotions, getPromotionsForBusiness, updatePromotionStatus,
   getDailyAnalytics, snapshotDailyAnalytics,
   getBusinessFaqs, createBusinessFaq, deleteBusinessFaq,
   createNotification, getUserNotifications, getUnreadNotificationCount,
@@ -1348,6 +1349,14 @@ export const appRouter = router({
           })() : [],
           bookingProvider: isPremiumPlus ? override.bookingProvider : null,
           bookingUrl: isPremiumPlus ? override.bookingUrl : null,
+          newcomerAttributes: (() => {
+            try {
+              const parsed = JSON.parse(override.newcomerAttributes || "[]");
+              return Array.isArray(parsed) ? parsed : [];
+            } catch {
+              return [];
+            }
+          })(),
         };
       }),
     myMemberships: protectedProcedure.query(async ({ ctx }) => {
@@ -1384,6 +1393,9 @@ export const appRouter = router({
         }, "Service menu must be a valid JSON array"),
         bookingProvider: z.enum(["Booksy", "Square Appointments", "Calendly", "Acuity", "Google booking", "Stripe Payment Links", "QuickBooks", "Other"]).optional().or(z.literal("")),
         bookingUrl: z.string().url().max(512).optional().or(z.literal("")),
+        newcomerAttributes: z.string().max(5000).refine(value => {
+          try { return Array.isArray(JSON.parse(value)); } catch { return false; }
+        }, "Newcomer attributes must be a valid JSON array").optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
@@ -1864,6 +1876,58 @@ export const appRouter = router({
           stripeCustomerId: listing.stripeCustomerId,
         });
       }),
+    // ─── Promotions (pay-to-show, all tiers) ───
+    getPromotions: protectedProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .query(async ({ input, ctx }) => {
+        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+        requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        return getPromotionsForBusiness(input.serviceKey);
+      }),
+    createPromotion: protectedProcedure
+      .input(z.object({
+        serviceKey: z.string(),
+        type: z.enum(["directory_boost", "category_spotlight", "neighborhood_spotlight"]),
+        headline: z.string().min(1).max(255),
+        subtitle: z.string().max(500).optional(),
+        targetCategory: z.string().max(128).optional(),
+        targetNeighborhood: z.string().max(128).optional(),
+        priceCents: z.number().int().min(0),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+        requireBusinessPermission(memberships, input.serviceKey, "manage_billing");
+        const now = new Date();
+        const endsAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30-day promotion
+        return createBusinessPromotion({
+          serviceKey: input.serviceKey,
+          type: input.type,
+          headline: input.headline,
+          subtitle: input.subtitle ?? null,
+          targetCategory: input.targetCategory ?? null,
+          targetNeighborhood: input.targetNeighborhood ?? null,
+          status: "active",
+          priceCents: input.priceCents,
+          startsAt: now,
+          endsAt,
+          userId: ctx.user.id,
+        });
+      }),
+    getActiveDirectoryPromotions: publicProcedure.query(async () => {
+      const promos = await getActivePromotions();
+      const now = Date.now();
+      return promos.filter(p =>
+        (!p.startsAt || new Date(p.startsAt).getTime() <= now) &&
+        (!p.endsAt || new Date(p.endsAt).getTime() >= now)
+      ).map(p => ({
+        serviceKey: p.serviceKey,
+        type: p.type,
+        headline: p.headline,
+        subtitle: p.subtitle,
+        targetCategory: p.targetCategory,
+        targetNeighborhood: p.targetNeighborhood,
+      }));
+    }),
     adminListPremium: adminProcedure.query(async () => {
       return getAllPremiumListings();
     }),

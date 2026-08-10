@@ -29,6 +29,7 @@ const plans = [
     name: "Featured Listing",
     price: "$29",
     cadence: "/mo",
+    trialNote: "14-day free trial",
     description: "Stand out in your category and get stronger click-through visibility.",
     badge: "Most popular",
     icon: Sparkles,
@@ -39,15 +40,17 @@ const plans = [
       "Priority placement in category results",
       "Photo gallery up to 5 photos",
       "Detailed click analytics",
+      "Service menu with starting prices",
       "Good fit for local service businesses testing demand",
     ],
-    cta: "Choose Featured",
+    cta: "Start 14-day free trial",
     href: "/my-business?upgrade=featured",
   },
   {
     name: "Premium Listing",
     price: "$79",
     cadence: "/mo",
+    trialNote: "14-day free trial",
     description: "Maximum directory visibility for businesses that want more leads from Settle CLT.",
     badge: "Lead-focused",
     icon: Crown,
@@ -58,15 +61,18 @@ const plans = [
       "Top placement in search results",
       "Photo gallery up to 15 photos",
       "Lead generation analytics and lead inbox",
+      "Lead source analytics and pipeline value",
+      "External booking and payment links (Booksy, Stripe, QuickBooks)",
       "Monthly performance report",
     ],
-    cta: "Choose Premium",
+    cta: "Start 14-day free trial",
     href: "/my-business?upgrade=premium",
   },
   {
     name: "Business Pro",
     price: "$149",
     cadence: "/mo",
+    trialNote: "7-day free trial",
     description: "AI-assisted business growth — practical recommendations without automatic publishing.",
     badge: "AI-powered",
     icon: Sparkles,
@@ -79,7 +85,7 @@ const plans = [
       "Profile and lead follow-up recommendations",
       "Photo gallery up to 30 photos",
     ],
-    cta: "Choose Business Pro",
+    cta: "Start 7-day free trial",
     href: "/my-business?upgrade=pro",
   },
 ];
@@ -160,7 +166,11 @@ export default function BusinessPricing() {
                   <CardDescription>{plan.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col flex-1">
-                  <p className="text-3xl font-extrabold mb-5">{plan.price}<span className="text-sm font-normal text-muted-foreground">{plan.cadence}</span></p>
+                  <p className="text-3xl font-extrabold mb-1">{plan.price}<span className="text-sm font-normal text-muted-foreground">{plan.cadence}</span></p>
+                  {"trialNote" in plan && plan.trialNote && (
+                    <p className="text-xs font-medium text-green-600 mb-4">{plan.trialNote} — no charge until it ends</p>
+                  )}
+                  {!("trialNote" in plan && plan.trialNote) && <div className="mb-4" />}
                   <ul className="space-y-2 text-sm flex-1">
                     {plan.features.map(feature => (
                       <li key={feature} className="flex items-start gap-2">

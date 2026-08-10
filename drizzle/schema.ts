@@ -624,6 +624,8 @@ export const businessListingOverrides = mysqlTable("business_listing_overrides",
   bookingProvider: varchar("bookingProvider", { length: 64 }),
   /** External booking or quote URL. */
   bookingUrl: varchar("bookingUrl", { length: 512 }),
+  /** JSON array of newcomer-friendly attributes, e.g. ["family-friendly", "new-mover-favorite"] */
+  newcomerAttributes: text("newcomerAttributes"),
   /** Whether the override is active (admin can disable) */
   isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -988,6 +990,40 @@ export const businessLeads = mysqlTable("business_leads", {
 });
 export type BusinessLead = typeof businessLeads.$inferSelect;
 export type InsertBusinessLead = typeof businessLeads.$inferInsert;
+
+// ─── Business Promotions (pay-to-show boosted placements) ───
+
+export const businessPromotions = mysqlTable("business_promotions", {
+  id: int("id").autoincrement().primaryKey(),
+  serviceKey: varchar("serviceKey", { length: 255 }).notNull(),
+  /** Promotion type: directory_boost, category_spotlight, neighborhood_spotlight */
+  type: mysqlEnum("type", ["directory_boost", "category_spotlight", "neighborhood_spotlight"]).notNull(),
+  /** Headline text for the promotional placement */
+  headline: varchar("headline", { length: 255 }),
+  /** Optional sub-text */
+  subtitle: varchar("subtitle", { length: 500 }),
+  /** Target category for category_spotlight (optional) */
+  targetCategory: varchar("targetCategory", { length: 128 }),
+  /** Target neighborhood for neighborhood_spotlight (optional) */
+  targetNeighborhood: varchar("targetNeighborhood", { length: 128 }),
+  /** Payment status: pending, active, expired, canceled */
+  status: mysqlEnum("status", ["pending", "active", "expired", "canceled"]).default("pending").notNull(),
+  /** Stripe payment intent or checkout session ID */
+  stripePaymentRef: varchar("stripePaymentRef", { length: 255 }),
+  /** Price paid in cents */
+  priceCents: int("priceCents").default(0).notNull(),
+  /** Active from this date */
+  startsAt: timestamp("startsAt"),
+  /** Active until this date */
+  endsAt: timestamp("endsAt"),
+  /** Business owner who purchased */
+  userId: int("userId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BusinessPromotion = typeof businessPromotions.$inferSelect;
+export type InsertBusinessPromotion = typeof businessPromotions.$inferInsert;
 
 // ─── Daily Analytics Snapshots ───
 

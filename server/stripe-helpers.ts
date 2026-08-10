@@ -84,12 +84,17 @@ export async function createCheckoutSession(opts: {
   const publicOrigin = getConfiguredPublicOrigin();
   const { priceId } = await ensureProduct(opts.tier);
 
+  const tierConfig = PREMIUM_TIERS[opts.tier];
+
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     line_items: [{ price: priceId, quantity: 1 }],
     customer_email: opts.userEmail,
     client_reference_id: opts.userId.toString(),
     allow_promotion_codes: true,
+    subscription_data: tierConfig.trialDays
+      ? { trial_period_days: tierConfig.trialDays }
+      : undefined,
     metadata: {
       user_id: opts.userId.toString(),
       customer_email: opts.userEmail,
