@@ -1556,6 +1556,18 @@ export async function updateBusinessLeadStatus(id: number, status: string): Prom
   await db.update(businessLeads).set({ status: status as any }).where(eq(businessLeads.id, id));
 }
 
+export async function updateBusinessLeadDetails(id: number, data: {
+  status?: "new" | "contacted" | "qualified" | "closed" | "archived";
+  followUpAt?: Date | null;
+  notes?: string | null;
+  source?: string | null;
+  estimatedValueCents?: number | null;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(businessLeads).set(data).where(eq(businessLeads.id, id));
+}
+
 export async function getBusinessLeadsForUser(userId: number, serviceKey: string): Promise<BusinessLead[]> {
   const db = await getDb();
   if (!db) return [];

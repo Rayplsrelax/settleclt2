@@ -618,6 +618,12 @@ export const businessListingOverrides = mysqlTable("business_listing_overrides",
   socialLinks: text("socialLinks"),
   /** Short tagline */
   tagline: varchar("tagline", { length: 255 }),
+  /** Owner-managed services as JSON array. */
+  serviceMenu: text("serviceMenu"),
+  /** External booking provider label, e.g. Booksy or Calendly. */
+  bookingProvider: varchar("bookingProvider", { length: 64 }),
+  /** External booking or quote URL. */
+  bookingUrl: varchar("bookingUrl", { length: 512 }),
   /** Whether the override is active (admin can disable) */
   isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -969,6 +975,15 @@ export const businessLeads = mysqlTable("business_leads", {
   userId: int("userId"),
   /** Lead status lifecycle. */
   status: mysqlEnum("status", ["new", "contacted", "qualified", "closed", "archived"]).default("new").notNull(),
+  /** Owner-scheduled follow-up time. */
+  followUpAt: timestamp("followUpAt"),
+  /** Private owner notes. */
+  notes: text("notes"),
+  /** Lead source such as listing inquiry, booking request, or AI assistant. */
+  source: varchar("source", { length: 128 }),
+  /** Estimated opportunity value stored in cents. */
+  estimatedValueCents: int("estimatedValueCents"),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 export type BusinessLead = typeof businessLeads.$inferSelect;

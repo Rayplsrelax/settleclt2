@@ -1,7 +1,7 @@
 import { SERVICES, SERVICE_CATEGORIES, type Service } from "@shared/services";
 import { useMemo, useRef, useCallback, useState, useEffect } from "react";
 import { useRoute, Link } from "wouter";
-import { MapPin, Phone, ExternalLink, ArrowLeft, Clock, Star, Share2, Navigation, Building2, ChevronRight, Camera, ChevronLeft, X, Crown, Award, Send } from "lucide-react";
+import { MapPin, Phone, ExternalLink, ArrowLeft, Clock, Star, Share2, Navigation, Building2, ChevronRight, Camera, ChevronLeft, X, Crown, Award, Send, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BusinessChatWidget } from "@/components/BusinessChatWidget";
 import { Card, CardContent } from "@/components/ui/card";
@@ -275,7 +275,7 @@ export default function BusinessDetail() {
     return SERVICES.filter((s) => s.category === service.category && toSlug(s.name) !== slug).slice(0, 6);
   }, [service.category, slug]);
 
-  const trackListingAction = (action: "phone_click" | "website_click" | "directions_click" | "claim_click", surface: string) => {
+  const trackListingAction = (action: "phone_click" | "website_click" | "directions_click" | "claim_click" | "booking_click", surface: string) => {
     trackBusinessAction(action, {
       service_key: slug,
       business_name: displayName,
@@ -490,12 +490,20 @@ export default function BusinessDetail() {
                   {website && (
                     <a href={website} target="_blank" rel="noopener noreferrer" onClick={() => {
                       trackListingAction("website_click", "hero_actions");
-                      if (premiumData?.active && premiumData?.tier !== 'basic') {
-                        trackClick.mutate({ serviceKey: slug });
-                      }
+                      if (premiumData?.active && premiumData?.tier !== 'basic') trackClick.mutate({ serviceKey: slug });
                     }}>
                       <Button size="sm" variant="outline" className="gap-1.5">
                         <ExternalLink className="w-3.5 h-3.5" /> Visit Website
+                      </Button>
+                    </a>
+                  )}
+                  {publicProfile?.bookingUrl && (
+                    <a href={publicProfile.bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => {
+                      trackListingAction("booking_click", "hero_actions");
+                      if (premiumData?.active && premiumData?.tier !== 'basic') trackClick.mutate({ serviceKey: slug });
+                    }}>
+                      <Button size="sm" className="gap-1.5 bg-primary hover:bg-primary/90">
+                        <Calendar className="w-3.5 h-3.5" /> {publicProfile.bookingProvider ? `Book via ${publicProfile.bookingProvider}` : "Book or Request a Quote"}
                       </Button>
                     </a>
                   )}
@@ -516,6 +524,26 @@ export default function BusinessDetail() {
                 </div>
               </CardContent>
             </Card>
+
+            {publicProfile?.serviceMenu?.some(serviceItem => serviceItem.active !== false && serviceItem.name) && (
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="font-display font-semibold text-lg text-foreground mb-4">Services</h2>
+                  <div className="space-y-3">
+                    {publicProfile.serviceMenu.filter(serviceItem => serviceItem.active !== false && serviceItem.name).map((serviceItem, index) => (
+                      <div key={`${serviceItem.name}-${index}`} className="flex items-start justify-between gap-4 rounded-xl border p-4">
+                        <div>
+                          <h3 className="font-semibold text-foreground">{serviceItem.name}</h3>
+                          {serviceItem.description && <p className="text-sm text-muted-foreground mt-1">{serviceItem.description}</p>}
+                        </div>
+                        {serviceItem.startingPriceCents != null && <span className="shrink-0 text-sm font-medium text-primary">From ${(serviceItem.startingPriceCents / 100).toFixed(0)}</span>}
+                      </div>
+                    ))}
+                  </div>
+                  {publicProfile.bookingUrl && <p className="text-xs text-muted-foreground mt-4">Use the booking or quote button above to ask about a service.</p>}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Hours */}
             {hours && hours.length > 0 && (

@@ -5,9 +5,14 @@ type LeadInput = {
   phone: string | null;
   message: string;
   userId: number | null;
+  source?: string;
 };
 
 type LeadOwner = { userId: number } | null | undefined;
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character] || character);
+}
 
 type LeadDependencies = {
   createLead: (input: LeadInput) => Promise<number | undefined>;
@@ -18,6 +23,8 @@ type LeadDependencies = {
     title: string;
     body: string;
     actionUrl: string;
+    metadata?: Record<string, unknown>;
+    emailTemplate?: { subject: string; html: string };
   }) => Promise<unknown>;
 };
 
@@ -35,9 +42,14 @@ export async function createPremiumLeadWithNotification(
       await dependencies.notify({
         userId: owner.userId,
         category: "system",
-        title: "New lead from your Premium listing",
-        body: `${input.name} (${input.email}) sent an inquiry: ${input.message.substring(0, 200)}`,
-        actionUrl: "/my-business?tab=analytics",
+        title: "New business inquiry",
+        body: `${input.name} (${input.email}) sent a ${input.source || "listing"} inquiry: ${input.message.substring(0, 200)}`,
+        actionUrl: "/my-business?tab=analytics&leadId=" + leadId,
+        metadata: { serviceKey: input.serviceKey, leadId, source: input.source || "listing_inquiry" },
+        emailTemplate: {
+          subject: `New inquiry from ${input.name}`,
+          html: `<h2>New business inquiry</h2><p><strong>${escapeHtml(input.name)}</strong> sent an inquiry through your Settle CLT listing.</p><p>${escapeHtml(input.message.substring(0, 500))}</p><p><a href="https://settleclt.com/my-business?tab=analytics&leadId=${leadId}">View and follow up</a></p>`,
+        },
       });
     }
   } catch (error) {

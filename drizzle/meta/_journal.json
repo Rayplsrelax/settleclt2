@@ -183,6 +183,13 @@
       "when": 1786130002000,
       "tag": "0025_self_hosted_auth",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "5",
+      "when": 1786130003000,
+      "tag": "0026_phase1_business_tools",
+      "breakpoints": true
     }
   ]
 }

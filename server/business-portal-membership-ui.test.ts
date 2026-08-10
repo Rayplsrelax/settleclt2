@@ -30,4 +30,12 @@ describe("membership-driven My Business portal", () => {
     expect(source).toContain("updateListing.isPending || !formIsCurrent");
     expect(source).not.toContain("Verified Owner");
   });
+
+  it("shows data-informed growth suggestions without content generation claims", () => {
+    expect(source).toContain("premium.getGrowthSuggestions.useQuery");
+    expect(source).toContain("Post ideas are topics only");
+    expect(source).toContain('suggestion.kind === "post_idea"');
+    expect(routerSource).toContain("getGrowthSuggestions: protectedProcedure");
+    expect(routerSource).not.toContain("Social content draft generation");
+  });
 });

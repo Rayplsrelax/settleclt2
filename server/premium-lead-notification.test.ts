@@ -15,7 +15,7 @@ describe("premium lead owner notification routing", () => {
 
   it("notifies the active owner instead of looking up the lead submitter membership", () => {
     expect(routerSource).toContain("getOwner: getActiveOwnerMembership");
-    expect(routerSource).toContain("notify: createNotification");
+    expect(routerSource).toContain("notify: notifyUser");
     expect(leadServiceSource).toContain("dependencies.getOwner(input.serviceKey)");
     expect(leadServiceSource).toContain("dependencies.notify({");
     expect(leadServiceSource).toContain('category: "system"');

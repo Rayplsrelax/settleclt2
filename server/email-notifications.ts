@@ -12,6 +12,7 @@
  */
 
 import { notifyOwner } from "./_core/notification";
+import { ENV } from "./_core/env";
 
 // ─── Email Templates ─────────────────────────────────────
 
@@ -142,18 +143,22 @@ export async function sendUserEmail(
   to: string,
   template: { subject: string; html: string }
 ): Promise<boolean> {
-  // TODO: Activate when email service is configured
-  // Example with Resend:
-  // const resend = new Resend(process.env.RESEND_API_KEY);
-  // await resend.emails.send({
-  //   from: 'Settle CLT <hello@settleclt.com>',
-  //   to,
-  //   subject: template.subject,
-  //   html: template.html,
-  // });
-  
-  console.log(`[Email] Would send to ${to}: "${template.subject}" (email service not yet configured)`);
-  return false;
+  if (!ENV.resendApiKey || !ENV.authFromEmail) {
+    console.warn(`[Email] Delivery unavailable for ${to}: email service is not configured`);
+    return false;
+  }
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${ENV.resendApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ from: ENV.authFromEmail, to: [to], subject: template.subject, html: template.html }),
+  });
+  if (!response.ok) {
+    throw new Error(`Email provider returned ${response.status}`);
+  }
+  return true;
 }
 
 /**

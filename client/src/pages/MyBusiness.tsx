@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Building2, Save, Globe, Phone, Mail, Clock, Image, Tag,
   CheckCircle2, BarChart3, Eye, MousePointerClick, Users,
-  ExternalLink, ArrowRight, Crown, Sparkles, Shield, Trash2, Download, Inbox, Upload
+  ExternalLink, ArrowRight, Crown, Sparkles, Shield, Trash2, Download, Inbox, Upload, Lightbulb
 } from "lucide-react";
 import { PhotoUploader } from "@/components/PhotoUploader";
 import { AnalyticsChart } from "@/components/AnalyticsChart";
@@ -31,7 +31,19 @@ import {
 
 const DAY_LABELS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-const EMPTY_LISTING_FORM = {
+const EMPTY_LISTING_FORM: {
+  displayName: string;
+  description: string;
+  phone: string;
+  website: string;
+  email: string;
+  hours: string;
+  tagline: string;
+  socialLinks: string;
+  serviceMenu: string;
+  bookingProvider: "" | "Booksy" | "Square Appointments" | "Calendly" | "Acuity" | "Google booking" | "Other";
+  bookingUrl: string;
+} = {
   displayName: "",
   description: "",
   phone: "",
@@ -40,7 +52,54 @@ const EMPTY_LISTING_FORM = {
   hours: "{}",
   tagline: "",
   socialLinks: "{}",
+  serviceMenu: "[]",
+  bookingProvider: "",
+  bookingUrl: "",
 };
+
+type ServiceMenuItem = {
+  name: string;
+  description: string;
+  startingPriceCents: number | null;
+  active: boolean;
+};
+
+function ServiceMenuEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const services = (() => {
+    try {
+      const parsed = JSON.parse(value || "[]");
+      return Array.isArray(parsed) ? parsed as ServiceMenuItem[] : [];
+    } catch {
+      return [];
+    }
+  })();
+  const save = (next: ServiceMenuItem[]) => onChange(JSON.stringify(next));
+  const update = (index: number, patch: Partial<ServiceMenuItem>) => {
+    save(services.map((service, i) => i === index ? { ...service, ...patch } : service));
+  };
+
+  return (
+    <div className="space-y-3">
+      {services.map((service, index) => (
+        <div key={index} className="rounded-lg border p-3 space-y-2">
+          <div className="grid sm:grid-cols-[1fr_140px_auto] gap-2">
+            <Input placeholder="Service name" value={service.name || ""} onChange={e => update(index, { name: e.target.value })} />
+            <Input type="number" min="0" step="1" placeholder="Starting price" value={service.startingPriceCents == null ? "" : service.startingPriceCents / 100} onChange={e => update(index, { startingPriceCents: e.target.value ? Math.round(Number(e.target.value) * 100) : null })} />
+            <Button type="button" variant="ghost" size="sm" onClick={() => save(services.filter((_, i) => i !== index))}>Remove</Button>
+          </div>
+          <Textarea rows={2} placeholder="Short description" value={service.description || ""} onChange={e => update(index, { description: e.target.value })} />
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            <input type="checkbox" checked={service.active !== false} onChange={e => update(index, { active: e.target.checked })} />
+            Show this service publicly
+          </label>
+        </div>
+      ))}
+      <Button type="button" variant="outline" size="sm" onClick={() => save([...services, { name: "", description: "", startingPriceCents: null, active: true }])}>
+        Add service
+      </Button>
+    </div>
+  );
+}
 
 function HoursEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const parsed = (() => {
@@ -137,6 +196,10 @@ export default function MyBusiness() {
     { serviceKey: selectedMembership?.serviceKey ?? "" },
     { enabled: !!selectedMembership && canViewAnalytics }
   );
+  const { data: growthSuggestions } = trpc.premium.getGrowthSuggestions.useQuery(
+    { serviceKey: selectedMembership?.serviceKey ?? "" },
+    { enabled: !!selectedMembership && canViewAnalytics }
+  );
 
   const { data: tierInfo } = trpc.premium.getTier.useQuery(
     { serviceKey: selectedMembership?.serviceKey ?? "" },
@@ -162,6 +225,13 @@ export default function MyBusiness() {
       refetchOverride();
     },
     onError: (err) => toast.error(err.message),
+  });
+  const updateLeadDetails = trpc.premium.updateLeadDetails.useMutation({
+    onSuccess: () => {
+      toast.success("Lead details updated.");
+      refetchLeads();
+    },
+    onError: error => toast.error(error.message),
   });
   const uploadPhoto = trpc.businessPortal.uploadPhoto.useMutation({
     onSuccess: () => {
@@ -262,6 +332,9 @@ export default function MyBusiness() {
         hours: override.hours || "{}",
         tagline: override.tagline || "",
         socialLinks: override.socialLinks || "{}",
+        serviceMenu: override.serviceMenu || "[]",
+        bookingProvider: (override.bookingProvider || "") as typeof EMPTY_LISTING_FORM.bookingProvider,
+        bookingUrl: override.bookingUrl || "",
       });
     } else {
       setFormState({ scopeKey: null, value: EMPTY_LISTING_FORM });
@@ -515,6 +588,38 @@ export default function MyBusiness() {
                   </div>
                 </CardContent>
               </Card>
+              <Card className="md:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-base">Services and booking</CardTitle>
+                  <CardDescription>Show what you offer and send visitors to your existing booking or quote page.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  <ServiceMenuEditor value={form.serviceMenu} onChange={(serviceMenu) => setForm({ ...form, serviceMenu })} />
+                  <div className="grid sm:grid-cols-2 gap-4 border-t pt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="bookingProvider">Booking or quote provider</Label>
+                      <select id="bookingProvider" className="w-full h-10 rounded-md border bg-background px-3 text-sm" value={form.bookingProvider} onChange={e => setForm({ ...form, bookingProvider: e.target.value as typeof form.bookingProvider })}>
+                        <option value="">No external booking link</option>
+                        <option value="Booksy">Booksy</option>
+                        <option value="Square Appointments">Square Appointments</option>
+                        <option value="Calendly">Calendly</option>
+                        <option value="Acuity">Acuity</option>
+                        <option value="Google booking">Google booking</option>
+                        <option value="Other">Other business booking page</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="bookingUrl">Booking or request-a-quote URL</Label>
+                      <Input id="bookingUrl" type="url" placeholder="https://..." value={form.bookingUrl} onChange={e => setForm({ ...form, bookingUrl: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="flex justify-end">
+                    <Button onClick={handleSave} disabled={updateListing.isPending || !formIsCurrent} size="sm" className="gap-1.5">
+                      <Save className="w-3.5 h-3.5" /> Save Services and Booking
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
@@ -619,6 +724,36 @@ export default function MyBusiness() {
                   </Card>
                 </div>
 
+                {growthSuggestions?.length ? (
+                  <Card className="border-amber-200 bg-amber-50/40">
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Lightbulb className="w-4 h-4 text-amber-600" /> Growth suggestions
+                      </CardTitle>
+                      <CardDescription>
+                        Practical next steps based on your listing activity. Post ideas are topics only—Settle CLT does not create graphics or publish content.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {growthSuggestions.map((suggestion) => (
+                          <div key={suggestion.key} className="rounded-lg border bg-background p-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="font-medium text-sm">{suggestion.title}</p>
+                                <p className="text-sm text-muted-foreground mt-1">{suggestion.detail}</p>
+                              </div>
+                              <Badge variant="outline" className="shrink-0 text-[10px]">
+                                {suggestion.kind === "post_idea" ? "Post topic" : "Action"}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : null}
+
                 {/* Daily chart */}
                 <Card>
                   <CardHeader>
@@ -695,6 +830,24 @@ export default function MyBusiness() {
                                   </select>
                                 </div>
                                 <p className="mt-2 text-muted-foreground whitespace-pre-wrap">{lead.message}</p>
+                                <div className="grid sm:grid-cols-2 gap-3 mt-3 pt-3 border-t">
+                                  <div className="space-y-1">
+                                    <Label className="text-xs">Follow-up</Label>
+                                    <Input type="datetime-local" className="h-8 text-xs" defaultValue={lead.followUpAt ? new Date(lead.followUpAt).toISOString().slice(0, 16) : ""} onBlur={event => updateLeadDetails.mutate({ leadId: lead.id, followUpAt: event.target.value ? new Date(event.target.value) : null })} />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <Label className="text-xs">Source</Label>
+                                    <Input className="h-8 text-xs" defaultValue={lead.source || "listing_inquiry"} onBlur={event => updateLeadDetails.mutate({ leadId: lead.id, source: event.target.value || null })} />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <Label className="text-xs">Estimated opportunity value ($)</Label>
+                                    <Input type="number" min="0" step="1" className="h-8 text-xs" defaultValue={lead.estimatedValueCents == null ? "" : lead.estimatedValueCents / 100} onBlur={event => updateLeadDetails.mutate({ leadId: lead.id, estimatedValueCents: event.target.value ? Math.round(Number(event.target.value) * 100) : null })} />
+                                  </div>
+                                  <div className="space-y-1 sm:col-span-2">
+                                    <Label className="text-xs">Private notes</Label>
+                                    <Textarea rows={2} className="text-xs" defaultValue={lead.notes || ""} onBlur={event => updateLeadDetails.mutate({ leadId: lead.id, notes: event.target.value || null })} />
+                                  </div>
+                                </div>
                               </div>
                             ))}
                           </div>
@@ -814,7 +967,7 @@ export default function MyBusiness() {
                     <li className="flex items-center gap-2"><Crown className="w-4 h-4 text-purple-600" /> Premium badge + highlight</li>
                     <li className="flex items-center gap-2"><Crown className="w-4 h-4 text-purple-600" /> Top of search results</li>
                     <li className="flex items-center gap-2"><Crown className="w-4 h-4 text-purple-600" /> Photo gallery (up to 15)</li>
-                    <li className="flex items-center gap-2"><Crown className="w-4 h-4 text-purple-600" /> Lead generation analytics</li>
+                    <li className="flex items-center gap-2"><Crown className="w-4 h-4 text-purple-600" /> Lead generation analytics and inbox</li>
                     <li className="flex items-center gap-2"><Crown className="w-4 h-4 text-purple-600" /> Monthly performance report</li>
                   </ul>
                   {currentTier !== "premium" && (
@@ -848,10 +1001,9 @@ export default function MyBusiness() {
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> Everything in Premium</li>
                     <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-600" /> AI Business Assistant (24/7 chat)</li>
-                    <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-600" /> Smart scheduling capture</li>
-                    <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-600" /> Social content drafts</li>
-                    <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-600" /> Reputation autopilot</li>
-                    <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-600" /> One-page web presence</li>
+                    <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-600" /> Smart inquiry and booking-request capture</li>
+                    <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-600" /> Data-informed post-topic suggestions</li>
+                    <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-600" /> Profile and lead follow-up recommendations</li>
                     <li className="flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-600" /> Photo gallery (up to 30)</li>
                   </ul>
                   {currentTier !== "pro" && (
