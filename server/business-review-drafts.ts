@@ -58,7 +58,11 @@ export async function generateBusinessReviewResponse(
     };
     const draft = data.choices?.[0]?.message?.content?.trim();
     return draft && draft.length <= 900 ? draft : fallback;
-  } catch {
+  } catch (error) {
+    console.warn(
+      "[BusinessReview] Provider request failed:",
+      error instanceof Error ? error.message : "unknown provider error"
+    );
     return fallback;
   }
 }
