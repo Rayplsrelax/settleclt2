@@ -1594,7 +1594,7 @@ export async function getActiveSponsorshipsForEvent(eventId: number) {
       eq(eventSponsorships.eventId, eventId),
       eq(eventSponsorships.status, "active"),
     ))
-    .orderBy(desc(eventSponsorships.level))
+    .orderBy(sql`CASE ${eventSponsorships.level} WHEN 'gold' THEN 1 WHEN 'silver' THEN 2 ELSE 3 END`)
     .limit(20);
 }
 
