@@ -23,8 +23,8 @@ describe("Premium Listing Tiers", () => {
       expect(PREMIUM_TIERS.featured.features).toContain("Featured badge on listing");
     });
 
-    it("premium tier should have 6 features", () => {
-      expect(PREMIUM_TIERS.premium.features.length).toBe(6);
+    it("premium tier should have 7 features", () => {
+      expect(PREMIUM_TIERS.premium.features.length).toBe(7);
       expect(PREMIUM_TIERS.premium.features).toContain("Everything in Featured");
     });
 

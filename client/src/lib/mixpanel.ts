@@ -220,7 +220,7 @@ export function trackDirectoryView(serviceKey: string, category: string) {
 }
 
 export function trackBusinessAction(
-  action: "phone_click" | "website_click" | "directions_click" | "claim_click",
+  action: "phone_click" | "website_click" | "directions_click" | "claim_click" | "booking_click",
   properties: {
     service_key: string;
     business_name?: string;

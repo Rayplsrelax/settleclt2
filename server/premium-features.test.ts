@@ -67,6 +67,11 @@ describe("Premium Feature: Lead Capture", () => {
     expect(appRouter._def.procedures).toHaveProperty("premium.updateLeadStatus");
   });
 
+  it("appRouter includes premium.updateLeadDetails procedure", async () => {
+    const { appRouter } = await import("./routers");
+    expect(appRouter._def.procedures).toHaveProperty("premium.updateLeadDetails");
+  });
+
   it("appRouter includes premium.getPhotoLimit procedure", async () => {
     const { appRouter } = await import("./routers");
     expect(appRouter._def.procedures).toHaveProperty("premium.getPhotoLimit");
@@ -87,6 +92,13 @@ describe("Premium Feature: Schema and Migration", () => {
     expect(schema.businessLeads.email).toBeDefined();
     expect(schema.businessLeads.message).toBeDefined();
     expect(schema.businessLeads.status).toBeDefined();
+    expect(schema.businessLeads.followUpAt).toBeDefined();
+    expect(schema.businessLeads.notes).toBeDefined();
+    expect(schema.businessLeads.source).toBeDefined();
+    expect(schema.businessLeads.estimatedValueCents).toBeDefined();
+    expect(schema.businessListingOverrides.serviceMenu).toBeDefined();
+    expect(schema.businessListingOverrides.bookingProvider).toBeDefined();
+    expect(schema.businessListingOverrides.bookingUrl).toBeDefined();
   });
 
   it("0022_business_leads.sql migration exists with CREATE TABLE", async () => {
@@ -102,6 +114,16 @@ describe("Premium Feature: Schema and Migration", () => {
     expect(content).toContain("qualified");
     expect(content).toContain("closed");
     expect(content).toContain("archived");
+  });
+
+  it("0026_phase1_business_tools.sql migration exists", async () => {
+    const fs = await import("node:fs/promises");
+    const path = await import("node:path");
+    const content = await fs.readFile(path.join(process.cwd(), "drizzle", "0026_phase1_business_tools.sql"), "utf-8");
+    expect(content).toContain("followUpAt");
+    expect(content).toContain("estimatedValueCents");
+    expect(content).toContain("serviceMenu");
+    expect(content).toContain("bookingUrl");
   });
 });
 

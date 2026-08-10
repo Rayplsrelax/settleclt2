@@ -52,8 +52,7 @@ export function assertEmailAuthConfiguration(env = ENV): void {
     throw new Error("Missing transactional email configuration");
   }
   // Accept any subdomain of settleclt.com (including the root domain).
-  // Case-insensitive per email standards; handles both bare addresses
-  // (noreply@settleclt.com) and display-name syntax (Name <noreply@settleclt.com>)
+  // Case-insensitive per email standards; handles bare addresses and display names.
   const domainMatch = env.authFromEmail.match(/@([^\s>]+)/i);
   if (!domainMatch || !/@(.*\.)?settleclt\.com$/i.test(domainMatch[1])) {
     throw new Error("Auth sender must use a settleclt.com (sub)domain");
