@@ -685,7 +685,7 @@ export default function BusinessDetail() {
             </Card>
 
             {/* Related businesses */}
-            {relatedBusinesses.length > 0 && (
+            {relatedBusinesses.length > 0 && !(premiumData?.active && premiumData?.tier === "pro") && (
               <Card>
                 <CardContent className="p-5">
                   <h3 className="font-display font-semibold text-foreground mb-3">

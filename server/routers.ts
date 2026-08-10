@@ -59,6 +59,8 @@ import { sourceRegistryRouter } from "./sourceRegistryRouter";
 import { requireActivePremium, requirePremiumLeadAccess } from "./premium-access";
 import { createPremiumLeadWithNotification } from "./premium-lead-service";
 import { askBusinessAssistant } from "./business-assistant";
+import { generateBusinessContentPrompts } from "./business-content-prompts";
+import { generateBusinessReviewResponse } from "./business-review-drafts";
 import { getBusinessGrowthSuggestions } from "./business-growth-suggestions";
 
 const SETTLE_CLT_MICROSITES = [
@@ -1615,7 +1617,7 @@ export const appRouter = router({
           getEnrichedService(input.serviceKey),
           getBusinessLeadsForService(input.serviceKey, { limit: 100 }),
         ]);
-        if (!listing || listing.paymentStatus !== "active") return [];
+        if (!listing || listing.tier !== "pro" || listing.paymentStatus !== "active") return [];
 
         let hours: Record<string, unknown> = {};
         try {
@@ -1640,6 +1642,58 @@ export const appRouter = router({
           hasWebsite: Boolean(override?.website),
           hasHours,
         });
+      }),
+    generateContentPrompts: protectedProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .mutation(async ({ input, ctx }) => {
+        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+        requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
+        const [listing, override, enriched] = await Promise.all([
+          getPremiumListing(input.serviceKey),
+          getListingOverride(input.serviceKey),
+          getEnrichedService(input.serviceKey),
+        ]);
+        if (!listing || listing.tier !== "pro" || listing.paymentStatus !== "active") return [];
+        return generateBusinessContentPrompts({
+          serviceKey: input.serviceKey,
+          displayName: override?.displayName ?? null,
+          description: override?.description ?? null,
+          phone: override?.phone ?? enriched?.verifiedPhone ?? null,
+          website: override?.website ?? null,
+          hours: override?.hours ?? enriched?.hoursJson ?? null,
+          tagline: override?.tagline ?? null,
+          category: enriched?.googleTypes ?? "local business",
+          googleRating: enriched?.googleRating ?? null,
+          reviewCount: enriched?.reviewCount ?? null,
+          verifiedAddress: enriched?.verifiedAddress ?? null,
+        });
+      }),
+    generateReviewResponse: protectedProcedure
+      .input(z.object({ reviewId: z.number().int().positive(), serviceKey: z.string(), rating: z.number().int().min(1).max(5), tip: z.string().nullable(), aspect: z.string().nullable() }))
+      .mutation(async ({ input, ctx }) => {
+        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+        requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
+        const [listing, override, enriched] = await Promise.all([
+          getPremiumListing(input.serviceKey),
+          getListingOverride(input.serviceKey),
+          getEnrichedService(input.serviceKey),
+        ]);
+        if (!listing || listing.tier !== "pro" || listing.paymentStatus !== "active") return { draft: "" };
+        return {
+          draft: await generateBusinessReviewResponse({
+            serviceKey: input.serviceKey,
+            displayName: override?.displayName ?? null,
+            description: override?.description ?? null,
+            phone: override?.phone ?? enriched?.verifiedPhone ?? null,
+            website: override?.website ?? null,
+            hours: override?.hours ?? enriched?.hoursJson ?? null,
+            tagline: override?.tagline ?? null,
+            category: enriched?.googleTypes ?? "local business",
+            googleRating: enriched?.googleRating ?? null,
+            reviewCount: enriched?.reviewCount ?? null,
+            verifiedAddress: enriched?.verifiedAddress ?? null,
+          }, input),
+        };
       }),
     trackView: publicProcedure
       .input(z.object({ serviceKey: z.string() }))
@@ -2297,6 +2351,10 @@ export const appRouter = router({
       .query(async ({ input, ctx }) => {
         const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
         requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        const listing = await getPremiumListing(input.serviceKey);
+        if (!listing || listing.tier !== "pro" || listing.paymentStatus !== "active") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "AI assistant memory is available for active Business Pro listings only." });
+        }
         return getBusinessFaqs(input.serviceKey);
       }),
 
@@ -2309,6 +2367,10 @@ export const appRouter = router({
       .mutation(async ({ input, ctx }) => {
         const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
         requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        const listing = await getPremiumListing(input.serviceKey);
+        if (!listing || listing.tier !== "pro" || listing.paymentStatus !== "active") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "AI assistant memory is available for active Business Pro listings only." });
+        }
         const id = await createBusinessFaq({
           serviceKey: input.serviceKey,
           question: input.question,
@@ -2322,6 +2384,10 @@ export const appRouter = router({
       .mutation(async ({ input, ctx }) => {
         const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
         requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        const listing = await getPremiumListing(input.serviceKey);
+        if (!listing || listing.tier !== "pro" || listing.paymentStatus !== "active") {
+          throw new TRPCError({ code: "FORBIDDEN", message: "AI assistant memory is available for active Business Pro listings only." });
+        }
         await deleteBusinessFaq(input.id, input.serviceKey);
         return { success: true };
       }),

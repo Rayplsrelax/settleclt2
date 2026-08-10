@@ -7,7 +7,7 @@
 
 import { ENV } from "./_core/env";
 
-interface BusinessContext {
+export interface BusinessContext {
   displayName: string | null;
   description: string | null;
   phone: string | null;
