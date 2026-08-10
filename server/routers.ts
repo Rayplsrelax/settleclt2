@@ -1382,7 +1382,7 @@ export const appRouter = router({
         serviceMenu: z.string().max(20000).refine(value => {
           try { return Array.isArray(JSON.parse(value)); } catch { return false; }
         }, "Service menu must be a valid JSON array"),
-        bookingProvider: z.enum(["Booksy", "Square Appointments", "Calendly", "Acuity", "Google booking", "Other"]).optional().or(z.literal("")),
+        bookingProvider: z.enum(["Booksy", "Square Appointments", "Calendly", "Acuity", "Google booking", "Stripe Payment Links", "QuickBooks", "Other"]).optional().or(z.literal("")),
         bookingUrl: z.string().url().max(512).optional().or(z.literal("")),
       }))
       .mutation(async ({ input, ctx }) => {
@@ -1675,6 +1675,49 @@ export const appRouter = router({
           requireActivePremium(listing);
         }
         return getBusinessLeadsForService(input.serviceKey, input);
+      }),
+    getLeadAnalytics: protectedProcedure
+      .input(z.object({ serviceKey: z.string() }))
+      .query(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") {
+          const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+          requirePremiumLeadAccess(memberships, input.serviceKey, await getPremiumListing(input.serviceKey));
+        } else {
+          requireActivePremium(await getPremiumListing(input.serviceKey));
+        }
+        const leads = await getBusinessLeadsForService(input.serviceKey, { limit: 100 });
+        const total = leads.length;
+        const byStatus = leads.reduce<Record<string, number>>((acc, l) => {
+          acc[l.status] = (acc[l.status] ?? 0) + 1;
+          return acc;
+        }, {});
+        const bySource = leads.reduce<Record<string, number>>((acc, l) => {
+          const source = l.source || "listing_inquiry";
+          acc[source] = (acc[source] ?? 0) + 1;
+          return acc;
+        }, {});
+        const totalEstimatedValueCents = leads.reduce((sum, l) => sum + (l.estimatedValueCents ?? 0), 0);
+        const openLeads = leads.filter(l => l.status === "new" || l.status === "contacted");
+        const openValueCents = openLeads.reduce((sum, l) => sum + (l.estimatedValueCents ?? 0), 0);
+        const closedWon = leads.filter(l => l.status === "closed");
+        const closedValueCents = closedWon.reduce((sum, l) => sum + (l.estimatedValueCents ?? 0), 0);
+        const needsFollowUp = leads.filter(l =>
+          (l.status === "new" || l.status === "contacted") &&
+          l.followUpAt &&
+          new Date(l.followUpAt).getTime() <= Date.now()
+        ).length;
+        return {
+          total,
+          byStatus,
+          bySource,
+          totalEstimatedValueCents,
+          openValueCents,
+          closedValueCents,
+          needsFollowUp,
+          sourcesList: Object.entries(bySource)
+            .sort((a, b) => b[1] - a[1])
+            .map(([source, count]) => ({ source, count, pct: total > 0 ? Math.round((count / total) * 100) : 0 })),
+        };
       }),
     getReport: protectedProcedure
       .input(z.object({ serviceKey: z.string() }))

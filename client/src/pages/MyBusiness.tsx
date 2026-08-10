@@ -12,7 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Building2, Save, Globe, Phone, Mail, Clock, Image, Tag,
   CheckCircle2, BarChart3, Eye, MousePointerClick, Users,
-  ExternalLink, ArrowRight, Crown, Sparkles, Shield, Trash2, Download, Inbox, Upload, Lightbulb
+  ExternalLink, ArrowRight, Crown, Sparkles, Shield, Trash2, Download, Inbox, Upload, Lightbulb,
+  DollarSign, TrendingUp, AlertCircle
 } from "lucide-react";
 import { PhotoUploader } from "@/components/PhotoUploader";
 import { AnalyticsChart } from "@/components/AnalyticsChart";
@@ -41,7 +42,7 @@ const EMPTY_LISTING_FORM: {
   tagline: string;
   socialLinks: string;
   serviceMenu: string;
-  bookingProvider: "" | "Booksy" | "Square Appointments" | "Calendly" | "Acuity" | "Google booking" | "Other";
+  bookingProvider: "" | "Booksy" | "Square Appointments" | "Calendly" | "Acuity" | "Google booking" | "Stripe Payment Links" | "QuickBooks" | "Other";
   bookingUrl: string;
 } = {
   displayName: "",
@@ -615,7 +616,7 @@ export default function MyBusiness() {
                     {isPremiumPlus ? (
                       <div className="grid sm:grid-cols-2 gap-4 border-t pt-4">
                         <div className="space-y-2">
-                          <Label htmlFor="bookingProvider">Booking or quote provider</Label>
+                          <Label htmlFor="bookingProvider">Booking, payment, or invoicing link</Label>
                           <select id="bookingProvider" className="w-full h-10 rounded-md border bg-background px-3 text-sm" value={form.bookingProvider} onChange={e => setForm({ ...form, bookingProvider: e.target.value as typeof form.bookingProvider })}>
                             <option value="">No external booking link</option>
                             <option value="Booksy">Booksy</option>
@@ -623,7 +624,9 @@ export default function MyBusiness() {
                             <option value="Calendly">Calendly</option>
                             <option value="Acuity">Acuity</option>
                             <option value="Google booking">Google booking</option>
-                            <option value="Other">Other business booking page</option>
+                            <option value="Stripe Payment Links">Stripe Payment Links</option>
+                            <option value="QuickBooks">QuickBooks / Invoicing</option>
+                            <option value="Other">Other business page</option>
                           </select>
                         </div>
                         <div className="space-y-2">
@@ -636,7 +639,7 @@ export default function MyBusiness() {
                         <Crown className="w-5 h-5 text-amber-600 shrink-0" />
                         <div>
                           <p className="font-medium text-sm">External booking links require Premium</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">Upgrade to Premium ($79/mo) to connect Booksy, Calendly, Square Appointments, and other booking providers.</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">Upgrade to Premium ($79/mo) to connect Booksy, Calendly, Square, Stripe Payment Links, QuickBooks, and other providers.</p>
                         </div>
                       </div>
                     )}
@@ -844,6 +847,8 @@ export default function MyBusiness() {
 
                 {/* Lead pipeline + inbox */}
                 {currentTier === "premium" && tierInfo?.active && (
+                  <>
+                  <LeadAnalyticsSection serviceKey={selectedMembership?.serviceKey ?? ""} />
                   <div className="grid lg:grid-cols-[1fr_auto] gap-4 items-start">
                     <Card>
                       <CardHeader>
@@ -906,6 +911,7 @@ export default function MyBusiness() {
                       <Download className="w-4 h-4" /> {reportQuery.isFetching ? "Preparing..." : "Download Monthly Report"}
                     </Button>
                   </div>
+                  </>
                 )}
                 {currentTier === "basic" && (
                   <Card className="border-amber-200 bg-amber-50/50">
@@ -1095,5 +1101,79 @@ export default function MyBusiness() {
         </Tabs>
       </div>
     </PageLayout>
+  );
+}
+
+function LeadAnalyticsSection({ serviceKey }: { serviceKey: string }) {
+  const { data: leadAnalytics } = trpc.premium.getLeadAnalytics.useQuery(
+    { serviceKey },
+    { enabled: !!serviceKey }
+  );
+
+  if (!leadAnalytics || leadAnalytics.total === 0) return null;
+
+  const fmt = (cents: number) => cents > 0 ? `$${(cents / 100).toFixed(0)}` : "—";
+
+  return (
+    <Card className="border-primary/20">
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-primary" /> Lead Source Analytics
+        </CardTitle>
+        <CardDescription>Where your leads come from and what they are worth.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="rounded-lg border p-3 text-center">
+            <p className="text-2xl font-bold text-foreground">{leadAnalytics.total}</p>
+            <p className="text-xs text-muted-foreground">Total leads</p>
+          </div>
+          <div className="rounded-lg border p-3 text-center">
+            <p className="text-2xl font-bold text-green-600">{fmt(leadAnalytics.openValueCents)}</p>
+            <p className="text-xs text-muted-foreground">Open pipeline</p>
+          </div>
+          <div className="rounded-lg border p-3 text-center">
+            <p className="text-2xl font-bold text-blue-600">{fmt(leadAnalytics.closedValueCents)}</p>
+            <p className="text-xs text-muted-foreground">Closed won</p>
+          </div>
+          <div className="rounded-lg border p-3 text-center">
+            <p className={`text-2xl font-bold ${leadAnalytics.needsFollowUp > 0 ? "text-amber-600" : "text-muted-foreground"}`}>
+              {leadAnalytics.needsFollowUp}
+            </p>
+            <p className="text-xs text-muted-foreground">Need follow-up</p>
+          </div>
+        </div>
+
+        {leadAnalytics.sourcesList.length > 0 && (
+          <div>
+            <h4 className="text-sm font-medium text-foreground mb-2 flex items-center gap-1.5">
+              <DollarSign className="w-3.5 h-3.5" /> Lead sources
+            </h4>
+            <div className="space-y-2">
+              {leadAnalytics.sourcesList.map(({ source, count, pct }) => (
+                <div key={source} className="flex items-center gap-3">
+                  <span className="text-sm text-muted-foreground w-32 shrink-0 capitalize">{source.replace(/_/g, " ")}</span>
+                  <div className="flex-1 h-6 rounded-md bg-muted overflow-hidden">
+                    <div className="h-full bg-primary/70 rounded-md flex items-center justify-end px-2" style={{ width: `${pct > 0 ? Math.max(Math.min(pct, 100), 5) : 0}%` }}>
+                      <span className="text-[10px] font-medium text-primary-foreground">{pct}%</span>
+                    </div>
+                  </div>
+                  <span className="text-xs text-muted-foreground w-8 text-right shrink-0">{count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {leadAnalytics.needsFollowUp > 0 && (
+          <div className="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 p-3">
+            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+            <p className="text-sm text-amber-800">
+              {leadAnalytics.needsFollowUp} lead{leadAnalytics.needsFollowUp !== 1 ? "s" : ""} overdue for follow-up.
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
