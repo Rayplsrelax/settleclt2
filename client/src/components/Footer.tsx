@@ -77,6 +77,7 @@ export default function Footer() {
               <Link href="/bingo" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">CLT Bingo Cards</Link>
               <Link href="/leaderboard" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Leaderboard</Link>
               <Link href="/list-your-business" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">List Your Business</Link>
+              <Link href="/business-pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Business Pricing</Link>
             </div>
           </div>
           <div>
