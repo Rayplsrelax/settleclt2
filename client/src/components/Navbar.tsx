@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { useState } from "react";
-import { Menu, X, LogIn, User, LogOut, Heart, Stamp, ChevronDown, Shield, Grid3X3, Trophy, Building2, Settings } from "lucide-react";
+import { Menu, X, LogIn, User, LogOut, Heart, Stamp, ChevronDown, Shield, Grid3X3, Trophy, Building2, Settings, Home, DollarSign } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import {
   DropdownMenu,
@@ -20,9 +20,6 @@ const navLinks = [
   { href: "/directory", label: "Directory" },
   { href: "/events", label: "Events" },
   { href: "/blog", label: "Blog" },
-  { href: "/passport", label: "CLT Passport" },
-  { href: "/find-your-home", label: "Find Your Home" },
-  { href: "/business-pricing", label: "Business Pricing" },
 ];
 
 function getInitials(name: string | null | undefined): string {
@@ -67,9 +64,21 @@ function UserMenu() {
           <User className="w-4 h-4 mr-2" />
           My Profile
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/my-business")}>
+          <Building2 className="w-4 h-4 mr-2" />
+          My Business
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/passport")}>
           <Stamp className="w-4 h-4 mr-2" />
           CLT Passport
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/find-your-home")}>
+          <Home className="w-4 h-4 mr-2" />
+          Find Your Home
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/business-pricing")}>
+          <DollarSign className="w-4 h-4 mr-2" />
+          Business Pricing
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/wishlist")}>
           <Heart className="w-4 h-4 mr-2" />
@@ -83,10 +92,6 @@ function UserMenu() {
           <Trophy className="w-4 h-4 mr-2" />
           Leaderboard
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate("/my-business")}>
-          <Building2 className="w-4 h-4 mr-2" />
-          My Business
-        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/notifications")}>
           <Settings className="w-4 h-4 mr-2" />
           Notification Settings
@@ -96,35 +101,7 @@ function UserMenu() {
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate("/admin/enrich")}>
               <Shield className="w-4 h-4 mr-2" />
-              Admin: Enrich Directory
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/admin/blog")}>
-              <Shield className="w-4 h-4 mr-2" />
-              Admin: Blog Editor
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/admin/events")}>
-              <Shield className="w-4 h-4 mr-2" />
-              Admin: Events Manager
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/admin/analytics")}>
-              <Shield className="w-4 h-4 mr-2" />
-              Admin: Analytics
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/admin/digest")}>
-              <Shield className="w-4 h-4 mr-2" />
-              Admin: Monthly Digest
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/admin/referrals")}>
-              <Shield className="w-4 h-4 mr-2" />
-              Admin: Referrals
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/admin/claims")}>
-              <Shield className="w-4 h-4 mr-2" />
-              Admin: Business Claims
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/admin/submissions")}>
-              <Shield className="w-4 h-4 mr-2" />
-              Admin: Business Submissions
+              Admin Dashboard
             </DropdownMenuItem>
           </>
         )}
