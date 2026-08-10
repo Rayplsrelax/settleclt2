@@ -1399,16 +1399,34 @@ export const appRouter = router({
         const isPremiumPlus = isActive && (tier === "premium" || tier === "pro");
 
         if (data.serviceMenu !== undefined && !isFeaturedPlus) {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "Service menu is a Featured-tier feature. Upgrade to Featured ($29/mo) or higher to display services.",
-          });
+          // Allow clearing (empty array) but block setting non-empty values
+          try {
+            const parsed = JSON.parse(data.serviceMenu || "[]");
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              throw new TRPCError({
+                code: "FORBIDDEN",
+                message: "Service menu is a Featured-tier feature. Upgrade to Featured ($29/mo) or higher to display services.",
+              });
+            }
+          } catch (e) {
+            if (e instanceof TRPCError) throw e;
+            // Invalid JSON — block it
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Service menu must be a valid JSON array.",
+            });
+          }
         }
         if ((data.bookingProvider !== undefined || data.bookingUrl !== undefined) && !isPremiumPlus) {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "External booking links are a Premium-tier feature. Upgrade to Premium ($79/mo) or higher.",
-          });
+          // Allow clearing (empty string) but block setting non-empty values
+          const provider = (data.bookingProvider ?? "").trim();
+          const url = (data.bookingUrl ?? "").trim();
+          if (provider || url) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: "External booking links are a Premium-tier feature. Upgrade to Premium ($79/mo) or higher.",
+            });
+          }
         }
 
         return upsertListingOverride(serviceKey, effectiveClaimId, data);
