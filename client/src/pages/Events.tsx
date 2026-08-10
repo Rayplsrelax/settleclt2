@@ -236,6 +236,7 @@ export default function Events() {
 
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedEvent, setSelectedEvent] = useState<EventType | null>(null);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");

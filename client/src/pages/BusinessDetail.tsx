@@ -413,9 +413,7 @@ export default function BusinessDetail() {
                           <Award className="w-3 h-3" /> Featured Listing
                         </Badge>
                       )}
-                      {(!premiumData?.active || premiumData?.tier === 'basic') && service.featured && service.affiliate && (
-                        <Badge className="bg-clt-gold/20 text-clt-gold border-clt-gold/30 text-xs">Featured Partner</Badge>
-                      )}
+
                       <Badge variant="outline" className="gap-1 text-xs">
                         <MapPin className="w-3 h-3" /> {service.area}
                       </Badge>
@@ -424,6 +422,11 @@ export default function BusinessDetail() {
                           {"$".repeat(enrichment.priceLevel)}
                         </Badge>
                       )}
+                      {publicProfile?.newcomerAttributes?.map((attr: string) => (
+                        <Badge key={attr} className="bg-green-100 text-green-700 border-green-200 text-xs gap-1 capitalize">
+                          {attr.replace(/-/g, " ")}
+                        </Badge>
+                      ))}
                     </div>
 
                     {/* Google rating */}
@@ -682,7 +685,7 @@ export default function BusinessDetail() {
             </Card>
 
             {/* Related businesses */}
-            {relatedBusinesses.length > 0 && (
+            {relatedBusinesses.length > 0 && !(premiumData?.active && premiumData?.tier === "pro") && (
               <Card>
                 <CardContent className="p-5">
                   <h3 className="font-display font-semibold text-foreground mb-3">

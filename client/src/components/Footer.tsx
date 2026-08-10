@@ -78,6 +78,7 @@ export default function Footer() {
               <Link href="/leaderboard" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Leaderboard</Link>
               <Link href="/list-your-business" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">List Your Business</Link>
               <Link href="/business-pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Business Pricing</Link>
+              <Link href="/referrals" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Request a Referral</Link>
             </div>
           </div>
           <div>

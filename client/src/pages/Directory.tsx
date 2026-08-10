@@ -216,7 +216,7 @@ export default function Directory() {
     } else if (sortBy === "newest") {
       result.reverse();
     } else {
-      // Default: premium > featured > affiliate partners > personalization > alphabetical
+      // Default: active Premium > active Featured > personalization > alphabetical
       const tierRank = (key: string) => {
         const tier = premiumMap[key];
         if (tier === "premium") return 0;
@@ -234,9 +234,6 @@ export default function Directory() {
           const aLocal = a.area.includes(myArea) ? 0 : 1;
           const bLocal = b.area.includes(myArea) ? 0 : 1;
           if (aLocal !== bLocal) return aLocal - bLocal;
-          const aPartner = a.featured && a.affiliate ? 0 : 1;
-          const bPartner = b.featured && b.affiliate ? 0 : 1;
-          if (aPartner !== bPartner) return aPartner - bPartner;
           return a.name.localeCompare(b.name);
         });
       } else {
@@ -246,9 +243,6 @@ export default function Directory() {
           const aTier = tierRank(aKey);
           const bTier = tierRank(bKey);
           if (aTier !== bTier) return aTier - bTier;
-          const aPartner = a.featured && a.affiliate ? 0 : 1;
-          const bPartner = b.featured && b.affiliate ? 0 : 1;
-          if (aPartner !== bPartner) return aPartner - bPartner;
           return a.name.localeCompare(b.name);
         });
       }
@@ -271,6 +265,44 @@ export default function Directory() {
   const activeFilterCount = [search, activeGroup, activeCategory, activeArea].filter(Boolean).length;
   const hasFilters = activeFilterCount > 0 || sortBy !== "default";
 
+  // Fetch active promotions for boosted placements
+  const promotionsQuery = trpc.premium.getActiveDirectoryPromotions.useQuery();
+  const boostedKeys = useMemo(() => {
+    if (!promotionsQuery.data) return new Set<string>();
+    return new Set(promotionsQuery.data.map(p => p.serviceKey));
+  }, [promotionsQuery.data]);
+  const activePromotionMap = useMemo(() => {
+    if (!promotionsQuery.data) return {} as Record<string, { headline: string; subtitle?: string | null; type: string; targetCategory?: string | null; targetNeighborhood?: string | null }>;
+    const map: Record<string, { headline: string; subtitle?: string | null; type: string; targetCategory?: string | null; targetNeighborhood?: string | null }> = {};
+    for (const p of promotionsQuery.data) {
+      map[p.serviceKey] = {
+        headline: p.headline ?? "",
+        subtitle: p.subtitle,
+        type: p.type,
+        targetCategory: p.targetCategory,
+        targetNeighborhood: p.targetNeighborhood,
+      };
+    }
+    return map;
+  }, [promotionsQuery.data]);
+
+  const isPromotionRelevant = useCallback((service: typeof SERVICES[number]) => {
+    const promotion = activePromotionMap[toSlug(service.name)];
+    if (!promotion) return false;
+    if (promotion.type === "directory_boost") return true;
+    if (promotion.type === "category_spotlight") return !promotion.targetCategory || promotion.targetCategory === service.category;
+    if (promotion.type === "neighborhood_spotlight") return !promotion.targetNeighborhood || service.area.toLowerCase() === promotion.targetNeighborhood.toLowerCase();
+    return false;
+  }, [activePromotionMap]);
+
+  // Sort paid placements to the top, including their category/neighborhood targets.
+  const sortedWithBoosts = useMemo(() => {
+    if (activePromotionMap && Object.keys(activePromotionMap).length > 0) {
+      return [...filteredServices].sort((a, b) => Number(isPromotionRelevant(b)) - Number(isPromotionRelevant(a)));
+    }
+    return filteredServices;
+  }, [filteredServices, activePromotionMap, isPromotionRelevant]);
+
   // Reset visible count when filters change
   useEffect(() => {
     setVisibleCount(PAGE_SIZE);
@@ -278,10 +310,10 @@ export default function Directory() {
 
   // Paginated slice of filtered services
   const visibleServices = useMemo(() => {
-    return filteredServices.slice(0, visibleCount);
-  }, [filteredServices, visibleCount]);
+    return sortedWithBoosts.slice(0, visibleCount);
+  }, [sortedWithBoosts, visibleCount]);
 
-  const hasMore = visibleCount < filteredServices.length;
+  const hasMore = visibleCount < sortedWithBoosts.length;
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -291,7 +323,7 @@ export default function Directory() {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, filteredServices.length));
+          setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, sortedWithBoosts.length));
         }
       },
       { rootMargin: "400px" }
@@ -689,10 +721,15 @@ export default function Directory() {
                                 <Award className="w-2.5 h-2.5" /> Featured
                               </span>
                             )}
-                            {!premiumTier && s.featured && s.affiliate && (
-                              <span className="px-1.5 py-0.5 rounded bg-clt-gold/20 text-clt-gold text-[10px] font-bold uppercase">Featured</span>
+                            {boostedKeys.has(sSlug) && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold uppercase">
+                                Promoted
+                              </span>
                             )}
                           </div>
+                          {boostedKeys.has(sSlug) && activePromotionMap[sSlug]?.headline && (
+                            <p className="text-xs font-medium text-blue-600 mt-0.5">{activePromotionMap[sSlug].headline}</p>
+                          )}
                           <p className="text-xs text-muted-foreground mt-1">{s.description}</p>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">

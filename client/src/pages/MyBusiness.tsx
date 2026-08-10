@@ -13,7 +13,7 @@ import {
   Building2, Save, Globe, Phone, Mail, Clock, Image, Tag,
   CheckCircle2, BarChart3, Eye, MousePointerClick, Users,
   ExternalLink, ArrowRight, Crown, Sparkles, Shield, Trash2, Download, Inbox, Upload, Lightbulb,
-  DollarSign, TrendingUp, AlertCircle
+  DollarSign, TrendingUp, AlertCircle, MessageSquare
 } from "lucide-react";
 import { PhotoUploader } from "@/components/PhotoUploader";
 import { AnalyticsChart } from "@/components/AnalyticsChart";
@@ -44,6 +44,7 @@ const EMPTY_LISTING_FORM: {
   serviceMenu: string;
   bookingProvider: "" | "Booksy" | "Square Appointments" | "Calendly" | "Acuity" | "Google booking" | "Stripe Payment Links" | "QuickBooks" | "Other";
   bookingUrl: string;
+  newcomerAttributes: string;
 } = {
   displayName: "",
   description: "",
@@ -56,7 +57,60 @@ const EMPTY_LISTING_FORM: {
   serviceMenu: "[]",
   bookingProvider: "",
   bookingUrl: "",
+  newcomerAttributes: "[]",
 };
+
+const NEWCOMER_ATTRIBUTE_OPTIONS = [
+  { value: "family-friendly", label: "Family-friendly" },
+  { value: "new-mover-favorite", label: "New-mover favorite" },
+  { value: "budget-friendly", label: "Budget-friendly" },
+  { value: "english-spanish", label: "Bilingual (English/Spanish)" },
+  { value: "walkable", label: "Walkable location" },
+  { value: "quick-service", label: "Quick service" },
+  { value: "veteran-owned", label: "Veteran-owned" },
+  { value: "woman-owned", label: "Woman-owned" },
+  { value: "locally-grown", label: "Locally grown" },
+  { value: "kid-friendly", label: "Kid-friendly" },
+  { value: "pet-friendly", label: "Pet-friendly" },
+  { value: "open-weekends", label: "Open weekends" },
+];
+
+function NewcomerAttributesEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const selected = (() => {
+    try {
+      const parsed = JSON.parse(value || "[]");
+      return Array.isArray(parsed) ? parsed as string[] : [];
+    } catch {
+      return [];
+    }
+  })();
+
+  const toggle = (attr: string) => {
+    const next = selected.includes(attr)
+      ? selected.filter(a => a !== attr)
+      : [...selected, attr];
+    onChange(JSON.stringify(next));
+  };
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {NEWCOMER_ATTRIBUTE_OPTIONS.map(opt => (
+        <button
+          key={opt.value}
+          type="button"
+          onClick={() => toggle(opt.value)}
+          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+            selected.includes(opt.value)
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted text-muted-foreground hover:bg-muted/80"
+          }`}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 type ServiceMenuItem = {
   name: string;
@@ -202,10 +256,36 @@ export default function MyBusiness() {
     { enabled: !!selectedMembership && canViewAnalytics }
   );
 
+  const trpcUtils = trpc.useUtils();
   const { data: tierInfo } = trpc.premium.getTier.useQuery(
     { serviceKey: selectedMembership?.serviceKey ?? "" },
     { enabled: !!selectedMembership }
   );
+  const { data: businessReferrals = [] } = trpc.premium.getBizReferrals.useQuery(
+    { serviceKey: selectedMembership?.serviceKey ?? "" },
+    { enabled: !!selectedMembership && canEdit }
+  );
+  const updateBizReferralStatus = trpc.premium.updateBizReferralStatus.useMutation({
+    onSuccess: () => selectedMembership?.serviceKey && void trpcUtils.premium.getBizReferrals.invalidate({ serviceKey: selectedMembership.serviceKey }),
+  });
+  const { data: referralAnalytics } = trpc.premium.getBizReferralAnalytics.useQuery(
+    { serviceKey: selectedMembership?.serviceKey ?? "" },
+    { enabled: !!selectedMembership && canEdit }
+  );
+  const { data: referralInvitations = [] } = trpc.premium.getBizReferralInvitations.useQuery(
+    { serviceKey: selectedMembership?.serviceKey ?? "" },
+    { enabled: !!selectedMembership && canEdit }
+  );
+  const [invitationTarget, setInvitationTarget] = useState("");
+  const [invitationReferralId, setInvitationReferralId] = useState<number | null>(null);
+  const inviteBusiness = trpc.premium.inviteBusinessToReferral.useMutation({
+    onSuccess: () => { toast.success("Referral invitation sent."); setInvitationTarget(""); setInvitationReferralId(null); },
+    onError: error => toast.error(error.message),
+  });
+  const respondToInvitation = trpc.premium.respondToReferralInvitation.useMutation({
+    onSuccess: () => selectedMembership?.serviceKey && void trpcUtils.premium.getBizReferralInvitations.invalidate({ serviceKey: selectedMembership.serviceKey }),
+    onError: error => toast.error(error.message),
+  });
   const tierLevel = tierInfo?.tier || "basic";
   const isTierActive = Boolean(tierInfo?.active);
   const isFeaturedPlus = isTierActive && (tierLevel === "featured" || tierLevel === "premium" || tierLevel === "pro");
@@ -340,6 +420,7 @@ export default function MyBusiness() {
         serviceMenu: override.serviceMenu || "[]",
         bookingProvider: (override.bookingProvider || "") as typeof EMPTY_LISTING_FORM.bookingProvider,
         bookingUrl: override.bookingUrl || "",
+        newcomerAttributes: override.newcomerAttributes || "[]",
       });
     } else {
       setFormState({ scopeKey: null, value: EMPTY_LISTING_FORM });
@@ -513,6 +594,7 @@ export default function MyBusiness() {
             <TabsTrigger value="hours" disabled={!canEdit} className="gap-1.5"><Clock className="w-3.5 h-3.5" /> Hours</TabsTrigger>
             <TabsTrigger value="photos" disabled={!canEdit} className="gap-1.5"><Image className="w-3.5 h-3.5" /> Photos</TabsTrigger>
             <TabsTrigger value="analytics" disabled={!canViewAnalytics} className="gap-1.5"><BarChart3 className="w-3.5 h-3.5" /> Analytics</TabsTrigger>
+            <TabsTrigger value="referrals" disabled={!canEdit} className="gap-1.5"><Users className="w-3.5 h-3.5" /> Referrals</TabsTrigger>
             <TabsTrigger value="upgrade" disabled={!canManageBilling} className="gap-1.5"><Crown className="w-3.5 h-3.5" /> Upgrade</TabsTrigger>
           </TabsList>
 
@@ -669,6 +751,23 @@ export default function MyBusiness() {
                   </CardContent>
                 </Card>
               )}
+              {/* Newcomer attributes — free for all tiers */}
+              <Card className="md:col-span-2 border-green-200/50">
+                <CardHeader>
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-green-600" /> Newcomer attributes
+                  </CardTitle>
+                  <CardDescription>Help newcomers find businesses like yours. Select all that apply — these show on your public listing.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <NewcomerAttributesEditor value={form.newcomerAttributes} onChange={(newcomerAttributes) => setForm({ ...form, newcomerAttributes })} />
+                  <div className="mt-4 flex justify-end">
+                    <Button onClick={handleSave} disabled={updateListing.isPending || !formIsCurrent} size="sm" className="gap-1.5">
+                      <Save className="w-3.5 h-3.5" /> Save Attributes
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
@@ -803,6 +902,14 @@ export default function MyBusiness() {
                   </Card>
                 ) : null}
 
+                {tierLevel === "pro" && isTierActive && selectedMembership?.serviceKey && (
+                  <>
+                    <BusinessAssistantMemory serviceKey={selectedMembership.serviceKey} />
+                    <BusinessContentPrompts serviceKey={selectedMembership.serviceKey} />
+                    <BusinessReviewDrafts serviceKey={selectedMembership.serviceKey} />
+                  </>
+                )}
+
                 {/* Daily chart */}
                 <Card>
                   <CardHeader>
@@ -936,6 +1043,48 @@ export default function MyBusiness() {
           </TabsContent>
 
           {/* Upgrade Tab */}
+          <TabsContent value="referrals">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2"><Users className="w-4 h-4" /> Referral requests</CardTitle>
+                <CardDescription>Track customers referred to your business from Settle CLT.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                {referralAnalytics && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="rounded-lg bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Total requests</p><p className="text-xl font-semibold">{referralAnalytics.total}</p></div>
+                    <div className="rounded-lg bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Completed</p><p className="text-xl font-semibold">{referralAnalytics.byStatus.completed ?? 0}</p></div>
+                    <div className="rounded-lg bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Sources</p><p className="text-xl font-semibold">{Object.keys(referralAnalytics.bySource).length}</p></div>
+                    <div className="rounded-lg bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Payout ledger</p><p className="text-xl font-semibold">${(referralAnalytics.pendingPayoutCents / 100).toFixed(2)}</p></div>
+                  </div>
+                )}
+                {referralInvitations.length > 0 && (
+                  <div className="rounded-lg border border-blue-200 bg-blue-50/40 p-4">
+                    <p className="font-medium text-sm mb-2">Business referral invitations</p>
+                    <div className="space-y-2">
+                      {referralInvitations.map(invitation => <div key={invitation.id} className="flex items-center justify-between gap-3 text-sm"><span>{invitation.fromServiceKey}{invitation.message ? ` · ${invitation.message}` : ""}</span>{invitation.status === "pending" ? <div className="flex gap-2"><Button size="sm" variant="outline" onClick={() => selectedMembership?.serviceKey && respondToInvitation.mutate({ invitationId: invitation.id, serviceKey: selectedMembership.serviceKey, status: "declined" })}>Decline</Button><Button size="sm" onClick={() => selectedMembership?.serviceKey && respondToInvitation.mutate({ invitationId: invitation.id, serviceKey: selectedMembership.serviceKey, status: "accepted" })}>Accept</Button></div> : <Badge variant="outline">{invitation.status}</Badge>}</div>)}
+                    </div>
+                  </div>
+                )}
+                {businessReferrals.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">No referral requests yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {businessReferrals.map((referral) => (
+                      <div key={referral.id} className="rounded-lg border p-3 space-y-3">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                          <div><p className="font-medium text-sm">{referral.name} · {referral.need}</p><p className="text-xs text-muted-foreground">{referral.email}{referral.phone ? ` · ${referral.phone}` : ""}</p><p className="text-xs text-muted-foreground">Attribution: {referral.attributionType} · Match: {referral.matchStatus}</p></div>
+                          <select value={referral.status} onChange={(event) => updateBizReferralStatus.mutate({ referralId: referral.id, status: event.target.value as "new" | "referred" | "connected" | "completed" | "archived" })} className="rounded-md border bg-background px-2 py-1.5 text-xs">{(["new", "referred", "connected", "completed", "archived"] as const).map(status => <option key={status} value={status}>{status}</option>)}</select>
+                        </div>
+                        {selectedMembership?.serviceKey && <div className="flex flex-wrap gap-2"><Input className="max-w-xs" placeholder="Recipient business key" value={invitationReferralId === referral.id ? invitationTarget : ""} onChange={event => { setInvitationReferralId(referral.id); setInvitationTarget(event.target.value); }} /><Button size="sm" variant="outline" disabled={!invitationTarget || invitationReferralId !== referral.id || inviteBusiness.isPending} onClick={() => inviteBusiness.mutate({ referralId: referral.id, fromServiceKey: selectedMembership.serviceKey, toServiceKey: invitationTarget })}>Invite partner</Button></div>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="upgrade">
             {requestedUpgradeTier && (
               <div className="mb-6 rounded-lg border border-primary/20 bg-primary/5 p-4">
@@ -1046,7 +1195,7 @@ export default function MyBusiness() {
                     </CardTitle>
                     {currentTier === "pro" && <Badge className="bg-indigo-100 text-indigo-700">Current</Badge>}
                   </div>
-                  <CardDescription>AI assistant, scheduling, content, and reputation automation</CardDescription>
+                  <CardDescription>AI visitor assistant, growth recommendations, and inquiry capture</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-2xl font-bold mb-4">$149<span className="text-sm font-normal text-muted-foreground">/mo</span></p>
@@ -1173,6 +1322,154 @@ function LeadAnalyticsSection({ serviceKey }: { serviceKey: string }) {
             </p>
           </div>
         )}
+      </CardContent>
+    </Card>
+  );
+}
+
+const AI_MEMORY_TEMPLATES = [
+  { label: "Services", question: "What services do you offer?", answer: "We offer [list your core services]." },
+  { label: "Pricing", question: "What does your service cost?", answer: "Our typical pricing is [starting price or range]. Final pricing depends on [factors]." },
+  { label: "Booking", question: "How do I book or request an appointment?", answer: "Customers can [call us / use the booking link / send a request]. Please provide [information needed]." },
+  { label: "Service area", question: "What areas do you serve?", answer: "We serve [neighborhoods, cities, or ZIP codes]." },
+  { label: "Policies", question: "What should customers know before contacting you?", answer: "Please know that [hours, cancellation, deposit, accessibility, or other policy]." },
+];
+
+function BusinessAssistantMemory({ serviceKey }: { serviceKey: string }) {
+  const utils = trpc.useUtils();
+  const { data: faqs = [], isLoading } = trpc.businessFaqs.list.useQuery({ serviceKey });
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const createFaq = trpc.businessFaqs.create.useMutation({
+    onSuccess: () => {
+      setQuestion("");
+      setAnswer("");
+      void utils.businessFaqs.list.invalidate({ serviceKey });
+      toast.success("AI memory saved.");
+    },
+    onError: error => toast.error(error.message),
+  });
+  const deleteFaq = trpc.businessFaqs.delete.useMutation({
+    onSuccess: () => void utils.businessFaqs.list.invalidate({ serviceKey }),
+    onError: error => toast.error(error.message),
+  });
+
+  return (
+    <Card className="border-indigo-200 bg-indigo-50/30">
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2"><Sparkles className="w-4 h-4 text-indigo-600" /> AI assistant memory</CardTitle>
+        <CardDescription>Give the visitor assistant approved facts about your business. It will use these facts instead of guessing.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <p className="text-xs font-medium text-muted-foreground mb-2">Start with a template</p>
+          <div className="flex flex-wrap gap-2">
+            {AI_MEMORY_TEMPLATES.map(template => (
+              <Button key={template.label} type="button" size="sm" variant="outline" onClick={() => { setQuestion(template.question); setAnswer(template.answer); }}>
+                {template.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+        <div className="grid gap-3">
+          <Input placeholder="Customer question, e.g. Do you offer free estimates?" value={question} onChange={event => setQuestion(event.target.value)} maxLength={500} />
+          <Textarea placeholder="Approved answer the AI may use" value={answer} onChange={event => setAnswer(event.target.value)} maxLength={2000} rows={3} />
+          <Button type="button" className="w-fit" disabled={!question.trim() || !answer.trim() || createFaq.isPending} onClick={() => createFaq.mutate({ serviceKey, question: question.trim(), answer: answer.trim() })}>
+            {createFaq.isPending ? "Saving..." : "Save memory"}
+          </Button>
+        </div>
+        {isLoading ? <p className="text-sm text-muted-foreground">Loading saved memory...</p> : faqs.length > 0 ? (
+          <div className="space-y-2">
+            {faqs.map(faq => (
+              <div key={faq.id} className="rounded-lg border bg-background p-3 flex items-start justify-between gap-3">
+                <div><p className="text-sm font-medium">{faq.question}</p><p className="text-sm text-muted-foreground mt-1">{faq.answer}</p></div>
+                <Button type="button" variant="ghost" size="sm" onClick={() => deleteFaq.mutate({ id: faq.id, serviceKey })}>Remove</Button>
+              </div>
+            ))}
+          </div>
+        ) : <p className="text-sm text-muted-foreground">No saved memory yet. The assistant will use your public listing information.</p>}
+      </CardContent>
+    </Card>
+  );
+}
+
+function BusinessContentPrompts({ serviceKey }: { serviceKey: string }) {
+  const [prompts, setPrompts] = useState<Array<{ channel: string; title: string; prompt: string }>>([]);
+  const generatePrompts = trpc.premium.generateContentPrompts.useMutation({
+    onSuccess: setPrompts,
+    onError: error => toast.error(error.message),
+  });
+  const copyPrompt = async (prompt: string) => {
+    await navigator.clipboard.writeText(prompt);
+    toast.success("Prompt copied.");
+  };
+
+  return (
+    <Card className="border-teal-200 bg-teal-50/30">
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2"><Lightbulb className="w-4 h-4 text-teal-600" /> Content prompt automation</CardTitle>
+        <CardDescription>Generate fresh prompts for your own graphics or social posts. Nothing is published automatically.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm text-muted-foreground">Generate four channel-specific prompts from your current listing facts.</p>
+          <Button type="button" onClick={() => generatePrompts.mutate({ serviceKey })} disabled={generatePrompts.isPending}>
+            {generatePrompts.isPending ? "Generating..." : "Generate prompts"}
+          </Button>
+        </div>
+        {prompts.length === 0 ? <p className="text-sm text-muted-foreground mt-3">No prompts generated yet.</p> : (
+          <div className="grid gap-3 sm:grid-cols-2 mt-3">
+            {prompts.map(prompt => (
+              <div key={prompt.channel} className="rounded-lg border bg-background p-3">
+                <p className="text-xs uppercase font-semibold text-teal-700">{prompt.channel.replace(/_/g, " ")}</p>
+                <p className="font-medium text-sm mt-1">{prompt.title}</p>
+                <p className="text-sm text-muted-foreground mt-2">{prompt.prompt}</p>
+                <Button type="button" size="sm" variant="outline" className="mt-3" onClick={() => void copyPrompt(prompt.prompt)}>Copy prompt</Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function BusinessReviewDrafts({ serviceKey }: { serviceKey: string }) {
+  const { data } = trpc.reviews.getByTarget.useQuery({ targetType: "directory", targetId: serviceKey });
+  const [drafts, setDrafts] = useState<Record<number, string>>({});
+  const generate = trpc.premium.generateReviewResponse.useMutation({
+    onSuccess: (result, variables) => setDrafts(current => ({ ...current, [variables.reviewId]: result.draft })),
+    onError: error => toast.error(error.message),
+  });
+  const copyDraft = async (draft: string) => {
+    await navigator.clipboard.writeText(draft);
+    toast.success("Review response copied.");
+  };
+
+  return (
+    <Card className="border-amber-200 bg-amber-50/30">
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2"><MessageSquare className="w-4 h-4 text-amber-600" /> Reputation response drafts</CardTitle>
+        <CardDescription>Draft thoughtful responses to directory reviews. You must review, copy, and publish each response yourself.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {(data?.reviews ?? []).slice(0, 5).map(review => {
+          const draft = drafts[review.id];
+          return (
+            <div key={review.id} className="rounded-lg border bg-background p-3">
+              <p className="text-sm font-medium">{review.rating}/5 · {review.userName || "Community member"}</p>
+              {review.tip && <p className="text-sm text-muted-foreground mt-1">{review.tip}</p>}
+              <div className="flex gap-2 mt-3">
+                <Button type="button" size="sm" variant="outline" disabled={generate.isPending} onClick={() => generate.mutate({ reviewId: review.id, serviceKey, rating: review.rating, tip: review.tip, aspect: review.aspect })}>
+                  {generate.isPending ? "Drafting..." : "Draft response"}
+                </Button>
+                {draft && <Button type="button" size="sm" onClick={() => void copyDraft(draft)}>Copy draft</Button>}
+              </div>
+              {draft && <p className="text-sm text-muted-foreground mt-2">{draft}</p>}
+            </div>
+          );
+        })}
+        {(data?.reviews ?? []).length === 0 && <p className="text-sm text-muted-foreground">No visible reviews to respond to yet.</p>}
       </CardContent>
     </Card>
   );

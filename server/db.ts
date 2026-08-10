@@ -2,7 +2,7 @@ import { eq, and, desc, asc, sql, gte, lte, inArray } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import { assertCheckoutIdentifiersCompatible, assertNoConflictingBillingOwner, assertUniquePremiumServiceKeys } from "./business-memberships";
-import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessMemberships, type InsertBusinessMembership, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, stripeCheckoutReconciliations, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription, businessLeads, type BusinessLead, type InsertBusinessLead, listingAnalyticsDaily, businessFaqs, authTokens, type InsertAuthToken, type BusinessFaq, type InsertBusinessFaq, businessPromotions, type BusinessPromotion, type InsertBusinessPromotion } from "../drizzle/schema";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessMemberships, type InsertBusinessMembership, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, stripeCheckoutReconciliations, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription, businessLeads, type BusinessLead, type InsertBusinessLead, listingAnalyticsDaily, businessFaqs, authTokens, type InsertAuthToken, type BusinessFaq, type InsertBusinessFaq, businessPromotions, type BusinessPromotion, type InsertBusinessPromotion, eventSponsorships, type EventSponsorship, type InsertEventSponsorship, businessReferrals, type BusinessReferral, type InsertBusinessReferral, businessReferralInvitations, type BusinessReferralInvitation, type InsertBusinessReferralInvitation } from "../drizzle/schema";
 import { scoreRealtorLead } from "../shared/realtorLeadOps";
 import { ENV } from './_core/env';
 
@@ -1575,6 +1575,127 @@ export async function getBusinessLeadsForUser(userId: number, serviceKey: string
     .where(and(eq(businessLeads.serviceKey, serviceKey)))
     .orderBy(desc(businessLeads.createdAt))
     .limit(100);
+}
+
+// ─── Event Sponsorships ───
+
+export async function createEventSponsorship(data: InsertEventSponsorship) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(eventSponsorships).values(data);
+  return { id: result.insertId };
+}
+
+export async function getActiveSponsorshipsForEvent(eventId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(eventSponsorships)
+    .where(and(
+      eq(eventSponsorships.eventId, eventId),
+      eq(eventSponsorships.status, "active"),
+    ))
+    .orderBy(sql`CASE ${eventSponsorships.level} WHEN 'gold' THEN 1 WHEN 'silver' THEN 2 ELSE 3 END`)
+    .limit(20);
+}
+
+export async function getSponsorshipsForBusiness(serviceKey: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(eventSponsorships)
+    .where(eq(eventSponsorships.serviceKey, serviceKey))
+    .orderBy(desc(eventSponsorships.createdAt))
+    .limit(20);
+}
+
+// ─── Business Referrals (general) ───
+
+export async function createBusinessReferral(data: InsertBusinessReferral) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(businessReferrals).values(data);
+  return { id: result.insertId };
+}
+
+export async function getBusinessReferralsForService(serviceKey: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(businessReferrals)
+    .where(eq(businessReferrals.serviceKey, serviceKey))
+    .orderBy(desc(businessReferrals.createdAt))
+    .limit(50);
+}
+
+export async function getBusinessReferralById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(businessReferrals)
+    .where(eq(businessReferrals.id, id)).limit(1);
+  return rows[0] ?? null;
+}
+
+export async function updateBusinessReferralStatus(id: number, status: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(businessReferrals).set({ status: status as any, ...(status === "completed" ? { completedAt: new Date() } : {}) }).where(eq(businessReferrals.id, id));
+}
+
+export async function updateBusinessReferralMatch(id: number, match: {
+  matchStatus: "unmatched" | "suggested" | "accepted" | "declined";
+  matchedServiceKey?: string | null;
+  matchReason?: string | null;
+  attributionType?: "direct" | "matched" | "business_invitation";
+}) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(businessReferrals).set(match).where(eq(businessReferrals.id, id));
+}
+
+export async function createBusinessReferralInvitation(data: InsertBusinessReferralInvitation) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(businessReferralInvitations).values(data);
+  return { id: result.insertId };
+}
+
+export async function getReferralInvitationsForBusiness(serviceKey: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(businessReferralInvitations)
+    .where(eq(businessReferralInvitations.toServiceKey, serviceKey))
+    .orderBy(desc(businessReferralInvitations.createdAt)).limit(50);
+}
+
+export async function getReferralInvitationById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(businessReferralInvitations).where(eq(businessReferralInvitations.id, id)).limit(1);
+  return rows[0] ?? null;
+}
+
+export async function updateReferralInvitationStatus(id: number, status: "accepted" | "declined" | "expired") {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(businessReferralInvitations).set({ status, respondedAt: new Date() }).where(eq(businessReferralInvitations.id, id));
+}
+
+export async function getBusinessReferralAnalytics(serviceKey: string) {
+  const db = await getDb();
+  if (!db) return { total: 0, byStatus: {}, bySource: {}, completedValueCents: 0, pendingPayoutCents: 0 };
+  const rows = await db.select().from(businessReferrals).where(eq(businessReferrals.serviceKey, serviceKey)).limit(500);
+  const byStatus: Record<string, number> = {};
+  const bySource: Record<string, number> = {};
+  for (const row of rows) {
+    byStatus[row.status] = (byStatus[row.status] ?? 0) + 1;
+    const source = row.source || "unknown";
+    bySource[source] = (bySource[source] ?? 0) + 1;
+  }
+  return {
+    total: rows.length,
+    byStatus,
+    bySource,
+    completedValueCents: rows.filter(row => row.status === "completed").reduce((sum, row) => sum + row.payoutCents, 0),
+    pendingPayoutCents: rows.filter(row => row.payoutStatus === "pending" || row.payoutStatus === "approved").reduce((sum, row) => sum + row.payoutCents, 0),
+  };
 }
 
 // ─── Business Promotions ───
