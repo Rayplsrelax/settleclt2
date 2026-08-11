@@ -40,8 +40,9 @@ describe("SEO Improvements", () => {
   });
 
   describe("Google Search Console", () => {
-    it("has google-site-verification meta tag placeholder", () => {
-      expect(indexHtml).toContain('name="google-site-verification"');
+    it("relies on the DNS-verified domain property without an unresolved HTML token", () => {
+      expect(indexHtml).not.toContain('name="google-site-verification"');
+      expect(indexHtml).not.toContain("VITE_GOOGLE_SITE_VERIFICATION");
     });
   });
 

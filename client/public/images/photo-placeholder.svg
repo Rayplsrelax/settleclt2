@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-labelledby="title description">
+  <title id="title">Settle CLT photo unavailable</title>
+  <desc id="description">A simple Charlotte map-pin placeholder</desc>
+  <rect width="800" height="500" fill="#f1f5f4"/>
+  <g transform="translate(400 210)">
+    <path d="M0-105c-61 0-110 49-110 110 0 82 110 185 110 185S110 87 110 5C110-56 61-105 0-105Z" fill="#167d76"/>
+    <circle cy="5" r="45" fill="#fff"/>
+    <text x="0" y="17" text-anchor="middle" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#167d76">CLT</text>
+  </g>
+  <text x="400" y="438" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="600" fill="#334155">Photo unavailable</text>
+</svg>
