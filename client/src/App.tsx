@@ -6,6 +6,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { lazy, Suspense } from "react";
 import { useMixpanelPageView } from "@/hooks/useMixpanelPageView";
+import { useImageFallbacks } from "@/hooks/useImageFallbacks";
 
 const Home = lazy(() => import("./pages/Home"));
 const Neighborhoods = lazy(() => import("./pages/Neighborhoods"));
@@ -118,6 +119,8 @@ function Router() {
 }
 
 function App() {
+  useImageFallbacks();
+
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">

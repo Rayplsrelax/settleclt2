@@ -76,8 +76,10 @@
 
 /// <reference types="@types/google.maps" />
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { MapStatus, type MapLoadStatus } from "@/components/MapStatus";
 import { usePersistFn } from "@/hooks/usePersistFn";
+import { buildGoogleMapsScriptUrl } from "@/lib/googleMapsLoader";
 import { cn } from "@/lib/utils";
 
 declare global {
@@ -87,7 +89,6 @@ declare global {
 }
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-const MAPS_BASE_URL = "https://maps.googleapis.com";
 
 let _mapsLoadPromise: Promise<unknown> | null = null;
 
@@ -100,12 +101,25 @@ function loadMapScript() {
   if (_mapsLoadPromise) {
     return _mapsLoadPromise;
   }
+
+  let scriptUrl: string;
+  try {
+    scriptUrl = buildGoogleMapsScriptUrl(API_KEY);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+
   _mapsLoadPromise = new Promise((resolve, reject) => {
     const script = document.createElement("script");
-    script.src = `${MAPS_BASE_URL}/maps/api/js?key=${API_KEY}&v=weekly&libraries=marker,places,geocoding,geometry`;
+    script.src = scriptUrl;
     script.async = true;
     script.crossOrigin = "anonymous";
     script.onload = () => {
+      if (!window.google?.maps) {
+        _mapsLoadPromise = null;
+        reject(new Error("Google Maps did not initialize"));
+        return;
+      }
       resolve(null);
     };
     script.onerror = () => {
@@ -125,6 +139,8 @@ interface MapViewProps {
   onMapReady?: (map: google.maps.Map) => void;
 }
 
+type MapViewStatus = MapLoadStatus | "ready";
+
 export function MapView({
   className,
   initialCenter = { lat: 37.7749, lng: -122.4194 },
@@ -133,24 +149,30 @@ export function MapView({
 }: MapViewProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<google.maps.Map | null>(null);
+  const [status, setStatus] = useState<MapViewStatus>("loading");
 
   const init = usePersistFn(async () => {
-    await loadMapScript();
-    if (!mapContainer.current) {
-      console.error("Map container not found");
-      return;
-    }
-    map.current = new window.google.maps.Map(mapContainer.current, {
-      zoom: initialZoom,
-      center: initialCenter,
-      mapTypeControl: true,
-      fullscreenControl: true,
-      zoomControl: true,
-      streetViewControl: true,
-      mapId: "DEMO_MAP_ID",
-    });
-    if (onMapReady) {
-      onMapReady(map.current);
+    try {
+      await loadMapScript();
+      if (!mapContainer.current || !window.google?.maps) {
+        throw new Error("Google Maps did not initialize");
+      }
+      map.current = new window.google.maps.Map(mapContainer.current, {
+        zoom: initialZoom,
+        center: initialCenter,
+        mapTypeControl: true,
+        fullscreenControl: true,
+        zoomControl: true,
+        streetViewControl: true,
+        mapId: "710245ba9cec2f1425a67dca",
+      });
+      setStatus("ready");
+      if (onMapReady) {
+        onMapReady(map.current);
+      }
+    } catch (error) {
+      console.error("Unable to initialize Google Maps", error);
+      setStatus("error");
     }
   });
 
@@ -159,6 +181,9 @@ export function MapView({
   }, [init]);
 
   return (
-    <div ref={mapContainer} className={cn("w-full h-[500px]", className)} />
+    <div className={cn("relative w-full h-[500px]", className)}>
+      {status !== "ready" && <MapStatus status={status} />}
+      <div ref={mapContainer} className="absolute inset-0" />
+    </div>
   );
 }
