@@ -22,7 +22,7 @@ describe("Google Maps client loader", () => {
     expect(url.pathname).toBe("/maps/api/js");
     expect(url.searchParams.get("key")).toBe("test-browser-key");
     expect(url.searchParams.get("libraries")).toBe("marker,geocoding");
-    expect(url.searchParams.get("loading")).toBe("async");
+    expect(url.searchParams.get("loading")).toBeNull();
     expect(url.searchParams.get("v")).toBe("weekly");
   });
 });

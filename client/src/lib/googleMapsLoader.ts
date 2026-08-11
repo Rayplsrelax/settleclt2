@@ -10,6 +10,5 @@ export function buildGoogleMapsScriptUrl(apiKey?: string) {
   url.searchParams.set("key", normalizedKey);
   url.searchParams.set("v", "weekly");
   url.searchParams.set("libraries", "marker,geocoding");
-  url.searchParams.set("loading", "async");
   return url.toString();
 }
