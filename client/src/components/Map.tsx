@@ -114,6 +114,7 @@ function loadMapScript() {
     script.src = scriptUrl;
     script.async = true;
     script.crossOrigin = "anonymous";
+    script.nonce = document.querySelector<HTMLScriptElement>("script[nonce]")?.nonce ?? "";
     script.onload = () => {
       if (!window.google?.maps) {
         _mapsLoadPromise = null;

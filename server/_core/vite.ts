@@ -5,6 +5,7 @@ import { nanoid } from "nanoid";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import viteConfig from "../../vite.config";
+import { injectCspNonce } from "./csp-nonce";
 
 export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
@@ -58,12 +59,12 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(distPath));
+  app.use(express.static(distPath, { index: false }));
 
   // fall through to index.html if the file doesn't exist
   // Resolve the HTTP status based on the SPA route classifier so that
   // genuinely unknown paths return 404 instead of 200.
-  app.use("*", async (req, res) => {
+  app.use("*", async (req, res, next) => {
     const { resolveSpaStatus, getProductionLookups } = await import(
       "./spa-route-status"
     );
@@ -73,7 +74,16 @@ export function serveStatic(app: Express) {
     } catch {
       // no DB available — optimistic
     }
-    const status = await resolveSpaStatus(req.originalUrl, lookups);
-    res.status(status).sendFile(path.resolve(distPath, "index.html"));
+    try {
+      const status = await resolveSpaStatus(req.originalUrl, lookups);
+      const template = await fs.promises.readFile(
+        path.resolve(distPath, "index.html"),
+        "utf-8"
+      );
+      const page = injectCspNonce(template, res.locals.cspNonce);
+      res.status(status).type("html").send(page);
+    } catch (error) {
+      next(error);
+    }
   });
 }

@@ -31,6 +31,7 @@ describe("production security headers", () => {
     expect(csp).toContain(
       "script-src 'self' https://analytics.example.com https://maps.googleapis.com https://maps.gstatic.com"
     );
+    expect(csp).toMatch(/script-src [^;]*'nonce-[A-Za-z0-9_-]+'/);
     expect(csp).toContain("frame-ancestors 'self'");
     expect(csp).toContain("object-src 'none'");
     expect(csp).toContain("upgrade-insecure-requests");
@@ -38,6 +39,19 @@ describe("production security headers", () => {
     expect(response.headers["permissions-policy"]).toBe(
       "camera=(), geolocation=(), microphone=()"
     );
+  });
+
+  it("uses a unique script nonce for every production response", async () => {
+    const first = await request(createApp()).get("/").set("Host", "settleclt.com");
+    const second = await request(createApp()).get("/").set("Host", "settleclt.com");
+    const nonce = /'nonce-([A-Za-z0-9_-]+)'/;
+
+    const firstNonce = first.headers["content-security-policy"].match(nonce)?.[1];
+    const secondNonce = second.headers["content-security-policy"].match(nonce)?.[1];
+
+    expect(firstNonce).toBeTruthy();
+    expect(secondNonce).toBeTruthy();
+    expect(secondNonce).not.toBe(firstNonce);
   });
 
   it.each([

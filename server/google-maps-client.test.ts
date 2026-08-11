@@ -59,6 +59,9 @@ describe("MapView integration", () => {
     expect(source).toContain('from "@/components/MapStatus"');
     expect(source).toContain('useState<MapViewStatus>("loading")');
     expect(source).toContain("buildGoogleMapsScriptUrl(API_KEY)");
+    expect(source).toContain(
+      'script.nonce = document.querySelector<HTMLScriptElement>("script[nonce]")?.nonce ?? ""'
+    );
     expect(source).toContain('setStatus("ready")');
     expect(source).toContain('setStatus("error")');
     expect(source).toContain('status !== "ready" && <MapStatus status={status} />');

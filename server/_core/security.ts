@@ -1,5 +1,7 @@
 import helmet from "helmet";
 import type { RequestHandler } from "express";
+import type { IncomingMessage, ServerResponse } from "node:http";
+import { createCspNonce } from "./csp-nonce";
 
 export type SecurityMiddlewareOptions = {
   analyticsEndpoint?: string;
@@ -83,6 +85,12 @@ export function createSecurityMiddleware(
           ...optionalAnalytics,
           "https://maps.googleapis.com",
           "https://maps.gstatic.com",
+          (_req: IncomingMessage, res: ServerResponse) => {
+            const locals = (res as ServerResponse & {
+              locals: { cspNonce: string };
+            }).locals;
+            return `'nonce-${locals.cspNonce}'`;
+          },
         ],
         scriptSrcAttr: ["'none'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
@@ -108,7 +116,11 @@ export function createSecurityMiddleware(
     // Use the actual Host authority rather than proxy-derived X-Forwarded-Host
     // so a forwarded-header spoof cannot disable production protections.
     const hostname = hostnameFromAuthority(req.get("host"));
-    const middleware = isPreviewHost(hostname)
+    const previewHost = isPreviewHost(hostname);
+    if (!previewHost) {
+      res.locals.cspNonce = createCspNonce();
+    }
+    const middleware = previewHost
       ? previewHelmet
       : productionHelmet;
     return middleware(req, res, (err?: unknown) => {
