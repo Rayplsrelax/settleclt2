@@ -20,6 +20,12 @@ describe("CSP nonces", () => {
     );
   });
 
+  it("fails closed when production HTML has no response nonce", () => {
+    expect(() => injectCspNonce("<script type=\"module\"></script>", "")).toThrow(
+      "Missing CSP nonce"
+    );
+  });
+
   it("injects the response nonce when production serves the SPA shell", () => {
     const source = readFileSync(
       resolve(__dirname, "./_core/vite.ts"),
