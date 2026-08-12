@@ -37,6 +37,17 @@ describe("mobile homepage performance", () => {
     expect(search).toContain("Retry");
   });
 
+  it("reloads the app when a deployment makes lazy search chunks stale", () => {
+    const search = readProjectFile("client/src/components/GlobalSearch.tsx");
+
+    expect(search).toContain("isStaleChunkError");
+    expect(search).toContain(
+      'setSearchIndexRecovery(isStaleChunkError(error) ? "reload" : "retry")'
+    );
+    expect(search).toContain("window.location.reload()");
+    expect(search).toContain("Reload search");
+  });
+
   it("defers passport neighborhood data until a stamp is clicked", () => {
     const quickStamp = readProjectFile(
       "client/src/components/QuickStampButton.tsx"

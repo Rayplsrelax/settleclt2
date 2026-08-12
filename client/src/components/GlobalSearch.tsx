@@ -30,6 +30,13 @@ interface SearchResult {
   icon: React.ReactNode;
 }
 
+function isStaleChunkError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return /Failed to fetch dynamically imported module|Importing a module script failed|Unable to preload CSS/i.test(
+    message
+  );
+}
+
 export default function GlobalSearch() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -38,6 +45,9 @@ export default function GlobalSearch() {
     "loading" | "ready" | "error" | "idle"
   >("idle");
   const [searchIndexAttempt, setSearchIndexAttempt] = useState(0);
+  const [searchIndexRecovery, setSearchIndexRecovery] = useState<
+    "retry" | "reload"
+  >("retry");
   const [, navigate] = useLocation();
   const trackSearch = trpc.search.track.useMutation();
   const lastTrackedQuery = useRef("");
@@ -120,10 +130,12 @@ export default function GlobalSearch() {
 
         setSearchIndex(results);
         setSearchIndexStatus("ready");
+        setSearchIndexRecovery("retry");
       })
       .catch(error => {
         if (cancelled) return;
         console.error("Failed to load search index", error);
+        setSearchIndexRecovery(isStaleChunkError(error) ? "reload" : "retry");
         setSearchIndexStatus("error");
       });
 
@@ -133,9 +145,18 @@ export default function GlobalSearch() {
   }, [open, searchIndex, searchIndexAttempt]);
 
   const retrySearchIndex = useCallback(() => {
+    setSearchIndexRecovery("retry");
     setSearchIndexStatus("idle");
     setSearchIndexAttempt(attempt => attempt + 1);
   }, []);
+
+  const recoverSearchIndex = useCallback(() => {
+    if (searchIndexRecovery === "reload") {
+      window.location.reload();
+      return;
+    }
+    retrySearchIndex();
+  }, [retrySearchIndex, searchIndexRecovery]);
 
   // Build dynamic search results from DB
   const dynamicResults = useMemo(() => {
@@ -320,10 +341,10 @@ export default function GlobalSearch() {
               </p>
               <button
                 type="button"
-                onClick={retrySearchIndex}
+                onClick={recoverSearchIndex}
                 className="mt-3 rounded-md border border-border px-3 py-1.5 text-sm font-medium hover:bg-muted"
               >
-                Retry
+                {searchIndexRecovery === "reload" ? "Reload search" : "Retry"}
               </button>
             </div>
           ) : (
