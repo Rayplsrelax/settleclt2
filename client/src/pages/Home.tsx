@@ -32,6 +32,7 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import ActivityFeed from "@/components/ActivityFeed";
+import SocialFollowLinks from "@/components/SocialFollowLinks";
 
 const FeaturedNeighborhoods = lazy(
   () => import("@/components/home/FeaturedNeighborhoods")
@@ -216,14 +217,17 @@ function NewsletterSignup() {
           </p>
 
           {submitted ? (
-            <div className="mt-8 p-6 rounded-2xl bg-primary/5 border border-primary/20 inline-flex flex-col items-center gap-3">
-              <Sparkles className="w-8 h-8 text-primary" />
-              <p className="font-display font-semibold text-foreground">
-                You're on the list!
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Your first Charlotte insider email is on its way.
-              </p>
+            <div className="mt-8 w-full rounded-2xl border border-primary/20 bg-primary/5 p-6">
+              <div className="flex flex-col items-center gap-3">
+                <Sparkles className="w-8 h-8 text-primary" />
+                <p className="font-display font-semibold text-foreground">You're on the list!</p>
+                <p className="text-sm text-muted-foreground">Watch your inbox for Charlotte tips and local finds.</p>
+              </div>
+              <div className="mt-6 border-t border-primary/15 pt-5">
+                <p className="font-display font-semibold text-foreground">Follow Settle CLT around Charlotte</p>
+                <p className="mb-4 mt-1 text-sm text-muted-foreground">Pick your favorite platform for local finds between newsletters.</p>
+                <SocialFollowLinks surface="newsletter-success" variant="cards" />
+              </div>
             </div>
           ) : (
             <form

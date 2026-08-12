@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { SOCIAL_LINKS } from "@/lib/socialLinks";
 
 const STRUCTURED_DATA_ID = "settle-clt-jsonld";
 
@@ -44,7 +45,7 @@ export function buildOrganizationSchema() {
       addressRegion: "NC",
       addressCountry: "US",
     },
-    sameAs: [],
+    sameAs: SOCIAL_LINKS.map(link => link.href),
   };
 }
 

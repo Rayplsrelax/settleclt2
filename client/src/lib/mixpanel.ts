@@ -306,6 +306,10 @@ export function trackNewsletterOptIn(optedIn: boolean) {
   trackEvent("Newsletter Toggle", { opted_in: optedIn });
 }
 
+export function trackSocialFollowClick(platform: string, surface: string) {
+  trackEvent("Social Follow Click", { platform, surface });
+}
+
 export function trackNewcomerJourneyAction(
   action: "start" | "step_click" | "progress_toggle",
   properties: Record<string, unknown> = {}
