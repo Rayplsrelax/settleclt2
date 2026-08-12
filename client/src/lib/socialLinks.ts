@@ -5,6 +5,8 @@ export type SocialPlatform =
   | "x"
   | "threads";
 
+export type SocialFollowSurface = "footer" | "newsletter-success";
+
 export interface SocialLink {
   platform: SocialPlatform;
   label: string;

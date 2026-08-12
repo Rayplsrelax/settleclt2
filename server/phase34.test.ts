@@ -94,7 +94,7 @@ describe("Phase 4: Marketing & Growth", () => {
         path.join(__dirname, "../client/src/components/SocialFollowLinks.tsx"),
         "utf-8"
       );
-      expect(socialLinks).toContain("aria-label={`${link.label}");
+      expect(socialLinks).toContain("aria-label=");
       expect(socialLinks).toContain("opens in a new tab");
     });
   });

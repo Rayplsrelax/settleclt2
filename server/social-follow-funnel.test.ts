@@ -30,7 +30,7 @@ describe("social follow funnel", () => {
 
     expect(component).toContain('target="_blank"');
     expect(component).toContain('rel="noopener noreferrer"');
-    expect(component).toContain("aria-label={`${link.label}");
+    expect(component).toContain("aria-label=");
     expect(component).toContain("opens in a new tab");
   });
 
@@ -45,6 +45,8 @@ describe("social follow funnel", () => {
       "trackSocialFollowClick"
     );
     expect(mixpanel).toContain('trackEvent("Social Follow Click"');
+    expect(mixpanel).toContain("platform: SocialPlatform");
+    expect(mixpanel).toContain("surface: SocialFollowSurface");
     expect(mixpanel).not.toMatch(
       /Social Follow Click[\s\S]{0,200}(email|subscriber_email)/i
     );

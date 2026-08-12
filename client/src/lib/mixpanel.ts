@@ -10,6 +10,10 @@
  */
 
 import { ANALYTICS_CONSENT_KEY } from "@/lib/analytics-config";
+import type {
+  SocialFollowSurface,
+  SocialPlatform,
+} from "@/lib/socialLinks";
 
 const MIXPANEL_TOKEN = import.meta.env.VITE_MIXPANEL_TOKEN as
   | string
@@ -306,7 +310,10 @@ export function trackNewsletterOptIn(optedIn: boolean) {
   trackEvent("Newsletter Toggle", { opted_in: optedIn });
 }
 
-export function trackSocialFollowClick(platform: string, surface: string) {
+export function trackSocialFollowClick(
+  platform: SocialPlatform,
+  surface: SocialFollowSurface
+) {
   trackEvent("Social Follow Click", { platform, surface });
 }
 
