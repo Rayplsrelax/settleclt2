@@ -13,7 +13,8 @@ describe("CSP nonces", () => {
   });
 
   it("adds the response nonce to the Vite module entry script", () => {
-    const html = '<div id="root"></div><script type="module" src="/assets/index.js"></script>';
+    const html =
+      '<div id="root"></div><script type="module" src="/assets/index.js"></script>';
 
     expect(injectCspNonce(html, "response_nonce")).toContain(
       '<script nonce="response_nonce" type="module" src="/assets/index.js"></script>'
@@ -21,7 +22,7 @@ describe("CSP nonces", () => {
   });
 
   it("fails closed when production HTML has no response nonce", () => {
-    expect(() => injectCspNonce("<script type=\"module\"></script>", "")).toThrow(
+    expect(() => injectCspNonce('<script type="module"></script>', "")).toThrow(
       "Missing CSP nonce"
     );
   });
@@ -32,7 +33,9 @@ describe("CSP nonces", () => {
       "utf-8"
     ).replace(/\s+/g, " ");
 
-    expect(source).toContain("injectCspNonce(template, res.locals.cspNonce)");
+    expect(source).toContain(
+      "injectCspNonce(routeTemplate, res.locals.cspNonce)"
+    );
     expect(source).toContain("express.static(distPath, { index: false })");
   });
 });

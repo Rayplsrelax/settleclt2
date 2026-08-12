@@ -1,6 +1,13 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
-import { Search, MapPin, Store, Calendar, FileText, Compass } from "lucide-react";
+import {
+  Search,
+  MapPin,
+  Store,
+  Calendar,
+  FileText,
+  Compass,
+} from "lucide-react";
 import {
   CommandDialog,
   CommandInput,
@@ -11,8 +18,6 @@ import {
   CommandSeparator,
 } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
-import { allNeighborhoods } from "../../../shared/neighborhoods";
-import { SERVICES, SERVICE_CATEGORIES } from "../../../shared/services";
 import { articles } from "../../../shared/articles";
 import { trpc } from "@/lib/trpc";
 
@@ -28,69 +33,108 @@ interface SearchResult {
 export default function GlobalSearch() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [searchIndex, setSearchIndex] = useState<SearchResult[] | null>(null);
+  const [searchIndexStatus, setSearchIndexStatus] = useState<
+    "loading" | "ready" | "error" | "idle"
+  >("idle");
+  const [searchIndexAttempt, setSearchIndexAttempt] = useState(0);
   const [, navigate] = useLocation();
   const trackSearch = trpc.search.track.useMutation();
   const lastTrackedQuery = useRef("");
 
   // Fetch dynamic data
-  const { data: dbBlogPosts } = trpc.blog.getPublished.useQuery(undefined, { enabled: open });
-  const { data: dbEvents } = trpc.events.getPublished.useQuery(undefined, { enabled: open });
-  const { data: popularSearches } = trpc.search.popular.useQuery({ limit: 5, days: 30 }, { enabled: open });
+  const { data: dbBlogPosts } = trpc.blog.getPublished.useQuery(undefined, {
+    enabled: open,
+  });
+  const { data: dbEvents } = trpc.events.getPublished.useQuery(undefined, {
+    enabled: open,
+  });
+  const { data: popularSearches } = trpc.search.popular.useQuery(
+    { limit: 5, days: 30 },
+    { enabled: open }
+  );
 
   // Keyboard shortcut: Cmd+K or Ctrl+K
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        setOpen((prev) => !prev);
+        setOpen(prev => !prev);
       }
     };
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  // Build static search index
-  const searchIndex = useMemo(() => {
-    const results: SearchResult[] = [];
+  // The full service and neighborhood datasets are large. Load them only when
+  // the visitor asks to search instead of putting them on every route's
+  // critical path through the persistent navbar.
+  useEffect(() => {
+    if (!open || searchIndex) return;
 
-    // Neighborhoods
-    for (const n of allNeighborhoods) {
-      results.push({
-        id: `neighborhood-${n.id}`,
-        title: n.name,
-        subtitle: n.vibe,
-        type: "neighborhood",
-        href: `/neighborhood/${n.id}`,
-        icon: <MapPin className="w-4 h-4 text-primary" />,
+    let cancelled = false;
+    setSearchIndexStatus("loading");
+    void Promise.all([
+      import("../../../shared/neighborhoods"),
+      import("../../../shared/services"),
+    ])
+      .then(([neighborhoodData, serviceData]) => {
+        if (cancelled) return;
+
+        const results: SearchResult[] = [];
+        for (const n of neighborhoodData.allNeighborhoods) {
+          results.push({
+            id: `neighborhood-${n.id}`,
+            title: n.name,
+            subtitle: n.vibe,
+            type: "neighborhood",
+            href: `/neighborhood/${n.id}`,
+            icon: <MapPin className="w-4 h-4 text-primary" />,
+          });
+        }
+
+        for (const s of serviceData.SERVICES) {
+          const category = serviceData.SERVICE_CATEGORIES.find(
+            candidate => candidate.id === s.category
+          );
+          results.push({
+            id: `directory-${s.name}-${s.category}`,
+            title: s.name,
+            subtitle: `${category?.name ?? s.category} · ${s.area}`,
+            type: "directory",
+            href: `/directory?search=${encodeURIComponent(s.name)}`,
+            icon: <Store className="w-4 h-4 text-amber-600" />,
+          });
+        }
+
+        for (const article of articles) {
+          results.push({
+            id: `blog-static-${article.id}`,
+            title: article.title,
+            subtitle: `${article.category} · ${article.readTime}`,
+            type: "blog",
+            href: article.url ?? "/blog",
+            icon: <FileText className="w-4 h-4 text-blue-600" />,
+          });
+        }
+
+        setSearchIndex(results);
+        setSearchIndexStatus("ready");
+      })
+      .catch(error => {
+        if (cancelled) return;
+        console.error("Failed to load search index", error);
+        setSearchIndexStatus("error");
       });
-    }
 
-    // Directory listings
-    for (const s of SERVICES) {
-      const cat = SERVICE_CATEGORIES.find((c) => c.id === s.category);
-      results.push({
-        id: `directory-${s.name}-${s.category}`,
-        title: s.name,
-        subtitle: `${cat?.name ?? s.category} · ${s.area}`,
-        type: "directory",
-        href: `/directory?search=${encodeURIComponent(s.name)}`,
-        icon: <Store className="w-4 h-4 text-amber-600" />,
-      });
-    }
+    return () => {
+      cancelled = true;
+    };
+  }, [open, searchIndex, searchIndexAttempt]);
 
-    // Static blog articles
-    for (const a of articles) {
-      results.push({
-        id: `blog-static-${a.id}`,
-        title: a.title,
-        subtitle: `${a.category} · ${a.readTime}`,
-        type: "blog",
-        href: a.url ?? `/blog`,
-        icon: <FileText className="w-4 h-4 text-blue-600" />,
-      });
-    }
-
-    return results;
+  const retrySearchIndex = useCallback(() => {
+    setSearchIndexStatus("idle");
+    setSearchIndexAttempt(attempt => attempt + 1);
   }, []);
 
   // Build dynamic search results from DB
@@ -135,16 +179,19 @@ export default function GlobalSearch() {
   }, [dbBlogPosts, dbEvents]);
 
   // Combined and filtered results
-  const allResults = useMemo(() => [...searchIndex, ...dynamicResults], [searchIndex, dynamicResults]);
+  const allResults = useMemo(
+    () => [...(searchIndex ?? []), ...dynamicResults],
+    [searchIndex, dynamicResults]
+  );
 
   const filteredResults = useMemo(() => {
     if (!query.trim()) return [];
     const q = query.toLowerCase().trim();
     const words = q.split(/\s+/);
     return allResults
-      .filter((r) => {
+      .filter(r => {
         const text = `${r.title} ${r.subtitle}`.toLowerCase();
-        return words.every((w) => text.includes(w));
+        return words.every(w => text.includes(w));
       })
       .slice(0, 20);
   }, [query, allResults]);
@@ -245,7 +292,9 @@ export default function GlobalSearch() {
               </p>
               {popularSearches && popularSearches.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-border">
-                  <p className="text-xs text-muted-foreground/60 mb-2">Popular searches</p>
+                  <p className="text-xs text-muted-foreground/60 mb-2">
+                    Popular searches
+                  </p>
                   <div className="flex flex-wrap justify-center gap-2">
                     {popularSearches.map((s, i) => (
                       <button
@@ -260,11 +309,30 @@ export default function GlobalSearch() {
                 </div>
               )}
             </div>
+          ) : searchIndexStatus === "loading" ? (
+            <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+              Loading search data…
+            </div>
+          ) : searchIndexStatus === "error" ? (
+            <div className="px-4 py-8 text-center">
+              <p className="text-sm text-muted-foreground">
+                Search data couldn't be loaded
+              </p>
+              <button
+                type="button"
+                onClick={retrySearchIndex}
+                className="mt-3 rounded-md border border-border px-3 py-1.5 text-sm font-medium hover:bg-muted"
+              >
+                Retry
+              </button>
+            </div>
           ) : (
             <>
               <CommandEmpty>
                 <div className="py-4">
-                  <p className="text-muted-foreground">No results found for "{query}"</p>
+                  <p className="text-muted-foreground">
+                    No results found for "{query}"
+                  </p>
                   <p className="text-xs text-muted-foreground/60 mt-1">
                     Try a different search term
                   </p>
@@ -274,7 +342,7 @@ export default function GlobalSearch() {
                 <div key={type}>
                   {idx > 0 && <CommandSeparator />}
                   <CommandGroup heading={typeLabels[type] ?? type}>
-                    {items.slice(0, 5).map((item) => (
+                    {items.slice(0, 5).map(item => (
                       <CommandItem
                         key={item.id}
                         value={`${item.title} ${item.subtitle}`}
@@ -283,7 +351,9 @@ export default function GlobalSearch() {
                       >
                         {item.icon}
                         <div className="flex flex-col min-w-0">
-                          <span className="truncate font-medium">{item.title}</span>
+                          <span className="truncate font-medium">
+                            {item.title}
+                          </span>
                           <span className="text-xs text-muted-foreground truncate">
                             {item.subtitle}
                           </span>

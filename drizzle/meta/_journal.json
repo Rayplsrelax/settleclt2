@@ -211,6 +211,13 @@
       "when": 1786130006000,
       "tag": "0029_business_referral_network",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "5",
+      "when": 1786571856000,
+      "tag": "0030_passport_stamp_idempotency",
+      "breakpoints": true
     }
   ]
 }

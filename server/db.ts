@@ -271,7 +271,9 @@ export async function getAllEnrichedServices() {
 export async function addPassportEntry(data: InsertPassportEntry) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  await db.insert(passportEntries).values(data);
+  await db.insert(passportEntries).values(data).onDuplicateKeyUpdate({
+    set: { visitedAt: sql`${passportEntries.visitedAt}` },
+  });
   return { success: true };
 }
 
