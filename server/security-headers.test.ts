@@ -26,12 +26,13 @@ describe("production security headers", () => {
     expect(csp).toContain("default-src 'self'");
     expect(csp).toContain("script-src 'self' https://analytics.example.com");
     expect(csp).toContain(
-      "connect-src 'self' https://analytics.example.com https://maps.googleapis.com https://maps.gstatic.com https://*.mixpanel.com"
+      "connect-src 'self' https://analytics.example.com https://maps.googleapis.com https://maps.gstatic.com https://*.googleapis.com https://*.gstatic.com https://*.mixpanel.com"
     );
     expect(csp).toContain(
       "script-src 'self' https://analytics.example.com https://maps.googleapis.com https://maps.gstatic.com"
     );
     expect(csp).toMatch(/script-src [^;]*'nonce-[A-Za-z0-9_-]+'/);
+    expect(csp).toContain("'wasm-unsafe-eval'");
     expect(csp).toContain("frame-ancestors 'self'");
     expect(csp).toContain("object-src 'none'");
     expect(csp).toContain("upgrade-insecure-requests");

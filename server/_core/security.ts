@@ -70,6 +70,8 @@ export function createSecurityMiddleware(
           ...optionalAnalytics,
           "https://maps.googleapis.com",
           "https://maps.gstatic.com",
+          "https://*.googleapis.com",
+          "https://*.gstatic.com",
           "https://*.mixpanel.com",
         ],
         fontSrc: ["'self'", "data:", "https://fonts.gstatic.com"],
@@ -85,6 +87,7 @@ export function createSecurityMiddleware(
           ...optionalAnalytics,
           "https://maps.googleapis.com",
           "https://maps.gstatic.com",
+          "'wasm-unsafe-eval'",
           (_req: IncomingMessage, res: ServerResponse) => {
             const locals = (res as ServerResponse & {
               locals: { cspNonce: string };
