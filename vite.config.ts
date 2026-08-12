@@ -55,7 +55,7 @@ function writeToLogFile(source: LogSource, entries: unknown[]) {
   const logPath = path.join(LOG_DIR, `${source}.log`);
 
   // Format entries with timestamps
-  const lines = entries.map((entry) => {
+  const lines = entries.map(entry => {
     const ts = new Date().toISOString();
     return `[${ts}] ${JSON.stringify(entry)}`;
   });
@@ -131,7 +131,7 @@ function vitePluginManusDebugCollector(): Plugin {
         }
 
         let body = "";
-        req.on("data", (chunk) => {
+        req.on("data", chunk => {
           body += chunk.toString();
         });
 
@@ -149,10 +149,17 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
+const manusRuntimePlugin = {
+  ...vitePluginManusRuntime(),
+  // The Manus editor bridge is useful during local development, but the
+  // self-hosted production site neither uses nor permits its inline runtime.
+  apply: "serve" as const,
+};
+
 const plugins = [
   react(),
   tailwindcss(),
-  vitePluginManusRuntime(),
+  manusRuntimePlugin,
   vitePluginManusDebugCollector(),
 ];
 
@@ -181,7 +188,8 @@ export default defineConfig({
         manualChunks(id: string) {
           if (!id.includes("node_modules")) {
             if (id.includes("shared/services")) return "data-services";
-            if (id.includes("shared/neighborhoods")) return "data-neighborhoods";
+            if (id.includes("shared/neighborhoods"))
+              return "data-neighborhoods";
           }
           return undefined;
         },

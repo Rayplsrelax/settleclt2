@@ -228,7 +228,10 @@ export const passportEntries = mysqlTable("passport_entries", {
   notes: text("notes"),
   photoUrl: varchar("photoUrl", { length: 1024 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-});
+}, table => [
+  uniqueIndex("passport_entries_user_service_unique").on(table.userId, table.serviceKey),
+  uniqueIndex("passport_entries_user_event_unique").on(table.userId, table.eventSlug),
+]);
 
 export type PassportEntry = typeof passportEntries.$inferSelect;
 export type InsertPassportEntry = typeof passportEntries.$inferInsert;

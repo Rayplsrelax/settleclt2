@@ -7,6 +7,18 @@ import { createServer as createViteServer } from "vite";
 import viteConfig from "../../vite.config";
 import { injectCspNonce } from "./csp-nonce";
 
+const HOME_HERO_IMAGE =
+  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/YJZXYMWOczYLllKW.jpg";
+
+export function injectRoutePreloads(template: string, requestPath: string) {
+  if (requestPath !== "/") return template;
+
+  return template.replace(
+    "</head>",
+    `  <link rel="preload" as="image" href="${HOME_HERO_IMAGE}" fetchpriority="high" />\n  </head>`
+  );
+}
+
 export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
     middlewareMode: true,
@@ -39,6 +51,7 @@ export async function setupVite(app: Express, server: Server) {
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid()}"`
       );
+      template = injectRoutePreloads(template, req.path);
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
@@ -80,7 +93,8 @@ export function serveStatic(app: Express) {
         path.resolve(distPath, "index.html"),
         "utf-8"
       );
-      const page = injectCspNonce(template, res.locals.cspNonce);
+      const routeTemplate = injectRoutePreloads(template, req.path);
+      const page = injectCspNonce(routeTemplate, res.locals.cspNonce);
       res.status(status).type("html").send(page);
     } catch (error) {
       next(error);

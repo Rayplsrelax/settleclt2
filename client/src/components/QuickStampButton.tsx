@@ -3,8 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { toast } from "sonner";
-import { useMemo } from "react";
-import { allNeighborhoods } from "@shared/neighborhoods";
+import { useMemo, useRef, useState } from "react";
 
 interface QuickStampButtonProps {
   /** For directory places */
@@ -26,6 +25,8 @@ export default function QuickStampButton({
 }: QuickStampButtonProps) {
   const { user, loading } = useAuth();
   const utils = trpc.useUtils();
+  const submissionInFlight = useRef(false);
+  const [preparingStamp, setPreparingStamp] = useState(false);
 
   const { data: entries = [] } = trpc.passport.getEntries.useQuery(undefined, {
     enabled: !!user,
@@ -38,8 +39,8 @@ export default function QuickStampButton({
   }, [entries, serviceKey, eventSlug]);
 
   const addEntry = trpc.passport.addEntry.useMutation({
-    onSuccess: () => {
-      utils.passport.getEntries.invalidate();
+    onSuccess: async () => {
+      await utils.passport.getEntries.invalidate();
       toast.success("Stamp collected!");
     },
     onError: () => {
@@ -47,9 +48,9 @@ export default function QuickStampButton({
     },
   });
 
-  const isPending = addEntry.isPending;
+  const isPending = addEntry.isPending || preparingStamp;
 
-  function handleClick(e: React.MouseEvent) {
+  async function handleClick(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
 
@@ -63,22 +64,40 @@ export default function QuickStampButton({
       return;
     }
 
-    const neighborhoodId = area
-      ? allNeighborhoods.find(n => n.name === area)?.id
-      : undefined;
+    if (submissionInFlight.current) return;
+    submissionInFlight.current = true;
+    setPreparingStamp(true);
+    let mutationStarted = false;
 
-    if (eventSlug) {
-      addEntry.mutate({
-        eventSlug,
-        neighborhoodId,
-        visitedAt: new Date(),
-      });
-    } else if (serviceKey) {
-      addEntry.mutate({
-        serviceKey,
-        neighborhoodId,
-        visitedAt: new Date(),
-      });
+    try {
+      const neighborhoodId = area
+        ? (await import("@shared/neighborhoods")).allNeighborhoods.find(
+            neighborhood => neighborhood.name === area
+          )?.id
+        : undefined;
+
+      setPreparingStamp(false);
+      mutationStarted = true;
+      if (eventSlug) {
+        await addEntry.mutateAsync({
+          eventSlug,
+          neighborhoodId,
+          visitedAt: new Date(),
+        });
+      } else if (serviceKey) {
+        await addEntry.mutateAsync({
+          serviceKey,
+          neighborhoodId,
+          visitedAt: new Date(),
+        });
+      }
+    } catch (error) {
+      if (!mutationStarted) {
+        toast.error("Failed to prepare stamp");
+      }
+    } finally {
+      submissionInFlight.current = false;
+      setPreparingStamp(false);
     }
   }
 
