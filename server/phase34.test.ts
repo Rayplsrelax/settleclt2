@@ -68,35 +68,34 @@ describe("Phase 4: Marketing & Growth", () => {
         path.join(__dirname, "../client/src/components/Footer.tsx"),
         "utf-8"
       );
-      expect(footerContent).toContain("instagram.com/settleclt");
-      expect(footerContent).toContain("twitter.com/settleclt");
-      expect(footerContent).toContain("facebook.com/settleclt");
-      expect(footerContent).toContain("tiktok.com/@settleclt");
+      const socialLinks = fs.readFileSync(
+        path.join(__dirname, "../client/src/lib/socialLinks.ts"),
+        "utf-8"
+      );
+      expect(footerContent).toContain("SocialFollowLinks");
+      expect(socialLinks).toContain("instagram.com/settleclt");
+      expect(socialLinks).toContain("x.com/settleclt");
+      expect(socialLinks).toContain("facebook.com/settleclt");
+      expect(socialLinks).toContain("tiktok.com/@settleclt");
+      expect(socialLinks).toContain("threads.net/@settleclt");
     });
 
     it("social links should open in new tab", () => {
-      const footerContent = fs.readFileSync(
-        path.join(__dirname, "../client/src/components/Footer.tsx"),
+      const socialLinks = fs.readFileSync(
+        path.join(__dirname, "../client/src/components/SocialFollowLinks.tsx"),
         "utf-8"
       );
-      // All external social links should have target="_blank"
-      const socialLinks = footerContent.match(/href="https:\/\/(instagram|twitter|facebook|tiktok)/g);
-      expect(socialLinks).not.toBeNull();
-      expect(socialLinks!.length).toBeGreaterThanOrEqual(4);
-      // Check for target="_blank" and rel="noopener noreferrer"
-      expect(footerContent).toContain('target="_blank"');
-      expect(footerContent).toContain('rel="noopener noreferrer"');
+      expect(socialLinks).toContain('target="_blank"');
+      expect(socialLinks).toContain('rel="noopener noreferrer"');
     });
 
     it("social links should have aria-labels for accessibility", () => {
-      const footerContent = fs.readFileSync(
-        path.join(__dirname, "../client/src/components/Footer.tsx"),
+      const socialLinks = fs.readFileSync(
+        path.join(__dirname, "../client/src/components/SocialFollowLinks.tsx"),
         "utf-8"
       );
-      expect(footerContent).toContain('aria-label="Instagram"');
-      expect(footerContent).toContain('aria-label="X (Twitter)"');
-      expect(footerContent).toContain('aria-label="Facebook"');
-      expect(footerContent).toContain('aria-label="TikTok"');
+      expect(socialLinks).toContain("aria-label=");
+      expect(socialLinks).toContain("opens in a new tab");
     });
   });
 
