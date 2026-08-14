@@ -163,6 +163,7 @@ describe("newsletter lifecycle contracts", () => {
     expect(recovery).toContain("confirmationTokenHash IS NULL");
     expect(recovery).toContain("NON_UNIQUE = 0");
     expect(recovery).toContain("SUB_PART IS NULL");
+    expect(recovery).toContain("COLLATION = 'A'");
     expect(recovery).toContain("settleclt_0031_recovery_complete");
   });
 });

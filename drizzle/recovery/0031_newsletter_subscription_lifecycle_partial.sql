@@ -96,6 +96,7 @@ SET @settleclt_0031_confirmation_index_exact = (
     AND SEQ_IN_INDEX = 1
     AND COLUMN_NAME = 'confirmationTokenHash'
     AND SUB_PART IS NULL
+    AND COLLATION = 'A'
     AND INDEX_TYPE = 'BTREE'
     AND IS_VISIBLE = 'YES'
     AND EXPRESSION IS NULL
@@ -117,6 +118,7 @@ SET @settleclt_0031_unsubscribe_index_exact = (
     AND SEQ_IN_INDEX = 1
     AND COLUMN_NAME = 'unsubscribeTokenHash'
     AND SUB_PART IS NULL
+    AND COLLATION = 'A'
     AND INDEX_TYPE = 'BTREE'
     AND IS_VISIBLE = 'YES'
     AND EXPRESSION IS NULL
@@ -218,8 +220,8 @@ SET @settleclt_0031_final_index_count = (
   WHERE TABLE_SCHEMA = DATABASE()
     AND TABLE_NAME = 'newsletter_subscribers'
     AND (
-      (INDEX_NAME = 'newsletter_subscribers_confirmation_token_unique' AND NON_UNIQUE = 0 AND SEQ_IN_INDEX = 1 AND COLUMN_NAME = 'confirmationTokenHash' AND SUB_PART IS NULL AND INDEX_TYPE = 'BTREE' AND IS_VISIBLE = 'YES' AND EXPRESSION IS NULL) OR
-      (INDEX_NAME = 'newsletter_subscribers_unsubscribe_token_unique' AND NON_UNIQUE = 0 AND SEQ_IN_INDEX = 1 AND COLUMN_NAME = 'unsubscribeTokenHash' AND SUB_PART IS NULL AND INDEX_TYPE = 'BTREE' AND IS_VISIBLE = 'YES' AND EXPRESSION IS NULL)
+      (INDEX_NAME = 'newsletter_subscribers_confirmation_token_unique' AND NON_UNIQUE = 0 AND SEQ_IN_INDEX = 1 AND COLUMN_NAME = 'confirmationTokenHash' AND SUB_PART IS NULL AND COLLATION = 'A' AND INDEX_TYPE = 'BTREE' AND IS_VISIBLE = 'YES' AND EXPRESSION IS NULL) OR
+      (INDEX_NAME = 'newsletter_subscribers_unsubscribe_token_unique' AND NON_UNIQUE = 0 AND SEQ_IN_INDEX = 1 AND COLUMN_NAME = 'unsubscribeTokenHash' AND SUB_PART IS NULL AND COLLATION = 'A' AND INDEX_TYPE = 'BTREE' AND IS_VISIBLE = 'YES' AND EXPRESSION IS NULL)
     )
 );
 SET @settleclt_0031_final_guard_sql = IF(
