@@ -163,17 +163,25 @@ describe("newsletter lifecycle contracts", () => {
     expect(recovery).toContain("__drizzle_migrations");
     expect(recovery).toContain("LOCK TABLES");
     expect(recovery).toContain("WHERE @settleclt_0031_guard_ok");
-    expect(recovery).toContain(
-      "@settleclt_0031_guard_ok AND @settleclt_0031_final_column_count = 11"
-    );
+    expect(recovery).toContain("@settleclt_0031_guard_ok");
+    expect(recovery).toContain("@settleclt_0031_final_column_count = 11");
     expect(recovery).toContain("BINARY email <> BINARY LOWER(TRIM(email))");
     expect(recovery).toContain("BINARY source <> BINARY TRIM(source)");
     expect(recovery).toContain("COLUMN_TYPE = 'timestamp'");
+    expect(recovery).toContain(
+      "LOWER(EXTRA) = 'default_generated on update current_timestamp'"
+    );
     expect(recovery).toContain("consentVersion IS NULL");
     expect(recovery).toContain("confirmationTokenHash IS NULL");
     expect(recovery).toContain("NON_UNIQUE = 0");
     expect(recovery).toContain("SUB_PART IS NULL");
     expect(recovery).toContain("COLLATION = 'A'");
+    expect(recovery).toContain(
+      "@settleclt_0031_final_confirmation_index_rows = 1"
+    );
+    expect(recovery).toContain(
+      "@settleclt_0031_final_unsubscribe_index_rows = 1"
+    );
     expect(recovery).toContain("settleclt_0031_recovery_complete");
   });
 });

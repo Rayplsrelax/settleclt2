@@ -40,7 +40,7 @@ SET @settleclt_0031_column_fingerprint_count = (
       (COLUMN_NAME = 'unsubscribeTokenHash' AND COLUMN_TYPE = 'varchar(64)' AND IS_NULLABLE IN ('YES', 'NO') AND COLUMN_DEFAULT IS NULL AND EXTRA = '') OR
       (COLUMN_NAME = 'confirmedAt' AND COLUMN_TYPE = 'timestamp' AND IS_NULLABLE = 'YES' AND COLUMN_DEFAULT IS NULL AND EXTRA = '') OR
       (COLUMN_NAME = 'unsubscribedAt' AND COLUMN_TYPE = 'timestamp' AND IS_NULLABLE = 'YES' AND COLUMN_DEFAULT IS NULL AND EXTRA = '') OR
-      (COLUMN_NAME = 'updatedAt' AND COLUMN_TYPE = 'timestamp' AND IS_NULLABLE = 'NO' AND UPPER(COLUMN_DEFAULT) IN ('CURRENT_TIMESTAMP', 'CURRENT_TIMESTAMP()') AND LOWER(EXTRA) LIKE '%on update current_timestamp%')
+      (COLUMN_NAME = 'updatedAt' AND COLUMN_TYPE = 'timestamp' AND IS_NULLABLE = 'NO' AND UPPER(COLUMN_DEFAULT) IN ('CURRENT_TIMESTAMP', 'CURRENT_TIMESTAMP()') AND LOWER(EXTRA) = 'default_generated on update current_timestamp')
     )
 );
 SET @settleclt_0031_finalized_required_count = (
@@ -232,21 +232,60 @@ SET @settleclt_0031_final_column_count = (
       (COLUMN_NAME = 'unsubscribeTokenHash' AND COLUMN_TYPE = 'varchar(64)' AND IS_NULLABLE = 'NO' AND COLUMN_DEFAULT IS NULL AND EXTRA = '') OR
       (COLUMN_NAME = 'confirmedAt' AND COLUMN_TYPE = 'timestamp' AND IS_NULLABLE = 'YES' AND COLUMN_DEFAULT IS NULL AND EXTRA = '') OR
       (COLUMN_NAME = 'unsubscribedAt' AND COLUMN_TYPE = 'timestamp' AND IS_NULLABLE = 'YES' AND COLUMN_DEFAULT IS NULL AND EXTRA = '') OR
-      (COLUMN_NAME = 'updatedAt' AND COLUMN_TYPE = 'timestamp' AND IS_NULLABLE = 'NO' AND UPPER(COLUMN_DEFAULT) IN ('CURRENT_TIMESTAMP', 'CURRENT_TIMESTAMP()') AND LOWER(EXTRA) LIKE '%on update current_timestamp%')
+      (COLUMN_NAME = 'updatedAt' AND COLUMN_TYPE = 'timestamp' AND IS_NULLABLE = 'NO' AND UPPER(COLUMN_DEFAULT) IN ('CURRENT_TIMESTAMP', 'CURRENT_TIMESTAMP()') AND LOWER(EXTRA) = 'default_generated on update current_timestamp')
     )
 );
-SET @settleclt_0031_final_index_count = (
+SET @settleclt_0031_final_confirmation_index_rows = (
   SELECT COUNT(*)
   FROM INFORMATION_SCHEMA.STATISTICS
   WHERE TABLE_SCHEMA = DATABASE()
     AND TABLE_NAME = 'newsletter_subscribers'
-    AND (
-      (INDEX_NAME = 'newsletter_subscribers_confirmation_token_unique' AND NON_UNIQUE = 0 AND SEQ_IN_INDEX = 1 AND COLUMN_NAME = 'confirmationTokenHash' AND SUB_PART IS NULL AND COLLATION = 'A' AND INDEX_TYPE = 'BTREE' AND IS_VISIBLE = 'YES' AND EXPRESSION IS NULL) OR
-      (INDEX_NAME = 'newsletter_subscribers_unsubscribe_token_unique' AND NON_UNIQUE = 0 AND SEQ_IN_INDEX = 1 AND COLUMN_NAME = 'unsubscribeTokenHash' AND SUB_PART IS NULL AND COLLATION = 'A' AND INDEX_TYPE = 'BTREE' AND IS_VISIBLE = 'YES' AND EXPRESSION IS NULL)
-    )
+    AND INDEX_NAME = 'newsletter_subscribers_confirmation_token_unique'
+);
+SET @settleclt_0031_final_confirmation_index_exact = (
+  SELECT COUNT(*)
+  FROM INFORMATION_SCHEMA.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'newsletter_subscribers'
+    AND INDEX_NAME = 'newsletter_subscribers_confirmation_token_unique'
+    AND NON_UNIQUE = 0
+    AND SEQ_IN_INDEX = 1
+    AND COLUMN_NAME = 'confirmationTokenHash'
+    AND SUB_PART IS NULL
+    AND COLLATION = 'A'
+    AND INDEX_TYPE = 'BTREE'
+    AND IS_VISIBLE = 'YES'
+    AND EXPRESSION IS NULL
+);
+SET @settleclt_0031_final_unsubscribe_index_rows = (
+  SELECT COUNT(*)
+  FROM INFORMATION_SCHEMA.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'newsletter_subscribers'
+    AND INDEX_NAME = 'newsletter_subscribers_unsubscribe_token_unique'
+);
+SET @settleclt_0031_final_unsubscribe_index_exact = (
+  SELECT COUNT(*)
+  FROM INFORMATION_SCHEMA.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'newsletter_subscribers'
+    AND INDEX_NAME = 'newsletter_subscribers_unsubscribe_token_unique'
+    AND NON_UNIQUE = 0
+    AND SEQ_IN_INDEX = 1
+    AND COLUMN_NAME = 'unsubscribeTokenHash'
+    AND SUB_PART IS NULL
+    AND COLLATION = 'A'
+    AND INDEX_TYPE = 'BTREE'
+    AND IS_VISIBLE = 'YES'
+    AND EXPRESSION IS NULL
 );
 SET @settleclt_0031_final_guard_sql = IF(
-  @settleclt_0031_guard_ok AND @settleclt_0031_final_column_count = 11 AND @settleclt_0031_final_index_count = 2,
+  @settleclt_0031_guard_ok
+    AND @settleclt_0031_final_column_count = 11
+    AND @settleclt_0031_final_confirmation_index_rows = 1
+    AND @settleclt_0031_final_confirmation_index_exact = 1
+    AND @settleclt_0031_final_unsubscribe_index_rows = 1
+    AND @settleclt_0031_final_unsubscribe_index_exact = 1,
   'SELECT ''settleclt_0031_recovery_complete'' AS recovery_status',
   'SELECT * FROM __settleclt_0031_recovery_failed_postconditions__'
 );
