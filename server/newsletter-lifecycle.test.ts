@@ -157,8 +157,18 @@ describe("newsletter lifecycle contracts", () => {
     expect(recovery).toContain("INFORMATION_SCHEMA.COLUMNS");
     expect(recovery).toContain("settleclt_0031_expected_database");
     expect(recovery).toContain("settleclt_0031_confirm_writes_stopped");
+    expect(recovery).toContain(
+      "BINARY @settleclt_0031_confirm_writes_stopped = BINARY 'WRITES_STOPPED'"
+    );
     expect(recovery).toContain("__drizzle_migrations");
     expect(recovery).toContain("LOCK TABLES");
+    expect(recovery).toContain("WHERE @settleclt_0031_guard_ok");
+    expect(recovery).toContain(
+      "@settleclt_0031_guard_ok AND @settleclt_0031_final_column_count = 11"
+    );
+    expect(recovery).toContain("BINARY email <> BINARY LOWER(TRIM(email))");
+    expect(recovery).toContain("BINARY source <> BINARY TRIM(source)");
+    expect(recovery).toContain("COLUMN_TYPE = 'timestamp'");
     expect(recovery).toContain("consentVersion IS NULL");
     expect(recovery).toContain("confirmationTokenHash IS NULL");
     expect(recovery).toContain("NON_UNIQUE = 0");
