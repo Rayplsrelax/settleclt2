@@ -484,19 +484,107 @@ export async function getBlogPostBySlug(slug: string) {
 }
 
 // --- Newsletter subscribers ---
-export async function insertNewsletterSubscriber(data: InsertNewsletterSubscriber) {
+export type NewsletterSubscriptionRequest = {
+  email: string;
+  source: string;
+  consentVersion: string;
+  consentedAt: Date;
+  confirmationTokenHash: string;
+  confirmationExpiresAt: Date;
+  confirmationSentAt: Date;
+  unsubscribeTokenHash: string;
+};
+
+export async function requestPendingNewsletterSubscription(data: NewsletterSubscriptionRequest) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  try {
-    await db.insert(newsletterSubscribers).values(data);
-    return { success: true, alreadySubscribed: false };
-  } catch (error: any) {
-    // Handle duplicate email gracefully
-    if (error?.code === "ER_DUP_ENTRY" || error?.message?.includes("Duplicate")) {
-      return { success: true, alreadySubscribed: true };
-    }
-    throw error;
-  }
+  await db.insert(newsletterSubscribers).values({ ...data, status: "pending" }).onDuplicateKeyUpdate({
+    set: {
+      source: sql`IF(${newsletterSubscribers.status} = 'unsubscribed' OR (${newsletterSubscribers.status} = 'pending' AND (${newsletterSubscribers.confirmationSentAt} IS NULL OR ${newsletterSubscribers.confirmationSentAt} < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 15 MINUTE))), VALUES(${newsletterSubscribers.source}), ${newsletterSubscribers.source})`,
+      consentVersion: sql`IF(${newsletterSubscribers.status} = 'unsubscribed' OR (${newsletterSubscribers.status} = 'pending' AND (${newsletterSubscribers.confirmationSentAt} IS NULL OR ${newsletterSubscribers.confirmationSentAt} < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 15 MINUTE))), VALUES(${newsletterSubscribers.consentVersion}), ${newsletterSubscribers.consentVersion})`,
+      consentedAt: sql`IF(${newsletterSubscribers.status} = 'unsubscribed' OR (${newsletterSubscribers.status} = 'pending' AND (${newsletterSubscribers.confirmationSentAt} IS NULL OR ${newsletterSubscribers.confirmationSentAt} < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 15 MINUTE))), VALUES(${newsletterSubscribers.consentedAt}), ${newsletterSubscribers.consentedAt})`,
+      confirmationTokenHash: sql`IF(${newsletterSubscribers.status} = 'unsubscribed' OR (${newsletterSubscribers.status} = 'pending' AND (${newsletterSubscribers.confirmationSentAt} IS NULL OR ${newsletterSubscribers.confirmationSentAt} < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 15 MINUTE))), VALUES(${newsletterSubscribers.confirmationTokenHash}), ${newsletterSubscribers.confirmationTokenHash})`,
+      confirmationExpiresAt: sql`IF(${newsletterSubscribers.status} = 'unsubscribed' OR (${newsletterSubscribers.status} = 'pending' AND (${newsletterSubscribers.confirmationSentAt} IS NULL OR ${newsletterSubscribers.confirmationSentAt} < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 15 MINUTE))), VALUES(${newsletterSubscribers.confirmationExpiresAt}), ${newsletterSubscribers.confirmationExpiresAt})`,
+      unsubscribeTokenHash: sql`IF(${newsletterSubscribers.status} = 'unsubscribed' OR (${newsletterSubscribers.status} = 'pending' AND (${newsletterSubscribers.confirmationSentAt} IS NULL OR ${newsletterSubscribers.confirmationSentAt} < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 15 MINUTE))), VALUES(${newsletterSubscribers.unsubscribeTokenHash}), ${newsletterSubscribers.unsubscribeTokenHash})`,
+      unsubscribedAt: sql`IF(${newsletterSubscribers.status} = 'unsubscribed', NULL, ${newsletterSubscribers.unsubscribedAt})`,
+      confirmationSentAt: sql`IF(${newsletterSubscribers.status} = 'unsubscribed' OR (${newsletterSubscribers.status} = 'pending' AND (${newsletterSubscribers.confirmationSentAt} IS NULL OR ${newsletterSubscribers.confirmationSentAt} < DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 15 MINUTE))), VALUES(${newsletterSubscribers.confirmationSentAt}), ${newsletterSubscribers.confirmationSentAt})`,
+      status: sql`IF(${newsletterSubscribers.status} = 'unsubscribed', 'pending', ${newsletterSubscribers.status})`,
+    },
+  });
+
+  const rows = await db.select({ status: newsletterSubscribers.status, confirmationTokenHash: newsletterSubscribers.confirmationTokenHash })
+    .from(newsletterSubscribers).where(eq(newsletterSubscribers.email, data.email)).limit(1);
+  return {
+    status: rows[0]?.status,
+    shouldSendConfirmation: rows[0]?.status === "pending" && rows[0]?.confirmationTokenHash === data.confirmationTokenHash,
+  };
+}
+
+export async function confirmPendingNewsletterSubscription(confirmationTokenHash: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.transaction(async tx => {
+    const rows = await tx.select({ id: newsletterSubscribers.id, email: newsletterSubscribers.email })
+      .from(newsletterSubscribers)
+      .where(and(eq(newsletterSubscribers.confirmationTokenHash, confirmationTokenHash), eq(newsletterSubscribers.status, "pending"), sql`${newsletterSubscribers.confirmationExpiresAt} > CURRENT_TIMESTAMP`))
+      .limit(1);
+    const subscriber = rows[0];
+    if (!subscriber) return false;
+    const result = await tx.update(newsletterSubscribers)
+      .set({ status: "active", confirmedAt: new Date(), confirmationTokenHash: null, confirmationExpiresAt: null })
+      .where(and(
+        eq(newsletterSubscribers.id, subscriber.id),
+        eq(newsletterSubscribers.confirmationTokenHash, confirmationTokenHash),
+        eq(newsletterSubscribers.status, "pending"),
+        sql`${newsletterSubscribers.confirmationExpiresAt} > CURRENT_TIMESTAMP`
+      ));
+    if (result[0]?.affectedRows !== 1) return false;
+    await tx.update(users).set({ newsletterOptIn: true }).where(eq(users.email, subscriber.email));
+    return true;
+  });
+}
+
+export async function unsubscribeNewsletterByToken(unsubscribeTokenHash: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.transaction(async tx => {
+    const rows = await tx.select({ id: newsletterSubscribers.id, email: newsletterSubscribers.email })
+      .from(newsletterSubscribers).where(eq(newsletterSubscribers.unsubscribeTokenHash, unsubscribeTokenHash)).limit(1);
+    const subscriber = rows[0];
+    if (!subscriber) return false;
+    const result = await tx.update(newsletterSubscribers)
+      .set({ status: "unsubscribed", unsubscribedAt: new Date() })
+      .where(and(
+        eq(newsletterSubscribers.id, subscriber.id),
+        eq(newsletterSubscribers.unsubscribeTokenHash, unsubscribeTokenHash),
+        inArray(newsletterSubscribers.status, ["pending", "active"])
+      ));
+    if (result[0]?.affectedRows !== 1) return false;
+    await tx.update(users).set({ newsletterOptIn: false }).where(eq(users.email, subscriber.email));
+    return true;
+  });
+}
+
+export async function releaseNewsletterConfirmationThrottle(confirmationTokenHash: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(newsletterSubscribers)
+    .set({ confirmationSentAt: null })
+    .where(and(
+      eq(newsletterSubscribers.confirmationTokenHash, confirmationTokenHash),
+      eq(newsletterSubscribers.status, "pending")
+    ));
+}
+
+export async function unsubscribeNewsletterByEmail(email: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.transaction(async tx => {
+    await tx.update(newsletterSubscribers)
+      .set({ status: "unsubscribed", unsubscribedAt: new Date() })
+      .where(and(eq(newsletterSubscribers.email, email), inArray(newsletterSubscribers.status, ["pending", "active"])));
+    await tx.update(users).set({ newsletterOptIn: false }).where(eq(users.email, email));
+  });
 }
 
 // --- Leaderboard queries ---
@@ -1167,19 +1255,16 @@ export async function getRecentBlogPosts(limit: number = 3) {
     .limit(limit);
 }
 
-/** Get newsletter subscribers (users who opted in + standalone subscribers) */
+/** Get active canonical newsletter subscribers. */
 export async function getNewsletterRecipients() {
   const db = await getDb();
-  if (!db) return { users: [] as { email: string; name: string | null }[], subscribers: [] as { email: string }[] };
-  
-  const optedInUsers = await db.select({ email: users.email, name: users.name })
-    .from(users)
-    .where(and(eq(users.newsletterOptIn, true), sql`${users.email} IS NOT NULL`));
-  
-  const standaloneSubscribers = await db.select({ email: newsletterSubscribers.email })
-    .from(newsletterSubscribers);
-  
-  return { users: optedInUsers as { email: string; name: string | null }[], subscribers: standaloneSubscribers };
+  if (!db) return { subscribers: [] as { email: string }[] };
+
+  const subscribers = await db.select({ email: newsletterSubscribers.email })
+    .from(newsletterSubscribers)
+    .where(eq(newsletterSubscribers.status, "active"));
+
+  return { subscribers };
 }
 
 

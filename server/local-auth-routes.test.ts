@@ -16,7 +16,12 @@ const mockDb = vi.hoisted(() => ({
   upsertUser: vi.fn(),
 }));
 
+const mockRequestNewsletterSubscription = vi.hoisted(() => vi.fn());
+
 vi.mock("./db", () => mockDb);
+vi.mock("./newsletter-service", () => ({
+  requestNewsletterSubscription: mockRequestNewsletterSubscription,
+}));
 
 import { registerLocalAuthRoutes } from "./local-auth-routes";
 import { sdk as mockSdk } from "./_core/sdk";
@@ -103,6 +108,7 @@ beforeEach(() => {
   mockDb.resetPasswordWithToken.mockResolvedValue(true);
   mockDb.updateUserAuth.mockResolvedValue({});
   mockDb.upsertUser.mockResolvedValue({});
+  mockRequestNewsletterSubscription.mockResolvedValue(undefined);
   mockSdk.createSessionToken.mockResolvedValue("mock-jwt-token");
   resetTestEnv();
   globalThis.fetch = vi.fn().mockResolvedValue({ ok: true }) as any;
@@ -126,6 +132,28 @@ describe("POST /api/auth/register", () => {
     expect(res.status).toBe(201);
     expect(res.body.ok).toBe(true);
     expect(mockDb.createLocalUser).toHaveBeenCalled();
+  });
+
+  it("requires explicit newsletter consent during registration", async () => {
+    await request(makeApp())
+      .post("/api/auth/register")
+      .set("Origin", ORIGIN)
+      .send({ email: "new@test.com", name: "Test User", password: "secure-pass-123" });
+    expect(mockRequestNewsletterSubscription).not.toHaveBeenCalled();
+
+    await request(makeApp())
+      .post("/api/auth/register")
+      .set("Origin", ORIGIN)
+      .send({
+        email: "optin@test.com",
+        name: "Test User",
+        password: "secure-pass-123",
+        newsletterOptIn: true,
+      });
+    expect(mockRequestNewsletterSubscription).toHaveBeenCalledWith({
+      email: "optin@test.com",
+      source: "registration",
+    });
   });
 
   it("returns 409 when email already exists", async () => {

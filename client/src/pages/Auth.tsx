@@ -2,7 +2,7 @@ import { FormEvent, useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 
-async function postJson(path: string, body: Record<string, string>) {
+async function postJson(path: string, body: Record<string, unknown>) {
   const response = await fetch(path, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -20,6 +20,7 @@ export default function Auth() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [newsletterOptIn, setNewsletterOptIn] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const returnTo = new URLSearchParams(window.location.search).get("returnTo") || "/";
@@ -43,7 +44,7 @@ export default function Auth() {
       }
       const result = mode === "login"
         ? await postJson("/api/auth/login", { email, password, returnTo })
-        : await postJson("/api/auth/register", { email, name, password });
+        : await postJson("/api/auth/register", { email, name, password, newsletterOptIn });
       if (mode === "login") {
         navigate(result.returnTo || returnTo);
       } else {
@@ -74,6 +75,7 @@ export default function Auth() {
           {mode === "register" && <label className="block text-sm">Name<input required minLength={2} maxLength={120} value={name} onChange={e => setName(e.target.value)} className="mt-1 w-full rounded-md border px-3 py-2" /></label>}
           <label className="block text-sm">Email<input required type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} className="mt-1 w-full rounded-md border px-3 py-2" /></label>
           {mode !== "forgot" && <label className="block text-sm">Password<input required type="password" autoComplete={mode === "login" ? "current-password" : "new-password"} minLength={12} value={password} onChange={e => setPassword(e.target.value)} className="mt-1 w-full rounded-md border px-3 py-2" /></label>}
+          {mode === "register" && <label className="flex items-start gap-2 text-sm"><input type="checkbox" checked={newsletterOptIn} onChange={e => setNewsletterOptIn(e.target.checked)} className="mt-1" /><span>Receive the Settle CLT newsletter. Optional; confirmation is required.</span></label>}
           <Button type="submit" className="w-full">{mode === "login" ? "Sign in" : mode === "register" ? "Create account" : "Send reset email"}</Button>
         </form>
         <div className="mt-6 space-y-2 text-center text-sm">

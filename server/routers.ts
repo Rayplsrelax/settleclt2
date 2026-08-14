@@ -5,8 +5,9 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router, adminProcedure } from "./_core/trpc";
 import { z } from "zod";
 import { recommendBusinessMatches } from "./business-referral-matching";
+import { requestNewsletterSubscription } from "./newsletter-service";
 import {
-  insertBusinessSubmission, getBusinessSubmissions, getBusinessSubmissionCount, updateBusinessSubmissionStatus, deleteBusinessSubmission, insertNewsletterSubscriber,
+  insertBusinessSubmission, getBusinessSubmissions, getBusinessSubmissionCount, updateBusinessSubmissionStatus, deleteBusinessSubmission,
   upsertEnrichedService, getEnrichedService, getAllEnrichedServices,
   addPassportEntry, getPassportEntries, deletePassportEntry,
   getActiveBingoCards, getBingoProgress, upsertBingoProgress,
@@ -841,29 +842,30 @@ export const appRouter = router({
     subscribe: publicProcedure
       .input(z.object({
         email: z.string().email(),
-        source: z.string().optional(),
+        source: z.enum(["homepage", "blog", "profile", "registration"]).default("homepage"),
       }))
       .mutation(async ({ input }) => {
-        const result = await insertNewsletterSubscriber({
-          email: input.email,
-          source: input.source ?? "homepage",
-        });
-        // Notify owner of new newsletter subscriber
+        await requestNewsletterSubscription(input);
         notifyOwner({
-          title: "📬 New Newsletter Subscriber",
-          content: `New subscriber: ${input.email} (source: ${input.source ?? 'homepage'})`,
-        }).catch(() => {}); // fire-and-forget
-        return result;
+          title: "📬 Newsletter Confirmation Requested",
+          content: `Newsletter confirmation requested from source: ${input.source}`,
+        }).catch(() => {});
+        return {
+          success: true,
+          message: "Your subscription request was received.",
+        };
       }),
     toggleOptIn: protectedProcedure
       .input(z.object({ optIn: z.boolean() }))
       .mutation(async ({ ctx, input }) => {
-        await updateUserNewsletter(ctx.user.id, input.optIn);
-        // If opting in, also add to newsletter_subscribers table
         if (input.optIn && ctx.user.email) {
-          await insertNewsletterSubscriber({ email: ctx.user.email, source: "profile" }).catch(() => {});
+          await requestNewsletterSubscription({ email: ctx.user.email, source: "profile" });
+        } else if (!input.optIn && ctx.user.email) {
+          await updateUserNewsletter(ctx.user.id, false);
+          const { unsubscribeNewsletterByEmail } = await import("./db");
+          await unsubscribeNewsletterByEmail(ctx.user.email);
         }
-        return { success: true };
+        return { success: true, pendingConfirmation: input.optIn };
       }),
   }),
 
@@ -1024,10 +1026,7 @@ export const appRouter = router({
         getTrendingTags(5, 30),
         getNewsletterRecipients(),
       ]);
-      const totalRecipients = new Set([
-        ...recipients.users.map(u => u.email).filter(Boolean),
-        ...recipients.subscribers.map(s => s.email),
-      ]).size;
+      const totalRecipients = new Set(recipients.subscribers.map(s => s.email)).size;
       return { newListings, upcomingEvents, recentPosts, trending, totalRecipients };
     }),
     generate: adminProcedure.mutation(async () => {
@@ -1060,18 +1059,11 @@ export const appRouter = router({
     }),
     send: adminProcedure
       .input(z.object({ html: z.string(), subject: z.string().optional() }))
-      .mutation(async ({ input }) => {
-        const recipients = await getNewsletterRecipients();
-        const allEmails = new Set([
-          ...recipients.users.map(u => u.email).filter(Boolean),
-          ...recipients.subscribers.map(s => s.email),
-        ]);
-        // Use notifyOwner to send a summary notification
-        await notifyOwner({
-          title: input.subject || 'Monthly Digest Sent',
-          content: `Newsletter digest sent to ${allEmails.size} recipients.\n\nPreview:\n${input.html.substring(0, 500)}...`,
+      .mutation(async () => {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "Newsletter broadcast delivery is not enabled yet.",
         });
-        return { sent: true, recipientCount: allEmails.size };
       }),
   }),
 

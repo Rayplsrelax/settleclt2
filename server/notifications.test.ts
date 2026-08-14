@@ -3,15 +3,22 @@ import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
 
 // Mock the notification module
-const mockNotifyOwner = vi.fn().mockResolvedValue(true);
+const { mockNotifyOwner, mockRequestNewsletterSubscription } = vi.hoisted(() => ({
+  mockNotifyOwner: vi.fn().mockResolvedValue(true),
+  mockRequestNewsletterSubscription: vi.fn().mockResolvedValue(undefined),
+}));
 vi.mock("./_core/notification", () => ({
   notifyOwner: (...args: any[]) => mockNotifyOwner(...args),
+}));
+
+vi.mock("./newsletter-service", () => ({
+  requestNewsletterSubscription: mockRequestNewsletterSubscription,
 }));
 
 // Mock the db module
 vi.mock("./db", () => ({
   insertBusinessSubmission: vi.fn().mockResolvedValue({ success: true }),
-  insertNewsletterSubscriber: vi.fn().mockResolvedValue({ success: true }),
+
   upsertBingoProgress: vi.fn().mockResolvedValue({ success: true }),
   upsertUser: vi.fn(),
   getUserByOpenId: vi.fn(),
@@ -39,6 +46,8 @@ vi.mock("./db", () => ({
   getPublishedBlogPosts: vi.fn(),
   getAllBlogPosts: vi.fn(),
   getBlogPostBySlug: vi.fn(),
+  isNotificationEnabled: vi.fn().mockResolvedValue(true),
+  createNotification: vi.fn().mockResolvedValue({ id: 1 }),
 }));
 
 function createPublicContext(): TrpcContext {
@@ -121,13 +130,10 @@ describe("Notifications - Newsletter Signup", () => {
 
     expect(mockNotifyOwner).toHaveBeenCalledTimes(1);
     expect(mockNotifyOwner).toHaveBeenCalledWith({
-      title: "\ud83d\udcec New Newsletter Subscriber",
-      content: expect.stringContaining("subscriber@example.com"),
+      title: "📬 Newsletter Confirmation Requested",
+      content: "Newsletter confirmation requested from source: homepage",
     });
-    expect(mockNotifyOwner).toHaveBeenCalledWith({
-      title: "\ud83d\udcec New Newsletter Subscriber",
-      content: expect.stringContaining("homepage"),
-    });
+    expect(mockNotifyOwner.mock.calls[0]?.[0]?.content).not.toContain("subscriber@example.com");
   });
 });
 
@@ -178,6 +184,9 @@ describe("Notifications - Resilience", () => {
       email: "test@example.com",
     });
 
-    expect(result).toEqual({ success: true });
+    expect(result).toEqual({
+      success: true,
+      message: "Your subscription request was received.",
+    });
   });
 });

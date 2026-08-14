@@ -24,7 +24,7 @@ export const users = mysqlTable("users", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
-  newsletterOptIn: boolean("newsletterOptIn").default(true).notNull(),
+  newsletterOptIn: boolean("newsletterOptIn").default(false).notNull(),
 });
 
 export type User = typeof users.$inferSelect;
@@ -64,7 +64,16 @@ export type InsertBusinessSubmission = typeof businessSubmissions.$inferInsert;
 export const newsletterSubscribers = mysqlTable("newsletter_subscribers", {
   id: int("id").autoincrement().primaryKey(),
   email: varchar("email", { length: 320 }).notNull().unique(),
-  source: varchar("source", { length: 64 }).default("homepage"),
+  source: varchar("source", { length: 64 }).default("homepage").notNull(),
+  status: mysqlEnum("status", ["pending", "active", "unsubscribed", "bounced", "complained"]).default("pending").notNull(),
+  consentVersion: varchar("consentVersion", { length: 32 }).notNull(),
+  consentedAt: timestamp("consentedAt").notNull(),
+  confirmationTokenHash: varchar("confirmationTokenHash", { length: 64 }).unique(),
+  confirmationExpiresAt: timestamp("confirmationExpiresAt"),
+  confirmationSentAt: timestamp("confirmationSentAt"),
+  unsubscribeTokenHash: varchar("unsubscribeTokenHash", { length: 64 }).notNull().unique(),
+  confirmedAt: timestamp("confirmedAt"),
+  unsubscribedAt: timestamp("unsubscribedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 

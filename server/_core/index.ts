@@ -14,6 +14,7 @@ import { registerLocalAuthRoutes } from "../local-auth-routes";
 import { installAuthOriginGuard } from "./auth-origin";
 import { hermesRouter } from "../hermes-api";
 import { createSecurityMiddleware } from "./security";
+import { registerNewsletterRoutes } from "../newsletter-routes";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -266,6 +267,7 @@ async function startServer() {
   registerStorageProxy(app);
   registerLocalAuthRoutes(app);
   registerOAuthRoutes(app);
+  registerNewsletterRoutes(app);
   // Shared-secret endpoint for Obsidian/GitHub Actions blog publishing
   registerObsidianPublishRoute(app);
   // Hermes revenue ops agent REST API (Bearer token auth)
@@ -285,6 +287,7 @@ async function startServer() {
   app.use("/api/trpc/event.submit", formLimiter);
   app.use("/api/trpc/system.notifyOwner", formLimiter);
   app.use("/api/trpc/claim.submit", formLimiter);
+  app.use("/api/trpc/newsletter.subscribe", formLimiter);
 
   // tRPC API
   app.use(

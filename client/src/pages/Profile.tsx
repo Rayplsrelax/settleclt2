@@ -98,9 +98,13 @@ function NewsletterToggle({ defaultOptIn }: { defaultOptIn: boolean }) {
     const newVal = !optIn;
     setSaving(true);
     try {
-      await toggle.mutateAsync({ optIn: newVal });
-      setOptIn(newVal);
-      toast.success(newVal ? "Subscribed to newsletter" : "Unsubscribed from newsletter");
+      const result = await toggle.mutateAsync({ optIn: newVal });
+      setOptIn(newVal ? false : newVal);
+      toast.success(
+        result.pendingConfirmation
+          ? "Your subscription request was received"
+          : "Unsubscribed from newsletter"
+      );
     } catch {
       toast.error("Failed to update preference");
     } finally {
@@ -338,10 +342,10 @@ export default function Profile() {
               </div>
               <div>
                 <span className="text-sm font-semibold text-foreground">Charlotte Insider Newsletter</span>
-                <p className="text-xs text-muted-foreground mt-0.5">Weekly updates on events, new spots, and local tips</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Weekly updates on events, new spots, and local tips. Enabling this requests the newsletter; confirmation is required.</p>
               </div>
             </div>
-            <NewsletterToggle defaultOptIn={(user as any).newsletterOptIn ?? true} />
+            <NewsletterToggle defaultOptIn={(user as any).newsletterOptIn ?? false} />
           </CardContent>
         </Card>
 
