@@ -75,6 +75,7 @@ export const newsletterSubscribers = mysqlTable("newsletter_subscribers", {
   confirmedAt: timestamp("confirmedAt"),
   unsubscribedAt: timestamp("unsubscribedAt"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
 export type NewsletterSubscriber = typeof newsletterSubscribers.$inferSelect;

@@ -28,6 +28,9 @@ describe("newsletter lifecycle contracts", () => {
     );
     expect(schema).toContain('confirmedAt: timestamp("confirmedAt")');
     expect(schema).toContain('unsubscribedAt: timestamp("unsubscribedAt")');
+    expect(schema).toContain(
+      'updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull()'
+    );
     expect(migration).toContain(
       "ALTER TABLE `users` MODIFY COLUMN `newsletterOptIn` boolean NOT NULL DEFAULT false"
     );
@@ -152,6 +155,14 @@ describe("newsletter lifecycle contracts", () => {
     );
     expect(recovery).toContain("legacy-2026-08");
     expect(recovery).toContain("INFORMATION_SCHEMA.COLUMNS");
+    expect(recovery).toContain("settleclt_0031_expected_database");
+    expect(recovery).toContain("settleclt_0031_confirm_writes_stopped");
+    expect(recovery).toContain("__drizzle_migrations");
+    expect(recovery).toContain("LOCK TABLES");
+    expect(recovery).toContain("consentVersion IS NULL");
+    expect(recovery).toContain("confirmationTokenHash IS NULL");
+    expect(recovery).toContain("NON_UNIQUE = 0");
+    expect(recovery).toContain("SUB_PART IS NULL");
     expect(recovery).toContain("settleclt_0031_recovery_complete");
   });
 });
