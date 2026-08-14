@@ -1,0 +1,260 @@
+{
+  "actions": [
+    {
+      "action": "update",
+      "resolves": [
+        {
+          "id": 1138097,
+          "path": ".>streamdown>mermaid",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1138099,
+          "path": ".>streamdown>mermaid",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1138100,
+          "path": ".>streamdown>mermaid",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1138101,
+          "path": ".>streamdown>mermaid",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        },
+        {
+          "id": 1138113,
+          "path": ".>streamdown>mermaid",
+          "dev": false,
+          "optional": false,
+          "bundled": false
+        }
+      ],
+      "module": "mermaid",
+      "target": "11.16.1",
+      "depth": 3
+    }
+  ],
+  "advisories": {
+    "1138097": {
+      "findings": [
+        {
+          "version": "11.16.0",
+          "paths": [
+            ". > streamdown@1.4.0 > mermaid@11.16.0"
+          ]
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://github.com/mermaid-js/mermaid/security/advisories/GHSA-c4c3-pg64-4m4v\n- https://github.com/mermaid-js/mermaid/pull/8022\n- https://github.com/mermaid-js/mermaid/commit/2cd6dcf735533b323507e3e889ffdea870540b43\n- https://github.com/mermaid-js/mermaid/commit/c34b07a0815842327e70794d69b0c8c5a1e2a956\n- https://github.com/mermaid-js/mermaid/releases/tag/mermaid%4011.16.1\n- https://github.com/mermaid-js/mermaid/releases/tag/v10.9.8\n- https://github.com/advisories/GHSA-c4c3-pg64-4m4v",
+      "created": "2026-08-06T19:59:10.000Z",
+      "id": 1138097,
+      "npm_advisory_id": null,
+      "overview": "### Summary\n\nMermaid's configuration setters (`mermaid.initialize`, `mermaidAPI.setConfig`, and `mermaidAPI.updateSiteConfig`) merge the caller-supplied configuration object into Mermaid's internal config using the `assignWithDepth` deep-merge helper that is vulnerable to prototype pollution.\n\nBecause these APIs are intended to receive **trusted** configuration supplied by the application integrating Mermaid, Mermaid assesses the practical risk as **low**. The vulnerability is only reachable if an application forwards attacker-controlled data directly into one of these configuration entry points, which is outside their documented usage.\n\nUser-controlled configuration (e.g. configuration in diagram code using `%%{init: {}}%%` or YAML frontmatter) are already protected from prototype pollution.\n\n### Patches\n\nThis has been patched in https://github.com/mermaid-js/mermaid/commit/2cd6dcf735533b323507e3e889ffdea870540b43 and released in [Mermaid v11.16.1](https://github.com/mermaid-js/mermaid/releases/tag/mermaid%4011.16.1).\n\nA backport has been made for the v10 branch in c34b07a0815842327e70794d69b0c8c5a1e2a956 and was released in [Mermaid v10.9.8](https://github.com/mermaid-js/mermaid/releases/tag/v10.9.8)\n\n### Impact\n\nMermaid believes it's unlikely that anybody is impacted, as these functions are configuration entry points expected to receive trusted, developer-controlled values as they can modify other security-relevant configuration.\n\n### Workarounds\n\nDon't pass user-controlled data to the `mermaid.initialize`, `mermaidAPI.setConfig`, and `mermaidAPI.updateSiteConfig` functions. Instead, users can use `%%{init: {}}%%` or YAML frontmatter in diagrams.\n\n### Reporters\n\n- liyi.zhou@sydney.edu.au (Liyi), https://lzhou1110.github.io/\n- ziyue0530@gmail.com (Ziyue), https://zyy0530.github.io/\n- cshe0476@uni.sydney.edu.au (Strick), https://str1ckl4nd.github.io/\n- chng0012@uni.sydney.edu.au (Maurice), http://maurice.busystar.org/\n- cyu210608@gmail.com (Chenchen), https://7thparkk.github.io/",
+      "reported_by": null,
+      "title": "Mermaid configuration APIs allow prototype pollution",
+      "metadata": null,
+      "cves": [
+        "CVE-2026-71438"
+      ],
+      "access": "public",
+      "severity": "low",
+      "module_name": "mermaid",
+      "vulnerable_versions": ">=11.0.0-alpha.1 <11.16.1",
+      "github_advisory_id": "GHSA-c4c3-pg64-4m4v",
+      "recommendation": "Upgrade to version 11.16.1 or later",
+      "patched_versions": ">=11.16.1",
+      "updated": "2026-08-06T19:59:11.000Z",
+      "cvss": {
+        "score": 0,
+        "vectorString": null
+      },
+      "cwe": [
+        "CWE-1321"
+      ],
+      "url": "https://github.com/advisories/GHSA-c4c3-pg64-4m4v"
+    },
+    "1138099": {
+      "findings": [
+        {
+          "version": "11.16.0",
+          "paths": [
+            ". > streamdown@1.4.0 > mermaid@11.16.0"
+          ]
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://github.com/mermaid-js/mermaid/security/advisories/GHSA-6x64-9x62-f2gx\n- https://github.com/mermaid-js/mermaid/pull/8022\n- https://github.com/mermaid-js/mermaid/commit/12d472c9ed43f94814b110da8d7a9ae6dd5266ed\n- https://github.com/mermaid-js/mermaid/commit/7e83f1533318b307764d961906a73377266f4c5e\n- https://github.com/mermaid-js/mermaid/releases/tag/mermaid@11.16.1\n- https://github.com/mermaid-js/mermaid/releases/tag/v10.9.8\n- https://github.com/advisories/GHSA-6x64-9x62-f2gx",
+      "created": "2026-08-06T19:55:31.000Z",
+      "id": 1138099,
+      "npm_advisory_id": null,
+      "overview": "### Summary\n\nMermaid does not fully restrict CSS to the rendered SVG subtree. Although selectors are prefixed with `#mermaid-X`, sibling (`~` and `+`) combinators can still escape the Mermaid container and inject styles to DOM elements adjacent to the diagram `<svg>`.\n\n**Most users of mermaid would not be affected by this**, as mermaid adds its `<svg>` as an only child of it's parent element. However, you may be affected if you manually insert the `<svg>` (or other elements) into the DOM yourself.\n\n### Details\n\nMermaid namespaces CSS through with a middleware intended to scope all rules to the diagram's SVG element. CSS nesting expands `& ~ * { ... }` to `#svgId ~ *`, which selects all sibling elements following the SVG in the DOM, outside the diagram boundary.\n\n### Impact\n\nAn attacker able to supply diagram source to a page (e.g., user-generated content rendered by Mermaid) could inject CSS rules affecting sibling elements to the diagram `<svg>` on the host page. This can be used for UI redressing, hiding content, conditional CSS-based probing, or phishing-style visual manipulation.\n\nJavaScript execution is not possible via this vector.\n\n### Patches\n\nThis has been patched in https://github.com/mermaid-js/mermaid/commit/12d472c9ed43f94814b110da8d7a9ae6dd5266ed and released in [Mermaid v11.16.1](https://github.com/mermaid-js/mermaid/releases/tag/mermaid%4011.16.1).\n\nA backport has been made for the v10 branch in 7e83f1533318b307764d961906a73377266f4c5e and was released in [Mermaid v10.9.8](https://github.com/mermaid-js/mermaid/releases/tag/v10.9.8)\n\n### Workarounds\n\nIf you are inserting the `<svg>` into the DOM yourself, you can wrap it in an element with no other children, e.g. `<div><svg>...</svg></div>` or `element.innerHTML = svg`. Alternatively, you can use `mermaid.run()` or `mermaid.initialize()`  which will do this for you. \n\nSetting [\"securityLevel\": \"sandbox\"](https://mermaid.js.org/config/schema-docs/config.html#securitylevel) will also prevent this, or setting the [`secure`](https://mermaid.js.org/config/schema-docs/config.html#secure) config value in the mermaid config to avoid allowing diagrams to modify `fontFamily`, `themeCSS`, `altFontFamily`, and `themeVariables`.\n\nTo test, you can try using a `themeCSS` with `& + * { /* my CSS here */}` and see if it's applied outside of your mermaid `<svg>`.\n\n```mermaid-example\n---\nconfig:\n  themeCSS: |-\n    & + * { background:red !important; width:100vw !important; height:100vh !important; position:fixed !important; inset:0 !important; }\n---\ninfo\n```\n\n### References\n\n- GHSA-87f9-hvmw-gh4p/CVE-2026-41159 (related vulnerability)\n- https://github.com/mermaid-js/mermaid/commit/12d472c9ed43f94814b110da8d7a9ae6dd5266ed\n- https://github.com/mermaid-js/mermaid/releases/tag/mermaid%4011.16.1\n- https://github.com/mermaid-js/mermaid/commit/7e83f1533318b307764d961906a73377266f4c5e\n- https://github.com/mermaid-js/mermaid/releases/tag/v10.9.8",
+      "reported_by": null,
+      "title": "Mermaid allows CSS injection applying to sibling elements of the diagram",
+      "metadata": null,
+      "cves": [
+        "CVE-2026-50159"
+      ],
+      "access": "public",
+      "severity": "moderate",
+      "module_name": "mermaid",
+      "vulnerable_versions": ">=11.0.0-alpha.1 <11.16.1",
+      "github_advisory_id": "GHSA-6x64-9x62-f2gx",
+      "recommendation": "Upgrade to version 11.16.1 or later",
+      "patched_versions": ">=11.16.1",
+      "updated": "2026-08-06T19:55:33.000Z",
+      "cvss": {
+        "score": 0,
+        "vectorString": null
+      },
+      "cwe": [
+        "CWE-94"
+      ],
+      "url": "https://github.com/advisories/GHSA-6x64-9x62-f2gx"
+    },
+    "1138100": {
+      "findings": [
+        {
+          "version": "11.16.0",
+          "paths": [
+            ". > streamdown@1.4.0 > mermaid@11.16.0"
+          ]
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://github.com/mermaid-js/mermaid/security/advisories/GHSA-3rrr-jr9j-h3q3\n- https://github.com/mermaid-js/mermaid/pull/8022\n- https://github.com/mermaid-js/mermaid/commit/99af3fc35ef0a9a9c8c6314521344d67523ddccf\n- https://github.com/mermaid-js/mermaid/releases/tag/mermaid@11.16.1\n- https://github.com/advisories/GHSA-3rrr-jr9j-h3q3",
+      "created": "2026-08-06T19:51:59.000Z",
+      "id": 1138100,
+      "npm_advisory_id": null,
+      "overview": "Rendering an untrusted `architecture-beta` diagram lets the diagram author write an arbitrary property with the value `horizontal` or `vertical` onto `Object.prototype`. A group id of `__proto__` is accepted as a valid parent.\n\n### Impact\n\nAny code in the same realm that reads a property of that name from an arbitrary object, or enumerates an object with bare `for...in`, observes the injected value (which can only be the string `horizontal` or `vertical`.\n\nThis may mean corrupted option/config defaults, bypassed truthiness checks, causing denial of service or logic corruption in the embedding application.\n\nBecause the injected value cannot be an object or function, this is not directly exploitable for remote code execution.\n\n### PoC\n\n```\narchitecture-beta\n      group mermaidPrototypePollutionMarker(cloud)[Marker]\n      service a(server)[A] in __proto__\n      service b(server)[B] in mermaidPrototypePollutionMarker\n      a:R -- L:b\n```\n\nThe vulnerable write was introduced in commit [cb0a4703bdf01d47508bde1c08aa9a980d70bc20](https://github.com/mermaid-js/mermaid/commit/cb0a4703bdf01d47508bde1c08aa9a980d70bc20) and first shipped in `mermaid@11.5.0`. The lines are unchanged in every release since.\n\n### Patches\n\nThis has been patched by https://github.com/mermaid-js/mermaid/commit/99af3fc35ef0a9a9c8c6314521344d67523ddccf, released in [Mermaid v11.16.1](https://github.com/mermaid-js/mermaid/releases/tag/mermaid%4011.16.1)\n\n### Workarounds\n\nThere are no known workarounds. Please update to a patched version.\n\n### References\n\n_Are there any links users can visit to find out more?_\n\n- https://github.com/mermaid-js/mermaid/commit/99af3fc35ef0a9a9c8c6314521344d67523ddccf\n- https://github.com/mermaid-js/mermaid/releases/tag/mermaid%4011.16.1",
+      "reported_by": null,
+      "title": "Mermaid Architecture diagrams are vulnerable to prototype pollution",
+      "metadata": null,
+      "cves": [
+        "CVE-2026-71437"
+      ],
+      "access": "public",
+      "severity": "moderate",
+      "module_name": "mermaid",
+      "vulnerable_versions": ">=11.5.0 <11.16.1",
+      "github_advisory_id": "GHSA-3rrr-jr9j-h3q3",
+      "recommendation": "Upgrade to version 11.16.1 or later",
+      "patched_versions": ">=11.16.1",
+      "updated": "2026-08-06T19:52:01.000Z",
+      "cvss": {
+        "score": 0,
+        "vectorString": null
+      },
+      "cwe": [
+        "CWE-1321"
+      ],
+      "url": "https://github.com/advisories/GHSA-3rrr-jr9j-h3q3"
+    },
+    "1138101": {
+      "findings": [
+        {
+          "version": "11.16.0",
+          "paths": [
+            ". > streamdown@1.4.0 > mermaid@11.16.0"
+          ]
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://github.com/mermaid-js/mermaid/security/advisories/GHSA-2v8p-3f2j-5mp7\n- https://github.com/mermaid-js/mermaid/pull/8022\n- https://github.com/mermaid-js/mermaid/commit/630aa7e5dd417e1f56bff2a1ce8df2c5ad08d289\n- https://github.com/mermaid-js/mermaid/commit/ef60adc837d9d5107af21285f01e83dea309bd0a\n- https://github.com/mermaid-js/mermaid/releases/tag/mermaid@11.16.1\n- https://github.com/mermaid-js/mermaid/releases/tag/v10.9.8\n- https://github.com/advisories/GHSA-2v8p-3f2j-5mp7",
+      "created": "2026-08-06T19:49:48.000Z",
+      "id": 1138101,
+      "npm_advisory_id": null,
+      "overview": "### Impact\n\nMermaid XY Charts are vulnerable to an infinite loop DoS attack in the `setXAxisRangeData()`, when configuring an X-Axis with invalid parameters.\n\nAs each loop appends an element to an array, this would generally only cause an `RangeError: Invalid array length` to appear after a few seconds, but may cause the page/JavaScript process to crash due to memory exhaustion, depending on the environment.\n\n#### Proof-of-concept\n\n```txt\nxychart\n  x-axis 1 --> 1\n  line [1, 2]\n```\n\n### Patches\n\nThis has been patched in https://github.com/mermaid-js/mermaid/commit/630aa7e5dd417e1f56bff2a1ce8df2c5ad08d289 and released in [Mermaid v11.16.1](https://github.com/mermaid-js/mermaid/releases/tag/mermaid%4011.16.1).\n\nA backport has been made for the v10 branch in ef60adc837d9d5107af21285f01e83dea309bd0a and was released in [Mermaid v10.9.8](https://github.com/mermaid-js/mermaid/releases/tag/v10.9.8)\n\n### Workarounds\n\nThere are no known workarounds. Please update to the latest version or apply the patch.\n\n### References\n\n- https://github.com/mermaid-js/mermaid/commit/630aa7e5dd417e1f56bff2a1ce8df2c5ad08d289\n- https://github.com/mermaid-js/mermaid/releases/tag/mermaid%4011.16.1\n- https://github.com/mermaid-js/mermaid/commit/ef60adc837d9d5107af21285f01e83dea309bd0a\n- https://github.com/mermaid-js/mermaid/releases/tag/v10.9.8",
+      "reported_by": null,
+      "title": "Mermaid XY Charts are vulnerable to an infinite loop DoS",
+      "metadata": null,
+      "cves": [
+        "CVE-2026-71436"
+      ],
+      "access": "public",
+      "severity": "moderate",
+      "module_name": "mermaid",
+      "vulnerable_versions": ">=11.0.0-alpha.1 <11.16.1",
+      "github_advisory_id": "GHSA-2v8p-3f2j-5mp7",
+      "recommendation": "Upgrade to version 11.16.1 or later",
+      "patched_versions": ">=11.16.1",
+      "updated": "2026-08-06T19:49:48.000Z",
+      "cvss": {
+        "score": 0,
+        "vectorString": null
+      },
+      "cwe": [
+        "CWE-835",
+        "CWE-1325"
+      ],
+      "url": "https://github.com/advisories/GHSA-2v8p-3f2j-5mp7"
+    },
+    "1138113": {
+      "findings": [
+        {
+          "version": "11.16.0",
+          "paths": [
+            ". > streamdown@1.4.0 > mermaid@11.16.0"
+          ]
+        }
+      ],
+      "found_by": null,
+      "deleted": null,
+      "references": "- https://github.com/mermaid-js/mermaid/security/advisories/GHSA-rhh3-jpg6-66xh\n- https://github.com/mermaid-js/mermaid/pull/8022\n- https://github.com/mermaid-js/mermaid/commit/59b22fad2b3bb04f87a476c84a8a2b24679e607e\n- https://github.com/mermaid-js/mermaid/releases/tag/mermaid%4011.16.1\n- https://github.com/advisories/GHSA-rhh3-jpg6-66xh",
+      "created": "2026-08-06T20:01:07.000Z",
+      "id": 1138113,
+      "npm_advisory_id": null,
+      "overview": "### Impact\n\nMermaid radar diagrams allow arbitrary large values for `ticks`, which can cause high CPU usage, freezing the webpage/JavaScript process for long periods of time, until the process is eventually killed due to OOM/running out of memory.\n\n#### Proof-of-concept\n\n```txt\nradar-beta\n  axis a, b\n  curve c {1, 1}\n  ticks 1000000000\n```\n\n### Patches\n\n_Has the problem been patched? What versions should users upgrade to?_\n\nThis problem has been patched by https://github.com/mermaid-js/mermaid/commit/59b22fad2b3bb04f87a476c84a8a2b24679e607e, which was released in [Mermaid v11.16.1](https://github.com/mermaid-js/mermaid/releases/tag/mermaid%4011.16.1)\n\n### Workarounds\n\n_Is there a way for users to fix or remediate the vulnerability without upgrading?_\n\nThere are no known workarounds without updating to a patched version of mermaid.\n\n### References\n\n_Are there any links users can visit to find out more?_\n\n- https://github.com/mermaid-js/mermaid/commit/59b22fad2b3bb04f87a476c84a8a2b24679e607e\n- https://github.com/mermaid-js/mermaid/releases/tag/mermaid%4011.16.1",
+      "reported_by": null,
+      "title": "Mermaid radar diagrams are vulnerable to DoS",
+      "metadata": null,
+      "cves": [
+        "CVE-2026-71439"
+      ],
+      "access": "public",
+      "severity": "moderate",
+      "module_name": "mermaid",
+      "vulnerable_versions": ">=11.6.0 <11.16.1",
+      "github_advisory_id": "GHSA-rhh3-jpg6-66xh",
+      "recommendation": "Upgrade to version 11.16.1 or later",
+      "patched_versions": ">=11.16.1",
+      "updated": "2026-08-06T20:01:08.000Z",
+      "cvss": {
+        "score": 0,
+        "vectorString": null
+      },
+      "cwe": [
+        "CWE-606",
+        "CWE-1322"
+      ],
+      "url": "https://github.com/advisories/GHSA-rhh3-jpg6-66xh"
+    }
+  },
+  "muted": [],
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 1,
+      "moderate": 4,
+      "high": 0,
+      "critical": 0
+    },
+    "dependencies": 515,
+    "devDependencies": 0,
+    "optionalDependencies": 0,
+    "totalDependencies": 515
+  }
+}
