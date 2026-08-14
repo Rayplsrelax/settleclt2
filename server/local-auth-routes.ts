@@ -6,6 +6,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { createOAuthState, normalizeOAuthReturnPath, verifyOAuthState } from "./_core/oauth-state";
 import { createOneTimeToken, hashPassword, hashToken, normalizeReturnPath, validateEmail, verifyPassword } from "./local-auth";
 import rateLimit from "express-rate-limit";
+import { requestNewsletterSubscription } from "./newsletter-service";
 
 const GOOGLE_NONCE_COOKIE = "settle_google_nonce";
 const STATE_TTL_MS = 10 * 60 * 1000;
@@ -95,6 +96,11 @@ export function registerLocalAuthRoutes(app: Express) {
       const user = await db.createLocalUser({ email, name, passwordHash: await hashPassword(password) });
       if (!user) return publicAuthError(res, 500, "Unable to create account");
       await createAndSendToken(user.id, email, "verify_email");
+      if (input.newsletterOptIn === true) {
+        await requestNewsletterSubscription({ email, source: "registration" }).catch(
+          () => undefined
+        );
+      }
       res.status(201).json({ ok: true, message: "Check your email to verify your account" });
     } catch (error) {
       console.error("[LocalAuth] Registration failed", error instanceof Error ? error.message : "unknown");

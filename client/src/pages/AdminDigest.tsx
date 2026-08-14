@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Mail, Sparkles, Send, Eye, Building2, Calendar, FileText, TrendingUp, Users, Loader2 } from "lucide-react";
+import { Mail, Sparkles, Eye, Building2, Calendar, FileText, TrendingUp, Users, Loader2 } from "lucide-react";
 
 export default function AdminDigest() {
   const { user, loading: authLoading } = useAuth();
@@ -28,12 +28,6 @@ export default function AdminDigest() {
     onError: (err) => toast.error(err.message),
   });
 
-  const sendMutation = trpc.digest.send.useMutation({
-    onSuccess: (data) => {
-      toast.success(`Digest notification sent! ${data.recipientCount} recipients.`);
-    },
-    onError: (err) => toast.error(err.message),
-  });
 
   if (authLoading) {
     return (
@@ -201,23 +195,9 @@ export default function AdminDigest() {
                 {showPreview ? "Hide Preview" : "Show Preview"}
               </Button>
 
-              <Button
-                size="lg"
-                variant="default"
-                className="bg-green-600 hover:bg-green-700"
-                onClick={() => sendMutation.mutate({
-                  html: generatedHtml,
-                  subject: "What's New This Month in Charlotte — Settle CLT",
-                })}
-                disabled={sendMutation.isPending}
-              >
-                {sendMutation.isPending ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4 mr-2" />
-                )}
-                {sendMutation.isPending ? "Sending..." : `Send to ${data?.totalRecipients ?? 0} Recipients`}
-              </Button>
+              <Badge variant="outline" className="px-4 py-2 text-sm">
+                Broadcast delivery is not enabled yet
+              </Badge>
             </>
           )}
         </div>

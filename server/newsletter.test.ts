@@ -2,11 +2,12 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
 
-// Mock the db module
-vi.mock("./db", () => ({
-  insertMovingQuote: vi.fn().mockResolvedValue({ success: true }),
-  insertBusinessSubmission: vi.fn().mockResolvedValue({ success: true }),
-  insertNewsletterSubscriber: vi.fn().mockResolvedValue({ success: true, alreadySubscribed: false }),
+const mockRequestNewsletterSubscription = vi.hoisted(() =>
+  vi.fn().mockResolvedValue(undefined)
+);
+
+vi.mock("./newsletter-service", () => ({
+  requestNewsletterSubscription: mockRequestNewsletterSubscription,
 }));
 
 function createPublicContext(): TrpcContext {
@@ -22,49 +23,50 @@ function createPublicContext(): TrpcContext {
   };
 }
 
+const genericResponse = {
+  success: true,
+  message: "Your subscription request was received.",
+};
+
 describe("newsletter.subscribe", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("accepts a valid email and returns success", async () => {
-    const ctx = createPublicContext();
-    const caller = appRouter.createCaller(ctx);
+  it("accepts a valid email and returns a generic response", async () => {
+    const caller = appRouter.createCaller(createPublicContext());
 
-    const result = await caller.newsletter.subscribe({
+    const result = await caller.newsletter.subscribe({ email: "test@example.com" });
+
+    expect(result).toEqual(genericResponse);
+    expect(mockRequestNewsletterSubscription).toHaveBeenCalledWith({
       email: "test@example.com",
+      source: "homepage",
     });
-
-    expect(result).toEqual({ success: true, alreadySubscribed: false });
   });
 
-  it("accepts an email with optional source", async () => {
-    const ctx = createPublicContext();
-    const caller = appRouter.createCaller(ctx);
+  it("accepts an email with an allowed source", async () => {
+    const caller = appRouter.createCaller(createPublicContext());
 
     const result = await caller.newsletter.subscribe({
       email: "test@example.com",
       source: "blog",
     });
 
-    expect(result).toEqual({ success: true, alreadySubscribed: false });
+    expect(result).toEqual(genericResponse);
+    expect(mockRequestNewsletterSubscription).toHaveBeenCalledWith({
+      email: "test@example.com",
+      source: "blog",
+    });
   });
 
   it("rejects an invalid email", async () => {
-    const ctx = createPublicContext();
-    const caller = appRouter.createCaller(ctx);
-
-    await expect(
-      caller.newsletter.subscribe({ email: "not-an-email" })
-    ).rejects.toThrow();
+    const caller = appRouter.createCaller(createPublicContext());
+    await expect(caller.newsletter.subscribe({ email: "not-an-email" })).rejects.toThrow();
   });
 
   it("rejects an empty email", async () => {
-    const ctx = createPublicContext();
-    const caller = appRouter.createCaller(ctx);
-
-    await expect(
-      caller.newsletter.subscribe({ email: "" })
-    ).rejects.toThrow();
+    const caller = appRouter.createCaller(createPublicContext());
+    await expect(caller.newsletter.subscribe({ email: "" })).rejects.toThrow();
   });
 });

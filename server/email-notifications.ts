@@ -144,7 +144,7 @@ export async function sendUserEmail(
   template: { subject: string; html: string }
 ): Promise<boolean> {
   if (!ENV.resendApiKey || !ENV.authFromEmail) {
-    console.warn(`[Email] Delivery unavailable for ${to}: email service is not configured`);
+    console.warn("[Email] Delivery unavailable: email service is not configured");
     return false;
   }
   const response = await fetch("https://api.resend.com/emails", {

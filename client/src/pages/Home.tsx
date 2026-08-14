@@ -182,13 +182,9 @@ function NewsletterSignup() {
   const [submitted, setSubmitted] = useState(false);
 
   const subscribe = trpc.newsletter.subscribe.useMutation({
-    onSuccess: data => {
+    onSuccess: () => {
       setSubmitted(true);
-      if (data.alreadySubscribed) {
-        toast.info("You're already subscribed — welcome back!");
-      } else {
-        toast.success("You're in! Check your inbox for Charlotte tips.");
-      }
+      toast.success("Your subscription request was received.");
     },
     onError: () => {
       toast.error("Something went wrong. Please try again.");
@@ -220,8 +216,8 @@ function NewsletterSignup() {
             <div className="mt-8 w-full rounded-2xl border border-primary/20 bg-primary/5 p-6">
               <div className="flex flex-col items-center gap-3">
                 <Sparkles className="w-8 h-8 text-primary" />
-                <p className="font-display font-semibold text-foreground">You're on the list!</p>
-                <p className="text-sm text-muted-foreground">Watch your inbox for Charlotte tips and local finds.</p>
+                <p className="font-display font-semibold text-foreground">Your subscription request was received</p>
+                <p className="text-sm text-muted-foreground">If eligible, confirmation instructions may be sent to the address provided.</p>
               </div>
               <div className="mt-6 border-t border-primary/15 pt-5">
                 <p className="font-display font-semibold text-foreground">Follow Settle CLT around Charlotte</p>
@@ -259,7 +255,7 @@ function NewsletterSignup() {
           )}
 
           <p className="text-xs text-muted-foreground mt-4">
-            Free forever. No spam. Unsubscribe anytime.
+            By subscribing, you agree to receive the Settle CLT newsletter. Free forever. Unsubscribe anytime.
           </p>
         </div>
       </div>
