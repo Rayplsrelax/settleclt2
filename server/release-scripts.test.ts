@@ -58,6 +58,16 @@ function runResult(script: string, ...args: string[]) {
 
 afterEach(() => {
   for (const directory of temporaryDirectories.splice(0)) {
+    spawnSync(
+      "bash",
+      [
+        "-c",
+        'chmod -R u+w -- "$1" 2>/dev/null || true',
+        "release-test-cleanup",
+        directory,
+      ],
+      { env: { ...process.env, MSYS: "winsymlinks:nativestrict" } }
+    );
     rmSync(directory, { recursive: true, force: true });
   }
 });
