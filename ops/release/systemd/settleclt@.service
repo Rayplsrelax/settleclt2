@@ -1,0 +1,24 @@
+[Unit]
+Description=Settle CLT web application (%i slot)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=agent
+Group=agent
+WorkingDirectory=/opt/settleclt2/slots/%i
+Environment=NODE_ENV=production
+EnvironmentFile=/etc/settleclt-app/web.env
+EnvironmentFile=/etc/settleclt-app/slot-%i.env
+ExecStart=/usr/bin/node dist/index.js
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=60
+TimeoutStopSec=30
+KillSignal=SIGTERM
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

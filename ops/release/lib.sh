@@ -22,3 +22,15 @@ atomic_symlink() {
 release_target() {
   printf 'releases/%s' "$1"
 }
+
+require_slot() {
+  [[ "$1" == "blue" || "$1" == "green" ]] || fail "slot must be blue or green"
+}
+
+slot_port() {
+  case "$1" in
+    blue) printf '%s' "${SLOT_PORT_BLUE:-3002}" ;;
+    green) printf '%s' "${SLOT_PORT_GREEN:-3003}" ;;
+    *) fail "slot must be blue or green" ;;
+  esac
+}
