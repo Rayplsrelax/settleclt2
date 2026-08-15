@@ -7,8 +7,7 @@ import { createServer as createViteServer } from "vite";
 import viteConfig from "../../vite.config";
 import { injectCspNonce } from "./csp-nonce";
 
-const HOME_HERO_IMAGE =
-  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/YJZXYMWOczYLllKW.jpg";
+const HOME_HERO_IMAGE = "/images/hero-charlotte-skyline.webp";
 
 export function injectRoutePreloads(template: string, requestPath: string) {
   if (requestPath !== "/") return template;

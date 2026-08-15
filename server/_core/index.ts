@@ -3,6 +3,7 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 import { createServer } from "http";
 import net from "net";
+import path from "node:path";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
@@ -10,11 +11,20 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { registerObsidianPublishRoute } from "../obsidian-publish";
 import { registerStorageProxy } from "./storageProxy";
+import { resolveStorageDirectory } from "../storage-path";
+import { validateStorageDirectory } from "../storage-filesystem";
 import { registerLocalAuthRoutes } from "../local-auth-routes";
 import { installAuthOriginGuard } from "./auth-origin";
 import { hermesRouter } from "../hermes-api";
 import { createSecurityMiddleware } from "./security";
 import { registerNewsletterRoutes } from "../newsletter-routes";
+import { loadReleaseManifest, registerReleaseRoutes } from "../release-info";
+import { registerFeatureFlagRoutes } from "../feature-flags";
+import { registerHealthRoutes } from "../health-routes";
+import {
+  createOperationalMetrics,
+  registerOperationalSummaryRoute,
+} from "../operational-metrics";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -36,8 +46,18 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 }
 
 async function startServer() {
+  const isProduction = process.env.NODE_ENV === "production";
+  const storageDirectory = resolveStorageDirectory(
+    process.env,
+    process.cwd(),
+    isProduction
+  );
+  await validateStorageDirectory(storageDirectory, !isProduction);
+
   const app = express();
-  app.set('trust proxy', 1);
+  const operationalMetrics = createOperationalMetrics();
+  app.use(operationalMetrics.middleware);
+  app.set("trust proxy", 1);
   const server = createServer(app);
 
   // Security headers must be mounted before every route, including webhooks.
@@ -47,190 +67,271 @@ async function startServer() {
       analyticsEndpoint: process.env.VITE_ANALYTICS_ENDPOINT,
     })
   );
+  registerReleaseRoutes(
+    app,
+    loadReleaseManifest(
+      process.env.RELEASE_MANIFEST_PATH ??
+        path.resolve(process.cwd(), "dist/release-manifest.json"),
+      process.env.NODE_ENV === "production"
+    )
+  );
+  registerFeatureFlagRoutes(app);
+  registerHealthRoutes(app);
+  registerOperationalSummaryRoute(app, operationalMetrics);
 
   // Stripe webhook must be BEFORE express.json() for raw body signature verification
-  app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async (req, res) => {
-    try {
-      const { constructWebhookEvent, getStripe } = await import("../stripe-helpers");
-      const {
-        activateCanonicalCheckout,
-        markCheckoutReconciliationFailed,
-        markCheckoutReconciliationSucceeded,
-        reserveCheckoutReconciliation,
-        upsertPremiumListing,
-      } = await import("../db");
-      const { processCheckoutCompletion } = await import("../stripe-checkout-completion");
-      const { getInvoiceSubscriptionId, getSubscriptionBillingUpdate } = await import("../stripe-webhook-fields");
-      const { cancelSubscriptionIfActive, reconcileRejectedCheckout } = await import("../stripe-checkout-reconciliation");
-      const sig = req.headers["stripe-signature"] as string;
-      const event = constructWebhookEvent(req.body, sig);
+  app.post(
+    "/api/stripe/webhook",
+    express.raw({ type: "application/json" }),
+    async (req, res) => {
+      try {
+        const { constructWebhookEvent, getStripe } = await import(
+          "../stripe-helpers"
+        );
+        const {
+          activateCanonicalCheckout,
+          markCheckoutReconciliationFailed,
+          markCheckoutReconciliationSucceeded,
+          reserveCheckoutReconciliation,
+          upsertPremiumListing,
+        } = await import("../db");
+        const { processCheckoutCompletion } = await import(
+          "../stripe-checkout-completion"
+        );
+        const { getInvoiceSubscriptionId, getSubscriptionBillingUpdate } =
+          await import("../stripe-webhook-fields");
+        const { cancelSubscriptionIfActive, reconcileRejectedCheckout } =
+          await import("../stripe-checkout-reconciliation");
+        const sig = req.headers["stripe-signature"] as string;
+        const event = constructWebhookEvent(req.body, sig);
 
-      // Handle test events
-      if (event.id.startsWith("evt_test_")) {
-        console.log("[Webhook] Test event detected, returning verification response");
-        return res.json({ verified: true });
-      }
-
-      console.log(`[Stripe Webhook] ${event.type} (${event.id})`);
-
-      switch (event.type) {
-        case "checkout.session.completed": {
-          const session = event.data.object as any;
-          const result = await processCheckoutCompletion(event.id, session, {
-            activateCanonicalCheckout,
-            reconcileRejectedCheckout: details => reconcileRejectedCheckout(details, {
-              reserve: reserveCheckoutReconciliation,
-              cancelSubscription: subscriptionId => cancelSubscriptionIfActive(subscriptionId, {
-                retrieve: id => getStripe().subscriptions.retrieve(id),
-                cancel: id => getStripe().subscriptions.cancel(id),
-              }),
-              markSucceeded: markCheckoutReconciliationSucceeded,
-              markFailed: markCheckoutReconciliationFailed,
-            }),
-          });
-          if (result.accepted) {
-            console.log(`[Stripe] Activated ${result.tier} tier for ${result.serviceKey}`);
-            // Notify user about successful payment
-            try {
-              const { notifyPaymentSuccess } = await import("../notification-service");
-              await notifyPaymentSuccess(result.userId, result.tier, result.serviceKey);
-            } catch (e) { console.error("[Webhook] Notification error:", e); }
-          }
-          break;
+        // Handle test events
+        if (event.id.startsWith("evt_test_")) {
+          console.log(
+            "[Webhook] Test event detected, returning verification response"
+          );
+          return res.json({ verified: true });
         }
-        case "customer.subscription.updated": {
-          const sub = event.data.object as any;
-          // Find the premium listing by subscription ID
-          const { getAllPremiumListings } = await import("../db");
-          const all = await getAllPremiumListings();
-          const listing = all.find((l: any) => l.stripeSubscriptionId === sub.id);
-          if (listing) {
-            await upsertPremiumListing(listing.serviceKey, getSubscriptionBillingUpdate(sub));
-          }
-          break;
-        }
-        case "customer.subscription.deleted": {
-          const sub = event.data.object as any;
-          const { getAllPremiumListings } = await import("../db");
-          const all = await getAllPremiumListings();
-          const listing = all.find((l: any) => l.stripeSubscriptionId === sub.id);
-          if (listing) {
-            await upsertPremiumListing(listing.serviceKey, {
-              paymentStatus: "canceled" as any,
-              tier: "basic" as any,
+
+        console.log(`[Stripe Webhook] ${event.type} (${event.id})`);
+
+        switch (event.type) {
+          case "checkout.session.completed": {
+            const session = event.data.object as any;
+            const result = await processCheckoutCompletion(event.id, session, {
+              activateCanonicalCheckout,
+              reconcileRejectedCheckout: details =>
+                reconcileRejectedCheckout(details, {
+                  reserve: reserveCheckoutReconciliation,
+                  cancelSubscription: subscriptionId =>
+                    cancelSubscriptionIfActive(subscriptionId, {
+                      retrieve: id => getStripe().subscriptions.retrieve(id),
+                      cancel: id => getStripe().subscriptions.cancel(id),
+                    }),
+                  markSucceeded: markCheckoutReconciliationSucceeded,
+                  markFailed: markCheckoutReconciliationFailed,
+                }),
             });
-            console.log(`[Stripe] Canceled subscription for ${listing.serviceKey}`);
-          }
-          break;
-        }
-        case "invoice.payment_succeeded": {
-          const invoice = event.data.object as any;
-          const subId = getInvoiceSubscriptionId(invoice);
-          if (subId) {
-            const { getAllPremiumListings } = await import("../db");
-            const all = await getAllPremiumListings();
-            const listing = all.find((l: any) => l.stripeSubscriptionId === subId);
-            if (listing) {
-              await upsertPremiumListing(listing.serviceKey, {
-                paymentStatus: "active" as any,
-              });
-              console.log(`[Stripe] Payment succeeded for ${listing.serviceKey}`);
-            }
-          }
-          break;
-        }
-        case "invoice.payment_failed": {
-          const invoice = event.data.object as any;
-          const subId = getInvoiceSubscriptionId(invoice);
-          if (subId) {
-            const { getAllPremiumListings } = await import("../db");
-            const { notifyOwner } = await import("./notification");
-            const all = await getAllPremiumListings();
-            const listing = all.find((l: any) => l.stripeSubscriptionId === subId);
-            if (listing) {
-              await upsertPremiumListing(listing.serviceKey, {
-                paymentStatus: "past_due" as any,
-              });
-              // Notify admin about failed payment
-              await notifyOwner({
-                title: `Payment Failed: ${listing.serviceKey}`,
-                content: `A subscription payment failed for business listing "${listing.serviceKey}" (${listing.billingEmail || 'unknown email'}). The listing has been marked as past_due. The customer will be retried automatically by Stripe.`,
-              });
-              console.log(`[Stripe] Payment failed for ${listing.serviceKey}`);
-              // Notify user about failed payment
+            if (result.accepted) {
+              console.log(
+                `[Stripe] Activated ${result.tier} tier for ${result.serviceKey}`
+              );
+              // Notify user about successful payment
               try {
-                if (listing.claimId) {
-                  const { getBusinessClaims } = await import("../db");
-                  const claims = await getBusinessClaims();
-                  const claim = claims.find((c: any) => c.id === listing.claimId);
-                  if (claim?.userId) {
-                    const { notifyPaymentFailed } = await import("../notification-service");
-                    await notifyPaymentFailed(claim.userId, listing.serviceKey);
-                  }
-                }
-              } catch (e) { console.error("[Webhook] Notification error:", e); }
+                const { notifyPaymentSuccess } = await import(
+                  "../notification-service"
+                );
+                await notifyPaymentSuccess(
+                  result.userId,
+                  result.tier,
+                  result.serviceKey
+                );
+              } catch (e) {
+                console.error("[Webhook] Notification error:", e);
+              }
             }
+            break;
           }
-          break;
+          case "customer.subscription.updated": {
+            const sub = event.data.object as any;
+            // Find the premium listing by subscription ID
+            const { getAllPremiumListings } = await import("../db");
+            const all = await getAllPremiumListings();
+            const listing = all.find(
+              (l: any) => l.stripeSubscriptionId === sub.id
+            );
+            if (listing) {
+              await upsertPremiumListing(
+                listing.serviceKey,
+                getSubscriptionBillingUpdate(sub)
+              );
+            }
+            break;
+          }
+          case "customer.subscription.deleted": {
+            const sub = event.data.object as any;
+            const { getAllPremiumListings } = await import("../db");
+            const all = await getAllPremiumListings();
+            const listing = all.find(
+              (l: any) => l.stripeSubscriptionId === sub.id
+            );
+            if (listing) {
+              await upsertPremiumListing(listing.serviceKey, {
+                paymentStatus: "canceled" as any,
+                tier: "basic" as any,
+              });
+              console.log(
+                `[Stripe] Canceled subscription for ${listing.serviceKey}`
+              );
+            }
+            break;
+          }
+          case "invoice.payment_succeeded": {
+            const invoice = event.data.object as any;
+            const subId = getInvoiceSubscriptionId(invoice);
+            if (subId) {
+              const { getAllPremiumListings } = await import("../db");
+              const all = await getAllPremiumListings();
+              const listing = all.find(
+                (l: any) => l.stripeSubscriptionId === subId
+              );
+              if (listing) {
+                await upsertPremiumListing(listing.serviceKey, {
+                  paymentStatus: "active" as any,
+                });
+                console.log(
+                  `[Stripe] Payment succeeded for ${listing.serviceKey}`
+                );
+              }
+            }
+            break;
+          }
+          case "invoice.payment_failed": {
+            const invoice = event.data.object as any;
+            const subId = getInvoiceSubscriptionId(invoice);
+            if (subId) {
+              const { getAllPremiumListings } = await import("../db");
+              const { notifyOwner } = await import("./notification");
+              const all = await getAllPremiumListings();
+              const listing = all.find(
+                (l: any) => l.stripeSubscriptionId === subId
+              );
+              if (listing) {
+                await upsertPremiumListing(listing.serviceKey, {
+                  paymentStatus: "past_due" as any,
+                });
+                // Notify admin about failed payment
+                await notifyOwner({
+                  title: `Payment Failed: ${listing.serviceKey}`,
+                  content: `A subscription payment failed for business listing "${listing.serviceKey}" (${listing.billingEmail || "unknown email"}). The listing has been marked as past_due. The customer will be retried automatically by Stripe.`,
+                });
+                console.log(
+                  `[Stripe] Payment failed for ${listing.serviceKey}`
+                );
+                // Notify user about failed payment
+                try {
+                  if (listing.claimId) {
+                    const { getBusinessClaims } = await import("../db");
+                    const claims = await getBusinessClaims();
+                    const claim = claims.find(
+                      (c: any) => c.id === listing.claimId
+                    );
+                    if (claim?.userId) {
+                      const { notifyPaymentFailed } = await import(
+                        "../notification-service"
+                      );
+                      await notifyPaymentFailed(
+                        claim.userId,
+                        listing.serviceKey
+                      );
+                    }
+                  }
+                } catch (e) {
+                  console.error("[Webhook] Notification error:", e);
+                }
+              }
+            }
+            break;
+          }
         }
-      }
 
-      res.json({ received: true });
-    } catch (err: any) {
-      console.error("[Stripe Webhook] Error:", err.message);
-      res.status(400).json({ error: err.message });
+        res.json({ received: true });
+      } catch (err: any) {
+        console.error("[Stripe Webhook] Error:", err.message);
+        res.status(400).json({ error: err.message });
+      }
     }
-  });
+  );
 
   // ── Obsidian → Settle CLT publish webhook ─────────────────────────────────
   // Accepts POST /api/obsidian/publish with a shared secret in the Authorization
   // header. Called by GitHub Actions when a note tagged `publish: true` is
   // pushed to the vault repo. Creates or updates a blog post by slug.
-  app.post("/api/obsidian/publish", express.json({ limit: "2mb" }), async (req, res) => {
-    try {
-      const secret = process.env.OBSIDIAN_PUBLISH_SECRET;
-      if (!secret) {
-        console.error("[Obsidian Webhook] OBSIDIAN_PUBLISH_SECRET not set");
-        return res.status(500).json({ error: "Server misconfiguration" });
+  app.post(
+    "/api/obsidian/publish",
+    express.json({ limit: "2mb" }),
+    async (req, res) => {
+      try {
+        const secret = process.env.OBSIDIAN_PUBLISH_SECRET;
+        if (!secret) {
+          console.error("[Obsidian Webhook] OBSIDIAN_PUBLISH_SECRET not set");
+          return res.status(500).json({ error: "Server misconfiguration" });
+        }
+        const authHeader = req.headers["authorization"] || "";
+        const token = authHeader.startsWith("Bearer ")
+          ? authHeader.slice(7)
+          : "";
+        if (token !== secret) {
+          console.warn("[Obsidian Webhook] Unauthorized attempt");
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        const {
+          slug,
+          title,
+          content,
+          excerpt,
+          category,
+          coverImage,
+          status,
+          readTime,
+          publishedAt,
+        } = req.body;
+        if (!slug || !title || !content) {
+          return res
+            .status(400)
+            .json({ error: "Missing required fields: slug, title, content" });
+        }
+
+        const { upsertBlogPostFromWebhook } = await import("../db");
+        const post = await upsertBlogPostFromWebhook({
+          slug,
+          title,
+          content,
+          excerpt: excerpt || null,
+          category: category || "Charlotte Guide",
+          coverImage: coverImage || null,
+          status: status === "draft" ? "draft" : "published",
+          readTime: readTime || null,
+          publishedAt: publishedAt ? new Date(publishedAt) : new Date(),
+        });
+
+        console.log(
+          `[Obsidian Webhook] Upserted post: ${slug} (${post.action})`
+        );
+        const { notifyOwner } = await import("./notification");
+        await notifyOwner({
+          title: `📝 Blog post ${post.action}: "${title}"`,
+          content: `Obsidian pipeline published "${title}" (/${slug}) — status: ${status || "published"}.`,
+        });
+
+        res.json({ ok: true, action: post.action, slug });
+      } catch (err: any) {
+        console.error("[Obsidian Webhook] Error:", err.message);
+        res.status(500).json({ error: err.message });
       }
-      const authHeader = req.headers["authorization"] || "";
-      const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-      if (token !== secret) {
-        console.warn("[Obsidian Webhook] Unauthorized attempt");
-        return res.status(401).json({ error: "Unauthorized" });
-      }
-
-      const { slug, title, content, excerpt, category, coverImage, status, readTime, publishedAt } = req.body;
-      if (!slug || !title || !content) {
-        return res.status(400).json({ error: "Missing required fields: slug, title, content" });
-      }
-
-      const { upsertBlogPostFromWebhook } = await import("../db");
-      const post = await upsertBlogPostFromWebhook({
-        slug,
-        title,
-        content,
-        excerpt: excerpt || null,
-        category: category || "Charlotte Guide",
-        coverImage: coverImage || null,
-        status: status === "draft" ? "draft" : "published",
-        readTime: readTime || null,
-        publishedAt: publishedAt ? new Date(publishedAt) : new Date(),
-      });
-
-      console.log(`[Obsidian Webhook] Upserted post: ${slug} (${post.action})`); 
-      const { notifyOwner } = await import("./notification");
-      await notifyOwner({
-        title: `📝 Blog post ${post.action}: "${title}"`,
-        content: `Obsidian pipeline published "${title}" (/${slug}) — status: ${status || 'published'}.`,
-      });
-
-      res.json({ ok: true, action: post.action, slug });
-    } catch (err: any) {
-      console.error("[Obsidian Webhook] Error:", err.message);
-      res.status(500).json({ error: err.message });
     }
-  });
+  );
 
   // SEO: Tell search engines not to index the manus.space subdomain
   app.use((req, res, next) => {
@@ -251,7 +352,10 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "1mb", extended: true }));
   // Upload-specific routes that need a larger body limit
   app.use("/api/trpc/storage", express.json({ limit: "50mb" }));
-  app.use("/api/trpc/businessPortal.uploadPhotoFile", express.json({ limit: "10mb" }));
+  app.use(
+    "/api/trpc/businessPortal.uploadPhotoFile",
+    express.json({ limit: "10mb" })
+  );
   app.use("/api/upload", express.json({ limit: "50mb" }));
   // Rate limiting for all API endpoints, including authentication routes.
   const apiLimiter = rateLimit({
@@ -280,7 +384,6 @@ async function startServer() {
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: "Too many submissions, please try again later." },
-
   });
 
   // Apply form limiter to mutation-heavy tRPC paths
@@ -328,41 +431,118 @@ async function startServer() {
 
     // Directory category pages (e.g., /directory/category/restaurants)
     const directoryCategories = [
-      "moving-companies", "storage", "utilities", "internet", "insurance",
-      "dmv", "government", "banking", "tax", "legal",
-      "plumbers", "electricians", "hvac", "roofing", "handyman",
-      "pressure-washing", "lawn", "tree", "fencing", "tv-mounting",
-      "pest", "cleaning", "dumpster",
-      "barbers", "salons", "makeup", "photographers", "chefs",
-      "grocery", "healthcare", "fitness", "auto", "childcare", "pets",
-      "restaurants", "breweries", "coffee-shops", "food-trucks",
-      "attractions", "community", "coworking", "beauty-booking",
-      "nightlife", "outdoor-parks", "tours-experiences", "art-culture",
-      "live-music", "yoga-wellness", "sports-recreation", "kids-activities",
-      "date-night", "classes-workshops", "shopping-boutiques", "wedding-events"
+      "moving-companies",
+      "storage",
+      "utilities",
+      "internet",
+      "insurance",
+      "dmv",
+      "government",
+      "banking",
+      "tax",
+      "legal",
+      "plumbers",
+      "electricians",
+      "hvac",
+      "roofing",
+      "handyman",
+      "pressure-washing",
+      "lawn",
+      "tree",
+      "fencing",
+      "tv-mounting",
+      "pest",
+      "cleaning",
+      "dumpster",
+      "barbers",
+      "salons",
+      "makeup",
+      "photographers",
+      "chefs",
+      "grocery",
+      "healthcare",
+      "fitness",
+      "auto",
+      "childcare",
+      "pets",
+      "restaurants",
+      "breweries",
+      "coffee-shops",
+      "food-trucks",
+      "attractions",
+      "community",
+      "coworking",
+      "beauty-booking",
+      "nightlife",
+      "outdoor-parks",
+      "tours-experiences",
+      "art-culture",
+      "live-music",
+      "yoga-wellness",
+      "sports-recreation",
+      "kids-activities",
+      "date-night",
+      "classes-workshops",
+      "shopping-boutiques",
+      "wedding-events",
     ];
 
     // Neighborhood pages
     const neighborhoodIds = [
-      "south-end", "noda", "dilworth", "ballantyne", "plaza-midwood",
-      "uptown", "myers-park", "university-city", "southpark", "elizabeth",
-      "loso", "east-charlotte", "south-charlotte", "west-charlotte",
-      "huntersville", "lake-norman", "matthews", "concord", "fort-mill", "pineville"
+      "south-end",
+      "noda",
+      "dilworth",
+      "ballantyne",
+      "plaza-midwood",
+      "uptown",
+      "myers-park",
+      "university-city",
+      "southpark",
+      "elizabeth",
+      "loso",
+      "east-charlotte",
+      "south-charlotte",
+      "west-charlotte",
+      "huntersville",
+      "lake-norman",
+      "matthews",
+      "concord",
+      "fort-mill",
+      "pineville",
     ];
 
     // Event category landing pages (recurring community events)
     const eventCategories = [
-      "run-walk", "yoga-fitness", "farmers-markets", "game-nights",
-      "veteran", "music-jam", "kids-storytime", "meditation",
-      "dog-meetups", "makers-crafts", "community", "neighborhood",
-      "professional", "festivals", "sports", "family"
+      "run-walk",
+      "yoga-fitness",
+      "farmers-markets",
+      "game-nights",
+      "veteran",
+      "music-jam",
+      "kids-storytime",
+      "meditation",
+      "dog-meetups",
+      "makers-crafts",
+      "community",
+      "neighborhood",
+      "professional",
+      "festivals",
+      "sports",
+      "family",
     ];
 
     // Individual business detail pages (700+ URLs)
     const { SERVICES: allServices } = await import("../../shared/services");
-    const businessSlugs = Array.from(new Set(allServices.map((s: { name: string }) =>
-      s.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-    )));
+    const businessSlugs = Array.from(
+      new Set(
+        allServices.map((s: { name: string }) =>
+          s.name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, "")
+        )
+      )
+    );
 
     // Blog slugs from DB
     let blogSlugs: string[] = [];
@@ -372,10 +552,15 @@ async function startServer() {
       const { eq } = await import("drizzle-orm");
       const db = await getDb();
       if (db) {
-        const posts = await db.select({ slug: blogPosts.slug }).from(blogPosts).where(eq(blogPosts.status, "published"));
+        const posts = await db
+          .select({ slug: blogPosts.slug })
+          .from(blogPosts)
+          .where(eq(blogPosts.status, "published"));
         blogSlugs = posts.map((p: { slug: string }) => p.slug);
       }
-    } catch { /* fallback: no DB blog posts */ }
+    } catch {
+      /* fallback: no DB blog posts */
+    }
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
     xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
@@ -419,7 +604,7 @@ async function startServer() {
       return res.send(`User-agent: *\nDisallow: /\n`);
     }
     res.send(
-`User-agent: *
+      `User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /api/
@@ -441,15 +626,22 @@ Sitemap: https://settleclt.com/sitemap.xml
   }
 
   const preferredPort = parseInt(process.env.PORT || "3000");
-  const port = await findAvailablePort(preferredPort);
+  const releaseSlot = process.env.RELEASE_SLOT;
+  const port = releaseSlot
+    ? preferredPort
+    : await findAvailablePort(preferredPort);
 
-  if (port !== preferredPort) {
+  if (!releaseSlot && port !== preferredPort) {
     console.log(`Port ${preferredPort} is busy, using port ${port} instead`);
   }
 
-  server.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}/`);
+  const host = process.env.HOST || "0.0.0.0";
+  server.listen(port, host, () => {
+    console.log(`Server running on http://${host}:${port}/`);
   });
 }
 
-startServer().catch(console.error);
+startServer().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});

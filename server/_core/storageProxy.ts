@@ -1,13 +1,16 @@
 import type { Express } from "express";
 import path from "path";
-import fs from "fs";
+import { resolveStorageDirectory } from "../storage-path";
+import { openExistingStorageFile } from "../storage-filesystem";
 
 /**
  * Storage proxy — serves files from the local filesystem.
  *
  * Originally proxied to Manus Forge API for presigned URLs. After migration
  * to self-hosted infrastructure, blog cover images and other stored assets
- * are served directly from `public/manus-storage/` on disk.
+ * are served from the configured persistent storage directory. Production
+ * requires SETTLECLT_STORAGE_DIR; development defaults to
+ * `public/manus-storage/` on disk.
  *
  * New uploads via `storagePut()` also write to this directory, so the
  * `/manus-storage/*` route handles both legacy blog covers and new
@@ -21,25 +24,22 @@ export function registerStorageProxy(app: Express) {
       return;
     }
 
-    // Normalize the key while preserving valid path segments
-    const normalizedKey = path.normalize(key).replace(/^[/\\]+/, "");
-    const storageDir = path.resolve(
+    const storageDir = resolveStorageDirectory(
+      process.env,
       process.cwd(),
-      "public",
-      "manus-storage",
+      process.env.NODE_ENV === "production"
     );
-    const filePath = path.resolve(storageDir, normalizedKey);
-
-    // Ensure the resolved path is still inside the storage directory
-    if (!filePath.startsWith(storageDir + path.sep)) {
-      res.status(403).send("Forbidden");
-      return;
-    }
-
+    let filePath: string;
+    let fileHandle: import("node:fs").promises.FileHandle;
     try {
-      await fs.promises.access(filePath, fs.constants.F_OK);
-    } catch {
-      res.status(404).send("File not found");
+      const opened = await openExistingStorageFile(storageDir, key);
+      filePath = opened.path;
+      fileHandle = opened.handle;
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      res
+        .status(code === "ENOENT" ? 404 : 403)
+        .send(code === "ENOENT" ? "File not found" : "Forbidden");
       return;
     }
 
@@ -56,12 +56,16 @@ export function registerStorageProxy(app: Express) {
     res.set("Content-Type", contentTypes[ext] || "application/octet-stream");
     res.set("Cache-Control", "public, max-age=31536000, immutable");
 
-    const stream = fs.createReadStream(filePath);
-    stream.on("error", (err) => {
+    const stream = fileHandle.createReadStream();
+    stream.on("error", async err => {
       console.error("[StorageProxy] stream error:", err);
+      await fileHandle.close().catch(() => undefined);
       if (!res.headersSent) {
         res.status(500).send("Error reading file");
       }
+    });
+    stream.on("close", () => {
+      void fileHandle.close().catch(() => undefined);
     });
     stream.pipe(res);
   });

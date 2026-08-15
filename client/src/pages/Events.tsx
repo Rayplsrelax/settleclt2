@@ -1,7 +1,19 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { Calendar, CalendarPlus, MapPin, ExternalLink, Clock, Filter, Tag, Navigation, Search, X, CalendarRange } from "lucide-react";
+import {
+  Calendar,
+  CalendarPlus,
+  MapPin,
+  ExternalLink,
+  Clock,
+  Filter,
+  Tag,
+  Navigation,
+  Search,
+  X,
+  CalendarRange,
+} from "lucide-react";
 import PageLayout from "@/components/PageLayout";
 import ShareButtons from "@/components/ShareButtons";
 import QuickStampButton from "@/components/QuickStampButton";
@@ -11,7 +23,11 @@ import { Input } from "@/components/ui/input";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import { useSEO } from "@/hooks/useSEO";
 import { trackEventAction } from "@/lib/mixpanel";
-import { useStructuredData, buildEventSchema, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
+import {
+  useStructuredData,
+  buildEventSchema,
+  buildBreadcrumbSchema,
+} from "@/hooks/useStructuredData";
 import {
   Dialog,
   DialogContent,
@@ -96,36 +112,50 @@ const CATEGORY_EMOJI: Record<string, string> = {
   professional: "🤝",
 };
 
-function formatDate(date: Date | string) {
-  const d = new Date(date);
+const CHARLOTTE_TIME_ZONE = "America/New_York";
+
+function parseEventDate(value: Date | string | null | undefined): Date | null {
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function formatDate(date: Date | string | null | undefined) {
+  const d = parseEventDate(date);
+  if (!d) return "Date TBA";
   return d.toLocaleDateString("en-US", {
     weekday: "short",
     month: "short",
     day: "numeric",
+    timeZone: CHARLOTTE_TIME_ZONE,
   });
 }
 
-function formatTime(date: Date | string) {
-  const d = new Date(date);
+function formatTime(date: Date | string | null | undefined) {
+  const d = parseEventDate(date);
+  if (!d) return "Time TBA";
   return d.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
+    timeZone: CHARLOTTE_TIME_ZONE,
   });
 }
 
-function formatFullDate(date: Date | string) {
-  const d = new Date(date);
+function formatFullDate(date: Date | string | null | undefined) {
+  const d = parseEventDate(date);
+  if (!d) return "Date TBA";
   return d.toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
     year: "numeric",
+    timeZone: CHARLOTTE_TIME_ZONE,
   });
 }
 
 function getCategoryLabel(value: string) {
-  return CATEGORIES.find((c) => c.value === value)?.label ?? value;
+  return CATEGORIES.find(c => c.value === value)?.label ?? value;
 }
 
 type EventType = {
@@ -145,7 +175,17 @@ type EventType = {
   isRecurring: string;
 };
 
-function EventCard({ event, onClick, onCategoryClick, onNeighborhoodClick }: { event: EventType; onClick: () => void; onCategoryClick?: (category: string) => void; onNeighborhoodClick?: (neighborhood: string) => void }) {
+function EventCard({
+  event,
+  onClick,
+  onCategoryClick,
+  onNeighborhoodClick,
+}: {
+  event: EventType;
+  onClick: () => void;
+  onCategoryClick?: (category: string) => void;
+  onNeighborhoodClick?: (neighborhood: string) => void;
+}) {
   return (
     <button
       onClick={onClick}
@@ -153,7 +193,8 @@ function EventCard({ event, onClick, onCategoryClick, onNeighborhoodClick }: { e
     >
       {event.imageUrl && (
         <div className="h-40 overflow-hidden">
-          <img loading="lazy"
+          <img
+            loading="lazy"
             src={event.imageUrl}
             alt={`${event.title} - Charlotte NC event`}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -167,11 +208,14 @@ function EventCard({ event, onClick, onCategoryClick, onNeighborhoodClick }: { e
               variant="outline"
               className={`text-xs font-medium ${CATEGORY_COLORS[event.category] ?? "bg-gray-100 text-gray-800"}`}
             >
-              {CATEGORY_EMOJI[event.category]} {getCategoryLabel(event.category)}
+              {CATEGORY_EMOJI[event.category]}{" "}
+              {getCategoryLabel(event.category)}
             </Badge>
-
           </div>
-          <QuickStampButton eventSlug={event.slug} area={event.neighborhood ?? undefined} />
+          <QuickStampButton
+            eventSlug={event.slug}
+            area={event.neighborhood ?? undefined}
+          />
         </div>
 
         <h3 className="font-display font-bold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-2">
@@ -195,7 +239,7 @@ function EventCard({ event, onClick, onCategoryClick, onNeighborhoodClick }: { e
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-medium no-underline transition-colors shrink-0"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={e => e.stopPropagation()}
                 >
                   <Navigation className="w-3 h-3" /> Directions
                 </a>
@@ -205,7 +249,7 @@ function EventCard({ event, onClick, onCategoryClick, onNeighborhoodClick }: { e
           {event.neighborhood && (
             <div
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary cursor-pointer transition-colors"
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation();
                 onNeighborhoodClick?.(event.neighborhood!);
               }}
@@ -229,8 +273,10 @@ function EventCard({ event, onClick, onCategoryClick, onNeighborhoodClick }: { e
 export default function Events() {
   useSEO({
     title: "Charlotte Events This Week & Weekend: Things to Do in CLT (2026)",
-    description: "Your complete Charlotte events calendar. Find concerts, festivals, sports, food events, family activities, and things to do in Charlotte NC this week and weekend.",
-    keywords: "Charlotte events, events in Charlotte NC, things to do in Charlotte this weekend, Charlotte events this weekend, Charlotte concerts, Charlotte festivals, what to do in Charlotte",
+    description:
+      "Your complete Charlotte events calendar. Find concerts, festivals, sports, food events, family activities, and things to do in Charlotte NC this week and weekend.",
+    keywords:
+      "Charlotte events, events in Charlotte NC, things to do in Charlotte this weekend, Charlotte events this weekend, Charlotte concerts, Charlotte festivals, what to do in Charlotte",
     path: "/events",
   });
 
@@ -245,9 +291,10 @@ export default function Events() {
   const [newcomerFriendlyOnly, setNewcomerFriendlyOnly] = useState(false);
   const { trackClickByName } = useTagTrackingWithLookup();
 
-  const { data: allEvents, isLoading } = trpc.events.getPublished.useQuery(
-    selectedCategory ? { category: selectedCategory } : undefined
-  );
+  const { data: allEvents, isLoading } = trpc.events.getPublished.useQuery({
+    includeExpired: true,
+    ...(selectedCategory ? { category: selectedCategory } : {}),
+  });
 
   const events = allEvents ?? [];
 
@@ -255,10 +302,12 @@ export default function Events() {
   useEffect(() => {
     if (!allEvents || allEvents.length === 0) return;
     const params = new URLSearchParams(window.location.search);
-    const highlightSlug = params.get('highlight');
-    const highlightId = params.get('event');
+    const highlightSlug = params.get("highlight");
+    const highlightId = params.get("event");
     if (highlightSlug) {
-      const found = allEvents.find((e: any) => e.slug === highlightSlug || String(e.id) === highlightSlug);
+      const found = allEvents.find(
+        (e: any) => e.slug === highlightSlug || String(e.id) === highlightSlug
+      );
       if (found) setSelectedEvent(found as EventType);
     } else if (highlightId) {
       const found = allEvents.find((e: any) => String(e.id) === highlightId);
@@ -271,15 +320,18 @@ export default function Events() {
     if (!allEvents) return null;
     const now = new Date();
     const upcoming = allEvents
-      .filter((e) => e.startDate ? new Date(e.startDate) >= now : false)
+      .filter(e => (e.startDate ? new Date(e.startDate) >= now : false))
       .slice(0, 10);
     if (upcoming.length === 0) return null;
     return [
-      { "@context": "https://schema.org", ...buildBreadcrumbSchema([
-        { name: "Home", url: "https://settleclt.com" },
-        { name: "Events", url: "https://settleclt.com/events" },
-      ]) },
-      ...upcoming.map((e) => ({
+      {
+        "@context": "https://schema.org",
+        ...buildBreadcrumbSchema([
+          { name: "Home", url: "https://settleclt.com" },
+          { name: "Events", url: "https://settleclt.com/events" },
+        ]),
+      },
+      ...upcoming.map(e => ({
         "@context": "https://schema.org",
         ...buildEventSchema({
           title: e.title || e.name || "Untitled Event",
@@ -296,7 +348,8 @@ export default function Events() {
   }, [allEvents]);
   useStructuredData(eventsForSchema);
 
-  const hasActiveFilters = searchQuery || dateFrom || dateTo || recurringOnly || newcomerFriendlyOnly;
+  const hasActiveFilters =
+    searchQuery || dateFrom || dateTo || recurringOnly || newcomerFriendlyOnly;
 
   const openEvent = useCallback((event: EventType, surface: string) => {
     trackEventAction("event_view", {
@@ -323,7 +376,9 @@ export default function Events() {
   const filteredEvents = useMemo(() => {
     let result = [...events];
     if (recurringOnly) {
-      result = result.filter((e: any) => e.type === "recurring" || e.isRecurring === "yes");
+      result = result.filter(
+        (e: any) => e.type === "recurring" || e.isRecurring === "yes"
+      );
     }
     if (newcomerFriendlyOnly) {
       result = result.filter((e: any) => e.newcomerFriendly === true);
@@ -331,7 +386,7 @@ export default function Events() {
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
-        (e) =>
+        e =>
           (e.title || e.name || "").toLowerCase().includes(q) ||
           (e.description && e.description.toLowerCase().includes(q)) ||
           (e.neighborhood && e.neighborhood.toLowerCase().includes(q)) ||
@@ -341,30 +396,51 @@ export default function Events() {
     if (dateFrom) {
       const from = new Date(dateFrom);
       from.setHours(0, 0, 0, 0);
-      result = result.filter((e) => e.startDate ? new Date(e.startDate) >= from : false);
+      result = result.filter(e =>
+        e.startDate ? new Date(e.startDate) >= from : false
+      );
     }
     if (dateTo) {
       const to = new Date(dateTo);
       to.setHours(23, 59, 59, 999);
-      result = result.filter((e) => e.startDate ? new Date(e.startDate) <= to : false);
+      result = result.filter(e =>
+        e.startDate ? new Date(e.startDate) <= to : false
+      );
     }
     return result;
-  }, [events, searchQuery, dateFrom, dateTo, recurringOnly, newcomerFriendlyOnly]);
+  }, [
+    events,
+    searchQuery,
+    dateFrom,
+    dateTo,
+    recurringOnly,
+    newcomerFriendlyOnly,
+  ]);
 
   const upcomingEvents = useMemo(() => {
     const now = new Date();
-    return filteredEvents.filter((e) => e.startDate ? new Date(e.startDate) >= now : false);
+    return filteredEvents.filter(event => {
+      const start = parseEventDate(event.startDate);
+      const end = parseEventDate(event.endDate);
+      if (end) return end >= now;
+      if (start) {
+        // No end date: treat as live for 24h after start.
+        return start.getTime() + 24 * 60 * 60 * 1000 >= now.getTime();
+      }
+      return false;
+    });
   }, [filteredEvents]);
 
   const pastEvents = useMemo(() => {
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    return filteredEvents.filter((e) => {
-      if (!e.startDate) return false;
-      const start = new Date(e.startDate);
-      return start < now && start >= thirtyDaysAgo;
+    const upcomingIds = new Set(upcomingEvents.map(event => event.id));
+    return filteredEvents.filter(event => {
+      if (upcomingIds.has(event.id)) return false;
+      const start = parseEventDate(event.startDate);
+      return start !== null && start < now && start >= thirtyDaysAgo;
     });
-  }, [filteredEvents]);
+  }, [filteredEvents, upcomingEvents]);
 
   return (
     <PageLayout>
@@ -372,7 +448,10 @@ export default function Events() {
       <section className="relative bg-gradient-to-br from-primary/10 via-background to-primary/5 py-16 sm:py-20">
         <div className="container">
           <div className="max-w-2xl">
-            <Badge variant="outline" className="mb-4 text-primary border-primary/30">
+            <Badge
+              variant="outline"
+              className="mb-4 text-primary border-primary/30"
+            >
               <Calendar className="w-3.5 h-3.5 mr-1.5" />
               Charlotte Events
             </Badge>
@@ -386,12 +465,22 @@ export default function Events() {
             </p>
             <div className="mt-6 flex items-center gap-3">
               <Link href="/submit-event">
-                <Button className="bg-primary text-primary-foreground font-semibold" onClick={() => trackEventAction("submit_event_click", { surface: "events_hero" })}>
+                <Button
+                  className="bg-primary text-primary-foreground font-semibold"
+                  onClick={() =>
+                    trackEventAction("submit_event_click", {
+                      surface: "events_hero",
+                    })
+                  }
+                >
                   <CalendarPlus className="w-4 h-4 mr-2" />
                   Submit an Event
                 </Button>
               </Link>
-              <ShareButtons title="Charlotte Events - Settle CLT" description="Discover what's happening in Charlotte" />
+              <ShareButtons
+                title="Charlotte Events - Settle CLT"
+                description="Discover what's happening in Charlotte"
+              />
             </div>
           </div>
         </div>
@@ -404,10 +493,17 @@ export default function Events() {
             Things to Do in Charlotte, NC This Week & Weekend
           </h2>
           <p className="text-sm text-muted-foreground leading-relaxed mb-2">
-            Looking for things to do in Charlotte this weekend? Settle CLT's events calendar covers everything happening in the Queen City — from live concerts and music festivals to family-friendly activities, free community events, food and drink experiences, professional sports games, and seasonal festivals.
+            Looking for things to do in Charlotte this weekend? Settle CLT's
+            events calendar covers everything happening in the Queen City — from
+            live concerts and music festivals to family-friendly activities,
+            free community events, food and drink experiences, professional
+            sports games, and seasonal festivals.
           </p>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Whether you just moved to Charlotte or you're a lifelong local, use this page to find Charlotte events this week, plan your weekend, and discover new experiences across every neighborhood. Filter by date, category, or search for specific venues and artists.
+            Whether you just moved to Charlotte or you're a lifelong local, use
+            this page to find Charlotte events this week, plan your weekend, and
+            discover new experiences across every neighborhood. Filter by date,
+            category, or search for specific venues and artists.
           </p>
         </div>
       </section>
@@ -424,10 +520,13 @@ export default function Events() {
                 aria-label="Search events, venues, and neighborhoods"
                 placeholder="Search events, venues, neighborhoods..."
                 value={searchQuery}
-                onChange={(e) => {
+                onChange={e => {
                   setSearchQuery(e.target.value);
                   if (e.target.value.trim().length >= 3) {
-                    trackEventAction("search", { search_query: e.target.value.trim(), surface: "events_search" });
+                    trackEventAction("search", {
+                      search_query: e.target.value.trim(),
+                      surface: "events_search",
+                    });
                   }
                 }}
                 className="pl-9 pr-9 h-9 text-sm"
@@ -449,7 +548,9 @@ export default function Events() {
               aria-expanded={showFilters}
               aria-controls="events-date-filters"
               className={`gap-1.5 shrink-0 ${
-                showFilters || hasActiveFilters ? "border-primary text-primary" : ""
+                showFilters || hasActiveFilters
+                  ? "border-primary text-primary"
+                  : ""
               }`}
             >
               <CalendarRange className="w-4 h-4" />
@@ -473,24 +574,37 @@ export default function Events() {
 
           {/* Date range picker (collapsible) */}
           {showFilters && (
-            <div id="events-date-filters" className="flex items-center gap-3 flex-wrap">
+            <div
+              id="events-date-filters"
+              className="flex items-center gap-3 flex-wrap"
+            >
               <div className="flex items-center gap-2">
-                <label htmlFor="events-date-from" className="text-xs font-medium text-muted-foreground">From</label>
+                <label
+                  htmlFor="events-date-from"
+                  className="text-xs font-medium text-muted-foreground"
+                >
+                  From
+                </label>
                 <Input
                   id="events-date-from"
                   type="date"
                   value={dateFrom}
-                  onChange={(e) => setDateFrom(e.target.value)}
+                  onChange={e => setDateFrom(e.target.value)}
                   className="h-8 text-sm w-40"
                 />
               </div>
               <div className="flex items-center gap-2">
-                <label htmlFor="events-date-to" className="text-xs font-medium text-muted-foreground">To</label>
+                <label
+                  htmlFor="events-date-to"
+                  className="text-xs font-medium text-muted-foreground"
+                >
+                  To
+                </label>
                 <Input
                   id="events-date-to"
                   type="date"
                   value={dateTo}
-                  onChange={(e) => setDateTo(e.target.value)}
+                  onChange={e => setDateTo(e.target.value)}
                   className="h-8 text-sm w-40"
                 />
               </div>
@@ -498,7 +612,10 @@ export default function Events() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => { setDateFrom(""); setDateTo(""); }}
+                  onClick={() => {
+                    setDateFrom("");
+                    setDateTo("");
+                  }}
                   className="text-xs text-muted-foreground h-8"
                 >
                   Clear dates
@@ -536,15 +653,18 @@ export default function Events() {
           {/* Category pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
             <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
-            {CATEGORIES.map((cat) => (
+            {CATEGORIES.map(cat => (
               <button
                 key={cat.value}
                 aria-pressed={selectedCategory === cat.value}
                 onClick={() => {
                   setSelectedCategory(cat.value);
                   if (cat.value) {
-                    trackClickByName(cat.value, 'event-filter');
-                    trackEventAction("filter_click", { category: cat.value, surface: "events_category_pills" });
+                    trackClickByName(cat.value, "event-filter");
+                    trackEventAction("filter_click", {
+                      category: cat.value,
+                      surface: "events_category_pills",
+                    });
                   }
                 }}
                 className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
@@ -553,8 +673,7 @@ export default function Events() {
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
                 }`}
               >
-                {cat.value && CATEGORY_EMOJI[cat.value]}{" "}
-                {cat.label}
+                {cat.value && CATEGORY_EMOJI[cat.value]} {cat.label}
               </button>
             ))}
           </div>
@@ -593,14 +712,18 @@ export default function Events() {
                   : "Events are coming soon! Check back for concerts, festivals, food events, and more happening in Charlotte."}
             </p>
             {hasActiveFilters && (
-              <Button variant="outline" size="sm" onClick={clearAllFilters} className="mt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearAllFilters}
+                className="mt-4"
+              >
                 Clear all filters
               </Button>
             )}
           </div>
         ) : (
           <div className="space-y-12">
-
             {/* Upcoming Events */}
             {upcomingEvents.length > 0 && (
               <div>
@@ -611,13 +734,19 @@ export default function Events() {
                   </span>
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {upcomingEvents.map((event) => (
+                  {upcomingEvents.map(event => (
                     <EventCard
                       key={event.id}
                       event={event as EventType}
-                      onClick={() => openEvent(event as EventType, "upcoming_grid")}
-                      onCategoryClick={(cat) => trackClickByName(cat, 'event-card')}
-                      onNeighborhoodClick={(n) => trackClickByName(n, 'event-card')}
+                      onClick={() =>
+                        openEvent(event as EventType, "upcoming_grid")
+                      }
+                      onCategoryClick={cat =>
+                        trackClickByName(cat, "event-card")
+                      }
+                      onNeighborhoodClick={n =>
+                        trackClickByName(n, "event-card")
+                      }
                     />
                   ))}
                 </div>
@@ -631,13 +760,17 @@ export default function Events() {
                   Past Events
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-70">
-                  {pastEvents.slice(0, 6).map((event) => (
+                  {pastEvents.slice(0, 6).map(event => (
                     <EventCard
                       key={event.id}
                       event={event as EventType}
                       onClick={() => openEvent(event as EventType, "past_grid")}
-                      onCategoryClick={(cat) => trackClickByName(cat, 'event-card')}
-                      onNeighborhoodClick={(n) => trackClickByName(n, 'event-card')}
+                      onCategoryClick={cat =>
+                        trackClickByName(cat, "event-card")
+                      }
+                      onNeighborhoodClick={n =>
+                        trackClickByName(n, "event-card")
+                      }
                     />
                   ))}
                 </div>
@@ -650,7 +783,7 @@ export default function Events() {
       {/* Event Detail Dialog */}
       <Dialog
         open={!!selectedEvent}
-        onOpenChange={(open) => !open && setSelectedEvent(null)}
+        onOpenChange={open => !open && setSelectedEvent(null)}
       >
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           {selectedEvent && (
@@ -664,7 +797,6 @@ export default function Events() {
                     {CATEGORY_EMOJI[selectedEvent.category]}{" "}
                     {getCategoryLabel(selectedEvent.category)}
                   </Badge>
-
                 </div>
                 <DialogTitle className="font-display text-xl">
                   {selectedEvent.title}
@@ -672,7 +804,8 @@ export default function Events() {
               </DialogHeader>
 
               {selectedEvent.imageUrl && (
-                <img loading="lazy"
+                <img
+                  loading="lazy"
                   src={selectedEvent.imageUrl}
                   alt={`${selectedEvent.title} - Charlotte NC event`}
                   className="w-full h-48 object-cover rounded-lg"
@@ -703,7 +836,9 @@ export default function Events() {
                           {selectedEvent.venueName}
                         </div>
                         {selectedEvent.venueAddress && (
-                          <p className="text-muted-foreground text-xs mt-0.5">{selectedEvent.venueAddress}</p>
+                          <p className="text-muted-foreground text-xs mt-0.5">
+                            {selectedEvent.venueAddress}
+                          </p>
                         )}
                         {selectedEvent.venueAddress && (
                           <a
@@ -711,16 +846,20 @@ export default function Events() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-medium no-underline transition-colors"
-                            onClick={() => trackEventAction("directions_click", {
-                              event_slug: selectedEvent.slug,
-                              event_title: selectedEvent.title,
-                              category: selectedEvent.category,
-                              neighborhood: selectedEvent.neighborhood || undefined,
-                              venue_name: selectedEvent.venueName,
-                              surface: "event_dialog",
-                            })}
+                            onClick={() =>
+                              trackEventAction("directions_click", {
+                                event_slug: selectedEvent.slug,
+                                event_title: selectedEvent.title,
+                                category: selectedEvent.category,
+                                neighborhood:
+                                  selectedEvent.neighborhood || undefined,
+                                venue_name: selectedEvent.venueName,
+                                surface: "event_dialog",
+                              })
+                            }
                           >
-                            <Navigation className="w-3.5 h-3.5" /> Get Directions
+                            <Navigation className="w-3.5 h-3.5" /> Get
+                            Directions
                           </a>
                         )}
                       </div>
@@ -758,14 +897,16 @@ export default function Events() {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-block"
-                    onClick={() => trackEventAction("external_click", {
-                      event_slug: selectedEvent.slug,
-                      event_title: selectedEvent.title,
-                      category: selectedEvent.category,
-                      neighborhood: selectedEvent.neighborhood || undefined,
-                      venue_name: selectedEvent.venueName,
-                      surface: "event_dialog",
-                    })}
+                    onClick={() =>
+                      trackEventAction("external_click", {
+                        event_slug: selectedEvent.slug,
+                        event_title: selectedEvent.title,
+                        category: selectedEvent.category,
+                        neighborhood: selectedEvent.neighborhood || undefined,
+                        venue_name: selectedEvent.venueName,
+                        surface: "event_dialog",
+                      })
+                    }
                   >
                     <Button className="gap-2">
                       <ExternalLink className="w-4 h-4" />

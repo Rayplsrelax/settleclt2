@@ -1,0 +1,35 @@
+[Unit]
+Description=Settle CLT web application (%i slot)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=settleclt-web
+Group=settleclt-web
+SupplementaryGroups=settleclt-data
+UMask=0027
+WorkingDirectory=/opt/settleclt2/slots/%i
+Environment=NODE_ENV=production
+Environment=SETTLECLT_STORAGE_DIR=/opt/settleclt2/shared/public/manus-storage
+EnvironmentFile=/etc/settleclt-app/web.env
+EnvironmentFile=-/etc/settleclt-app/feature-flags.env
+EnvironmentFile=/etc/settleclt-app/slot-%i.env
+ExecStart=/usr/bin/node dist/index.js
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=60
+TimeoutStopSec=30
+KillSignal=SIGTERM
+NoNewPrivileges=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+RestrictSUIDSGID=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/opt/settleclt2 /etc/settleclt-app
+ReadWritePaths=/opt/settleclt2/shared/public/manus-storage
+
+[Install]
+WantedBy=multi-user.target

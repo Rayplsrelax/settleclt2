@@ -1,0 +1,11 @@
+[Unit]
+Description=Monthly Settle CLT disaster-recovery restore drill
+
+[Timer]
+OnCalendar=monthly
+RandomizedDelaySec=6h
+Persistent=true
+Unit=settleclt-dr-drill.service
+
+[Install]
+WantedBy=timers.target

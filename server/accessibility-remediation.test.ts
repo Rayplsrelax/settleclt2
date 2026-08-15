@@ -59,6 +59,23 @@ describe("public accessibility contracts", () => {
     expect(events).toContain("aria-pressed={selectedCategory === cat.value}");
   });
 
+  it("keeps public search labels aligned with visible text", () => {
+    const search = normalize(
+      readProjectFile("client/src/components/GlobalSearch.tsx")
+    );
+
+    expect(search).toContain('aria-label="Search CLT..."');
+    expect(search).not.toContain('aria-label="Open site search"');
+  });
+
+  it("uses one interactive element for homepage CTAs", () => {
+    const home = normalize(readProjectFile("client/src/pages/Home.tsx"));
+
+    expect(home).toContain('asChild size="lg"');
+    expect(home).not.toContain('<Link href="/neighborhoods"> <Button');
+    expect(home).not.toContain('<Link href="/quiz?source=homepage"> <Button');
+  });
+
   it("associates contact form labels with their controls", () => {
     const contact = normalize(readProjectFile("client/src/pages/Contact.tsx"));
 
@@ -71,5 +88,15 @@ describe("public accessibility contracts", () => {
       expect(contact).toContain(`htmlFor="${id}"`);
       expect(contact).toContain(`id="${id}"`);
     }
+  });
+
+  it("formats event times in the Charlotte timezone and handles missing times", () => {
+    const events = normalize(readProjectFile("client/src/pages/Events.tsx"));
+
+    expect(events).toContain('const CHARLOTTE_TIME_ZONE = "America/New_York"');
+    expect(events).toContain("timeZone: CHARLOTTE_TIME_ZONE");
+    expect(events).toContain("if (!value) return null");
+    expect(events).toContain('if (!d) return "Time TBA"');
+    expect(events).toContain('if (!d) return "Date TBA"');
   });
 });

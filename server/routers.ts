@@ -2,80 +2,244 @@ import { COOKIE_NAME } from "@shared/const";
 import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, protectedProcedure, router, adminProcedure } from "./_core/trpc";
+import {
+  publicProcedure,
+  protectedProcedure,
+  router,
+  adminProcedure,
+} from "./_core/trpc";
 import { z } from "zod";
 import { recommendBusinessMatches } from "./business-referral-matching";
 import { requestNewsletterSubscription } from "./newsletter-service";
 import {
-  insertBusinessSubmission, getBusinessSubmissions, getBusinessSubmissionCount, updateBusinessSubmissionStatus, deleteBusinessSubmission,
-  upsertEnrichedService, getEnrichedService, getAllEnrichedServices,
-  addPassportEntry, getPassportEntries, deletePassportEntry,
-  getActiveBingoCards, getBingoProgress, upsertBingoProgress,
-  addWishlistEntry, removeWishlistEntry, getWishlistEntries, updateWishlistNotes,
-  addComment, getComments, deleteComment, voteComment, getUserVotes,
-  createBlogPost, updateBlogPost, deleteBlogPost, getPublishedBlogPosts, getAllBlogPosts, getStaleBlogPosts, getBlogPostBySlug,
-  getLeaderboardByStamps, getLeaderboardByBingo, getLeaderboardByNeighborhoods,
-  createEvent, updateEvent, deleteEvent, getPublishedEvents, getAllEvents, getEventBySlug, getEventById,
-  createTag, getAllTags, getTagBySlug, addContentTag, removeContentTag, getContentTags, getContentByTag, bulkAddContentTags,
+  insertBusinessSubmission,
+  getBusinessSubmissions,
+  getBusinessSubmissionCount,
+  updateBusinessSubmissionStatus,
+  deleteBusinessSubmission,
+  upsertEnrichedService,
+  getEnrichedService,
+  getAllEnrichedServices,
+  addPassportEntry,
+  getPassportEntries,
+  deletePassportEntry,
+  getActiveBingoCards,
+  getBingoProgress,
+  upsertBingoProgress,
+  addWishlistEntry,
+  removeWishlistEntry,
+  getWishlistEntries,
+  updateWishlistNotes,
+  addComment,
+  getComments,
+  deleteComment,
+  voteComment,
+  getUserVotes,
+  createBlogPost,
+  updateBlogPost,
+  deleteBlogPost,
+  getPublishedBlogPosts,
+  getAllBlogPosts,
+  getStaleBlogPosts,
+  getBlogPostBySlug,
+  getLeaderboardByStamps,
+  getLeaderboardByBingo,
+  getLeaderboardByNeighborhoods,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  getPublishedEvents,
+  getAllEvents,
+  getEventBySlug,
+  getEventById,
+  createTag,
+  getAllTags,
+  getTagBySlug,
+  addContentTag,
+  removeContentTag,
+  getContentTags,
+  getContentByTag,
+  bulkAddContentTags,
   getRecentActivity,
-  addDirectoryListing, getDirectoryListings, getAllDirectoryListings, updateDirectoryListing, deleteDirectoryListing,
+  addDirectoryListing,
+  getDirectoryListings,
+  getAllDirectoryListings,
+  updateDirectoryListing,
+  deleteDirectoryListing,
   updateUserNewsletter,
-  trackTagEngagement, getTrendingTags, bulkTrackTagEngagement,
-  trackSearchQuery, getPopularSearches, getSearchAnalytics,
+  trackTagEngagement,
+  getTrendingTags,
+  bulkTrackTagEngagement,
+  trackSearchQuery,
+  getPopularSearches,
+  getSearchAnalytics,
   getTagAnalytics,
-  updateUserTagPreference, getUserTagPreferences, getRecommendedContent,
-  getNewListings, getUpcomingEvents, getRecentBlogPosts, getNewsletterRecipients,
-  createReview, getReviews, getReviewStats, getBulkReviewStats, getVisibleDirectoryReviewForService, deleteReview, toggleReviewVisibility, getAllReviews,
-  submitReferral, getReferrals, updateReferralStatus, getReferralStats,
-  submitBusinessClaim, getBusinessClaims, updateBusinessClaimStatus, approveBusinessClaimAndCreateOwnerMembership, getBusinessClaimStats, hasExistingClaim,
-  getListingOverride, upsertListingOverride, getBusinessMembershipsForUser, getActiveOwnerMembership,
-  getPremiumListing, getPremiumBillingForCheckout, upsertPremiumListing, upsertCanonicalPremiumListingForAdmin, getAllPremiumListings, incrementListingAnalytics,
+  updateUserTagPreference,
+  getUserTagPreferences,
+  getRecommendedContent,
+  getNewListings,
+  getUpcomingEvents,
+  getRecentBlogPosts,
+  getNewsletterRecipients,
+  createReview,
+  getReviews,
+  getReviewStats,
+  getBulkReviewStats,
+  getVisibleDirectoryReviewForService,
+  deleteReview,
+  toggleReviewVisibility,
+  getAllReviews,
+  submitReferral,
+  getReferrals,
+  updateReferralStatus,
+  getReferralStats,
+  submitBusinessClaim,
+  getBusinessClaims,
+  updateBusinessClaimStatus,
+  approveBusinessClaimAndCreateOwnerMembership,
+  getBusinessClaimStats,
+  hasExistingClaim,
+  getListingOverride,
+  upsertListingOverride,
+  getBusinessMembershipsForUser,
+  getActiveOwnerMembership,
+  getPremiumListing,
+  getPremiumBillingForCheckout,
+  upsertPremiumListing,
+  upsertCanonicalPremiumListingForAdmin,
+  getAllPremiumListings,
+  incrementListingAnalytics,
   deleteUserAccount,
-  createBusinessLead, getBusinessLeadsForService, getBusinessLeadById, updateBusinessLeadStatus, updateBusinessLeadDetails,
-  createBusinessPromotion, getActivePromotions, getPromotionsForBusiness, updatePromotionStatus,
-  createEventSponsorship, getSponsorshipsForBusiness,
-  createBusinessReferral, getBusinessReferralsForService, getBusinessReferralById, updateBusinessReferralStatus, updateBusinessReferralMatch, createBusinessReferralInvitation, getReferralInvitationsForBusiness, getReferralInvitationById, updateReferralInvitationStatus, getBusinessReferralAnalytics,
-  getDailyAnalytics, snapshotDailyAnalytics,
-  getBusinessFaqs, createBusinessFaq, deleteBusinessFaq,
-  createNotification, getUserNotifications, getUnreadNotificationCount,
-  markNotificationRead, markAllNotificationsRead, deleteNotification,
-  getNotificationPreferences, upsertNotificationPreference, isNotificationEnabled,
-  savePushSubscription, getUserPushSubscriptions, removePushSubscription,
+  createBusinessLead,
+  getBusinessLeadsForService,
+  getBusinessLeadById,
+  updateBusinessLeadStatus,
+  updateBusinessLeadDetails,
+  createBusinessPromotion,
+  getActivePromotions,
+  getPromotionsForBusiness,
+  updatePromotionStatus,
+  createEventSponsorship,
+  getSponsorshipsForBusiness,
+  createBusinessReferral,
+  getBusinessReferralsForService,
+  getBusinessReferralById,
+  updateBusinessReferralStatus,
+  updateBusinessReferralMatch,
+  createBusinessReferralInvitation,
+  getReferralInvitationsForBusiness,
+  getReferralInvitationById,
+  updateReferralInvitationStatus,
+  getBusinessReferralAnalytics,
+  getDailyAnalytics,
+  snapshotDailyAnalytics,
+  getBusinessFaqs,
+  createBusinessFaq,
+  deleteBusinessFaq,
+  createNotification,
+  getUserNotifications,
+  getUnreadNotificationCount,
+  markNotificationRead,
+  markAllNotificationsRead,
+  deleteNotification,
+  getNotificationPreferences,
+  upsertNotificationPreference,
+  isNotificationEnabled,
+  savePushSubscription,
+  getUserPushSubscriptions,
+  removePushSubscription,
   type NotificationCategory,
 } from "./db";
-import { makeRequest, type PlacesSearchResult, type PlaceDetailsResult } from "./_core/map";
+import {
+  makeRequest,
+  type PlacesSearchResult,
+  type PlaceDetailsResult,
+} from "./_core/map";
 import { notifyOwner } from "./_core/notification";
 import { storagePut } from "./storage";
 import { createCheckoutSession, createPortalSession } from "./stripe-helpers";
-import { permissionsForBusinessRole, requireApprovedBusinessClaim, requireBusinessPermission } from "./business-authorization";
+import {
+  permissionsForBusinessRole,
+  requireApprovedBusinessClaim,
+  requireBusinessPermission,
+} from "./business-authorization";
 import { selectEffectiveClaimId } from "./business-memberships";
-import { notifyClaimApproved, notifyClaimRejected, notifyNewReview, notifyBingoComplete, notifyWelcome, notifyUser } from "./notification-service";
-import { buildHermesRevenueOpsSummary, createHermesRevenueDraft, generateHermesRevenueTasks } from "../shared/hermesRevenueOps";
+import {
+  notifyClaimApproved,
+  notifyClaimRejected,
+  notifyNewReview,
+  notifyBingoComplete,
+  notifyWelcome,
+  notifyUser,
+} from "./notification-service";
+import {
+  buildHermesRevenueOpsSummary,
+  createHermesRevenueDraft,
+  generateHermesRevenueTasks,
+} from "../shared/hermesRevenueOps";
 import { operationsRouter } from "./operationsRouter";
 import { directoryOpsRouter } from "./directoryOpsRouter";
 import { eventOpsRouter } from "./eventOpsRouter";
 import { editorialOpsRouter } from "./editorialOpsRouter";
 import { communityOpsRouter } from "./communityOpsRouter";
 import { sourceRegistryRouter } from "./sourceRegistryRouter";
-import { requireActivePremium, requirePremiumLeadAccess } from "./premium-access";
+import {
+  requireActivePremium,
+  requirePremiumLeadAccess,
+} from "./premium-access";
 import { createPremiumLeadWithNotification } from "./premium-lead-service";
 import { askBusinessAssistant } from "./business-assistant";
 import { generateBusinessContentPrompts } from "./business-content-prompts";
 import { generateBusinessReviewResponse } from "./business-review-drafts";
 import { getBusinessGrowthSuggestions } from "./business-growth-suggestions";
+import { assertFeatureEnabled } from "./feature-flags";
 
 const SETTLE_CLT_MICROSITES = [
-  { domain: "movingtocharlotteguide.com", campaign: "relocation", status: "ready_for_dns", primaryFunnel: "/find-your-home" },
-  { domain: "charlotteweekendevents.com", campaign: "events", status: "ready_for_dns", primaryFunnel: "/events" },
-  { domain: "charlottejobmarket.com", campaign: "jobs", status: "ready_for_dns", primaryFunnel: "/jobs" },
-  { domain: "charlotteneighborhoodsguide.com", campaign: "neighborhoods", status: "ready_for_dns", primaryFunnel: "/neighborhoods" },
-  { domain: "charlottehomepros.org", campaign: "home_pros", status: "ready_for_dns", primaryFunnel: "/directory" },
+  {
+    domain: "movingtocharlotteguide.com",
+    campaign: "relocation",
+    status: "ready_for_dns",
+    primaryFunnel: "/find-your-home",
+  },
+  {
+    domain: "charlotteweekendevents.com",
+    campaign: "events",
+    status: "ready_for_dns",
+    primaryFunnel: "/events",
+  },
+  {
+    domain: "charlottejobmarket.com",
+    campaign: "jobs",
+    status: "ready_for_dns",
+    primaryFunnel: "/jobs",
+  },
+  {
+    domain: "charlotteneighborhoodsguide.com",
+    campaign: "neighborhoods",
+    status: "ready_for_dns",
+    primaryFunnel: "/neighborhoods",
+  },
+  {
+    domain: "charlottehomepros.org",
+    campaign: "home_pros",
+    status: "ready_for_dns",
+    primaryFunnel: "/directory",
+  },
 ];
 
 const NEWCOMER_ATTRIBUTE_VALUES = new Set([
-  "family-friendly", "new-mover-favorite", "budget-friendly", "english-spanish",
-  "walkable", "quick-service", "veteran-owned", "woman-owned", "locally-grown",
-  "kid-friendly", "pet-friendly", "open-weekends",
+  "family-friendly",
+  "new-mover-favorite",
+  "budget-friendly",
+  "english-spanish",
+  "walkable",
+  "quick-service",
+  "veteran-owned",
+  "woman-owned",
+  "locally-grown",
+  "kid-friendly",
+  "pet-friendly",
+  "open-weekends",
 ]);
 
 export const appRouter = router({
@@ -97,7 +261,11 @@ export const appRouter = router({
       .input(z.object({ confirmText: z.literal("DELETE MY ACCOUNT") }))
       .mutation(async ({ ctx }) => {
         const deleted = await deleteUserAccount(ctx.user.id);
-        if (!deleted) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to delete account" });
+        if (!deleted)
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to delete account",
+          });
         // Clear session cookie
         const cookieOptions = getSessionCookieOptions(ctx.req);
         ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
@@ -112,16 +280,18 @@ export const appRouter = router({
 
   leads: router({
     submitBusiness: publicProcedure
-      .input(z.object({
-        name: z.string().min(1),
-        email: z.string().email(),
-        businessName: z.string().min(1),
-        category: z.string().min(1),
-        phone: z.string().optional(),
-        website: z.string().optional(),
-        area: z.string().optional(),
-        description: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          name: z.string().min(1),
+          email: z.string().email(),
+          businessName: z.string().min(1),
+          category: z.string().min(1),
+          phone: z.string().optional(),
+          website: z.string().optional(),
+          area: z.string().optional(),
+          description: z.string().optional(),
+        })
+      )
       .mutation(async ({ input }) => {
         const result = await insertBusinessSubmission({
           name: input.name,
@@ -136,18 +306,20 @@ export const appRouter = router({
         // Notify owner of new business submission
         notifyOwner({
           title: "🏪 New Business Listing Submitted",
-          content: `${input.name} (${input.email}) submitted "${input.businessName}" in ${input.category}.${input.area ? ` Area: ${input.area}.` : ''}${input.website ? ` Website: ${input.website}` : ''}`,
+          content: `${input.name} (${input.email}) submitted "${input.businessName}" in ${input.category}.${input.area ? ` Area: ${input.area}.` : ""}${input.website ? ` Website: ${input.website}` : ""}`,
         }).catch(() => {}); // fire-and-forget
         return result;
       }),
-    
+
     // Admin: List all submissions with pagination
     adminList: adminProcedure
-      .input(z.object({
-        status: z.enum(['pending', 'approved', 'rejected']).optional(),
-        limit: z.number().min(1).max(100).default(20),
-        offset: z.number().min(0).default(0),
-      }))
+      .input(
+        z.object({
+          status: z.enum(["pending", "approved", "rejected"]).optional(),
+          limit: z.number().min(1).max(100).default(20),
+          offset: z.number().min(0).default(0),
+        })
+      )
       .query(async ({ input }) => {
         const [submissions, total] = await Promise.all([
           getBusinessSubmissions(input.status, input.limit, input.offset),
@@ -155,17 +327,19 @@ export const appRouter = router({
         ]);
         return { submissions, total, limit: input.limit, offset: input.offset };
       }),
-    
+
     // Admin: Update submission status
     updateStatus: adminProcedure
-      .input(z.object({
-        id: z.number(),
-        status: z.enum(['pending', 'approved', 'rejected']),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+          status: z.enum(["pending", "approved", "rejected"]),
+        })
+      )
       .mutation(async ({ input }) => {
         return updateBusinessSubmissionStatus(input.id, input.status);
       }),
-    
+
     // Admin: Delete submission
     delete: adminProcedure
       .input(z.object({ id: z.number() }))
@@ -177,10 +351,12 @@ export const appRouter = router({
   // --- Admin: Google Places enrichment ---
   admin: router({
     searchPlaces: adminProcedure
-      .input(z.object({
-        query: z.string().min(1),
-        location: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          query: z.string().min(1),
+          location: z.string().optional(),
+        })
+      )
       .mutation(async ({ input }) => {
         const params: Record<string, unknown> = {
           query: `${input.query} Charlotte NC`,
@@ -213,7 +389,8 @@ export const appRouter = router({
           "/maps/api/place/details/json",
           {
             place_id: input.placeId,
-            fields: "name,formatted_address,formatted_phone_number,international_phone_number,website,rating,user_ratings_total,reviews,opening_hours,geometry,price_level,types",
+            fields:
+              "name,formatted_address,formatted_phone_number,international_phone_number,website,rating,user_ratings_total,reviews,opening_hours,geometry,price_level,types",
           }
         );
         return {
@@ -236,18 +413,20 @@ export const appRouter = router({
       }),
 
     applyEnrichment: adminProcedure
-      .input(z.object({
-        serviceKey: z.string().min(1),
-        googlePlaceId: z.string().optional(),
-        googleRating: z.string().optional(),
-        reviewCount: z.number().optional(),
-        verifiedAddress: z.string().optional(),
-        verifiedPhone: z.string().optional(),
-        hoursJson: z.string().optional(),
-        photosJson: z.string().optional(),
-        googleTypes: z.string().optional(),
-        priceLevel: z.number().optional(),
-      }))
+      .input(
+        z.object({
+          serviceKey: z.string().min(1),
+          googlePlaceId: z.string().optional(),
+          googleRating: z.string().optional(),
+          reviewCount: z.number().optional(),
+          verifiedAddress: z.string().optional(),
+          verifiedPhone: z.string().optional(),
+          hoursJson: z.string().optional(),
+          photosJson: z.string().optional(),
+          googleTypes: z.string().optional(),
+          priceLevel: z.number().optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         return upsertEnrichedService({
           serviceKey: input.serviceKey,
@@ -260,7 +439,7 @@ export const appRouter = router({
           photosJson: input.photosJson ?? null,
           googleTypes: input.googleTypes ?? null,
           priceLevel: input.priceLevel ?? null,
-          verified: 'verified',
+          verified: "verified",
           enrichedBy: ctx.user.id,
         });
       }),
@@ -277,24 +456,29 @@ export const appRouter = router({
 
     // Admin directory listing management (add new businesses via Google Places)
     addNewListing: adminProcedure
-      .input(z.object({
-        name: z.string().min(1),
-        category: z.string().min(1),
-        description: z.string().optional(),
-        area: z.string().default("Charlotte Metro"),
-        phone: z.string().optional(),
-        website: z.string().optional(),
-        googlePlaceId: z.string().optional(),
-        googleRating: z.string().optional(),
-        reviewCount: z.number().optional(),
-        verifiedAddress: z.string().optional(),
-        hoursJson: z.string().optional(),
-        googleTypes: z.string().optional(),
-        priceLevel: z.number().optional(),
-        featured: z.boolean().default(false),
-      }))
+      .input(
+        z.object({
+          name: z.string().min(1),
+          category: z.string().min(1),
+          description: z.string().optional(),
+          area: z.string().default("Charlotte Metro"),
+          phone: z.string().optional(),
+          website: z.string().optional(),
+          googlePlaceId: z.string().optional(),
+          googleRating: z.string().optional(),
+          reviewCount: z.number().optional(),
+          verifiedAddress: z.string().optional(),
+          hoursJson: z.string().optional(),
+          googleTypes: z.string().optional(),
+          priceLevel: z.number().optional(),
+          featured: z.boolean().default(false),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        const serviceKey = input.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const serviceKey = input.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "");
         const result = await addDirectoryListing({
           serviceKey,
           name: input.name,
@@ -321,17 +505,19 @@ export const appRouter = router({
     }),
 
     updateListing: adminProcedure
-      .input(z.object({
-        id: z.number(),
-        name: z.string().optional(),
-        category: z.string().optional(),
-        description: z.string().optional(),
-        area: z.string().optional(),
-        phone: z.string().optional(),
-        website: z.string().optional(),
-        featured: z.boolean().optional(),
-        active: z.boolean().optional(),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+          name: z.string().optional(),
+          category: z.string().optional(),
+          description: z.string().optional(),
+          area: z.string().optional(),
+          phone: z.string().optional(),
+          website: z.string().optional(),
+          featured: z.boolean().optional(),
+          active: z.boolean().optional(),
+        })
+      )
       .mutation(async ({ input }) => {
         const { id, ...data } = input;
         return updateDirectoryListing(id, data);
@@ -350,22 +536,28 @@ export const appRouter = router({
     // Surface stale published blog posts (not updated in N days, default 90).
     // Used by the admin dashboard "needs refresh" panel and the monthly digest job.
     getStaleBlogPosts: adminProcedure
-      .input(z.object({ staleAfterDays: z.number().min(7).max(365).optional() }).optional())
+      .input(
+        z
+          .object({ staleAfterDays: z.number().min(7).max(365).optional() })
+          .optional()
+      )
       .query(async ({ input }) => {
         return getStaleBlogPosts(input?.staleAfterDays ?? 90);
       }),
 
     createBlogPost: adminProcedure
-      .input(z.object({
-        title: z.string().min(1),
-        slug: z.string().min(1),
-        excerpt: z.string().optional(),
-        content: z.string().min(1),
-        category: z.string().optional(),
-        coverImage: z.string().optional(),
-        status: z.enum(['draft', 'published']).optional(),
-        readTime: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          title: z.string().min(1),
+          slug: z.string().min(1),
+          excerpt: z.string().optional(),
+          content: z.string().min(1),
+          category: z.string().optional(),
+          coverImage: z.string().optional(),
+          status: z.enum(["draft", "published"]).optional(),
+          readTime: z.string().optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         return createBlogPost({
           title: input.title,
@@ -375,24 +567,26 @@ export const appRouter = router({
           category: input.category ?? null,
           coverImage: input.coverImage ?? null,
           authorId: ctx.user.id,
-          status: input.status ?? 'draft',
+          status: input.status ?? "draft",
           readTime: input.readTime ?? null,
-          publishedAt: input.status === 'published' ? new Date() : null,
+          publishedAt: input.status === "published" ? new Date() : null,
         });
       }),
 
     updateBlogPost: adminProcedure
-      .input(z.object({
-        id: z.number(),
-        title: z.string().optional(),
-        slug: z.string().optional(),
-        excerpt: z.string().optional(),
-        content: z.string().optional(),
-        category: z.string().optional(),
-        coverImage: z.string().optional(),
-        status: z.enum(['draft', 'published']).optional(),
-        readTime: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+          title: z.string().optional(),
+          slug: z.string().optional(),
+          excerpt: z.string().optional(),
+          content: z.string().optional(),
+          category: z.string().optional(),
+          coverImage: z.string().optional(),
+          status: z.enum(["draft", "published"]).optional(),
+          readTime: z.string().optional(),
+        })
+      )
       .mutation(async ({ input }) => {
         const { id, ...data } = input;
         const updateData: Record<string, any> = {};
@@ -401,10 +595,11 @@ export const appRouter = router({
         if (data.excerpt !== undefined) updateData.excerpt = data.excerpt;
         if (data.content !== undefined) updateData.content = data.content;
         if (data.category !== undefined) updateData.category = data.category;
-        if (data.coverImage !== undefined) updateData.coverImage = data.coverImage;
+        if (data.coverImage !== undefined)
+          updateData.coverImage = data.coverImage;
         if (data.status !== undefined) {
           updateData.status = data.status;
-          if (data.status === 'published') updateData.publishedAt = new Date();
+          if (data.status === "published") updateData.publishedAt = new Date();
         }
         if (data.readTime !== undefined) updateData.readTime = data.readTime;
         return updateBlogPost(id, updateData);
@@ -422,23 +617,36 @@ export const appRouter = router({
     }),
 
     createEvent: adminProcedure
-      .input(z.object({
-        title: z.string().min(1),
-        slug: z.string().min(1),
-        description: z.string().optional(),
-        startDate: z.date(),
-        endDate: z.date().optional(),
-        venueName: z.string().optional(),
-        venueAddress: z.string().optional(),
-        neighborhood: z.string().optional(),
-        externalUrl: z.string().optional(),
-        imageUrl: z.string().optional(),
-        category: z.enum(['concerts', 'food-drink', 'sports', 'arts-culture', 'festivals', 'family', 'nightlife', 'free', 'markets', 'community']),
-        isFeatured: z.enum(['yes', 'no']).optional(),
-        isRecurring: z.enum(['yes', 'no']).optional(),
-        status: z.enum(['draft', 'published', 'archived']).optional(),
-        tagIds: z.array(z.number()).optional(),
-      }))
+      .input(
+        z.object({
+          title: z.string().min(1),
+          slug: z.string().min(1),
+          description: z.string().optional(),
+          startDate: z.date(),
+          endDate: z.date().optional(),
+          venueName: z.string().optional(),
+          venueAddress: z.string().optional(),
+          neighborhood: z.string().optional(),
+          externalUrl: z.string().optional(),
+          imageUrl: z.string().optional(),
+          category: z.enum([
+            "concerts",
+            "food-drink",
+            "sports",
+            "arts-culture",
+            "festivals",
+            "family",
+            "nightlife",
+            "free",
+            "markets",
+            "community",
+          ]),
+          isFeatured: z.enum(["yes", "no"]).optional(),
+          isRecurring: z.enum(["yes", "no"]).optional(),
+          status: z.enum(["draft", "published", "archived"]).optional(),
+          tagIds: z.array(z.number()).optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         const { tagIds, ...eventData } = input;
         const result = await createEvent({
@@ -450,32 +658,47 @@ export const appRouter = router({
           neighborhood: eventData.neighborhood ?? null,
           externalUrl: eventData.externalUrl ?? null,
           imageUrl: eventData.imageUrl ?? null,
-          isFeatured: eventData.isFeatured ?? 'no',
-          isRecurring: eventData.isRecurring ?? 'no',
-          status: eventData.status ?? 'draft',
+          isFeatured: eventData.isFeatured ?? "no",
+          isRecurring: eventData.isRecurring ?? "no",
+          status: eventData.status ?? "draft",
           submittedBy: ctx.user.id,
         });
         return result;
       }),
 
     updateEvent: adminProcedure
-      .input(z.object({
-        id: z.number(),
-        title: z.string().optional(),
-        slug: z.string().optional(),
-        description: z.string().optional(),
-        startDate: z.date().optional(),
-        endDate: z.date().optional(),
-        venueName: z.string().optional(),
-        venueAddress: z.string().optional(),
-        neighborhood: z.string().optional(),
-        externalUrl: z.string().optional(),
-        imageUrl: z.string().optional(),
-        category: z.enum(['concerts', 'food-drink', 'sports', 'arts-culture', 'festivals', 'family', 'nightlife', 'free', 'markets', 'community']).optional(),
-        isFeatured: z.enum(['yes', 'no']).optional(),
-        isRecurring: z.enum(['yes', 'no']).optional(),
-        status: z.enum(['draft', 'published', 'archived']).optional(),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+          title: z.string().optional(),
+          slug: z.string().optional(),
+          description: z.string().optional(),
+          startDate: z.date().optional(),
+          endDate: z.date().optional(),
+          venueName: z.string().optional(),
+          venueAddress: z.string().optional(),
+          neighborhood: z.string().optional(),
+          externalUrl: z.string().optional(),
+          imageUrl: z.string().optional(),
+          category: z
+            .enum([
+              "concerts",
+              "food-drink",
+              "sports",
+              "arts-culture",
+              "festivals",
+              "family",
+              "nightlife",
+              "free",
+              "markets",
+              "community",
+            ])
+            .optional(),
+          isFeatured: z.enum(["yes", "no"]).optional(),
+          isRecurring: z.enum(["yes", "no"]).optional(),
+          status: z.enum(["draft", "published", "archived"]).optional(),
+        })
+      )
       .mutation(async ({ input }) => {
         const { id, ...data } = input;
         const updateData: Record<string, any> = {};
@@ -493,43 +716,68 @@ export const appRouter = router({
 
     // Admin tag management
     createTag: adminProcedure
-      .input(z.object({
-        name: z.string().min(1),
-        slug: z.string().min(1),
-        category: z.enum(['neighborhood', 'activity', 'audience', 'season', 'content-type']),
-      }))
+      .input(
+        z.object({
+          name: z.string().min(1),
+          slug: z.string().min(1),
+          category: z.enum([
+            "neighborhood",
+            "activity",
+            "audience",
+            "season",
+            "content-type",
+          ]),
+        })
+      )
       .mutation(async ({ input }) => {
         return createTag(input);
       }),
 
     addContentTag: adminProcedure
-      .input(z.object({
-        tagId: z.number(),
-        contentType: z.enum(['event', 'directory', 'blog', 'neighborhood']),
-        contentId: z.string(),
-      }))
+      .input(
+        z.object({
+          tagId: z.number(),
+          contentType: z.enum(["event", "directory", "blog", "neighborhood"]),
+          contentId: z.string(),
+        })
+      )
       .mutation(async ({ input }) => {
         return addContentTag(input);
       }),
 
     removeContentTag: adminProcedure
-      .input(z.object({
-        tagId: z.number(),
-        contentType: z.string(),
-        contentId: z.string(),
-      }))
+      .input(
+        z.object({
+          tagId: z.number(),
+          contentType: z.string(),
+          contentId: z.string(),
+        })
+      )
       .mutation(async ({ input }) => {
-        return removeContentTag(input.tagId, input.contentType, input.contentId);
+        return removeContentTag(
+          input.tagId,
+          input.contentType,
+          input.contentId
+        );
       }),
 
     bulkAddContentTags: adminProcedure
-      .input(z.object({
-        items: z.array(z.object({
-          tagId: z.number(),
-          contentType: z.enum(['event', 'directory', 'blog', 'neighborhood']),
-          contentId: z.string(),
-        })),
-      }))
+      .input(
+        z.object({
+          items: z.array(
+            z.object({
+              tagId: z.number(),
+              contentType: z.enum([
+                "event",
+                "directory",
+                "blog",
+                "neighborhood",
+              ]),
+              contentId: z.string(),
+            })
+          ),
+        })
+      )
       .mutation(async ({ input }) => {
         return bulkAddContentTags(input.items);
       }),
@@ -553,14 +801,16 @@ export const appRouter = router({
       return getPassportEntries(ctx.user.id);
     }),
     addEntry: protectedProcedure
-      .input(z.object({
-        serviceKey: z.string().optional(),
-        customPlaceName: z.string().optional(),
-        eventSlug: z.string().optional(),
-        neighborhoodId: z.string().optional(),
-        notes: z.string().optional(),
-        visitedAt: z.date().optional(),
-      }))
+      .input(
+        z.object({
+          serviceKey: z.string().optional(),
+          customPlaceName: z.string().optional(),
+          eventSlug: z.string().optional(),
+          neighborhoodId: z.string().optional(),
+          notes: z.string().optional(),
+          visitedAt: z.date().optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         return addPassportEntry({
           userId: ctx.user.id,
@@ -588,11 +838,13 @@ export const appRouter = router({
       return getBingoProgress(ctx.user.id);
     }),
     updateProgress: protectedProcedure
-      .input(z.object({
-        cardId: z.number(),
-        completedSquaresJson: z.string(),
-        completedAt: z.date().optional(),
-      }))
+      .input(
+        z.object({
+          cardId: z.number(),
+          completedSquaresJson: z.string(),
+          completedAt: z.date().optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         const result = await upsertBingoProgress({
           userId: ctx.user.id,
@@ -607,7 +859,9 @@ export const appRouter = router({
             content: `User ${ctx.user.name ?? ctx.user.id} completed bingo card #${input.cardId}! Time to celebrate a CLT explorer!`,
           }).catch(() => {}); // fire-and-forget
           // Notify the user in-app
-          notifyBingoComplete(ctx.user.id, `Card #${input.cardId}`).catch(() => {});
+          notifyBingoComplete(ctx.user.id, `Card #${input.cardId}`).catch(
+            () => {}
+          );
         }
         return result;
       }),
@@ -619,10 +873,12 @@ export const appRouter = router({
       return getWishlistEntries(ctx.user.id);
     }),
     add: protectedProcedure
-      .input(z.object({
-        serviceKey: z.string().min(1),
-        notes: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          serviceKey: z.string().min(1),
+          notes: z.string().optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         return addWishlistEntry({
           userId: ctx.user.id,
@@ -645,10 +901,12 @@ export const appRouter = router({
   // --- Comments (public read, protected write) ---
   comments: router({
     getByTarget: publicProcedure
-      .input(z.object({
-        targetType: z.string(),
-        targetId: z.string(),
-      }))
+      .input(
+        z.object({
+          targetType: z.string(),
+          targetId: z.string(),
+        })
+      )
       .query(async ({ input }) => {
         return getComments(input.targetType, input.targetId);
       }),
@@ -658,12 +916,14 @@ export const appRouter = router({
         return getUserVotes(ctx.user.id, input.commentIds);
       }),
     add: protectedProcedure
-      .input(z.object({
-        targetType: z.string(),
-        targetId: z.string(),
-        parentId: z.number().optional(),
-        content: z.string().min(1).max(2000),
-      }))
+      .input(
+        z.object({
+          targetType: z.string(),
+          targetId: z.string(),
+          parentId: z.number().optional(),
+          content: z.string().min(1).max(2000),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         return addComment({
           userId: ctx.user.id,
@@ -679,10 +939,12 @@ export const appRouter = router({
         return deleteComment(input.id, ctx.user.id);
       }),
     vote: protectedProcedure
-      .input(z.object({
-        commentId: z.number(),
-        voteType: z.enum(['up', 'down']),
-      }))
+      .input(
+        z.object({
+          commentId: z.number(),
+          voteType: z.enum(["up", "down"]),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         return voteComment(ctx.user.id, input.commentId, input.voteType);
       }),
@@ -722,25 +984,37 @@ export const appRouter = router({
   // --- Events (public read, admin write) ---
   events: router({
     getPublished: publicProcedure
-      .input(z.object({
-        category: z.string().optional(),
-        neighborhood: z.string().optional(),
-        fromDate: z.date().optional(),
-        toDate: z.date().optional(),
-        limit: z.number().optional(),
-        featured: z.boolean().optional(),
-        includeExpired: z.boolean().optional(),
-      }).optional())
+      .input(
+        z
+          .object({
+            category: z.string().optional(),
+            neighborhood: z.string().optional(),
+            fromDate: z.date().optional(),
+            toDate: z.date().optional(),
+            limit: z.number().optional(),
+            featured: z.boolean().optional(),
+            includeExpired: z.boolean().optional(),
+          })
+          .optional()
+      )
       .query(async ({ input }) => {
         const allEvents = await getPublishedEvents(input ?? undefined);
-        // By default, filter out events whose end date (or start date if no end) is more than 1 month ago
+        // Public listings hide stale events. Events without an end date are
+        // treated as lasting 24 hours from their start so in-progress events
+        // stay visible; undated events are hidden unless includeExpired.
         if (input?.includeExpired) return allEvents;
-        const oneMonthAgo = new Date();
-        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        const now = new Date();
+        const DEFAULT_EVENT_DURATION_MS = 24 * 60 * 60 * 1000;
         return allEvents.filter(evt => {
-          const eventEnd = evt.endDate ? new Date(evt.endDate) : evt.startDate ? new Date(evt.startDate) : null;
-          if (!eventEnd) return true; // keep events with no dates
-          return eventEnd >= oneMonthAgo;
+          const start = evt.startDate ? new Date(evt.startDate) : null;
+          const end = evt.endDate ? new Date(evt.endDate) : null;
+          const eventEnd =
+            end && !Number.isNaN(end.getTime())
+              ? end
+              : start && !Number.isNaN(start.getTime())
+                ? new Date(start.getTime() + DEFAULT_EVENT_DURATION_MS)
+                : null;
+          return eventEnd !== null && eventEnd >= now;
         });
       }),
     getBySlug: publicProcedure
@@ -757,7 +1031,11 @@ export const appRouter = router({
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 7);
       endOfWeek.setHours(23, 59, 59, 999);
-      const thisWeek = await getPublishedEvents({ fromDate: startOfWeek, toDate: endOfWeek, limit: 6 });
+      const thisWeek = await getPublishedEvents({
+        fromDate: startOfWeek,
+        toDate: endOfWeek,
+        limit: 6,
+      });
       // If no events this week, fall back to next 30 days of upcoming events
       if (thisWeek.length === 0) {
         return getUpcomingEvents(30).then(events => events.slice(0, 6));
@@ -765,20 +1043,40 @@ export const appRouter = router({
       return thisWeek;
     }),
     submitEvent: protectedProcedure
-      .input(z.object({
-        title: z.string().min(1).max(255),
-        description: z.string().min(10).max(5000),
-        startDate: z.date(),
-        endDate: z.date().optional(),
-        venueName: z.string().min(1).max(255),
-        venueAddress: z.string().max(500).optional(),
-        neighborhood: z.string().max(100).optional(),
-        externalUrl: z.string().url().max(500).optional(),
-        category: z.enum(['concerts', 'food-drink', 'sports', 'arts-culture', 'festivals', 'family', 'nightlife', 'free', 'markets', 'community']),
-        isRecurring: z.enum(['yes', 'no']).optional(),
-      }))
+      .input(
+        z.object({
+          title: z.string().min(1).max(255),
+          description: z.string().min(10).max(5000),
+          startDate: z.date(),
+          endDate: z.date().optional(),
+          venueName: z.string().min(1).max(255),
+          venueAddress: z.string().max(500).optional(),
+          neighborhood: z.string().max(100).optional(),
+          externalUrl: z.string().url().max(500).optional(),
+          category: z.enum([
+            "concerts",
+            "food-drink",
+            "sports",
+            "arts-culture",
+            "festivals",
+            "family",
+            "nightlife",
+            "free",
+            "markets",
+            "community",
+          ]),
+          isRecurring: z.enum(["yes", "no"]).optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        const slug = input.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString(36);
+        assertFeatureEnabled("eventSubmissions");
+        const slug =
+          input.title
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "") +
+          "-" +
+          Date.now().toString(36);
         await createEvent({
           title: input.title,
           slug,
@@ -791,15 +1089,15 @@ export const appRouter = router({
           externalUrl: input.externalUrl ?? null,
           imageUrl: null,
           category: input.category,
-          isFeatured: 'no',
-          isRecurring: input.isRecurring ?? 'no',
-          status: 'draft', // requires admin approval
+          isFeatured: "no",
+          isRecurring: input.isRecurring ?? "no",
+          status: "draft", // requires admin approval
           submittedBy: ctx.user.id,
         });
         // Notify owner of new event submission
         notifyOwner({
-          title: '📅 New Event Submitted',
-          content: `${ctx.user.name ?? 'A user'} submitted event "${input.title}" at ${input.venueName}${input.neighborhood ? ` in ${input.neighborhood}` : ''}. Category: ${input.category}. Review in admin panel.`,
+          title: "📅 New Event Submitted",
+          content: `${ctx.user.name ?? "A user"} submitted event "${input.title}" at ${input.venueName}${input.neighborhood ? ` in ${input.neighborhood}` : ""}. Category: ${input.category}. Review in admin panel.`,
         }).catch(() => {}); // fire-and-forget
         return { success: true };
       }),
@@ -808,7 +1106,9 @@ export const appRouter = router({
   // --- Activity Feed ---
   activity: router({
     recent: publicProcedure
-      .input(z.object({ limit: z.number().min(1).max(50).optional() }).optional())
+      .input(
+        z.object({ limit: z.number().min(1).max(50).optional() }).optional()
+      )
       .query(async ({ input }) => {
         return getRecentActivity(input?.limit ?? 20);
       }),
@@ -832,7 +1132,9 @@ export const appRouter = router({
         return getContentTags(input.contentType, input.contentId);
       }),
     getContentByTag: publicProcedure
-      .input(z.object({ tagId: z.number(), contentType: z.string().optional() }))
+      .input(
+        z.object({ tagId: z.number(), contentType: z.string().optional() })
+      )
       .query(async ({ input }) => {
         return getContentByTag(input.tagId, input.contentType);
       }),
@@ -840,10 +1142,14 @@ export const appRouter = router({
 
   newsletter: router({
     subscribe: publicProcedure
-      .input(z.object({
-        email: z.string().email(),
-        source: z.enum(["homepage", "blog", "profile", "registration"]).default("homepage"),
-      }))
+      .input(
+        z.object({
+          email: z.string().email(),
+          source: z
+            .enum(["homepage", "blog", "profile", "registration"])
+            .default("homepage"),
+        })
+      )
       .mutation(async ({ input }) => {
         await requestNewsletterSubscription(input);
         notifyOwner({
@@ -859,7 +1165,10 @@ export const appRouter = router({
       .input(z.object({ optIn: z.boolean() }))
       .mutation(async ({ ctx, input }) => {
         if (input.optIn && ctx.user.email) {
-          await requestNewsletterSubscription({ email: ctx.user.email, source: "profile" });
+          await requestNewsletterSubscription({
+            email: ctx.user.email,
+            source: "profile",
+          });
         } else if (!input.optIn && ctx.user.email) {
           await updateUserNewsletter(ctx.user.id, false);
           const { unsubscribeNewsletterByEmail } = await import("./db");
@@ -869,25 +1178,30 @@ export const appRouter = router({
       }),
   }),
 
-
   // --- Trending Tags (public read, public track) ---
   trending: router({
     getTrending: publicProcedure
-      .input(z.object({
-        limit: z.number().min(1).max(20).optional(),
-        days: z.number().min(1).max(90).optional(),
-      }).optional())
+      .input(
+        z
+          .object({
+            limit: z.number().min(1).max(20).optional(),
+            days: z.number().min(1).max(90).optional(),
+          })
+          .optional()
+      )
       .query(async ({ input }) => {
         return getTrendingTags(input?.limit ?? 10, input?.days ?? 7);
       }),
 
     track: publicProcedure
-      .input(z.object({
-        tagId: z.number(),
-        engagementType: z.enum(['view', 'click', 'stamp', 'share']),
-        contentType: z.string().optional(),
-        contentId: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          tagId: z.number(),
+          engagementType: z.enum(["view", "click", "stamp", "share"]),
+          contentType: z.string().optional(),
+          contentId: z.string().optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         await trackTagEngagement({
           tagId: input.tagId,
@@ -900,14 +1214,18 @@ export const appRouter = router({
       }),
 
     trackBatch: publicProcedure
-      .input(z.object({
-        entries: z.array(z.object({
-          tagId: z.number(),
-          engagementType: z.enum(['view', 'click', 'stamp', 'share']),
-          contentType: z.string().optional(),
-          contentId: z.string().optional(),
-        })),
-      }))
+      .input(
+        z.object({
+          entries: z.array(
+            z.object({
+              tagId: z.number(),
+              engagementType: z.enum(["view", "click", "stamp", "share"]),
+              contentType: z.string().optional(),
+              contentId: z.string().optional(),
+            })
+          ),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         const entries = input.entries.map(e => ({
           tagId: e.tagId,
@@ -919,16 +1237,18 @@ export const appRouter = router({
         await bulkTrackTagEngagement(entries);
         return { success: true };
       }),
-   }),
+  }),
 
   // --- Search Tracking ---
   search: router({
     track: publicProcedure
-      .input(z.object({
-        query: z.string().min(1).max(512),
-        resultCount: z.number().min(0),
-        source: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          query: z.string().min(1).max(512),
+          resultCount: z.number().min(0),
+          source: z.string().optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         await trackSearchQuery({
           query: input.query,
@@ -939,7 +1259,14 @@ export const appRouter = router({
         return { success: true };
       }),
     popular: publicProcedure
-      .input(z.object({ limit: z.number().min(1).max(50).optional(), days: z.number().min(1).max(365).optional() }).optional())
+      .input(
+        z
+          .object({
+            limit: z.number().min(1).max(50).optional(),
+            days: z.number().min(1).max(365).optional(),
+          })
+          .optional()
+      )
       .query(async ({ input }) => {
         return getPopularSearches(input?.limit ?? 10, input?.days ?? 30);
       }),
@@ -948,17 +1275,28 @@ export const appRouter = router({
   // --- Admin Analytics ---
   analytics: router({
     tags: adminProcedure
-      .input(z.object({ days: z.number().min(1).max(365).optional() }).optional())
+      .input(
+        z.object({ days: z.number().min(1).max(365).optional() }).optional()
+      )
       .query(async ({ input }) => {
         return getTagAnalytics(input?.days ?? 30);
       }),
     searches: adminProcedure
-      .input(z.object({ days: z.number().min(1).max(365).optional() }).optional())
+      .input(
+        z.object({ days: z.number().min(1).max(365).optional() }).optional()
+      )
       .query(async ({ input }) => {
         return getSearchAnalytics(input?.days ?? 30);
       }),
     popularSearches: adminProcedure
-      .input(z.object({ limit: z.number().min(1).max(100).optional(), days: z.number().min(1).max(365).optional() }).optional())
+      .input(
+        z
+          .object({
+            limit: z.number().min(1).max(100).optional(),
+            days: z.number().min(1).max(365).optional(),
+          })
+          .optional()
+      )
       .query(async ({ input }) => {
         return getPopularSearches(input?.limit ?? 20, input?.days ?? 30);
       }),
@@ -1010,7 +1348,11 @@ export const appRouter = router({
           microsites: SETTLE_CLT_MICROSITES as any[],
         });
         const task = tasks.find(item => item.id === input.taskId);
-        if (!task) throw new TRPCError({ code: "NOT_FOUND", message: "Hermes revenue task not found" });
+        if (!task)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Hermes revenue task not found",
+          });
         return createHermesRevenueDraft(task);
       }),
   }),
@@ -1019,43 +1361,78 @@ export const appRouter = router({
   // --- Monthly Digest ---
   digest: router({
     preview: adminProcedure.query(async () => {
-      const [newListings, upcomingEvents, recentPosts, trending, recipients] = await Promise.all([
-        getNewListings(30),
-        getUpcomingEvents(30),
-        getRecentBlogPosts(30),
-        getTrendingTags(5, 30),
-        getNewsletterRecipients(),
-      ]);
-      const totalRecipients = new Set(recipients.subscribers.map(s => s.email)).size;
-      return { newListings, upcomingEvents, recentPosts, trending, totalRecipients };
+      const [newListings, upcomingEvents, recentPosts, trending, recipients] =
+        await Promise.all([
+          getNewListings(30),
+          getUpcomingEvents(30),
+          getRecentBlogPosts(30),
+          getTrendingTags(5, 30),
+          getNewsletterRecipients(),
+        ]);
+      const totalRecipients = new Set(recipients.subscribers.map(s => s.email))
+        .size;
+      return {
+        newListings,
+        upcomingEvents,
+        recentPosts,
+        trending,
+        totalRecipients,
+      };
     }),
     generate: adminProcedure.mutation(async () => {
       const { invokeLLM } = await import("./_core/llm");
-      const [newListings, upcomingEvents, recentPosts, trending] = await Promise.all([
-        getNewListings(30),
-        getUpcomingEvents(30),
-        getRecentBlogPosts(30),
-        getTrendingTags(5, 30),
-      ]);
+      const [newListings, upcomingEvents, recentPosts, trending] =
+        await Promise.all([
+          getNewListings(30),
+          getUpcomingEvents(30),
+          getRecentBlogPosts(30),
+          getTrendingTags(5, 30),
+        ]);
       const dataContext = [
         `New Directory Listings (${newListings.length}):`,
-        ...newListings.slice(0, 10).map(l => `- ${l.name} (${l.category}, ${l.area})`),
+        ...newListings
+          .slice(0, 10)
+          .map(l => `- ${l.name} (${l.category}, ${l.area})`),
         `\nUpcoming Events (${upcomingEvents.length}):`,
-        ...upcomingEvents.slice(0, 10).map(e => `- ${e.title || e.name || "Untitled Event"} on ${e.startDate ? new Date(e.startDate).toLocaleDateString() : "TBD"} at ${e.venueName || 'TBA'}`),
+        ...upcomingEvents
+          .slice(0, 10)
+          .map(
+            e =>
+              `- ${e.title || e.name || "Untitled Event"} on ${e.startDate ? new Date(e.startDate).toLocaleDateString() : "TBD"} at ${e.venueName || "TBA"}`
+          ),
         `\nRecent Blog Posts (${recentPosts.length}):`,
-        ...recentPosts.slice(0, 5).map(p => `- ${p.title} (${p.category || 'General'})`),
+        ...recentPosts
+          .slice(0, 5)
+          .map(p => `- ${p.title} (${p.category || "General"})`),
         `\nTrending Tags:`,
-        ...trending.map((t: any) => `- ${t.name} (${t.engagementCount} engagements)`),
-      ].join('\n');
+        ...trending.map(
+          (t: any) => `- ${t.name} (${t.engagementCount} engagements)`
+        ),
+      ].join("\n");
       const response = await invokeLLM({
         messages: [
-          { role: 'system', content: 'You are a friendly newsletter writer for Settle CLT, a guide for people moving to Charlotte, NC. Write a warm, engaging monthly digest email in HTML format. Use inline CSS for styling. Keep it concise but informative. Include sections for new businesses, upcoming events, trending topics, and recent blog posts. Use the Settle CLT brand colors: teal (#2A9D8F) for headers and gold (#E9C46A) for accents.' },
-          { role: 'user', content: `Generate a "What\'s New This Month in Charlotte" newsletter digest email based on this data:\n\n${dataContext}\n\nMake it friendly, useful for newcomers, and include a call-to-action to visit settleclt.com for more details.` },
+          {
+            role: "system",
+            content:
+              "You are a friendly newsletter writer for Settle CLT, a guide for people moving to Charlotte, NC. Write a warm, engaging monthly digest email in HTML format. Use inline CSS for styling. Keep it concise but informative. Include sections for new businesses, upcoming events, trending topics, and recent blog posts. Use the Settle CLT brand colors: teal (#2A9D8F) for headers and gold (#E9C46A) for accents.",
+          },
+          {
+            role: "user",
+            content: `Generate a "What\'s New This Month in Charlotte" newsletter digest email based on this data:\n\n${dataContext}\n\nMake it friendly, useful for newcomers, and include a call-to-action to visit settleclt.com for more details.`,
+          },
         ],
       });
       const rawContent = response.choices?.[0]?.message?.content;
-      const htmlContent: string = typeof rawContent === 'string' ? rawContent : '';
-      return { html: htmlContent, stats: { listings: newListings.length, events: upcomingEvents.length, posts: recentPosts.length } };
+      const htmlContent: string =
+        typeof rawContent === "string" ? rawContent : "";
+      return {
+        html: htmlContent,
+        stats: {
+          listings: newListings.length,
+          events: upcomingEvents.length,
+          posts: recentPosts.length,
+        },
+      };
     }),
     send: adminProcedure
       .input(z.object({ html: z.string(), subject: z.string().optional() }))
@@ -1070,7 +1447,12 @@ export const appRouter = router({
   // --- Community Reviews ---
   reviews: router({
     getByTarget: publicProcedure
-      .input(z.object({ targetType: z.enum(["neighborhood", "directory"]), targetId: z.string() }))
+      .input(
+        z.object({
+          targetType: z.enum(["neighborhood", "directory"]),
+          targetId: z.string(),
+        })
+      )
       .query(async ({ input }) => {
         const [reviewsList, stats] = await Promise.all([
           getReviews(input.targetType, input.targetId),
@@ -1079,7 +1461,12 @@ export const appRouter = router({
         return { reviews: reviewsList, stats };
       }),
     stats: publicProcedure
-      .input(z.object({ targetType: z.enum(["neighborhood", "directory"]), targetId: z.string() }))
+      .input(
+        z.object({
+          targetType: z.enum(["neighborhood", "directory"]),
+          targetId: z.string(),
+        })
+      )
       .query(async ({ input }) => {
         return getReviewStats(input.targetType, input.targetId);
       }),
@@ -1089,13 +1476,25 @@ export const appRouter = router({
         return getBulkReviewStats(input.targetType);
       }),
     create: protectedProcedure
-      .input(z.object({
-        targetType: z.enum(["neighborhood", "directory"]),
-        targetId: z.string(),
-        rating: z.number().min(1).max(5),
-        tip: z.string().min(5).max(500),
-        aspect: z.enum(["vibe", "food", "safety", "transit", "nightlife", "cost", "general"]).optional(),
-      }))
+      .input(
+        z.object({
+          targetType: z.enum(["neighborhood", "directory"]),
+          targetId: z.string(),
+          rating: z.number().min(1).max(5),
+          tip: z.string().min(5).max(500),
+          aspect: z
+            .enum([
+              "vibe",
+              "food",
+              "safety",
+              "transit",
+              "nightlife",
+              "cost",
+              "general",
+            ])
+            .optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         await createReview({
           targetType: input.targetType,
@@ -1106,21 +1505,41 @@ export const appRouter = router({
           aspect: input.aspect || "general",
         });
         // Notify business owner if this is a directory review on a claimed business
-        if (input.targetType === 'directory') {
+        if (input.targetType === "directory") {
           try {
             const claims = await getBusinessClaims();
-            const ownerClaim = claims.find((c: any) => c.serviceKey === input.targetId && c.status === 'approved' && c.userId);
-            if (ownerClaim && ownerClaim.userId && ownerClaim.userId !== ctx.user.id) {
-              notifyNewReview(ownerClaim.userId, ownerClaim.businessName, input.rating, input.targetId).catch(() => {});
+            const ownerClaim = claims.find(
+              (c: any) =>
+                c.serviceKey === input.targetId &&
+                c.status === "approved" &&
+                c.userId
+            );
+            if (
+              ownerClaim &&
+              ownerClaim.userId &&
+              ownerClaim.userId !== ctx.user.id
+            ) {
+              notifyNewReview(
+                ownerClaim.userId,
+                ownerClaim.businessName,
+                input.rating,
+                input.targetId
+              ).catch(() => {});
             }
-          } catch (e) { /* non-critical */ }
+          } catch (e) {
+            /* non-critical */
+          }
         }
         return { success: true };
       }),
     delete: protectedProcedure
       .input(z.object({ reviewId: z.number() }))
       .mutation(async ({ input, ctx }) => {
-        await deleteReview(input.reviewId, ctx.user.id, ctx.user.role === "admin");
+        await deleteReview(
+          input.reviewId,
+          ctx.user.id,
+          ctx.user.role === "admin"
+        );
         return { success: true };
       }),
     toggleVisibility: adminProcedure
@@ -1142,12 +1561,18 @@ export const appRouter = router({
       return getUserTagPreferences(ctx.user.id, 15);
     }),
     updatePreference: protectedProcedure
-      .input(z.object({
-        tagId: z.number(),
-        engagementType: z.enum(['view', 'click', 'stamp', 'share']),
-      }))
+      .input(
+        z.object({
+          tagId: z.number(),
+          engagementType: z.enum(["view", "click", "stamp", "share"]),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        await updateUserTagPreference(ctx.user.id, input.tagId, input.engagementType);
+        await updateUserTagPreference(
+          ctx.user.id,
+          input.tagId,
+          input.engagementType
+        );
         return { success: true };
       }),
   }),
@@ -1155,18 +1580,26 @@ export const appRouter = router({
   // --- Referrals ---
   referrals: router({
     submit: publicProcedure
-      .input(z.object({
-        name: z.string().min(1),
-        email: z.string().email(),
-        phone: z.string().optional(),
-        referralType: z.enum(['buying', 'selling', 'renting', 'relocating', 'investing']),
-        budget: z.string().optional(),
-        neighborhoods: z.string().optional(),
-        timeline: z.string().optional(),
-        notes: z.string().optional(),
-        currentCity: z.string().optional(),
-        referralSource: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          name: z.string().min(1),
+          email: z.string().email(),
+          phone: z.string().optional(),
+          referralType: z.enum([
+            "buying",
+            "selling",
+            "renting",
+            "relocating",
+            "investing",
+          ]),
+          budget: z.string().optional(),
+          neighborhoods: z.string().optional(),
+          timeline: z.string().optional(),
+          notes: z.string().optional(),
+          currentCity: z.string().optional(),
+          referralSource: z.string().optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         const result = await submitReferral({
           ...input,
@@ -1174,29 +1607,31 @@ export const appRouter = router({
         });
         // Notify owner of new referral lead
         const typeLabels: Record<string, string> = {
-          buying: 'Buying a Home',
-          selling: 'Selling a Home',
-          renting: 'Renting an Apartment',
-          relocating: 'Relocating to Charlotte',
-          investing: 'Real Estate Investing',
+          buying: "Buying a Home",
+          selling: "Selling a Home",
+          renting: "Renting an Apartment",
+          relocating: "Relocating to Charlotte",
+          investing: "Real Estate Investing",
         };
         const lines = [
           `NEW LEAD — ${typeLabels[input.referralType] || input.referralType}`,
           ``,
           `Name: ${input.name}`,
           `Email: ${input.email}`,
-          `Phone: ${input.phone || 'Not provided'}`,
+          `Phone: ${input.phone || "Not provided"}`,
           ``,
           `Service: ${typeLabels[input.referralType] || input.referralType}`,
-          `Budget: ${input.budget || 'Not specified'}`,
-          `Timeline: ${input.timeline || 'Not specified'}`,
-          `Preferred Neighborhoods: ${input.neighborhoods || 'Not specified'}`,
-          input.currentCity ? `Moving From: ${input.currentCity}` : '',
-          input.notes ? `\nNotes: ${input.notes}` : '',
-          input.referralSource ? `Source: ${input.referralSource}` : '',
+          `Budget: ${input.budget || "Not specified"}`,
+          `Timeline: ${input.timeline || "Not specified"}`,
+          `Preferred Neighborhoods: ${input.neighborhoods || "Not specified"}`,
+          input.currentCity ? `Moving From: ${input.currentCity}` : "",
+          input.notes ? `\nNotes: ${input.notes}` : "",
+          input.referralSource ? `Source: ${input.referralSource}` : "",
           ``,
           `⏰ Respond within 48 business hours as promised on Settle CLT.`,
-        ].filter(Boolean).join('\n');
+        ]
+          .filter(Boolean)
+          .join("\n");
         await notifyOwner({
           title: `🏠 New Referral Lead: ${input.name} — ${typeLabels[input.referralType] || input.referralType}`,
           content: lines,
@@ -1204,19 +1639,25 @@ export const appRouter = router({
         return result;
       }),
     list: adminProcedure
-      .input(z.object({
-        status: z.string().optional(),
-        limit: z.number().optional(),
-      }).optional())
+      .input(
+        z
+          .object({
+            status: z.string().optional(),
+            limit: z.number().optional(),
+          })
+          .optional()
+      )
       .query(async ({ input }) => {
         return getReferrals(input);
       }),
     updateStatus: adminProcedure
-      .input(z.object({
-        id: z.number(),
-        status: z.enum(['new', 'contacted', 'matched', 'closed', 'lost']),
-        adminNotes: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+          status: z.enum(["new", "contacted", "matched", "closed", "lost"]),
+          adminNotes: z.string().optional(),
+        })
+      )
       .mutation(async ({ input }) => {
         return updateReferralStatus(input.id, input.status, input.adminNotes);
       }),
@@ -1228,21 +1669,34 @@ export const appRouter = router({
   // --- Business Claims ---
   claims: router({
     submit: protectedProcedure
-      .input(z.object({
-        serviceKey: z.string().min(1),
-        businessName: z.string().min(1),
-        claimantName: z.string().min(1),
-        claimantEmail: z.string().email(),
-        claimantPhone: z.string().optional(),
-        claimantRole: z.string().min(1),
-        verificationMethod: z.enum(['owner', 'manager', 'employee', 'authorized_rep']),
-        message: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          serviceKey: z.string().min(1),
+          businessName: z.string().min(1),
+          claimantName: z.string().min(1),
+          claimantEmail: z.string().email(),
+          claimantPhone: z.string().optional(),
+          claimantRole: z.string().min(1),
+          verificationMethod: z.enum([
+            "owner",
+            "manager",
+            "employee",
+            "authorized_rep",
+          ]),
+          message: z.string().optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         // Check for existing claim
-        const exists = await hasExistingClaim(input.serviceKey, input.claimantEmail);
+        const exists = await hasExistingClaim(
+          input.serviceKey,
+          input.claimantEmail
+        );
         if (exists) {
-          return { success: false, error: 'You have already submitted a claim for this business.' };
+          return {
+            success: false,
+            error: "You have already submitted a claim for this business.",
+          };
         }
         const result = await submitBusinessClaim({
           ...input,
@@ -1250,26 +1704,33 @@ export const appRouter = router({
         });
         // Notify owner
         const roleLabels: Record<string, string> = {
-          owner: 'Owner', manager: 'Manager', employee: 'Employee', authorized_rep: 'Authorized Representative',
+          owner: "Owner",
+          manager: "Manager",
+          employee: "Employee",
+          authorized_rep: "Authorized Representative",
         };
         await notifyOwner({
           title: `🏢 New Business Claim: ${input.businessName}`,
           content: [
             `Business: ${input.businessName} (${input.serviceKey})`,
             `Claimant: ${input.claimantName} (${input.claimantEmail})`,
-            input.claimantPhone ? `Phone: ${input.claimantPhone}` : '',
+            input.claimantPhone ? `Phone: ${input.claimantPhone}` : "",
             `Role: ${roleLabels[input.verificationMethod] || input.verificationMethod}`,
-            input.message ? `Message: ${input.message}` : '',
-          ].filter(Boolean).join('\n'),
+            input.message ? `Message: ${input.message}` : "",
+          ]
+            .filter(Boolean)
+            .join("\n"),
         }).catch(() => {});
         return { success: true, id: result.id };
       }),
     checkClaimed: publicProcedure
       .input(z.object({ serviceKey: z.string() }))
       .query(async ({ input }) => {
-        const claims = await getBusinessClaims({ serviceKey: input.serviceKey });
-        const approved = claims.find((c: any) => c.status === 'approved');
-        const pending = claims.find((c: any) => c.status === 'pending');
+        const claims = await getBusinessClaims({
+          serviceKey: input.serviceKey,
+        });
+        const approved = claims.find((c: any) => c.status === "approved");
+        const pending = claims.find((c: any) => c.status === "pending");
         return { claimed: !!approved, pending: !!pending };
       }),
     list: adminProcedure
@@ -1278,36 +1739,60 @@ export const appRouter = router({
         return getBusinessClaims(input);
       }),
     updateStatus: adminProcedure
-      .input(z.object({
-        id: z.number(),
-        status: z.enum(['pending', 'approved', 'rejected']),
-        adminNotes: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          id: z.number(),
+          status: z.enum(["pending", "approved", "rejected"]),
+          adminNotes: z.string().optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         // Get the claim details before updating for notification
         const claims = await getBusinessClaims();
         const claim = claims.find((c: any) => c.id === input.id);
-        const result = input.status === 'approved'
-          ? await approveBusinessClaimAndCreateOwnerMembership(input.id, ctx.user.id, input.adminNotes)
-          : await updateBusinessClaimStatus(input.id, input.status, input.adminNotes);
+        const result =
+          input.status === "approved"
+            ? await approveBusinessClaimAndCreateOwnerMembership(
+                input.id,
+                ctx.user.id,
+                input.adminNotes
+              )
+            : await updateBusinessClaimStatus(
+                input.id,
+                input.status,
+                input.adminNotes
+              );
         // Notify owner about status change
-        if (claim && input.status !== 'pending') {
-          const statusLabel = input.status === 'approved' ? '✅ Approved' : '❌ Rejected';
+        if (claim && input.status !== "pending") {
+          const statusLabel =
+            input.status === "approved" ? "✅ Approved" : "❌ Rejected";
           await notifyOwner({
             title: `Business Claim ${statusLabel}: ${claim.businessName}`,
             content: [
               `Claim for "${claim.businessName}" has been ${input.status}.`,
               `Claimant: ${claim.claimantName} (${claim.claimantEmail})`,
-              input.adminNotes ? `Admin Notes: ${input.adminNotes}` : '',
-              input.status === 'approved' ? 'The business owner can now manage their listing.' : '',
-            ].filter(Boolean).join('\n'),
+              input.adminNotes ? `Admin Notes: ${input.adminNotes}` : "",
+              input.status === "approved"
+                ? "The business owner can now manage their listing."
+                : "",
+            ]
+              .filter(Boolean)
+              .join("\n"),
           }).catch(() => {});
           // Notify the claimant about their claim status
           if (claim.userId) {
-            if (input.status === 'approved') {
-              notifyClaimApproved(claim.userId, claim.businessName, claim.serviceKey).catch(() => {});
-            } else if (input.status === 'rejected') {
-              notifyClaimRejected(claim.userId, claim.businessName, input.adminNotes).catch(() => {});
+            if (input.status === "approved") {
+              notifyClaimApproved(
+                claim.userId,
+                claim.businessName,
+                claim.serviceKey
+              ).catch(() => {});
+            } else if (input.status === "rejected") {
+              notifyClaimRejected(
+                claim.userId,
+                claim.businessName,
+                input.adminNotes
+              ).catch(() => {});
             }
           }
         }
@@ -1328,8 +1813,11 @@ export const appRouter = router({
         const listing = await getPremiumListing(input.serviceKey);
         const tier = listing?.tier ?? "basic";
         const isActive = listing?.paymentStatus === "active";
-        const isFeaturedPlus = isActive && (tier === "featured" || tier === "premium" || tier === "pro");
-        const isPremiumPlus = isActive && (tier === "premium" || tier === "pro");
+        const isFeaturedPlus =
+          isActive &&
+          (tier === "featured" || tier === "premium" || tier === "pro");
+        const isPremiumPlus =
+          isActive && (tier === "premium" || tier === "pro");
         return {
           serviceKey: override.serviceKey,
           displayName: override.displayName,
@@ -1342,14 +1830,16 @@ export const appRouter = router({
             : [],
           socialLinks: override.socialLinks,
           tagline: override.tagline,
-          serviceMenu: isFeaturedPlus ? (() => {
-            try {
-              const parsed = JSON.parse(override.serviceMenu || "[]");
-              return Array.isArray(parsed) ? parsed : [];
-            } catch {
-              return [];
-            }
-          })() : [],
+          serviceMenu: isFeaturedPlus
+            ? (() => {
+                try {
+                  const parsed = JSON.parse(override.serviceMenu || "[]");
+                  return Array.isArray(parsed) ? parsed : [];
+                } catch {
+                  return [];
+                }
+              })()
+            : [],
           bookingProvider: isPremiumPlus ? override.bookingProvider : null,
           bookingUrl: isPremiumPlus ? override.bookingUrl : null,
           newcomerAttributes: (() => {
@@ -1376,45 +1866,98 @@ export const appRouter = router({
     getOverride: protectedProcedure
       .input(z.object({ serviceKey: z.string() }))
       .query(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "edit_listing"
+        );
         return getListingOverride(input.serviceKey);
       }),
     updateListing: protectedProcedure
-      .input(z.object({
-        serviceKey: z.string(),
-        displayName: z.string().optional(),
-        description: z.string().optional(),
-        phone: z.string().optional(),
-        website: z.string().optional(),
-        email: z.string().optional(),
-        hours: z.string().optional(),
-        tagline: z.string().optional(),
-        socialLinks: z.string().optional(),
-        serviceMenu: z.string().max(20000).refine(value => {
-          try { return Array.isArray(JSON.parse(value)); } catch { return false; }
-        }, "Service menu must be a valid JSON array"),
-        bookingProvider: z.enum(["Booksy", "Square Appointments", "Calendly", "Acuity", "Google booking", "Stripe Payment Links", "QuickBooks", "Other"]).optional().or(z.literal("")),
-        bookingUrl: z.string().url().max(512).optional().or(z.literal("")),
-        newcomerAttributes: z.string().max(5000).refine(value => {
-          try {
-            const parsed = JSON.parse(value);
-            return Array.isArray(parsed) && parsed.every(item => typeof item === "string" && NEWCOMER_ATTRIBUTE_VALUES.has(item));
-          } catch { return false; }
-        }, "Newcomer attributes must be an allowed JSON string array").optional(),
-      }))
+      .input(
+        z.object({
+          serviceKey: z.string(),
+          displayName: z.string().optional(),
+          description: z.string().optional(),
+          phone: z.string().optional(),
+          website: z.string().optional(),
+          email: z.string().optional(),
+          hours: z.string().optional(),
+          tagline: z.string().optional(),
+          socialLinks: z.string().optional(),
+          serviceMenu: z
+            .string()
+            .max(20000)
+            .refine(value => {
+              try {
+                return Array.isArray(JSON.parse(value));
+              } catch {
+                return false;
+              }
+            }, "Service menu must be a valid JSON array"),
+          bookingProvider: z
+            .enum([
+              "Booksy",
+              "Square Appointments",
+              "Calendly",
+              "Acuity",
+              "Google booking",
+              "Stripe Payment Links",
+              "QuickBooks",
+              "Other",
+            ])
+            .optional()
+            .or(z.literal("")),
+          bookingUrl: z.string().url().max(512).optional().or(z.literal("")),
+          newcomerAttributes: z
+            .string()
+            .max(5000)
+            .refine(value => {
+              try {
+                const parsed = JSON.parse(value);
+                return (
+                  Array.isArray(parsed) &&
+                  parsed.every(
+                    item =>
+                      typeof item === "string" &&
+                      NEWCOMER_ATTRIBUTE_VALUES.has(item)
+                  )
+                );
+              } catch {
+                return false;
+              }
+            }, "Newcomer attributes must be an allowed JSON string array")
+            .optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        const membership = requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        const membership = requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "edit_listing"
+        );
         const { serviceKey, ...data } = input;
-        const effectiveClaimId = selectEffectiveClaimId(membership.ownerClaimId);
+        const effectiveClaimId = selectEffectiveClaimId(
+          membership.ownerClaimId
+        );
 
         // Tier-gate service menu (Featured+) and booking link (Premium+)
         const premiumListing = await getPremiumListing(serviceKey);
         const tier = premiumListing?.tier ?? "basic";
         const isActive = premiumListing?.paymentStatus === "active";
-        const isFeaturedPlus = isActive && (tier === "featured" || tier === "premium" || tier === "pro");
-        const isPremiumPlus = isActive && (tier === "premium" || tier === "pro");
+        const isFeaturedPlus =
+          isActive &&
+          (tier === "featured" || tier === "premium" || tier === "pro");
+        const isPremiumPlus =
+          isActive && (tier === "premium" || tier === "pro");
 
         if (data.serviceMenu !== undefined && !isFeaturedPlus) {
           // Allow clearing (empty array) but block setting non-empty values
@@ -1423,7 +1966,8 @@ export const appRouter = router({
             if (Array.isArray(parsed) && parsed.length > 0) {
               throw new TRPCError({
                 code: "FORBIDDEN",
-                message: "Service menu is a Featured-tier feature. Upgrade to Featured ($29/mo) or higher to display services.",
+                message:
+                  "Service menu is a Featured-tier feature. Upgrade to Featured ($29/mo) or higher to display services.",
               });
             }
           } catch (e) {
@@ -1435,14 +1979,19 @@ export const appRouter = router({
             });
           }
         }
-        if ((data.bookingProvider !== undefined || data.bookingUrl !== undefined) && !isPremiumPlus) {
+        if (
+          (data.bookingProvider !== undefined ||
+            data.bookingUrl !== undefined) &&
+          !isPremiumPlus
+        ) {
           // Allow clearing (empty string) but block setting non-empty values
           const provider = (data.bookingProvider ?? "").trim();
           const url = (data.bookingUrl ?? "").trim();
           if (provider || url) {
             throw new TRPCError({
               code: "FORBIDDEN",
-              message: "External booking links are a Premium-tier feature. Upgrade to Premium ($79/mo) or higher.",
+              message:
+                "External booking links are a Premium-tier feature. Upgrade to Premium ($79/mo) or higher.",
             });
           }
         }
@@ -1450,22 +1999,37 @@ export const appRouter = router({
         return upsertListingOverride(serviceKey, effectiveClaimId, data);
       }),
     uploadPhoto: protectedProcedure
-      .input(z.object({
-        serviceKey: z.string(),
-        photoUrl: z.string().url(),
-      }))
+      .input(
+        z.object({
+          serviceKey: z.string(),
+          photoUrl: z.string().url(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        const membership = requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
-        const effectiveClaimId = selectEffectiveClaimId(membership.ownerClaimId);
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        const membership = requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "edit_listing"
+        );
+        const effectiveClaimId = selectEffectiveClaimId(
+          membership.ownerClaimId
+        );
         const existing = await getListingOverride(input.serviceKey);
-        const currentPhotos = existing?.photoUrls ? existing.photoUrls.split(',').filter(Boolean) : [];
+        const currentPhotos = existing?.photoUrls
+          ? existing.photoUrls.split(",").filter(Boolean)
+          : [];
 
         // Tier-based photo limit enforcement
         const premiumListing = await getPremiumListing(input.serviceKey);
         const tier = premiumListing?.tier ?? "basic";
         const isActive = premiumListing?.paymentStatus === "active";
-        const { canUploadPhoto, getPhotoLimit } = await import("../shared/premium-limits");
+        const { canUploadPhoto, getPhotoLimit } = await import(
+          "../shared/premium-limits"
+        );
         if (!canUploadPhoto(tier, isActive, currentPhotos.length)) {
           const limit = getPhotoLimit(tier, isActive);
           throw new TRPCError({
@@ -1475,28 +2039,50 @@ export const appRouter = router({
         }
 
         currentPhotos.push(input.photoUrl);
-        await upsertListingOverride(input.serviceKey, effectiveClaimId, { photoUrls: currentPhotos.join(',') });
+        await upsertListingOverride(input.serviceKey, effectiveClaimId, {
+          photoUrls: currentPhotos.join(","),
+        });
         return { success: true, photos: currentPhotos };
       }),
     uploadPhotoFile: protectedProcedure
-      .input(z.object({
-        serviceKey: z.string(),
-        fileName: z.string().min(1).max(255),
-        contentType: z.enum(["image/jpeg", "image/png", "image/webp", "image/gif"]),
-        data: z.string().min(1),
-      }))
+      .input(
+        z.object({
+          serviceKey: z.string(),
+          fileName: z.string().min(1).max(255),
+          contentType: z.enum([
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "image/gif",
+          ]),
+          data: z.string().min(1),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        const membership = requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
-        const effectiveClaimId = selectEffectiveClaimId(membership.ownerClaimId);
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        const membership = requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "edit_listing"
+        );
+        const effectiveClaimId = selectEffectiveClaimId(
+          membership.ownerClaimId
+        );
         const existing = await getListingOverride(input.serviceKey);
-        const currentPhotos = existing?.photoUrls ? existing.photoUrls.split(',').filter(Boolean) : [];
+        const currentPhotos = existing?.photoUrls
+          ? existing.photoUrls.split(",").filter(Boolean)
+          : [];
 
         // Tier-based photo limit enforcement
         const premiumListing = await getPremiumListing(input.serviceKey);
         const tier = premiumListing?.tier ?? "basic";
         const isActive = premiumListing?.paymentStatus === "active";
-        const { canUploadPhoto, getPhotoLimit } = await import("../shared/premium-limits");
+        const { canUploadPhoto, getPhotoLimit } = await import(
+          "../shared/premium-limits"
+        );
         if (!canUploadPhoto(tier, isActive, currentPhotos.length)) {
           const limit = getPhotoLimit(tier, isActive);
           throw new TRPCError({
@@ -1523,7 +2109,10 @@ export const appRouter = router({
           "image/webp": [0x52, 0x49, 0x46, 0x46], // RIFF header (WebP starts with RIFF)
         };
         const expectedMagic = ALLOWED_MAGIC[input.contentType];
-        if (expectedMagic && !expectedMagic.every((byte, i) => buffer[i] === byte)) {
+        if (
+          expectedMagic &&
+          !expectedMagic.every((byte, i) => buffer[i] === byte)
+        ) {
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: "File content does not match the declared image type.",
@@ -1537,22 +2126,39 @@ export const appRouter = router({
         const { url } = await storagePut(storageKey, buffer, input.contentType);
 
         currentPhotos.push(url);
-        await upsertListingOverride(input.serviceKey, effectiveClaimId, { photoUrls: currentPhotos.join(',') });
+        await upsertListingOverride(input.serviceKey, effectiveClaimId, {
+          photoUrls: currentPhotos.join(","),
+        });
         return { success: true, photos: currentPhotos };
       }),
     removePhoto: protectedProcedure
-      .input(z.object({
-        serviceKey: z.string(),
-        photoUrl: z.string(),
-      }))
+      .input(
+        z.object({
+          serviceKey: z.string(),
+          photoUrl: z.string(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        const membership = requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
-        const effectiveClaimId = selectEffectiveClaimId(membership.ownerClaimId);
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        const membership = requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "edit_listing"
+        );
+        const effectiveClaimId = selectEffectiveClaimId(
+          membership.ownerClaimId
+        );
         const existing = await getListingOverride(input.serviceKey);
-        const currentPhotos = existing?.photoUrls ? existing.photoUrls.split(',').filter(Boolean) : [];
+        const currentPhotos = existing?.photoUrls
+          ? existing.photoUrls.split(",").filter(Boolean)
+          : [];
         const filtered = currentPhotos.filter(p => p !== input.photoUrl);
-        await upsertListingOverride(input.serviceKey, effectiveClaimId, { photoUrls: filtered.join(',') });
+        await upsertListingOverride(input.serviceKey, effectiveClaimId, {
+          photoUrls: filtered.join(","),
+        });
         return { success: true, photos: filtered };
       }),
   }),
@@ -1563,7 +2169,9 @@ export const appRouter = router({
       .input(z.object({ serviceKey: z.string() }))
       .query(async ({ input }) => {
         const listing = await getPremiumListing(input.serviceKey);
-        return listing ? { tier: listing.tier, active: listing.paymentStatus === 'active' } : { tier: 'basic' as const, active: false };
+        return listing
+          ? { tier: listing.tier, active: listing.paymentStatus === "active" }
+          : { tier: "basic" as const, active: false };
       }),
     getPhotoLimit: publicProcedure
       .input(z.object({ serviceKey: z.string() }))
@@ -1572,35 +2180,63 @@ export const appRouter = router({
         const tier = listing?.tier ?? "basic";
         const active = listing?.paymentStatus === "active";
         const { getPhotoLimit } = await import("../shared/premium-limits");
-        return { limit: getPhotoLimit(tier as "basic" | "featured" | "premium" | "pro", active), tier, active };
+        return {
+          limit: getPhotoLimit(
+            tier as "basic" | "featured" | "premium" | "pro",
+            active
+          ),
+          tier,
+          active,
+        };
       }),
     getActiveTiers: publicProcedure.query(async () => {
       const all = await getAllPremiumListings();
-      const active = all.filter((l: any) => l.paymentStatus === 'active' && l.tier !== 'basic');
-      return active.map((l: any) => ({ serviceKey: l.serviceKey, tier: l.tier }));
+      const active = all.filter(
+        (l: any) => l.paymentStatus === "active" && l.tier !== "basic"
+      );
+      return active.map((l: any) => ({
+        serviceKey: l.serviceKey,
+        tier: l.tier,
+      }));
     }),
     getAnalytics: protectedProcedure
       .input(z.object({ serviceKey: z.string() }))
       .query(async ({ input, ctx }) => {
-        if (ctx.user.role !== 'admin') {
-          const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-          requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
+        if (ctx.user.role !== "admin") {
+          const memberships = await getBusinessMembershipsForUser(
+            ctx.user.id,
+            input.serviceKey
+          );
+          requireBusinessPermission(
+            memberships,
+            input.serviceKey,
+            "view_analytics"
+          );
         }
         const listing = await getPremiumListing(input.serviceKey);
-        return listing ? {
-          views: listing.viewsThisPeriod,
-          clicks: listing.clicksThisPeriod,
-          leads: listing.leadsThisPeriod,
-          tier: listing.tier,
-          periodEnd: listing.currentPeriodEnd,
-        } : null;
+        return listing
+          ? {
+              views: listing.viewsThisPeriod,
+              clicks: listing.clicksThisPeriod,
+              leads: listing.leadsThisPeriod,
+              tier: listing.tier,
+              periodEnd: listing.currentPeriodEnd,
+            }
+          : null;
       }),
     getGrowthSuggestions: protectedProcedure
       .input(z.object({ serviceKey: z.string() }))
       .query(async ({ input, ctx }) => {
         if (ctx.user.role !== "admin") {
-          const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-          requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
+          const memberships = await getBusinessMembershipsForUser(
+            ctx.user.id,
+            input.serviceKey
+          );
+          requireBusinessPermission(
+            memberships,
+            input.serviceKey,
+            "view_analytics"
+          );
         }
 
         const [listing, override, enriched, leads] = await Promise.all([
@@ -1609,7 +2245,12 @@ export const appRouter = router({
           getEnrichedService(input.serviceKey),
           getBusinessLeadsForService(input.serviceKey, { limit: 100 }),
         ]);
-        if (!listing || listing.tier !== "pro" || listing.paymentStatus !== "active") return [];
+        if (
+          !listing ||
+          listing.tier !== "pro" ||
+          listing.paymentStatus !== "active"
+        )
+          return [];
 
         let hours: Record<string, unknown> = {};
         try {
@@ -1618,9 +2259,12 @@ export const appRouter = router({
           hours = {};
         }
 
-        const photoCount = override?.photoUrls?.split(",").filter(Boolean).length ?? 0;
+        const photoCount =
+          override?.photoUrls?.split(",").filter(Boolean).length ?? 0;
         const hasHours = Object.values(hours).some(value => Boolean(value));
-        const openLeadCount = leads.filter(lead => lead.status === "new" || lead.status === "contacted").length;
+        const openLeadCount = leads.filter(
+          lead => lead.status === "new" || lead.status === "contacted"
+        ).length;
 
         return getBusinessGrowthSuggestions({
           businessName: override?.displayName || input.serviceKey,
@@ -1638,14 +2282,26 @@ export const appRouter = router({
     generateContentPrompts: protectedProcedure
       .input(z.object({ serviceKey: z.string() }))
       .mutation(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "view_analytics"
+        );
         const [listing, override, enriched] = await Promise.all([
           getPremiumListing(input.serviceKey),
           getListingOverride(input.serviceKey),
           getEnrichedService(input.serviceKey),
         ]);
-        if (!listing || listing.tier !== "pro" || listing.paymentStatus !== "active") return [];
+        if (
+          !listing ||
+          listing.tier !== "pro" ||
+          listing.paymentStatus !== "active"
+        )
+          return [];
         return generateBusinessContentPrompts({
           serviceKey: input.serviceKey,
           displayName: override?.displayName ?? null,
@@ -1661,55 +2317,81 @@ export const appRouter = router({
         });
       }),
     generateReviewResponse: protectedProcedure
-      .input(z.object({ reviewId: z.number().int().positive(), serviceKey: z.string() }))
+      .input(
+        z.object({
+          reviewId: z.number().int().positive(),
+          serviceKey: z.string(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "view_analytics"
+        );
         const [listing, override, enriched, review] = await Promise.all([
           getPremiumListing(input.serviceKey),
           getListingOverride(input.serviceKey),
           getEnrichedService(input.serviceKey),
           getVisibleDirectoryReviewForService(input.reviewId, input.serviceKey),
         ]);
-        if (!listing || listing.tier !== "pro" || listing.paymentStatus !== "active") return { draft: "" };
-        if (!review) throw new TRPCError({ code: "NOT_FOUND", message: "Visible review not found for this business." });
+        if (
+          !listing ||
+          listing.tier !== "pro" ||
+          listing.paymentStatus !== "active"
+        )
+          return { draft: "" };
+        if (!review)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Visible review not found for this business.",
+          });
         return {
-          draft: await generateBusinessReviewResponse({
-            serviceKey: input.serviceKey,
-            displayName: override?.displayName ?? null,
-            description: override?.description ?? null,
-            phone: override?.phone ?? enriched?.verifiedPhone ?? null,
-            website: override?.website ?? null,
-            hours: override?.hours ?? enriched?.hoursJson ?? null,
-            tagline: override?.tagline ?? null,
-            category: enriched?.googleTypes ?? "local business",
-            googleRating: enriched?.googleRating ?? null,
-            reviewCount: enriched?.reviewCount ?? null,
-            verifiedAddress: enriched?.verifiedAddress ?? null,
-          }, review),
+          draft: await generateBusinessReviewResponse(
+            {
+              serviceKey: input.serviceKey,
+              displayName: override?.displayName ?? null,
+              description: override?.description ?? null,
+              phone: override?.phone ?? enriched?.verifiedPhone ?? null,
+              website: override?.website ?? null,
+              hours: override?.hours ?? enriched?.hoursJson ?? null,
+              tagline: override?.tagline ?? null,
+              category: enriched?.googleTypes ?? "local business",
+              googleRating: enriched?.googleRating ?? null,
+              reviewCount: enriched?.reviewCount ?? null,
+              verifiedAddress: enriched?.verifiedAddress ?? null,
+            },
+            review
+          ),
         };
       }),
     trackView: publicProcedure
       .input(z.object({ serviceKey: z.string() }))
       .mutation(async ({ input }) => {
-        await incrementListingAnalytics(input.serviceKey, 'viewsThisPeriod');
+        await incrementListingAnalytics(input.serviceKey, "viewsThisPeriod");
         return { success: true };
       }),
     trackClick: publicProcedure
       .input(z.object({ serviceKey: z.string() }))
       .mutation(async ({ input }) => {
-        await incrementListingAnalytics(input.serviceKey, 'clicksThisPeriod');
+        await incrementListingAnalytics(input.serviceKey, "clicksThisPeriod");
         return { success: true };
       }),
     trackLead: publicProcedure
-      .input(z.object({
-        serviceKey: z.string(),
-        name: z.string().min(1).max(255),
-        email: z.string().email(),
-        phone: z.string().max(32).optional(),
-        message: z.string().min(1).max(2000),
-        source: z.string().max(128).optional(),
-      }))
+      .input(
+        z.object({
+          serviceKey: z.string(),
+          name: z.string().min(1).max(255),
+          email: z.string().email(),
+          phone: z.string().max(32).optional(),
+          message: z.string().min(1).max(2000),
+          source: z.string().max(128).optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         // Only allow leads on active premium-tier businesses
         const listing = await getPremiumListing(input.serviceKey);
@@ -1728,20 +2410,25 @@ export const appRouter = router({
             createLead: createBusinessLead,
             getOwner: getActiveOwnerMembership,
             notify: notifyUser,
-          },
+          }
         );
         return { success: true as const, leadId };
       }),
     getLeads: protectedProcedure
-      .input(z.object({
-        serviceKey: z.string(),
-        limit: z.number().min(1).max(100).default(50),
-        offset: z.number().min(0).default(0),
-      }))
+      .input(
+        z.object({
+          serviceKey: z.string(),
+          limit: z.number().min(1).max(100).default(50),
+          offset: z.number().min(0).default(0),
+        })
+      )
       .query(async ({ input, ctx }) => {
         const listing = await getPremiumListing(input.serviceKey);
         if (ctx.user.role !== "admin") {
-          const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+          const memberships = await getBusinessMembershipsForUser(
+            ctx.user.id,
+            input.serviceKey
+          );
           requirePremiumLeadAccess(memberships, input.serviceKey, listing);
         } else {
           requireActivePremium(listing);
@@ -1752,12 +2439,21 @@ export const appRouter = router({
       .input(z.object({ serviceKey: z.string() }))
       .query(async ({ input, ctx }) => {
         if (ctx.user.role !== "admin") {
-          const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-          requirePremiumLeadAccess(memberships, input.serviceKey, await getPremiumListing(input.serviceKey));
+          const memberships = await getBusinessMembershipsForUser(
+            ctx.user.id,
+            input.serviceKey
+          );
+          requirePremiumLeadAccess(
+            memberships,
+            input.serviceKey,
+            await getPremiumListing(input.serviceKey)
+          );
         } else {
           requireActivePremium(await getPremiumListing(input.serviceKey));
         }
-        const leads = await getBusinessLeadsForService(input.serviceKey, { limit: 100 });
+        const leads = await getBusinessLeadsForService(input.serviceKey, {
+          limit: 100,
+        });
         const total = leads.length;
         const byStatus = leads.reduce<Record<string, number>>((acc, l) => {
           acc[l.status] = (acc[l.status] ?? 0) + 1;
@@ -1768,15 +2464,27 @@ export const appRouter = router({
           acc[source] = (acc[source] ?? 0) + 1;
           return acc;
         }, {});
-        const totalEstimatedValueCents = leads.reduce((sum, l) => sum + (l.estimatedValueCents ?? 0), 0);
-        const openLeads = leads.filter(l => l.status === "new" || l.status === "contacted");
-        const openValueCents = openLeads.reduce((sum, l) => sum + (l.estimatedValueCents ?? 0), 0);
+        const totalEstimatedValueCents = leads.reduce(
+          (sum, l) => sum + (l.estimatedValueCents ?? 0),
+          0
+        );
+        const openLeads = leads.filter(
+          l => l.status === "new" || l.status === "contacted"
+        );
+        const openValueCents = openLeads.reduce(
+          (sum, l) => sum + (l.estimatedValueCents ?? 0),
+          0
+        );
         const closedWon = leads.filter(l => l.status === "closed");
-        const closedValueCents = closedWon.reduce((sum, l) => sum + (l.estimatedValueCents ?? 0), 0);
-        const needsFollowUp = leads.filter(l =>
-          (l.status === "new" || l.status === "contacted") &&
-          l.followUpAt &&
-          new Date(l.followUpAt).getTime() <= Date.now()
+        const closedValueCents = closedWon.reduce(
+          (sum, l) => sum + (l.estimatedValueCents ?? 0),
+          0
+        );
+        const needsFollowUp = leads.filter(
+          l =>
+            (l.status === "new" || l.status === "contacted") &&
+            l.followUpAt &&
+            new Date(l.followUpAt).getTime() <= Date.now()
         ).length;
         return {
           total,
@@ -1788,30 +2496,51 @@ export const appRouter = router({
           needsFollowUp,
           sourcesList: Object.entries(bySource)
             .sort((a, b) => b[1] - a[1])
-            .map(([source, count]) => ({ source, count, pct: total > 0 ? Math.round((count / total) * 100) : 0 })),
+            .map(([source, count]) => ({
+              source,
+              count,
+              pct: total > 0 ? Math.round((count / total) * 100) : 0,
+            })),
         };
       }),
     getReport: protectedProcedure
       .input(z.object({ serviceKey: z.string() }))
       .query(async ({ input, ctx }) => {
         if (ctx.user.role !== "admin") {
-          const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-          requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
+          const memberships = await getBusinessMembershipsForUser(
+            ctx.user.id,
+            input.serviceKey
+          );
+          requireBusinessPermission(
+            memberships,
+            input.serviceKey,
+            "view_analytics"
+          );
         }
         const listing = await getPremiumListing(input.serviceKey);
         if (!listing) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "No premium listing found for this business." });
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "No premium listing found for this business.",
+          });
         }
         if (listing.tier !== "premium" || listing.paymentStatus !== "active") {
-          throw new TRPCError({ code: "FORBIDDEN", message: "Monthly performance reports are only available for active Premium listings." });
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              "Monthly performance reports are only available for active Premium listings.",
+          });
         }
-        const leads = await getBusinessLeadsForService(input.serviceKey, { limit: 100 });
+        const leads = await getBusinessLeadsForService(input.serviceKey, {
+          limit: 100,
+        });
         const dailyAnalytics = await getDailyAnalytics(input.serviceKey, 30);
         const views = listing.viewsThisPeriod ?? 0;
         const clicks = listing.clicksThisPeriod ?? 0;
         const leadCount = listing.leadsThisPeriod ?? 0;
         const ctr = views > 0 ? ((clicks / views) * 100).toFixed(1) : "0.0";
-        const conversionRate = clicks > 0 ? ((leadCount / clicks) * 100).toFixed(1) : "0.0";
+        const conversionRate =
+          clicks > 0 ? ((leadCount / clicks) * 100).toFixed(1) : "0.0";
         return {
           serviceKey: input.serviceKey,
           tier: listing.tier,
@@ -1838,16 +2567,28 @@ export const appRouter = router({
         };
       }),
     updateLeadStatus: protectedProcedure
-      .input(z.object({
-        leadId: z.number(),
-        status: z.enum(["new", "contacted", "qualified", "closed", "archived"]),
-      }))
+      .input(
+        z.object({
+          leadId: z.number(),
+          status: z.enum([
+            "new",
+            "contacted",
+            "qualified",
+            "closed",
+            "archived",
+          ]),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         const lead = await getBusinessLeadById(input.leadId);
-        if (!lead) throw new TRPCError({ code: "NOT_FOUND", message: "Lead not found" });
+        if (!lead)
+          throw new TRPCError({ code: "NOT_FOUND", message: "Lead not found" });
         const listing = await getPremiumListing(lead.serviceKey);
         if (ctx.user.role !== "admin") {
-          const memberships = await getBusinessMembershipsForUser(ctx.user.id, lead.serviceKey);
+          const memberships = await getBusinessMembershipsForUser(
+            ctx.user.id,
+            lead.serviceKey
+          );
           requirePremiumLeadAccess(memberships, lead.serviceKey, listing);
         } else {
           requireActivePremium(listing);
@@ -1856,20 +2597,34 @@ export const appRouter = router({
         return { success: true as const };
       }),
     updateLeadDetails: protectedProcedure
-      .input(z.object({
-        leadId: z.number(),
-        status: z.enum(["new", "contacted", "qualified", "closed", "archived"]).optional(),
-        followUpAt: z.coerce.date().nullable().optional(),
-        notes: z.string().max(5000).nullable().optional(),
-        source: z.string().max(128).nullable().optional(),
-        estimatedValueCents: z.number().int().min(0).max(100_000_000).nullable().optional(),
-      }))
+      .input(
+        z.object({
+          leadId: z.number(),
+          status: z
+            .enum(["new", "contacted", "qualified", "closed", "archived"])
+            .optional(),
+          followUpAt: z.coerce.date().nullable().optional(),
+          notes: z.string().max(5000).nullable().optional(),
+          source: z.string().max(128).nullable().optional(),
+          estimatedValueCents: z
+            .number()
+            .int()
+            .min(0)
+            .max(100_000_000)
+            .nullable()
+            .optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         const lead = await getBusinessLeadById(input.leadId);
-        if (!lead) throw new TRPCError({ code: "NOT_FOUND", message: "Lead not found" });
+        if (!lead)
+          throw new TRPCError({ code: "NOT_FOUND", message: "Lead not found" });
         const listing = await getPremiumListing(lead.serviceKey);
         if (ctx.user.role !== "admin") {
-          const memberships = await getBusinessMembershipsForUser(ctx.user.id, lead.serviceKey);
+          const memberships = await getBusinessMembershipsForUser(
+            ctx.user.id,
+            lead.serviceKey
+          );
           requirePremiumLeadAccess(memberships, lead.serviceKey, listing);
         } else {
           requireActivePremium(listing);
@@ -1879,24 +2634,44 @@ export const appRouter = router({
         return { success: true as const };
       }),
     createCheckout: protectedProcedure
-      .input(z.object({
-        tier: z.enum(['featured', 'premium', 'pro']),
-        serviceKey: z.string(),
-      }))
+      .input(
+        z.object({
+          tier: z.enum(["featured", "premium", "pro"]),
+          serviceKey: z.string(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        const membership = requireBusinessPermission(memberships, input.serviceKey, "manage_billing");
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        const membership = requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "manage_billing"
+        );
+        assertFeatureEnabled("businessCheckout");
         const claimId = selectEffectiveClaimId(membership.ownerClaimId);
-        const claim = (await getBusinessClaims({ serviceKey: input.serviceKey }))
-          .find(c => c.id === claimId && c.status === "approved");
+        const claim = (
+          await getBusinessClaims({ serviceKey: input.serviceKey })
+        ).find(c => c.id === claimId && c.status === "approved");
         if (!claim) {
-          throw new TRPCError({ code: "FORBIDDEN", message: "Business ownership record is unavailable." });
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Business ownership record is unavailable.",
+          });
         }
-        const existingBilling = await getPremiumBillingForCheckout(input.serviceKey);
-        if (existingBilling?.stripeCustomerId || existingBilling?.stripeSubscriptionId) {
+        const existingBilling = await getPremiumBillingForCheckout(
+          input.serviceKey
+        );
+        if (
+          existingBilling?.stripeCustomerId ||
+          existingBilling?.stripeSubscriptionId
+        ) {
           throw new TRPCError({
             code: "CONFLICT",
-            message: "Existing billing must be resolved before starting another checkout.",
+            message:
+              "Existing billing must be resolved before starting another checkout.",
           });
         }
         const result = await createCheckoutSession({
@@ -1905,26 +2680,34 @@ export const appRouter = router({
           businessName: claim.businessName,
           claimId,
           userId: ctx.user.id,
-          userEmail: ctx.user.email || '',
-          userName: ctx.user.name || '',
+          userEmail: ctx.user.email || "",
+          userName: ctx.user.name || "",
         });
         return result;
       }),
     manageSubscription: protectedProcedure
-      .input(z.object({
-        serviceKey: z.string(),
-      }))
+      .input(
+        z.object({
+          serviceKey: z.string(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
         const membership = requireBusinessPermission(
           memberships,
           input.serviceKey,
-          "manage_billing",
+          "manage_billing"
         );
         const claimId = selectEffectiveClaimId(membership.ownerClaimId);
         const listing = await getPremiumListing(input.serviceKey);
         if (!listing?.stripeCustomerId) {
-          throw new TRPCError({ code: 'NOT_FOUND', message: 'No active subscription found.' });
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "No active subscription found.",
+          });
         }
         if (listing.claimId !== claimId) {
           throw new TRPCError({
@@ -1940,23 +2723,43 @@ export const appRouter = router({
     getPromotions: protectedProcedure
       .input(z.object({ serviceKey: z.string() }))
       .query(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "edit_listing"
+        );
         return getPromotionsForBusiness(input.serviceKey);
       }),
     createPromotion: protectedProcedure
-      .input(z.object({
-        serviceKey: z.string(),
-        type: z.enum(["directory_boost", "category_spotlight", "neighborhood_spotlight"]),
-        headline: z.string().min(1).max(255),
-        subtitle: z.string().max(500).optional(),
-        targetCategory: z.string().max(128).optional(),
-        targetNeighborhood: z.string().max(128).optional(),
-        priceCents: z.number().int().min(0),
-      }))
+      .input(
+        z.object({
+          serviceKey: z.string(),
+          type: z.enum([
+            "directory_boost",
+            "category_spotlight",
+            "neighborhood_spotlight",
+          ]),
+          headline: z.string().min(1).max(255),
+          subtitle: z.string().max(500).optional(),
+          targetCategory: z.string().max(128).optional(),
+          targetNeighborhood: z.string().max(128).optional(),
+          priceCents: z.number().int().min(0),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        requireBusinessPermission(memberships, input.serviceKey, "manage_billing");
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "manage_billing"
+        );
         const now = new Date();
         const endsAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30-day promotion
         return createBusinessPromotion({
@@ -1977,37 +2780,56 @@ export const appRouter = router({
     getActiveDirectoryPromotions: publicProcedure.query(async () => {
       const promos = await getActivePromotions();
       const now = Date.now();
-      return promos.filter(p =>
-        (!p.startsAt || new Date(p.startsAt).getTime() <= now) &&
-        (!p.endsAt || new Date(p.endsAt).getTime() >= now)
-      ).map(p => ({
-        serviceKey: p.serviceKey,
-        type: p.type,
-        headline: p.headline,
-        subtitle: p.subtitle,
-        targetCategory: p.targetCategory,
-        targetNeighborhood: p.targetNeighborhood,
-      }));
+      return promos
+        .filter(
+          p =>
+            (!p.startsAt || new Date(p.startsAt).getTime() <= now) &&
+            (!p.endsAt || new Date(p.endsAt).getTime() >= now)
+        )
+        .map(p => ({
+          serviceKey: p.serviceKey,
+          type: p.type,
+          headline: p.headline,
+          subtitle: p.subtitle,
+          targetCategory: p.targetCategory,
+          targetNeighborhood: p.targetNeighborhood,
+        }));
     }),
     // ─── Event Sponsorships ───
     getSponsorships: protectedProcedure
       .input(z.object({ serviceKey: z.string() }))
       .query(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "edit_listing"
+        );
         return getSponsorshipsForBusiness(input.serviceKey);
       }),
     createSponsorship: protectedProcedure
-      .input(z.object({
-        serviceKey: z.string(),
-        eventId: z.number(),
-        level: z.enum(["gold", "silver", "bronze"]),
-        message: z.string().max(500).optional(),
-        priceCents: z.number().int().min(0),
-      }))
+      .input(
+        z.object({
+          serviceKey: z.string(),
+          eventId: z.number(),
+          level: z.enum(["gold", "silver", "bronze"]),
+          message: z.string().max(500).optional(),
+          priceCents: z.number().int().min(0),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        requireBusinessPermission(memberships, input.serviceKey, "manage_billing");
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "manage_billing"
+        );
         return createEventSponsorship({
           serviceKey: input.serviceKey,
           eventId: input.eventId,
@@ -2024,21 +2846,26 @@ export const appRouter = router({
       .query(async ({ input }) => {
         // Sponsorships remain intentionally hidden until organizer payout and payment routing are approved.
         return [];
-
       }),
     // ─── Business Referrals (general) ───
     submitBizReferral: publicProcedure
-      .input(z.object({
-        serviceKey: z.string().optional(),
-        category: z.string().max(128).optional(),
-        name: z.string().min(1).max(255),
-        email: z.string().email(),
-        phone: z.string().max(32).optional(),
-        need: z.string().min(1).max(500),
-        source: z.string().max(128).optional(),
-      }))
+      .input(
+        z.object({
+          serviceKey: z.string().optional(),
+          category: z.string().max(128).optional(),
+          name: z.string().min(1).max(255),
+          email: z.string().email(),
+          phone: z.string().max(32).optional(),
+          need: z.string().min(1).max(500),
+          source: z.string().max(128).optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        const matches = await recommendBusinessMatches(input.need, input.category, input.serviceKey);
+        const matches = await recommendBusinessMatches(
+          input.need,
+          input.category,
+          input.serviceKey
+        );
         const referral = await createBusinessReferral({
           serviceKey: input.serviceKey ?? null,
           category: input.category ?? null,
@@ -2067,46 +2894,113 @@ export const appRouter = router({
     getBizReferrals: protectedProcedure
       .input(z.object({ serviceKey: z.string() }))
       .query(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "view_analytics"
+        );
         return getBusinessReferralsForService(input.serviceKey);
       }),
     updateBizReferralStatus: protectedProcedure
-      .input(z.object({
-        referralId: z.number(),
-        status: z.enum(["new", "referred", "connected", "completed", "archived"]),
-      }))
+      .input(
+        z.object({
+          referralId: z.number(),
+          status: z.enum([
+            "new",
+            "referred",
+            "connected",
+            "completed",
+            "archived",
+          ]),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
         const referral = await getBusinessReferralById(input.referralId);
-        if (!referral) throw new TRPCError({ code: "NOT_FOUND", message: "Referral not found." });
-        if (!referral?.serviceKey) throw new TRPCError({ code: "BAD_REQUEST", message: "This referral has not been assigned to a business." });
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, referral.serviceKey);
-        requireBusinessPermission(memberships, referral.serviceKey, "view_analytics");
+        if (!referral)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Referral not found.",
+          });
+        if (!referral?.serviceKey)
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "This referral has not been assigned to a business.",
+          });
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          referral.serviceKey
+        );
+        requireBusinessPermission(
+          memberships,
+          referral.serviceKey,
+          "view_analytics"
+        );
         await updateBusinessReferralStatus(input.referralId, input.status);
         return { success: true as const };
       }),
     getBizReferralAnalytics: protectedProcedure
       .input(z.object({ serviceKey: z.string() }))
       .query(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "view_analytics"
+        );
         return getBusinessReferralAnalytics(input.serviceKey);
       }),
     getBizReferralInvitations: protectedProcedure
       .input(z.object({ serviceKey: z.string() }))
       .query(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "view_analytics"
+        );
         return getReferralInvitationsForBusiness(input.serviceKey);
       }),
     inviteBusinessToReferral: protectedProcedure
-      .input(z.object({ referralId: z.number(), fromServiceKey: z.string(), toServiceKey: z.string(), message: z.string().max(500).optional() }))
+      .input(
+        z.object({
+          referralId: z.number(),
+          fromServiceKey: z.string(),
+          toServiceKey: z.string(),
+          message: z.string().max(500).optional(),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.fromServiceKey);
-        requireBusinessPermission(memberships, input.fromServiceKey, "view_analytics");
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.fromServiceKey
+        );
+        requireBusinessPermission(
+          memberships,
+          input.fromServiceKey,
+          "view_analytics"
+        );
         const referral = await getBusinessReferralById(input.referralId);
-        if (!referral) throw new TRPCError({ code: "NOT_FOUND", message: "Referral not found." });
-        if (referral.serviceKey !== input.fromServiceKey) throw new TRPCError({ code: "FORBIDDEN", message: "You can only invite partners for referrals assigned to your business." });
+        if (!referral)
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Referral not found.",
+          });
+        if (referral.serviceKey !== input.fromServiceKey)
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              "You can only invite partners for referrals assigned to your business.",
+          });
         const invitation = await createBusinessReferralInvitation({
           referralId: referral.id,
           fromServiceKey: input.fromServiceKey,
@@ -2117,13 +3011,29 @@ export const appRouter = router({
         return invitation;
       }),
     respondToReferralInvitation: protectedProcedure
-      .input(z.object({ invitationId: z.number(), serviceKey: z.string(), status: z.enum(["accepted", "declined"]) }))
+      .input(
+        z.object({
+          invitationId: z.number(),
+          serviceKey: z.string(),
+          status: z.enum(["accepted", "declined"]),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        requireBusinessPermission(memberships, input.serviceKey, "view_analytics");
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "view_analytics"
+        );
         const invitation = await getReferralInvitationById(input.invitationId);
         if (!invitation || invitation.toServiceKey !== input.serviceKey) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "Referral invitation not found." });
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Referral invitation not found.",
+          });
         }
         await updateReferralInvitationStatus(input.invitationId, input.status);
         if (input.status === "accepted") {
@@ -2140,11 +3050,13 @@ export const appRouter = router({
       return getAllPremiumListings();
     }),
     adminUpdate: adminProcedure
-      .input(z.object({
-        serviceKey: z.string(),
-        tier: z.enum(['basic', 'featured', 'premium', 'pro']),
-        billingEmail: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          serviceKey: z.string(),
+          tier: z.enum(["basic", "featured", "premium", "pro"]),
+          billingEmail: z.string().optional(),
+        })
+      )
       .mutation(async ({ input }) => {
         return upsertCanonicalPremiumListingForAdmin(input.serviceKey, {
           tier: input.tier,
@@ -2157,11 +3069,13 @@ export const appRouter = router({
   notifications: router({
     /** Get notifications for the current user */
     list: protectedProcedure
-      .input(z.object({
-        limit: z.number().min(1).max(100).optional().default(30),
-        offset: z.number().min(0).optional().default(0),
-        unreadOnly: z.boolean().optional().default(false),
-      }))
+      .input(
+        z.object({
+          limit: z.number().min(1).max(100).optional().default(30),
+          offset: z.number().min(0).optional().default(0),
+          unreadOnly: z.boolean().optional().default(false),
+        })
+      )
       .query(async ({ ctx, input }) => {
         return getUserNotifications(ctx.user.id, input);
       }),
@@ -2197,12 +3111,21 @@ export const appRouter = router({
 
     /** Update a notification preference */
     updatePreference: protectedProcedure
-      .input(z.object({
-        category: z.enum(["claim", "review", "payment", "event", "community", "system"]),
-        inApp: z.boolean().optional(),
-        email: z.boolean().optional(),
-        push: z.boolean().optional(),
-      }))
+      .input(
+        z.object({
+          category: z.enum([
+            "claim",
+            "review",
+            "payment",
+            "event",
+            "community",
+            "system",
+          ]),
+          inApp: z.boolean().optional(),
+          email: z.boolean().optional(),
+          push: z.boolean().optional(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         return upsertNotificationPreference({
           userId: ctx.user.id,
@@ -2215,12 +3138,14 @@ export const appRouter = router({
 
     /** Save a push subscription */
     savePushSubscription: protectedProcedure
-      .input(z.object({
-        endpoint: z.string(),
-        p256dh: z.string(),
-        auth: z.string(),
-        userAgent: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          endpoint: z.string(),
+          p256dh: z.string(),
+          auth: z.string(),
+          userAgent: z.string().optional(),
+        })
+      )
       .mutation(async ({ ctx, input }) => {
         return savePushSubscription({
           userId: ctx.user.id,
@@ -2240,27 +3165,45 @@ export const appRouter = router({
 
     /** Admin: send a notification to a specific user */
     adminSend: adminProcedure
-      .input(z.object({
-        userId: z.number(),
-        category: z.enum(["claim", "review", "payment", "event", "community", "system"]),
-        title: z.string().min(1).max(255),
-        body: z.string().min(1),
-        actionUrl: z.string().optional(),
-        icon: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          userId: z.number(),
+          category: z.enum([
+            "claim",
+            "review",
+            "payment",
+            "event",
+            "community",
+            "system",
+          ]),
+          title: z.string().min(1).max(255),
+          body: z.string().min(1),
+          actionUrl: z.string().optional(),
+          icon: z.string().optional(),
+        })
+      )
       .mutation(async ({ input }) => {
         return createNotification(input);
       }),
 
     /** Admin: broadcast a notification to all users */
     adminBroadcast: adminProcedure
-      .input(z.object({
-        category: z.enum(["claim", "review", "payment", "event", "community", "system"]),
-        title: z.string().min(1).max(255),
-        body: z.string().min(1),
-        actionUrl: z.string().optional(),
-        icon: z.string().optional(),
-      }))
+      .input(
+        z.object({
+          category: z.enum([
+            "claim",
+            "review",
+            "payment",
+            "event",
+            "community",
+            "system",
+          ]),
+          title: z.string().min(1).max(255),
+          body: z.string().min(1),
+          actionUrl: z.string().optional(),
+          icon: z.string().optional(),
+        })
+      )
       .mutation(async ({ input }) => {
         const { getDb } = await import("./db");
         const { users } = await import("../drizzle/schema");
@@ -2269,7 +3212,11 @@ export const appRouter = router({
         const allUsers = await db.select({ id: users.id }).from(users);
         let sent = 0;
         for (const user of allUsers) {
-          const enabled = await isNotificationEnabled(user.id, input.category, "inApp");
+          const enabled = await isNotificationEnabled(
+            user.id,
+            input.category,
+            "inApp"
+          );
           if (enabled) {
             await createNotification({ ...input, userId: user.id });
             sent++;
@@ -2282,19 +3229,34 @@ export const appRouter = router({
   // ─── AI Business Assistant ──────────────────────────────────
   businessAssistant: router({
     ask: publicProcedure
-      .input(z.object({
-        serviceKey: z.string().min(1),
-        question: z.string().min(1).max(500),
-        history: z.array(z.object({
-          role: z.enum(["user", "assistant"]),
-          content: z.string(),
-        })).max(10).default([]),
-      }))
+      .input(
+        z.object({
+          serviceKey: z.string().min(1),
+          question: z.string().min(1).max(500),
+          history: z
+            .array(
+              z.object({
+                role: z.enum(["user", "assistant"]),
+                content: z.string(),
+              })
+            )
+            .max(10)
+            .default([]),
+        })
+      )
       .mutation(async ({ input }) => {
         // Verify the business has an active Pro tier
         const listing = await getPremiumListing(input.serviceKey);
-        if (!listing || listing.tier !== "pro" || listing.paymentStatus !== "active") {
-          throw new TRPCError({ code: "FORBIDDEN", message: "AI assistant is only available for Business Pro listings." });
+        if (
+          !listing ||
+          listing.tier !== "pro" ||
+          listing.paymentStatus !== "active"
+        ) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              "AI assistant is only available for Business Pro listings.",
+          });
         }
 
         // Gather business context
@@ -2305,7 +3267,8 @@ export const appRouter = router({
         const businessContext = {
           serviceKey: input.serviceKey,
           displayName: override?.displayName ?? null,
-          description: override?.description ?? enriched?.verifiedAddress ?? null,
+          description:
+            override?.description ?? enriched?.verifiedAddress ?? null,
           phone: override?.phone ?? enriched?.verifiedPhone ?? null,
           website: override?.website ?? null,
           hours: override?.hours ?? enriched?.hoursJson ?? null,
@@ -2316,13 +3279,16 @@ export const appRouter = router({
           verifiedAddress: enriched?.verifiedAddress ?? null,
         };
 
-        const faqEntries = faqs.map(f => ({ question: f.question, answer: f.answer }));
+        const faqEntries = faqs.map(f => ({
+          question: f.question,
+          answer: f.answer,
+        }));
 
         const result = await askBusinessAssistant(
           businessContext,
           faqEntries,
           input.question,
-          input.history,
+          input.history
         );
 
         return result;
@@ -2333,7 +3299,8 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const listing = await getPremiumListing(input.serviceKey);
         return {
-          enabled: listing?.tier === "pro" && listing.paymentStatus === "active",
+          enabled:
+            listing?.tier === "pro" && listing.paymentStatus === "active",
         };
       }),
   }),
@@ -2343,27 +3310,59 @@ export const appRouter = router({
     list: protectedProcedure
       .input(z.object({ serviceKey: z.string() }))
       .query(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "edit_listing"
+        );
         const listing = await getPremiumListing(input.serviceKey);
-        if (!listing || listing.tier !== "pro" || listing.paymentStatus !== "active") {
-          throw new TRPCError({ code: "FORBIDDEN", message: "AI assistant memory is available for active Business Pro listings only." });
+        if (
+          !listing ||
+          listing.tier !== "pro" ||
+          listing.paymentStatus !== "active"
+        ) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              "AI assistant memory is available for active Business Pro listings only.",
+          });
         }
         return getBusinessFaqs(input.serviceKey);
       }),
 
     create: protectedProcedure
-      .input(z.object({
-        serviceKey: z.string(),
-        question: z.string().min(1).max(500),
-        answer: z.string().min(1).max(2000),
-      }))
+      .input(
+        z.object({
+          serviceKey: z.string(),
+          question: z.string().min(1).max(500),
+          answer: z.string().min(1).max(2000),
+        })
+      )
       .mutation(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "edit_listing"
+        );
         const listing = await getPremiumListing(input.serviceKey);
-        if (!listing || listing.tier !== "pro" || listing.paymentStatus !== "active") {
-          throw new TRPCError({ code: "FORBIDDEN", message: "AI assistant memory is available for active Business Pro listings only." });
+        if (
+          !listing ||
+          listing.tier !== "pro" ||
+          listing.paymentStatus !== "active"
+        ) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              "AI assistant memory is available for active Business Pro listings only.",
+          });
         }
         const id = await createBusinessFaq({
           serviceKey: input.serviceKey,
@@ -2376,11 +3375,26 @@ export const appRouter = router({
     delete: protectedProcedure
       .input(z.object({ id: z.number(), serviceKey: z.string() }))
       .mutation(async ({ input, ctx }) => {
-        const memberships = await getBusinessMembershipsForUser(ctx.user.id, input.serviceKey);
-        requireBusinessPermission(memberships, input.serviceKey, "edit_listing");
+        const memberships = await getBusinessMembershipsForUser(
+          ctx.user.id,
+          input.serviceKey
+        );
+        requireBusinessPermission(
+          memberships,
+          input.serviceKey,
+          "edit_listing"
+        );
         const listing = await getPremiumListing(input.serviceKey);
-        if (!listing || listing.tier !== "pro" || listing.paymentStatus !== "active") {
-          throw new TRPCError({ code: "FORBIDDEN", message: "AI assistant memory is available for active Business Pro listings only." });
+        if (
+          !listing ||
+          listing.tier !== "pro" ||
+          listing.paymentStatus !== "active"
+        ) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              "AI assistant memory is available for active Business Pro listings only.",
+          });
         }
         await deleteBusinessFaq(input.id, input.serviceKey);
         return { success: true };
