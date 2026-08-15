@@ -279,7 +279,7 @@ export default function GlobalSearch() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Open site search"
+        aria-label="Search CLT..."
         className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-muted/50 hover:bg-muted text-muted-foreground text-sm transition-colors"
       >
         <Search className="w-3.5 h-3.5" />

@@ -41,8 +41,7 @@ const DirectoryPreview = lazy(
   () => import("@/components/home/DirectoryPreview")
 );
 
-const HERO_IMAGE =
-  "https://files.manuscdn.com/user_upload_by_module/session_file/310519663270161707/YJZXYMWOczYLllKW.jpg";
+const HERO_IMAGE = "/images/hero-charlotte-skyline.webp";
 
 function Hero() {
   return (
@@ -75,33 +74,34 @@ function Hero() {
             honest advice from people who actually live here.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/neighborhoods">
-              <Button
-                size="lg"
-                className="bg-clt-teal-dark hover:bg-clt-teal text-white font-semibold px-6 shadow-lg shadow-clt-teal-dark/20"
-              >
+            <Button
+              asChild
+              size="lg"
+              className="bg-clt-teal-dark hover:bg-clt-teal text-white font-semibold px-6 shadow-lg shadow-clt-teal-dark/20"
+            >
+              <Link href="/neighborhoods">
                 Explore Neighborhoods
                 <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            </Link>
-            <Link href="/directory">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white/25 text-white hover:bg-white/10 font-semibold px-6 backdrop-blur-sm"
-              >
-                Browse Directory
-              </Button>
-            </Link>
-            <Link href="/find-your-home?source=homepage">
-              <Button
-                size="lg"
-                className="bg-clt-gold hover:bg-clt-gold/90 text-clt-navy font-semibold px-6 shadow-lg shadow-clt-gold/20"
-              >
+              </Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="border-white/25 text-white hover:bg-white/10 font-semibold px-6 backdrop-blur-sm"
+            >
+              <Link href="/directory">Browse Directory</Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              className="bg-clt-gold hover:bg-clt-gold/90 text-clt-navy font-semibold px-6 shadow-lg shadow-clt-gold/20"
+            >
+              <Link href="/find-your-home?source=homepage">
                 <HomeIcon className="mr-2 w-4 h-4" />
                 Find Your Home
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
 
           {/* Quick stats bar */}
@@ -151,23 +151,25 @@ function QuizCTA() {
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
-              <Link href="/quiz?source=homepage">
-                <Button
-                  size="lg"
-                  className="bg-clt-gold hover:bg-clt-gold/90 text-clt-navy font-bold text-base px-8 py-6 rounded-xl shadow-lg gap-2 whitespace-nowrap"
-                >
+              <Button
+                asChild
+                size="lg"
+                className="bg-clt-gold hover:bg-clt-gold/90 text-clt-navy font-bold text-base px-8 py-6 rounded-xl shadow-lg gap-2 whitespace-nowrap"
+              >
+                <Link href="/quiz?source=homepage">
                   Take the Quiz <ArrowRight className="w-5 h-5" />
-                </Button>
-              </Link>
-              <Link href="/newcomer-plan?source=homepage">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white/40 text-white hover:bg-white/10 font-semibold text-base px-8 py-6 rounded-xl gap-2 whitespace-nowrap"
-                >
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="border-white/40 text-white hover:bg-white/10 font-semibold text-base px-8 py-6 rounded-xl gap-2 whitespace-nowrap"
+              >
+                <Link href="/newcomer-plan?source=homepage">
                   Build My Plan <ArrowRight className="w-5 h-5" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -216,13 +218,26 @@ function NewsletterSignup() {
             <div className="mt-8 w-full rounded-2xl border border-primary/20 bg-primary/5 p-6">
               <div className="flex flex-col items-center gap-3">
                 <Sparkles className="w-8 h-8 text-primary" />
-                <p className="font-display font-semibold text-foreground">Your subscription request was received</p>
-                <p className="text-sm text-muted-foreground">If eligible, confirmation instructions may be sent to the address provided.</p>
+                <p className="font-display font-semibold text-foreground">
+                  Your subscription request was received
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  If eligible, confirmation instructions may be sent to the
+                  address provided.
+                </p>
               </div>
               <div className="mt-6 border-t border-primary/15 pt-5">
-                <p className="font-display font-semibold text-foreground">Follow Settle CLT around Charlotte</p>
-                <p className="mb-4 mt-1 text-sm text-muted-foreground">Pick your favorite platform for local finds between newsletters.</p>
-                <SocialFollowLinks surface="newsletter-success" variant="cards" />
+                <p className="font-display font-semibold text-foreground">
+                  Follow Settle CLT around Charlotte
+                </p>
+                <p className="mb-4 mt-1 text-sm text-muted-foreground">
+                  Pick your favorite platform for local finds between
+                  newsletters.
+                </p>
+                <SocialFollowLinks
+                  surface="newsletter-success"
+                  variant="cards"
+                />
               </div>
             </div>
           ) : (
@@ -255,7 +270,8 @@ function NewsletterSignup() {
           )}
 
           <p className="text-xs text-muted-foreground mt-4">
-            By subscribing, you agree to receive the Settle CLT newsletter. Free forever. Unsubscribe anytime.
+            By subscribing, you agree to receive the Settle CLT newsletter. Free
+            forever. Unsubscribe anytime.
           </p>
         </div>
       </div>
@@ -588,15 +604,13 @@ function TrendingInCLT() {
           category: t.tagCategory,
           count: t.engagementCount,
         }))
-      : (allTags || [])
-          .slice(0, 8)
-          .map(t => ({
-            id: t.id,
-            name: t.name,
-            slug: t.slug,
-            category: t.category,
-            count: 0,
-          }));
+      : (allTags || []).slice(0, 8).map(t => ({
+          id: t.id,
+          name: t.name,
+          slug: t.slug,
+          category: t.category,
+          count: 0,
+        }));
 
   if (isLoading || displayTags.length === 0) return null;
 
