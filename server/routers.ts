@@ -999,18 +999,22 @@ export const appRouter = router({
       )
       .query(async ({ input }) => {
         const allEvents = await getPublishedEvents(input ?? undefined);
-        // By default, filter out events whose end date (or start date if no end) is more than 1 month ago
+        // Public listings hide stale events. Events without an end date are
+        // treated as lasting 24 hours from their start so in-progress events
+        // stay visible; undated events are hidden unless includeExpired.
         if (input?.includeExpired) return allEvents;
-        const oneMonthAgo = new Date();
-        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        const now = new Date();
+        const DEFAULT_EVENT_DURATION_MS = 24 * 60 * 60 * 1000;
         return allEvents.filter(evt => {
-          const eventEnd = evt.endDate
-            ? new Date(evt.endDate)
-            : evt.startDate
-              ? new Date(evt.startDate)
-              : null;
-          if (!eventEnd) return true; // keep events with no dates
-          return eventEnd >= oneMonthAgo;
+          const start = evt.startDate ? new Date(evt.startDate) : null;
+          const end = evt.endDate ? new Date(evt.endDate) : null;
+          const eventEnd =
+            end && !Number.isNaN(end.getTime())
+              ? end
+              : start && !Number.isNaN(start.getTime())
+                ? new Date(start.getTime() + DEFAULT_EVENT_DURATION_MS)
+                : null;
+          return eventEnd !== null && eventEnd >= now;
         });
       }),
     getBySlug: publicProcedure

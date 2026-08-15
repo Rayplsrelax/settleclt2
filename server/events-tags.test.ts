@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
-import { getBlogPostBySlug } from "./db";
+import { getBlogPostBySlug, getPublishedEvents } from "./db";
 
 const mockEvents = [
   {
@@ -42,7 +42,12 @@ const mockEvents = [
 
 const mockTags = [
   { id: 1, name: "Outdoor", slug: "outdoor", category: "activity" },
-  { id: 2, name: "Family Friendly", slug: "family-friendly", category: "audience" },
+  {
+    id: 2,
+    name: "Family Friendly",
+    slug: "family-friendly",
+    category: "audience",
+  },
   { id: 3, name: "Free", slug: "free", category: "price" },
 ];
 
@@ -54,48 +59,86 @@ const mockContentTags = [
 vi.mock("./db", () => {
   const events = [
     {
-      id: 1, title: "South End Wine Walk", slug: "south-end-wine-walk-mar-2026",
+      id: 1,
+      title: "South End Wine Walk",
+      slug: "south-end-wine-walk-mar-2026",
       description: "Explore South End's best restaurants",
-      startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000),
-      venueName: "South End Rail Trail", venueAddress: "South End, Charlotte, NC",
-      neighborhood: "South End", category: "food-drink", isFeatured: "yes",
-      isRecurring: "no", status: "published", createdAt: new Date(), updatedAt: new Date(),
+      startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      endDate: new Date(
+        Date.now() + 7 * 24 * 60 * 60 * 1000 + 3 * 60 * 60 * 1000
+      ),
+      venueName: "South End Rail Trail",
+      venueAddress: "South End, Charlotte, NC",
+      neighborhood: "South End",
+      category: "food-drink",
+      isFeatured: "yes",
+      isRecurring: "no",
+      status: "published",
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
     {
-      id: 2, title: "Charlotte SHOUT!", slug: "charlotte-shout-2026",
+      id: 2,
+      title: "Charlotte SHOUT!",
+      slug: "charlotte-shout-2026",
       description: "Charlotte's signature spring arts festival",
-      startDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      venueName: "Various Uptown Venues", venueAddress: "Uptown Charlotte, NC",
-      neighborhood: "Uptown", category: "festivals", isFeatured: "yes",
-      isRecurring: "no", status: "published", createdAt: new Date(), updatedAt: new Date(),
+      startDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      venueName: "Various Uptown Venues",
+      venueAddress: "Uptown Charlotte, NC",
+      neighborhood: "Uptown",
+      category: "festivals",
+      isFeatured: "yes",
+      isRecurring: "no",
+      status: "published",
+      createdAt: new Date(),
+      updatedAt: new Date(),
     },
   ];
   const tags = [
     { id: 1, name: "Outdoor", slug: "outdoor", category: "activity" },
-    { id: 2, name: "Family Friendly", slug: "family-friendly", category: "audience" },
+    {
+      id: 2,
+      name: "Family Friendly",
+      slug: "family-friendly",
+      category: "audience",
+    },
     { id: 3, name: "Free", slug: "free", category: "price" },
   ];
   const contentTagItems = [
-    { tagId: 1, contentType: "event", contentId: "south-end-wine-walk-mar-2026" },
+    {
+      tagId: 1,
+      contentType: "event",
+      contentId: "south-end-wine-walk-mar-2026",
+    },
     { tagId: 2, contentType: "event", contentId: "charlotte-shout-2026" },
   ];
   return {
-    upsertUser: vi.fn(), getUserByOpenId: vi.fn(),
-    insertBusinessSubmission: vi.fn(), insertNewsletterSubscriber: vi.fn(),
-    upsertEnrichedService: vi.fn(), getEnrichedService: vi.fn(),
+    upsertUser: vi.fn(),
+    getUserByOpenId: vi.fn(),
+    insertBusinessSubmission: vi.fn(),
+    insertNewsletterSubscriber: vi.fn(),
+    upsertEnrichedService: vi.fn(),
+    getEnrichedService: vi.fn(),
     getAllEnrichedServices: vi.fn().mockResolvedValue([]),
-    addPassportEntry: vi.fn(), getPassportEntries: vi.fn().mockResolvedValue([]),
+    addPassportEntry: vi.fn(),
+    getPassportEntries: vi.fn().mockResolvedValue([]),
     deletePassportEntry: vi.fn(),
     getActiveBingoCards: vi.fn().mockResolvedValue([]),
     getBingoProgress: vi.fn().mockResolvedValue([]),
     upsertBingoProgress: vi.fn(),
-    addWishlistEntry: vi.fn(), removeWishlistEntry: vi.fn(),
+    addWishlistEntry: vi.fn(),
+    removeWishlistEntry: vi.fn(),
     getWishlistEntries: vi.fn().mockResolvedValue([]),
     updateWishlistNotes: vi.fn(),
-    addComment: vi.fn(), getComments: vi.fn().mockResolvedValue([]),
-    deleteComment: vi.fn(), voteComment: vi.fn(),
+    addComment: vi.fn(),
+    getComments: vi.fn().mockResolvedValue([]),
+    deleteComment: vi.fn(),
+    voteComment: vi.fn(),
     getUserVotes: vi.fn().mockResolvedValue([]),
-    createBlogPost: vi.fn(), updateBlogPost: vi.fn(), deleteBlogPost: vi.fn(),
+    createBlogPost: vi.fn(),
+    updateBlogPost: vi.fn(),
+    deleteBlogPost: vi.fn(),
     getPublishedBlogPosts: vi.fn().mockResolvedValue([]),
     getAllBlogPosts: vi.fn().mockResolvedValue([]),
     getBlogPostBySlug: vi.fn(),
@@ -105,21 +148,31 @@ vi.mock("./db", () => {
     createEvent: vi.fn().mockResolvedValue({ insertId: 1 }),
     updateEvent: vi.fn().mockResolvedValue({}),
     deleteEvent: vi.fn().mockResolvedValue({}),
-    getPublishedEvents: vi.fn().mockImplementation(() => Promise.resolve(events)),
+    getPublishedEvents: vi
+      .fn()
+      .mockImplementation(() => Promise.resolve(events)),
     getAllEvents: vi.fn().mockImplementation(() => Promise.resolve(events)),
-    getEventBySlug: vi.fn().mockImplementation((slug: string) =>
-      Promise.resolve(events.find((e) => e.slug === slug) ?? null)
-    ),
+    getEventBySlug: vi
+      .fn()
+      .mockImplementation((slug: string) =>
+        Promise.resolve(events.find(e => e.slug === slug) ?? null)
+      ),
     getEventById: vi.fn().mockResolvedValue(events[0]),
     createTag: vi.fn().mockResolvedValue({ insertId: 1 }),
     getAllTags: vi.fn().mockImplementation(() => Promise.resolve(tags)),
-    getTagBySlug: vi.fn().mockImplementation((slug: string) =>
-      Promise.resolve(tags.find((t) => t.slug === slug) ?? null)
-    ),
+    getTagBySlug: vi
+      .fn()
+      .mockImplementation((slug: string) =>
+        Promise.resolve(tags.find(t => t.slug === slug) ?? null)
+      ),
     addContentTag: vi.fn().mockResolvedValue({}),
     removeContentTag: vi.fn().mockResolvedValue({}),
-    getContentTags: vi.fn().mockImplementation(() => Promise.resolve(contentTagItems)),
-    getContentByTag: vi.fn().mockImplementation(() => Promise.resolve(contentTagItems)),
+    getContentTags: vi
+      .fn()
+      .mockImplementation(() => Promise.resolve(contentTagItems)),
+    getContentByTag: vi
+      .fn()
+      .mockImplementation(() => Promise.resolve(contentTagItems)),
     bulkAddContentTags: vi.fn().mockResolvedValue({}),
     getBusinessSubmissions: vi.fn().mockResolvedValue([]),
     getBusinessSubmissionCount: vi.fn().mockResolvedValue(0),
@@ -195,6 +248,42 @@ describe("Events API", () => {
       expect(event).toHaveProperty("startDate");
     }
   });
+
+  it("excludes stale and undated public events by default", async () => {
+    vi.mocked(getPublishedEvents).mockResolvedValueOnce([
+      {
+        ...mockEvents[0],
+        startDate: new Date(Date.now() - 3 * 86400000),
+        endDate: new Date(Date.now() - 2 * 86400000),
+      },
+      { ...mockEvents[1], startDate: null, endDate: null },
+      {
+        ...mockEvents[0],
+        id: 3,
+        startDate: new Date(Date.now() + 86400000),
+        endDate: null,
+      },
+      {
+        // In-progress single-day event without an end date: started 2 hours
+        // ago, must stay visible under the 24h default duration.
+        ...mockEvents[0],
+        id: 4,
+        startDate: new Date(Date.now() - 2 * 60 * 60 * 1000),
+        endDate: null,
+      },
+      {
+        // Endless-date event older than 24h is expired.
+        ...mockEvents[0],
+        id: 5,
+        startDate: new Date(Date.now() - 2 * 86400000),
+        endDate: null,
+      },
+    ] as any);
+
+    const result = await publicCaller.events.getPublished();
+
+    expect(result.map(evt => evt.id).sort()).toEqual([3, 4]);
+  });
 });
 
 describe("Blog API", () => {
@@ -215,7 +304,9 @@ describe("Blog API", () => {
       authorId: 1,
     } as any);
 
-    const result = await publicCaller.blog.getBySlug({ slug: "draft-test-post" });
+    const result = await publicCaller.blog.getBySlug({
+      slug: "draft-test-post",
+    });
 
     expect(result).toBeNull();
   });
@@ -237,7 +328,9 @@ describe("Blog API", () => {
       authorId: 1,
     } as any);
 
-    const result = await publicCaller.blog.getBySlug({ slug: "published-test-post" });
+    const result = await publicCaller.blog.getBySlug({
+      slug: "published-test-post",
+    });
 
     expect(result?.title).toBe("Published Test Post");
   });

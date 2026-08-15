@@ -13,6 +13,7 @@ describe("mobile homepage performance", () => {
     const heroUrl = home.match(/const HERO_IMAGE\s*=\s*\n?\s*"([^"]+)"/)?.[1];
 
     expect(heroUrl).toBeTruthy();
+    expect(heroUrl).toMatch(/\.(?:jpe?g|webp)$/);
     expect(indexHtml).not.toContain('rel="preload"\n      as="image"');
     expect(viteServer).toContain("injectRoutePreloads(template, req.path)");
     expect(viteServer).toContain(heroUrl);

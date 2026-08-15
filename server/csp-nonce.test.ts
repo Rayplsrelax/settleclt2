@@ -12,13 +12,24 @@ describe("CSP nonces", () => {
     expect(second).not.toBe(first);
   });
 
-  it("adds the response nonce to the Vite module entry script", () => {
+  it("adds the response nonce to every inline and module script", () => {
     const html =
-      '<div id="root"></div><script type="module" src="/assets/index.js"></script>';
+      '<script type="application/ld+json">{"@type":"WebSite"}</script><div id="root"></div><script type="module" src="/assets/index.js"></script>';
 
-    expect(injectCspNonce(html, "response_nonce")).toContain(
+    const result = injectCspNonce(html, "response_nonce");
+
+    expect(result).toContain(
+      '<script nonce="response_nonce" type="application/ld+json">'
+    );
+    expect(result).toContain(
       '<script nonce="response_nonce" type="module" src="/assets/index.js"></script>'
     );
+  });
+
+  it("does not replace an existing script nonce", () => {
+    const html = '<script nonce="existing">window.example = true;</script>';
+
+    expect(injectCspNonce(html, "response_nonce")).toBe(html);
   });
 
   it("fails closed when production HTML has no response nonce", () => {

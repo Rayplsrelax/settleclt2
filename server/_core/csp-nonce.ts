@@ -9,8 +9,11 @@ export function injectCspNonce(html: string, nonce: string): string {
     throw new Error("Missing CSP nonce");
   }
 
-  return html.replace(
-    /<script(\s+type=["']module["'])/i,
-    `<script nonce="${nonce}"$1`
-  );
+  return html.replace(/<script\b([^>]*)>/gi, (tag, attributes: string) => {
+    if (/\bnonce\s*=/i.test(attributes)) {
+      return tag;
+    }
+
+    return `<script nonce="${nonce}"${attributes}>`;
+  });
 }
