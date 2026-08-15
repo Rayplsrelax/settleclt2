@@ -3,6 +3,7 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 import { createServer } from "http";
 import net from "net";
+import path from "node:path";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
@@ -15,6 +16,7 @@ import { installAuthOriginGuard } from "./auth-origin";
 import { hermesRouter } from "../hermes-api";
 import { createSecurityMiddleware } from "./security";
 import { registerNewsletterRoutes } from "../newsletter-routes";
+import { loadReleaseManifest, registerReleaseRoutes } from "../release-info";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -46,6 +48,14 @@ async function startServer() {
     createSecurityMiddleware({
       analyticsEndpoint: process.env.VITE_ANALYTICS_ENDPOINT,
     })
+  );
+  registerReleaseRoutes(
+    app,
+    loadReleaseManifest(
+      process.env.RELEASE_MANIFEST_PATH ??
+        path.resolve(process.cwd(), "dist/release-manifest.json"),
+      process.env.NODE_ENV === "production"
+    )
   );
 
   // Stripe webhook must be BEFORE express.json() for raw body signature verification
