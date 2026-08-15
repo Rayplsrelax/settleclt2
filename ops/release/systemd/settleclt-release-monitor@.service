@@ -1,0 +1,19 @@
+[Unit]
+Description=Observe Settle CLT release %i and produce a rollback decision
+After=network-online.target nginx.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=settleclt-monitor
+Group=settleclt-monitor
+UMask=0077
+StateDirectory=settleclt-monitor
+StateDirectoryMode=0700
+Environment=MONITOR_CURL_CONFIG=/etc/settleclt-app/monitor-curl.conf
+ExecStart=/opt/settleclt2/ops/release/monitor-release.sh https://settleclt.com %i /var/lib/settleclt-monitor/%i.json 12 10 2
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/opt/settleclt2 /etc/settleclt-app/monitor-curl.conf

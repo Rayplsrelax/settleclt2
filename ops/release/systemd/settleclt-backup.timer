@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily verified Settle CLT backup
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+RandomizedDelaySec=15m
+Persistent=true
+Unit=settleclt-backup.service
+
+[Install]
+WantedBy=timers.target

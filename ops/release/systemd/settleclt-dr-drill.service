@@ -1,0 +1,23 @@
+[Unit]
+Description=Run isolated Settle CLT disaster-recovery restore drill
+After=network-online.target mysql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=settleclt-drill
+Group=settleclt-drill
+SupplementaryGroups=settleclt-backups
+UMask=0027
+StateDirectory=settleclt-drill
+StateDirectoryMode=0700
+EnvironmentFile=/etc/settleclt-app/drill.env
+Environment=DRILL_PROVISION_DEFAULTS_FILE=/etc/settleclt-app/mysql-drill-provision.cnf
+Environment=PROVISION_MYSQL_BIN=/usr/bin/mysql
+ExecStart=/opt/settleclt2/ops/release/run-latest-dr-drill.sh /var/backups/settleclt /var/lib/settleclt-drill/work /etc/settleclt-app/mysql-drill.cnf /var/lib/settleclt-drill/evidence
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/opt/settleclt2 /etc/settleclt-app/mysql-drill.cnf /etc/settleclt-app/mysql-drill-provision.cnf /etc/settleclt-app/drill.env
+ReadOnlyPaths=/var/backups/settleclt

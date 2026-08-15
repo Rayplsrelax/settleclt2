@@ -30,6 +30,9 @@ if (
 }
 NODE
 
+"$curl_bin" --fail --silent --show-error --max-time 10 \
+  "$base_url/health/ready" >/dev/null
+
 homepage=$(
   "$curl_bin" --fail --silent --show-error --max-time 10 \
     "$base_url/"

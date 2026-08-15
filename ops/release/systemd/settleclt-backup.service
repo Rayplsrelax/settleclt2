@@ -1,0 +1,18 @@
+[Unit]
+Description=Create verified Settle CLT application and database backup
+After=network-online.target mysql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=settleclt-backup
+Group=settleclt-backup
+SupplementaryGroups=settleclt-data settleclt-backups
+UMask=0027
+ExecStart=/opt/settleclt2/ops/release/create-backup.sh /opt/settleclt2 /var/backups/settleclt /etc/settleclt-app/mysql-backup.cnf settleclt 14
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/opt/settleclt2 /etc/settleclt-app/mysql-backup.cnf
+ReadWritePaths=/var/backups/settleclt

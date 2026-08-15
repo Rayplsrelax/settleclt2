@@ -29,12 +29,14 @@ Release verification must compare the endpoint's full `gitSha` with the approved
 ```text
 /opt/settleclt2/
   releases/<git-sha>/       immutable application release
-  shared/                   uploads and non-versioned runtime data
+  shared/public/manus-storage/ persistent uploads and generated media
   current -> releases/<sha> active release
   previous -> releases/<sha> last known-good release
 ```
 
 Secrets remain in the protected systemd `EnvironmentFile`; they are never copied into a release directory or manifest.
+
+Production requires `SETTLECLT_STORAGE_DIR=/opt/settleclt2/shared/public/manus-storage`. Slot-relative upload storage is prohibited because it would mutate immutable releases and could omit user files from backups.
 
 ## Target blue-green topology
 
@@ -67,7 +69,7 @@ Application rollback is permitted only while the previous release remains compat
 - Transition: backfill and dual-compatible application behavior.
 - Contract: destructive cleanup only after the rollback window closes.
 
-Automated rollback switches application traffic; it does not reverse database migrations.
+Application traffic rollback is human-approved and does not reverse database migrations. Monitoring can recommend rollback but cannot execute it.
 
 ## Required evidence per release
 
@@ -80,6 +82,8 @@ Automated rollback switches application traffic; it does not reverse database mi
 - Public route, header, API guard, and `/api/version` checks pass after cutover.
 - Previous release and database compatibility are recorded.
 - Monitoring window completes before old-slot retirement.
+- Backup evidence and checksums cover the database, exact release, and persistent shared tree.
+- A recent isolated restore drill has verified the recovery path.
 
 ## Emergency rollback decision
 

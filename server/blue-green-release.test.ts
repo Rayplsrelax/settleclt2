@@ -129,6 +129,11 @@ describe("blue-green release contracts", () => {
   it("defines isolated blue and green systemd slots on private ports", () => {
     const unit = readFileSync(systemdTemplate, "utf8");
     expect(unit).toContain("WorkingDirectory=/opt/settleclt2/slots/%i");
+    expect(unit).toContain("User=settleclt-web");
+    expect(unit).toContain("ProtectSystem=strict");
+    expect(unit).toContain(
+      "ReadWritePaths=/opt/settleclt2/shared/public/manus-storage"
+    );
     expect(unit).toContain("EnvironmentFile=/etc/settleclt-app/web.env");
     expect(unit).toContain("EnvironmentFile=/etc/settleclt-app/slot-%i.env");
     expect(unit).toContain("ExecStart=/usr/bin/node dist/index.js");
