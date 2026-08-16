@@ -4,6 +4,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   readlinkSync,
   rmSync,
   symlinkSync,
@@ -149,83 +150,81 @@ describe("blue-green release contracts", () => {
     );
   });
 
-  it("smoke-tests and switches traffic while preserving the prior upstream", () => {
+  it("smoke-tests and switches the edge proxy while preserving a backup", () => {
     const root = temporaryDirectory();
-    const blueSha = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     const greenSha = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
-    createRelease(root, "blue", blueSha);
-    createRelease(root, "green", greenSha);
-    mkdirSync(join(root, "traffic", "upstreams"), { recursive: true });
+    const nginxDirectory = join(root, "sites-enabled");
+    const backupDirectory = join(root, "nginx-backups");
+    mkdirSync(nginxDirectory, { recursive: true });
+    const site = join(nginxDirectory, "settleclt-com");
     writeFileSync(
-      join(root, "traffic", "upstreams", "blue.conf"),
-      "server 127.0.0.1:3002;\n"
+      site,
+      "server { location / { proxy_pass http://10.10.10.101:3002; } }\n"
     );
-    writeFileSync(
-      join(root, "traffic", "upstreams", "green.conf"),
-      "server 127.0.0.1:3003;\n"
-    );
-    const active = join(root, "active-upstream.conf");
-    symlinkSync(join(root, "traffic", "upstreams", "blue.conf"), active);
     const harness = createHarness(root);
 
-    execFileSync("bash", [switchScript, root, active, "green", greenSha], {
-      env: commandEnvironment(harness.fakeCurl, harness.fakeNginx),
-    });
-    execFileSync("bash", [switchScript, root, active, "green", greenSha], {
-      env: commandEnvironment(harness.fakeCurl, harness.fakeNginx),
-    });
-
-    expect(readFileSync(active, "utf8")).toContain("3003");
-    expect(readFileSync(join(root, "traffic", "previous"), "utf8")).toContain(
-      "3002"
+    execFileSync(
+      "bash",
+      [switchScript, site, backupDirectory, "10.10.10.101", "green", greenSha],
+      { env: commandEnvironment(harness.fakeCurl, harness.fakeNginx) }
     );
+    execFileSync(
+      "bash",
+      [switchScript, site, backupDirectory, "10.10.10.101", "green", greenSha],
+      { env: commandEnvironment(harness.fakeCurl, harness.fakeNginx) }
+    );
+
+    expect(readFileSync(site, "utf8")).toContain("10.10.10.101:3003");
     expect(readFileSync(harness.nginxLog, "utf8")).toContain("-t");
     expect(readFileSync(harness.nginxLog, "utf8")).toContain("-s reload");
+    expect(
+      readFileSync(
+        join(backupDirectory, readdirSync(backupDirectory)[0]),
+        "utf8"
+      )
+    ).toContain("10.10.10.101:3002");
   });
 
-  it("rolls traffic back to the preserved slot", () => {
+  it("rolls traffic back through the same verified edge switch", () => {
     const root = temporaryDirectory();
     const blueSha = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-    const greenSha = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
-    createRelease(root, "blue", blueSha);
-    createRelease(root, "green", greenSha);
-    mkdirSync(join(root, "traffic", "upstreams"), { recursive: true });
-    const blueConfig = join(root, "traffic", "upstreams", "blue.conf");
-    const greenConfig = join(root, "traffic", "upstreams", "green.conf");
-    writeFileSync(blueConfig, "server 127.0.0.1:3002;\n");
-    writeFileSync(greenConfig, "server 127.0.0.1:3003;\n");
-    const active = join(root, "active-upstream.conf");
-    symlinkSync(greenConfig, active);
-    symlinkSync(blueConfig, join(root, "traffic", "previous"));
+    const nginxDirectory = join(root, "sites-enabled");
+    const backupDirectory = join(root, "nginx-backups");
+    mkdirSync(nginxDirectory, { recursive: true });
+    const site = join(nginxDirectory, "settleclt-com");
+    writeFileSync(
+      site,
+      "server { location / { proxy_pass http://10.10.10.101:3003; } }\n"
+    );
     const harness = createHarness(root);
 
-    execFileSync("bash", [rollbackScript, root, active], {
-      env: commandEnvironment(harness.fakeCurl, harness.fakeNginx),
-    });
+    execFileSync(
+      "bash",
+      [rollbackScript, site, backupDirectory, "10.10.10.101", "blue", blueSha],
+      { env: commandEnvironment(harness.fakeCurl, harness.fakeNginx) }
+    );
 
-    expect(readlinkSync(active).split("\\").join("/")).toContain("blue.conf");
-    expect(readFileSync(active, "utf8")).toContain("3002");
+    expect(readFileSync(site, "utf8")).toContain("10.10.10.101:3002");
   });
 
-  it("restores the active upstream when nginx rejects a candidate", () => {
+  it("rejects backup paths inside the active nginx tree", () => {
     const root = temporaryDirectory();
-    const blueSha = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     const greenSha = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
-    createRelease(root, "blue", blueSha);
-    createRelease(root, "green", greenSha);
-    mkdirSync(join(root, "traffic", "upstreams"), { recursive: true });
-    const blueConfig = join(root, "traffic", "upstreams", "blue.conf");
-    const greenConfig = join(root, "traffic", "upstreams", "green.conf");
-    writeFileSync(blueConfig, "server 127.0.0.1:3002;\n");
-    writeFileSync(greenConfig, "server 127.0.0.1:3003;\n");
-    const active = join(root, "active-upstream.conf");
-    symlinkSync(blueConfig, active);
+    const nginxDirectory = join(root, "sites-enabled");
+    mkdirSync(nginxDirectory, { recursive: true });
+    const site = join(nginxDirectory, "settleclt-com");
+    writeFileSync(site, "proxy_pass http://10.10.10.101:3002;\n");
+    const aliasedBackup = join(
+      nginxDirectory,
+      "..",
+      "sites-enabled",
+      "backups"
+    );
     const harness = createHarness(root);
-    executable(harness.fakeNginx, "#!/usr/bin/env bash\nexit 1\n");
 
     const result = spawnSync(
       "bash",
-      [switchScript, root, active, "green", greenSha],
+      [switchScript, site, aliasedBackup, "10.10.10.101", "green", greenSha],
       {
         encoding: "utf8",
         env: commandEnvironment(harness.fakeCurl, harness.fakeNginx),
@@ -233,7 +232,66 @@ describe("blue-green release contracts", () => {
     );
 
     expect(result.status).not.toBe(0);
-    expect(result.stderr).toContain("nginx rejected the candidate upstream");
-    expect(readFileSync(active, "utf8")).toContain("3002");
+    expect(result.stderr).toContain(
+      "outside the active nginx configuration tree"
+    );
+    expect(readFileSync(site, "utf8")).toContain("10.10.10.101:3002");
+  });
+
+  it("rejects ambiguous edge proxy configurations without mutation", () => {
+    const root = temporaryDirectory();
+    const greenSha = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+    const nginxDirectory = join(root, "sites-enabled");
+    const backupDirectory = join(root, "nginx-backups");
+    mkdirSync(nginxDirectory, { recursive: true });
+    const site = join(nginxDirectory, "settleclt-com");
+    const original = [
+      "proxy_pass http://10.10.10.101:3002;",
+      "proxy_pass   http://10.10.10.101:3002;",
+      "",
+    ].join("\n");
+    writeFileSync(site, original);
+    const harness = createHarness(root);
+
+    const result = spawnSync(
+      "bash",
+      [switchScript, site, backupDirectory, "10.10.10.101", "green", greenSha],
+      {
+        encoding: "utf8",
+        env: commandEnvironment(harness.fakeCurl, harness.fakeNginx),
+      }
+    );
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain("exactly one Settle CLT slot proxy_pass");
+    expect(readFileSync(site, "utf8")).toBe(original);
+  });
+
+  it("restores the edge site when nginx rejects a candidate", () => {
+    const root = temporaryDirectory();
+    const greenSha = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+    const nginxDirectory = join(root, "sites-enabled");
+    const backupDirectory = join(root, "nginx-backups");
+    mkdirSync(nginxDirectory, { recursive: true });
+    const site = join(nginxDirectory, "settleclt-com");
+    writeFileSync(
+      site,
+      "server { location / { proxy_pass http://10.10.10.101:3002; } }\n"
+    );
+    const harness = createHarness(root);
+    executable(harness.fakeNginx, "#!/usr/bin/env bash\nexit 1\n");
+
+    const result = spawnSync(
+      "bash",
+      [switchScript, site, backupDirectory, "10.10.10.101", "green", greenSha],
+      {
+        encoding: "utf8",
+        env: commandEnvironment(harness.fakeCurl, harness.fakeNginx),
+      }
+    );
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain("nginx rejected the candidate");
+    expect(readFileSync(site, "utf8")).toContain("10.10.10.101:3002");
   });
 });

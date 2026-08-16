@@ -14,6 +14,7 @@ import { afterEach, describe, expect, it } from "vitest";
 const prepareScript = resolve("ops/release/prepare-release.sh");
 const activateScript = resolve("ops/release/activate-release.sh");
 const rollbackScript = resolve("ops/release/rollback-release.sh");
+const ledgerVerifier = resolve("scripts/verify-migration-ledger.mjs");
 const temporaryDirectories: string[] = [];
 
 function temporaryDirectory(): string {
@@ -86,6 +87,31 @@ describe("immutable release scripts", () => {
       "one"
     );
     expect(statSync(join(release, "dist", "index.js")).mode & 0o222).toBe(0);
+  });
+
+  it("packages release operations alongside dist", () => {
+    const packageScript = resolve("scripts/package-release-artifact.mjs");
+    const artifact = resolve("release-artifact");
+    expect(readFileSync(packageScript, "utf8")).toContain(
+      'cpSync(releaseOps, resolve(artifact, "ops", "release")'
+    );
+    expect(
+      readFileSync(resolve("ops/release/systemd/settleclt@.service"), "utf8")
+    ).toContain("ExecStart=/usr/bin/node dist/index.js");
+    expect(
+      readFileSync(resolve("ops/release/monitor-release.sh"), "utf8")
+    ).toContain("monitoring hold");
+  });
+
+  it("rejects ambiguous migration ledger tips", () => {
+    const source = readFileSync(ledgerVerifier, "utf8").replace(/\s+/g, " ");
+    expect(source).toContain(
+      "WHERE created_at = (SELECT MAX(created_at) FROM __drizzle_migrations)"
+    );
+    expect(source).toContain("if (rows.length !== 1)");
+    expect(source).toContain(
+      "migration ledger has multiple rows at the latest timestamp"
+    );
   });
 
   it("rejects an artifact whose manifest does not match the requested SHA", () => {
