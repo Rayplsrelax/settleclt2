@@ -88,6 +88,20 @@ describe("immutable release scripts", () => {
     expect(statSync(join(release, "dist", "index.js")).mode & 0o222).toBe(0);
   });
 
+  it("packages release operations alongside dist", () => {
+    const packageScript = resolve("scripts/package-release-artifact.mjs");
+    const artifact = resolve("release-artifact");
+    expect(readFileSync(packageScript, "utf8")).toContain(
+      'cpSync(releaseOps, resolve(artifact, "ops", "release")'
+    );
+    expect(
+      readFileSync(resolve("ops/release/systemd/settleclt@.service"), "utf8")
+    ).toContain("ExecStart=/usr/bin/node dist/index.js");
+    expect(
+      readFileSync(resolve("ops/release/monitor-release.sh"), "utf8")
+    ).toContain("monitoring hold");
+  });
+
   it("rejects an artifact whose manifest does not match the requested SHA", () => {
     const root = temporaryDirectory();
     const releaseRoot = join(root, "releases-root");
