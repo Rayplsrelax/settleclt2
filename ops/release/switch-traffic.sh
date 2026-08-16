@@ -5,68 +5,90 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 # shellcheck source=./lib.sh
 source "$SCRIPT_DIR/lib.sh"
 
-[[ $# -eq 4 ]] || fail "usage: switch-traffic.sh RELEASE_ROOT ACTIVE_UPSTREAM_LINK SLOT GIT_SHA"
-release_root=$1
-active_link=$2
-slot=$3
-git_sha=$4
+[[ $# -eq 5 ]] || fail "usage: switch-traffic.sh NGINX_SITE BACKUP_DIR UPSTREAM_HOST SLOT GIT_SHA"
+nginx_site=$1
+backup_dir=$2
+upstream_host=$3
+slot=$4
+git_sha=$5
 require_slot "$slot"
 require_release_sha "$git_sha"
+if [[ "$nginx_site" != /* && ! "$nginx_site" =~ ^[A-Za-z]:[\\/] ]] || [[ "$backup_dir" != /* && ! "$backup_dir" =~ ^[A-Za-z]:[\\/] ]]; then
+  fail "nginx site and backup directory must be absolute paths"
+fi
+[[ -f "$nginx_site" && ! -L "$nginx_site" ]] || fail "nginx site must be a regular non-symlink file"
+[[ "$backup_dir" != "$(dirname -- "$nginx_site")" ]] || fail "backups must live outside the active nginx configuration directory"
+[[ "$upstream_host" =~ ^[A-Za-z0-9.-]+$ ]] || fail "upstream host is invalid"
 
-slot_release="$release_root/slots/$slot"
-[[ -L "$slot_release" ]] || fail "slot release link is missing"
-[[ -f "$slot_release/dist/release-manifest.json" ]] || fail "slot release manifest is missing"
-manifest_sha=$(node -p "JSON.parse(require('fs').readFileSync(process.argv[1], 'utf8')).gitSha" "$slot_release/dist/release-manifest.json")
-[[ "$manifest_sha" == "$git_sha" ]] || fail "slot release manifest does not match requested SHA"
-
-candidate="$release_root/traffic/upstreams/$slot.conf"
-[[ -f "$candidate" ]] || fail "slot upstream configuration is missing"
-expected_upstream="server 127.0.0.1:$(slot_port "$slot");"
-actual_upstream=$(tr -d '\r' < "$candidate" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-[[ "$actual_upstream" == "$expected_upstream" ]] || fail "slot upstream does not match its private port"
-"$SCRIPT_DIR/smoke-slot.sh" "$slot" "$git_sha"
-
+candidate_port=$(slot_port "$slot")
+candidate_origin="http://$upstream_host:$candidate_port"
+curl_bin=${CURL_BIN:-curl}
 nginx_bin=${NGINX_BIN:-nginx}
-previous_link="$release_root/traffic/previous"
-old_active=""
-old_previous=""
-[[ ! -e "$active_link" || -L "$active_link" ]] || fail "active upstream exists but is not a symbolic link"
-[[ ! -e "$previous_link" || -L "$previous_link" ]] || fail "previous upstream exists but is not a symbolic link"
-[[ -L "$active_link" ]] && old_active=$(readlink -- "$active_link")
-[[ -L "$previous_link" ]] && old_previous=$(readlink -- "$previous_link")
 
-if [[ -L "$active_link" && "$active_link" -ef "$candidate" ]]; then
-  "$nginx_bin" -t || fail "nginx rejected the active upstream"
+version=$($curl_bin -fsS --max-time 5 "$candidate_origin/api/version") || fail "candidate version probe failed"
+VERSION_JSON="$version" EXPECTED_SHA="$git_sha" node <<'NODE'
+const value = JSON.parse(process.env.VERSION_JSON);
+if (value.app !== "settle-clt" || value.gitSha !== process.env.EXPECTED_SHA) {
+  throw new Error("candidate version does not match requested SHA");
+}
+NODE
+$curl_bin -fsS --max-time 5 "$candidate_origin/health/ready" >/dev/null || fail "candidate readiness probe failed"
+$curl_bin -fsS --max-time 5 "$candidate_origin/" >/dev/null || fail "candidate homepage probe failed"
+
+configured_port=$(UPSTREAM_HOST="$upstream_host" NGINX_SITE="$nginx_site" node <<'NODE'
+const fs = require("node:fs");
+const source = fs.readFileSync(process.env.NGINX_SITE, "utf8");
+const escaped = process.env.UPSTREAM_HOST.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const matches = [...source.matchAll(new RegExp(`proxy_pass\\s+http://${escaped}:(3002|3003);`, "g"))];
+if (matches.length !== 1) process.exit(2);
+process.stdout.write(matches[0][1]);
+NODE
+) || fail "nginx site must contain exactly one Settle CLT slot proxy_pass"
+current_port=$configured_port
+
+if [[ "$current_port" == "$candidate_port" ]]; then
+  "$nginx_bin" -t || fail "nginx rejected the active site"
   printf 'traffic already active: %s %s\n' "$slot" "$git_sha"
   exit 0
 fi
 
-restore_links() {
-  if [[ -n "$old_active" ]]; then
-    atomic_symlink "$old_active" "$active_link"
-  else
-    rm -f -- "$active_link"
-  fi
-  if [[ -n "$old_previous" ]]; then
-    atomic_symlink "$old_previous" "$previous_link"
-  else
-    rm -f -- "$previous_link"
-  fi
+mkdir -p -- "$backup_dir"
+[[ -d "$backup_dir" && ! -L "$backup_dir" ]] || fail "backup directory must be a real directory"
+stamp=$(date -u +%Y%m%dT%H%M%SZ)
+backup="$backup_dir/$(basename -- "$nginx_site").before-${current_port}-to-${candidate_port}.$stamp"
+cp -a -- "$nginx_site" "$backup"
+
+restore_site() {
+  cp -a -- "$backup" "$nginx_site"
 }
 
-if [[ -n "$old_active" ]]; then
-  atomic_symlink "$old_active" "$previous_link"
-fi
-atomic_symlink "$candidate" "$active_link"
+UPSTREAM_HOST="$upstream_host" NGINX_SITE="$nginx_site" CURRENT_PORT="$current_port" CANDIDATE_PORT="$candidate_port" node <<'NODE'
+const fs = require("node:fs");
+const path = process.env.NGINX_SITE;
+const source = fs.readFileSync(path, "utf8");
+const escaped = process.env.UPSTREAM_HOST.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const pattern = new RegExp(`(proxy_pass\\s+http://${escaped}:)${process.env.CURRENT_PORT}(;)`, "g");
+const matches = [...source.matchAll(pattern)];
+if (matches.length !== 1) throw new Error("expected exactly one current upstream");
+const temporary = `${path}.tmp-${process.pid}`;
+fs.writeFileSync(
+  temporary,
+  source.replace(pattern, `$1${process.env.CANDIDATE_PORT}$2`),
+  { mode: fs.statSync(path).mode }
+);
+fs.renameSync(temporary, path);
+NODE
 
 if ! "$nginx_bin" -t; then
-  restore_links
-  fail "nginx rejected the candidate upstream"
+  restore_site
+  fail "nginx rejected the candidate; prior site restored"
 fi
 if ! "$nginx_bin" -s reload; then
-  restore_links
+  restore_site
   "$nginx_bin" -t && "$nginx_bin" -s reload || true
-  fail "nginx reload failed; prior upstream restored"
+  fail "nginx reload failed; prior site restored"
 fi
 
 printf 'traffic switched: %s %s\n' "$slot" "$git_sha"
+printf 'backup: %s\n' "$backup"
+printf 'rollback: cp -a -- %q %q && %q -t && %q -s reload\n' "$backup" "$nginx_site" "$nginx_bin" "$nginx_bin"

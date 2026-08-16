@@ -2,10 +2,19 @@
 
 These scripts prepare and switch release directories. They do not restart services, change Nginx, run migrations, or touch production unless an operator explicitly invokes them there.
 
+## Build artifact
+
+`pnpm run build` creates `release-artifact/` with both the executable application and the release controls needed on the target host:
+
+- `dist/`
+- `ops/release/`, including systemd templates, smoke/monitor scripts, and traffic controls
+
+Use `release-artifact/` as the input to `prepare-release.sh`; do not construct a dist-only artifact manually.
+
 ## Prepare
 
 ```bash
-ops/release/prepare-release.sh /opt/settleclt2 /path/to/artifact FULL_40_CHARACTER_SHA
+ops/release/prepare-release.sh /opt/settleclt2 ./release-artifact FULL_40_CHARACTER_SHA
 ```
 
 The artifact must contain `dist/release-manifest.json` with the same SHA. A new release is copied through a staging directory, made read-only, and renamed into `releases/<sha>`. Reusing a SHA is allowed only when the existing directory exactly matches the artifact.
@@ -65,29 +74,43 @@ The smoke test calls the private loopback port, requires the exact release SHA f
 
 ## Nginx traffic switch
 
-`nginx/settleclt-upstream.conf` defines the `settleclt_app` upstream. The existing HTTPS server block must proxy to `http://settleclt_app` and include an operator-managed active-upstream symlink at `/etc/nginx/settleclt-active-upstream.conf`.
-
-The switch command performs the private smoke test again, verifies an exact loopback upstream, preserves the prior target, atomically replaces the active symlink, runs `nginx -t`, and reloads Nginx:
+Public traffic terminates on VM 103. The production site file is `/etc/nginx/sites-enabled/settleclt-com`, and it proxies to VM 101 at `10.10.10.101`. The switch command performs private candidate checks, changes exactly one Settle CLT `proxy_pass`, stores a timestamped backup outside `sites-enabled`, runs `nginx -t`, and reloads Nginx:
 
 ```bash
 ops/release/switch-traffic.sh \
-  /opt/settleclt2 \
-  /etc/nginx/settleclt-active-upstream.conf \
+  /etc/nginx/sites-enabled/settleclt-com \
+  /var/backups/settleclt-nginx \
+  10.10.10.101 \
   green \
   FULL_40_CHARACTER_SHA
 ```
 
-If Nginx validation or reload fails, the prior links are restored. Repeating a switch to the already-active slot does not overwrite the rollback target.
-
-Rollback uses the preserved slot and validates it before switching:
+Rollback is explicit and uses the prior slot's full SHA:
 
 ```bash
 ops/release/rollback-traffic.sh \
-  /opt/settleclt2 \
-  /etc/nginx/settleclt-active-upstream.conf
+  /etc/nginx/sites-enabled/settleclt-com \
+  /var/backups/settleclt-nginx \
+  10.10.10.101 \
+  blue \
+  PREVIOUS_FULL_SHA
 ```
 
+The switch prints an exact backup restore command after success. Backup files must not be placed in `sites-enabled`; Nginx loads files in that directory and duplicate server names create conflicting virtual-host warnings.
+
 Traffic rollback does not reverse database migrations. Confirm that the previous application release remains compatible with the current schema.
+
+## Migration ledger preflight
+
+Production's historical migration rows came from an earlier migration-file provenance, but Drizzle's MySQL migrator uses only the newest `created_at` value to select future migrations. Do not rewrite verified historical rows merely to make every old hash match the current checkout.
+
+After applying or registering a migration, and immediately before the next production migration, run:
+
+```bash
+DATABASE_URL=... pnpm run db:verify-ledger
+```
+
+The command is read-only. It requires the latest production ledger timestamp and SHA-256 hash to match the latest repository journal entry. Production is reconciled at `0031_newsletter_subscription_lifecycle`; any future mismatch is a stop condition for schema and ledger inspection, not authorization to reset or replay migrations.
 
 ## Persistent uploads
 
