@@ -49,4 +49,18 @@ describe("CSP nonces", () => {
     );
     expect(source).toContain("express.static(distPath, { index: false })");
   });
+
+  it("serves the SPA shell unmodified on preview hosts where no nonce is minted", () => {
+    // Preview hosts intentionally run without production CSP, so the
+    // security middleware sets no res.locals.cspNonce and the shell must
+    // still be served (regression: previously threw "Missing CSP nonce").
+    const source = readFileSync(
+      resolve(__dirname, "./_core/vite.ts"),
+      "utf-8"
+    ).replace(/\s+/g, " ");
+
+    expect(source).toContain(
+      "res.locals.cspNonce ? injectCspNonce(routeTemplate, res.locals.cspNonce) : routeTemplate"
+    );
+  });
 });
