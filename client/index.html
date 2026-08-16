@@ -156,6 +156,24 @@
   </head>
 
   <body>
+    <script>
+      // Pre-paint theme resolution: apply the stored theme (or OS preference)
+      // before React mounts so dark-mode users never see a light flash.
+      (function () {
+        try {
+          var stored = localStorage.getItem("theme");
+          var dark =
+            stored === "dark" ||
+            (stored !== "light" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          var root = document.documentElement;
+          root.classList.toggle("dark", dark);
+          root.style.colorScheme = dark ? "dark" : "light";
+        } catch (e) {
+          /* private mode or blocked storage — default light */
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
