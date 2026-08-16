@@ -207,6 +207,116 @@ describe("blue-green release contracts", () => {
     expect(readFileSync(site, "utf8")).toContain("10.10.10.101:3002");
   });
 
+  it("rejects backup paths inside the active nginx tree", () => {
+    const root = temporaryDirectory();
+    const greenSha = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+    const nginxDirectory = join(root, "sites-enabled");
+    mkdirSync(nginxDirectory, { recursive: true });
+    const site = join(nginxDirectory, "settleclt-com");
+    writeFileSync(site, "proxy_pass http://10.10.10.101:3002;\n");
+    const aliasedBackup = join(
+      nginxDirectory,
+      "..",
+      "sites-enabled",
+      "backups"
+    );
+    const harness = createHarness(root);
+
+    const result = spawnSync(
+      "bash",
+      [switchScript, site, aliasedBackup, "10.10.10.101", "green", greenSha],
+      {
+        encoding: "utf8",
+        env: commandEnvironment(harness.fakeCurl, harness.fakeNginx),
+      }
+    );
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain(
+      "outside the active nginx configuration tree"
+    );
+    expect(readFileSync(site, "utf8")).toContain("10.10.10.101:3002");
+  });
+
+  it("rejects symlinked backup parents that resolve into the active nginx tree", () => {
+    const root = temporaryDirectory();
+    const greenSha = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+    const nginxDirectory = join(root, "sites-enabled");
+    mkdirSync(nginxDirectory, { recursive: true });
+    const site = join(nginxDirectory, "settleclt-com");
+    writeFileSync(site, "proxy_pass http://10.10.10.101:3002;\n");
+    symlinkSync(nginxDirectory, join(root, "aliased-backups"), "dir");
+    const backupDirectory = join(root, "aliased-backups", "settleclt");
+    const harness = createHarness(root);
+
+    const result = spawnSync(
+      "bash",
+      [switchScript, site, backupDirectory, "10.10.10.101", "green", greenSha],
+      {
+        encoding: "utf8",
+        env: commandEnvironment(harness.fakeCurl, harness.fakeNginx),
+      }
+    );
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain(
+      "outside the active nginx configuration tree"
+    );
+    expect(readFileSync(site, "utf8")).toContain("10.10.10.101:3002");
+    expect(readdirSync(nginxDirectory)).toEqual(["settleclt-com"]);
+  });
+
+  it("rejects backup directories whose parent does not exist", () => {
+    const root = temporaryDirectory();
+    const greenSha = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+    const nginxDirectory = join(root, "sites-enabled");
+    mkdirSync(nginxDirectory, { recursive: true });
+    const site = join(nginxDirectory, "settleclt-com");
+    writeFileSync(site, "proxy_pass http://10.10.10.101:3002;\n");
+    const backupDirectory = join(root, "missing-parent", "nested", "backups");
+    const harness = createHarness(root);
+
+    const result = spawnSync(
+      "bash",
+      [switchScript, site, backupDirectory, "10.10.10.101", "green", greenSha],
+      {
+        encoding: "utf8",
+        env: commandEnvironment(harness.fakeCurl, harness.fakeNginx),
+      }
+    );
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain("backup directory parent must exist");
+    expect(readFileSync(site, "utf8")).toContain("10.10.10.101:3002");
+  });
+
+  it("rejects rollback when the candidate reports the wrong release SHA", () => {
+    const root = temporaryDirectory();
+    const wrongSha = "dddddddddddddddddddddddddddddddddddddddd";
+    const nginxDirectory = join(root, "sites-enabled");
+    const backupDirectory = join(root, "nginx-backups");
+    mkdirSync(nginxDirectory, { recursive: true });
+    const site = join(nginxDirectory, "settleclt-com");
+    writeFileSync(
+      site,
+      "server { location / { proxy_pass http://10.10.10.101:3003; } }\n"
+    );
+    const harness = createHarness(root);
+
+    const result = spawnSync(
+      "bash",
+      [rollbackScript, site, backupDirectory, "10.10.10.101", "blue", wrongSha],
+      {
+        encoding: "utf8",
+        env: commandEnvironment(harness.fakeCurl, harness.fakeNginx),
+      }
+    );
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain("candidate version does not match");
+    expect(readFileSync(site, "utf8")).toContain("10.10.10.101:3003");
+  });
+
   it("rejects ambiguous edge proxy configurations without mutation", () => {
     const root = temporaryDirectory();
     const greenSha = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";

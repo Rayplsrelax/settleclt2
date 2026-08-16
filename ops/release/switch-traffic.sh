@@ -17,8 +17,32 @@ if [[ "$nginx_site" != /* && ! "$nginx_site" =~ ^[A-Za-z]:[\\/] ]] || [[ "$backu
   fail "nginx site and backup directory must be absolute paths"
 fi
 [[ -f "$nginx_site" && ! -L "$nginx_site" ]] || fail "nginx site must be a regular non-symlink file"
-[[ "$backup_dir" != "$(dirname -- "$nginx_site")" ]] || fail "backups must live outside the active nginx configuration directory"
 [[ "$upstream_host" =~ ^[A-Za-z0-9.-]+$ ]] || fail "upstream host is invalid"
+containment_status=0
+ACTIVE_CONFIG_DIR="$(dirname -- "$nginx_site")" BACKUP_DIR="$backup_dir" node <<'NODE' || containment_status=$?
+const fs = require("node:fs");
+const path = require("node:path");
+const active = fs.realpathSync(process.env.ACTIVE_CONFIG_DIR);
+const backupParent = path.dirname(process.env.BACKUP_DIR);
+let backupParentReal;
+try {
+  backupParentReal = fs.realpathSync(backupParent);
+} catch {
+  process.exit(3);
+}
+const backup = path.resolve(backupParentReal, path.basename(process.env.BACKUP_DIR));
+const relative = path.relative(active, backup);
+if (relative === "" || (!relative.startsWith(`..${path.sep}`) && relative !== ".." && !path.isAbsolute(relative))) {
+  process.exit(2);
+}
+NODE
+case "$containment_status" in
+  0) ;;
+  3) fail "backup directory parent must exist" ;;
+  *) fail "backups must live outside the active nginx configuration tree" ;;
+esac
+mkdir -p -- "$backup_dir"
+[[ -d "$backup_dir" && ! -L "$backup_dir" ]] || fail "backup directory must be a real directory"
 
 candidate_port=$(slot_port "$slot")
 candidate_origin="http://$upstream_host:$candidate_port"
@@ -52,8 +76,6 @@ if [[ "$current_port" == "$candidate_port" ]]; then
   exit 0
 fi
 
-mkdir -p -- "$backup_dir"
-[[ -d "$backup_dir" && ! -L "$backup_dir" ]] || fail "backup directory must be a real directory"
 stamp=$(date -u +%Y%m%dT%H%M%SZ)
 backup="$backup_dir/$(basename -- "$nginx_site").before-${current_port}-to-${candidate_port}.$stamp"
 cp -a -- "$nginx_site" "$backup"
