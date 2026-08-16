@@ -139,10 +139,12 @@ describe("blue-green release contracts", () => {
     expect(unit).toContain("EnvironmentFile=/etc/settleclt-app/slot-%i.env");
     expect(unit).toContain("ExecStart=/usr/bin/node dist/index.js");
 
-    expect(readFileSync(blueEnvironment, "utf8")).toContain(
+    const CR = String.fromCharCode(13);
+    const normalize = (value: string) => value.split(CR).join("");
+    expect(normalize(readFileSync(blueEnvironment, "utf8"))).toContain(
       "HOST=127.0.0.1\nPORT=3002"
     );
-    expect(readFileSync(greenEnvironment, "utf8")).toContain(
+    expect(normalize(readFileSync(greenEnvironment, "utf8"))).toContain(
       "HOST=127.0.0.1\nPORT=3003"
     );
     expect(readFileSync(serverEntry, "utf8")).toMatch(
