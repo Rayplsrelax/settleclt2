@@ -2,8 +2,25 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { useState } from "react";
-import { Menu, X, LogIn, User, LogOut, Heart, Stamp, ChevronDown, Shield, Grid3X3, Trophy, Building2, Settings, Home, DollarSign } from "lucide-react";
+import {
+  Menu,
+  X,
+  LogIn,
+  User,
+  LogOut,
+  Heart,
+  Stamp,
+  ChevronDown,
+  Shield,
+  Grid3X3,
+  Trophy,
+  Building2,
+  Settings,
+  Home,
+  DollarSign,
+} from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
+import ThemeToggle from "@/components/ThemeToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,7 +43,7 @@ function getInitials(name: string | null | undefined): string {
   if (!name) return "U";
   return name
     .split(" ")
-    .map((w) => w[0])
+    .map(w => w[0])
     .filter(Boolean)
     .slice(0, 2)
     .join("")
@@ -56,8 +73,12 @@ function UserMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
         <div className="px-3 py-2">
-          <p className="text-sm font-medium text-foreground truncate">{user.name || "User"}</p>
-          <p className="text-xs text-muted-foreground truncate">{user.email || ""}</p>
+          <p className="text-sm font-medium text-foreground truncate">
+            {user.name || "User"}
+          </p>
+          <p className="text-xs text-muted-foreground truncate">
+            {user.email || ""}
+          </p>
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => navigate("/profile")}>
@@ -96,7 +117,7 @@ function UserMenu() {
           <Settings className="w-4 h-4 mr-2" />
           Notification Settings
         </DropdownMenuItem>
-        {user.role === 'admin' && (
+        {user.role === "admin" && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate("/admin/enrich")}>
@@ -138,7 +159,7 @@ export default function Navbar() {
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => (
+          {navLinks.map(link => (
             <Link
               key={link.href}
               href={link.href}
@@ -162,6 +183,7 @@ export default function Navbar() {
           </Link>
 
           {/* Auth section */}
+          <ThemeToggle />
           {!loading && (
             <>
               {user ? (
@@ -180,12 +202,12 @@ export default function Navbar() {
               )}
             </>
           )}
-
         </div>
 
         {/* Mobile controls */}
         <div className="flex md:hidden items-center gap-2">
           <GlobalSearch />
+          <ThemeToggle />
           {!loading && user && (
             <>
               <NotificationBell />
@@ -199,7 +221,11 @@ export default function Navbar() {
             aria-expanded={mobileOpen}
             aria-controls="mobile-navigation"
           >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
           </button>
         </div>
       </nav>
@@ -211,7 +237,7 @@ export default function Navbar() {
           className="md:hidden border-t border-border bg-background/95 backdrop-blur-lg"
         >
           <div className="container py-4 flex flex-col gap-1">
-            {navLinks.map((link) => (
+            {navLinks.map(link => (
               <Link
                 key={link.href}
                 href={link.href}
