@@ -93,7 +93,12 @@ export function serveStatic(app: Express) {
         "utf-8"
       );
       const routeTemplate = injectRoutePreloads(template, req.path);
-      const page = injectCspNonce(routeTemplate, res.locals.cspNonce);
+      // Preview hosts intentionally run without production CSP, so the
+      // security middleware mints no nonce for them; serve the template
+      // unmodified rather than failing the response.
+      const page = res.locals.cspNonce
+        ? injectCspNonce(routeTemplate, res.locals.cspNonce)
+        : routeTemplate;
       res.status(status).type("html").send(page);
     } catch (error) {
       next(error);
