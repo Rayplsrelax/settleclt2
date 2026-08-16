@@ -207,6 +207,37 @@ describe("blue-green release contracts", () => {
     expect(readFileSync(site, "utf8")).toContain("10.10.10.101:3002");
   });
 
+  it("rejects backup paths inside the active nginx tree", () => {
+    const root = temporaryDirectory();
+    const greenSha = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+    const nginxDirectory = join(root, "sites-enabled");
+    mkdirSync(nginxDirectory, { recursive: true });
+    const site = join(nginxDirectory, "settleclt-com");
+    writeFileSync(site, "proxy_pass http://10.10.10.101:3002;\n");
+    const aliasedBackup = join(
+      nginxDirectory,
+      "..",
+      "sites-enabled",
+      "backups"
+    );
+    const harness = createHarness(root);
+
+    const result = spawnSync(
+      "bash",
+      [switchScript, site, aliasedBackup, "10.10.10.101", "green", greenSha],
+      {
+        encoding: "utf8",
+        env: commandEnvironment(harness.fakeCurl, harness.fakeNginx),
+      }
+    );
+
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain(
+      "outside the active nginx configuration tree"
+    );
+    expect(readFileSync(site, "utf8")).toContain("10.10.10.101:3002");
+  });
+
   it("rejects ambiguous edge proxy configurations without mutation", () => {
     const root = temporaryDirectory();
     const greenSha = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
