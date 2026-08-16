@@ -11,7 +11,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { delimiter, join, resolve } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
 const switchScript = resolve("ops/release/switch-traffic.sh");
@@ -112,11 +112,24 @@ describe("blue-green release contracts", () => {
       })
     );
 
+    const bin = join(root, "bin");
+    mkdirSync(bin, { recursive: true });
+    const systemctlStub = join(bin, "systemctl");
+    writeFileSync(
+      systemctlStub,
+      ["#!/usr/bin/env bash", 'echo "stub systemctl: $*"'].join("\n")
+    );
+    chmodSync(systemctlStub, 0o755);
+
     execFileSync(
       "bash",
       [assignScript, root, join(root, "active-upstream.conf"), "green", sha],
       {
-        env: { ...process.env, MSYS: "winsymlinks:nativestrict" },
+        env: {
+          ...process.env,
+          MSYS: "winsymlinks:nativestrict",
+          PATH: `${bin}${delimiter}${process.env.PATH}`,
+        },
       }
     );
 

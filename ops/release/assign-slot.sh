@@ -29,4 +29,13 @@ mkdir -p -- "$release_root/slots"
 slot_link="$release_root/slots/$slot"
 [[ ! -e "$slot_link" || -L "$slot_link" ]] || fail "slot exists but is not a symbolic link"
 atomic_symlink "../releases/$git_sha" "$slot_link"
+
+# The slot unit resolves its WorkingDirectory through this symlink at start;
+# flipping it alone leaves the running process on the old release. Restart
+# so the unit actually serves the newly assigned release. Fail loudly: a
+# silent restart failure would present as a successful assignment while the
+# old release keeps serving.
+if ! systemctl restart "settleclt@$slot"; then
+  fail "slot symlink flipped but systemctl restart settleclt@$slot failed — manual intervention required"
+fi
 printf 'slot assigned: %s %s\n' "$slot" "$git_sha"
