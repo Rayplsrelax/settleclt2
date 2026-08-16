@@ -110,11 +110,12 @@ export async function setupVite(app: Express, server: Server) {
   });
 }
 
-export function serveStatic(app: Express) {
+export function serveStatic(app: Express, distPathOverride?: string) {
   const distPath =
-    process.env.NODE_ENV === "development"
+    distPathOverride ??
+    (process.env.NODE_ENV === "development"
       ? path.resolve(import.meta.dirname, "../..", "dist", "public")
-      : path.resolve(import.meta.dirname, "public");
+      : path.resolve(import.meta.dirname, "public"));
   if (!fs.existsSync(distPath)) {
     console.error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`
@@ -143,10 +144,14 @@ export function serveStatic(app: Express) {
         "utf-8"
       );
       let routeTemplate = injectRoutePreloads(template, req.path);
+      // NOTE: inside app.use("*") on Express 4, req.path is always "/" —
+      // the route prefix is stripped into req.baseUrl. Derive the true
+      // pathname from req.originalUrl instead.
+      const spaPath = req.originalUrl.split("?")[0].split("#")[0];
       // Blog titles come from the database; resolve asynchronously before
       // the sync SEO resolver runs.
       let blogTitles: Map<string, string> | undefined;
-      const blogMatch = req.path.match(/^\/blog\/([^/]+)$/);
+      const blogMatch = spaPath.match(/^\/blog\/([^/]+)$/);
       if (blogMatch && status === 200) {
         try {
           const { getBlogPostBySlug } = await import("../db");
@@ -161,7 +166,7 @@ export function serveStatic(app: Express) {
       }
       routeTemplate = injectRouteSeo(
         routeTemplate,
-        status === 404 ? "/404" : req.path,
+        status === 404 ? "/404" : spaPath,
         blogTitles
       );
       // Preview hosts intentionally run without production CSP, so the

@@ -95,9 +95,11 @@ describe("server-side route SEO contracts", () => {
 
   it("the production shell middleware applies per-route SEO", () => {
     expect(viteCore).toContain("injectRouteSeo(");
-    expect(viteCore).toContain('status === 404 ? "/404" : req.path');
+    // Express 4 app.use("*") strips the route prefix into req.baseUrl,
+    // so the SEO path must derive from req.originalUrl, never req.path.
+    expect(viteCore).toContain('req.originalUrl.split("?")[0].split("#")[0]');
+    expect(viteCore).toContain('status === 404 ? "/404" : spaPath');
     expect(viteCore).toContain("blogTitles");
-    expect(viteCore).toContain("injectRouteSeo(template, req.path)");
   });
 
   it("blog slugs resolve titles from the database", () => {
