@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
+import type { EventPromotionLevel } from "@shared/event-promotions";
 import {
   Calendar,
   CalendarPlus,
@@ -176,7 +177,7 @@ type EventType = {
   isRecurring: string;
 };
 
-const PROMOTED_STYLES: Record<string, string> = {
+const PROMOTED_STYLES: Record<EventPromotionLevel, string> = {
   boost: "bg-amber-100 text-amber-900",
   spotlight: "bg-violet-100 text-violet-900",
   headliner: "bg-yellow-100 text-yellow-900",
@@ -193,7 +194,7 @@ function EventCard({
   onClick: () => void;
   onCategoryClick?: (category: string) => void;
   onNeighborhoodClick?: (neighborhood: string) => void;
-  promoted?: { level: string; customHeadline?: string | null } | null;
+  promoted?: { level: EventPromotionLevel; customHeadline?: string | null; sponsorMessage?: string | null; organizerLogoUrl?: string | null } | null;
 }) {
   return (
     <button
@@ -315,7 +316,7 @@ export default function Events() {
 
   const { data: promotedRows } = trpc.events.promoted.useQuery();
   const promotedBySlug = useMemo(() => {
-    const map = new Map<string, { level: string; customHeadline?: string | null; sponsorMessage?: string | null; organizerLogoUrl?: string | null }>();
+    const map = new Map<string, { level: EventPromotionLevel; customHeadline?: string | null; sponsorMessage?: string | null; organizerLogoUrl?: string | null }>();
     for (const row of promotedRows ?? []) {
       if (row.slug) map.set(row.slug, row);
     }
