@@ -59,6 +59,7 @@ import {
   createEventPromotion,
   getActivePromotionsForEvent,
   getPromotionsForUser,
+  getActivePromotionsPublic,
   createTag,
   getAllTags,
   getTagBySlug,
@@ -1168,6 +1169,11 @@ export const appRouter = router({
 
     myPromotions: protectedProcedure.query(async ({ ctx }) => {
       return getPromotionsForUser(ctx.user.id);
+    }),
+
+    /** Public: active event promotions for badge + boost rendering. */
+    promoted: publicProcedure.query(async () => {
+      return getActivePromotionsPublic();
     }),
   }),
 
