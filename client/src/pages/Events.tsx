@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
+import type { EventPromotionLevel } from "@shared/event-promotions";
 import {
   Calendar,
   CalendarPlus,
@@ -176,16 +177,24 @@ type EventType = {
   isRecurring: string;
 };
 
+const PROMOTED_STYLES: Record<EventPromotionLevel, string> = {
+  boost: "bg-amber-100 text-amber-900",
+  spotlight: "bg-violet-100 text-violet-900",
+  headliner: "bg-yellow-100 text-yellow-900",
+};
+
 function EventCard({
   event,
   onClick,
   onCategoryClick,
   onNeighborhoodClick,
+  promoted,
 }: {
   event: EventType;
   onClick: () => void;
   onCategoryClick?: (category: string) => void;
   onNeighborhoodClick?: (neighborhood: string) => void;
+  promoted?: { level: EventPromotionLevel; customHeadline?: string | null; sponsorMessage?: string | null; organizerLogoUrl?: string | null } | null;
 }) {
   return (
     <button
@@ -205,6 +214,13 @@ function EventCard({
       <div className="p-5">
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex items-center gap-2 flex-wrap">
+            {promoted && (
+              <Badge
+                className={`text-xs font-semibold border border-amber-300 ${PROMOTED_STYLES[promoted.level] ?? PROMOTED_STYLES.boost}`}
+              >
+                ★ Promoted
+              </Badge>
+            )}
             <Badge
               variant="outline"
               className={`text-xs font-medium ${CATEGORY_COLORS[event.category] ?? "bg-gray-100 text-gray-800"}`}
@@ -220,7 +236,7 @@ function EventCard({
         </div>
 
         <h3 className="font-display font-bold text-lg text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-2">
-          {event.title}
+          {promoted?.customHeadline || event.title}
         </h3>
 
         <div className="space-y-1.5">
@@ -298,7 +314,24 @@ export default function Events() {
     ...(selectedCategory ? { category: selectedCategory } : {}),
   });
 
-  const events = allEvents ?? [];
+  const { data: promotedRows } = trpc.events.promoted.useQuery();
+  const promotedBySlug = useMemo(() => {
+    const map = new Map<string, { level: EventPromotionLevel; customHeadline?: string | null; sponsorMessage?: string | null; organizerLogoUrl?: string | null }>();
+    for (const row of promotedRows ?? []) {
+      if (row.slug) map.set(row.slug, row);
+    }
+    return map;
+  }, [promotedRows]);
+
+  // Promoted events surface first
+  const events = useMemo(() => {
+    const list = allEvents ?? [];
+    return [...list].sort((a, b) => {
+      const pa = promotedBySlug.has(a.slug) ? 1 : 0;
+      const pb = promotedBySlug.has(b.slug) ? 1 : 0;
+      return pb - pa;
+    });
+  }, [allEvents, promotedBySlug]);
 
   // Auto-open event from URL query param (e.g., /events?highlight=event-slug)
   useEffect(() => {
@@ -739,6 +772,7 @@ export default function Events() {
                     <EventCard
                       key={event.id}
                       event={event as EventType}
+                      promoted={promotedBySlug.get(event.slug) ?? null}
                       onClick={() =>
                         openEvent(event as EventType, "upcoming_grid")
                       }
@@ -789,6 +823,35 @@ export default function Events() {
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           {selectedEvent && (
             <>
+              {(() => {
+                const promo = promotedBySlug.get(selectedEvent.slug);
+                if (!promo) return null;
+                return (
+                  <div className={`rounded-lg px-4 py-3 mb-3 border ${PROMOTED_STYLES[promo.level] ?? PROMOTED_STYLES.boost} border-amber-300`}>
+                    <div className="flex items-center gap-2 font-semibold text-sm">
+                      {promo.organizerLogoUrl && (
+                        <img
+                          src={promo.organizerLogoUrl}
+                          alt=""
+                          loading="lazy"
+                          className="w-6 h-6 rounded-full object-cover"
+                        />
+                      )}
+                      ★ Promoted Event
+                    </div>
+                    {promo.customHeadline && (
+                      <p className="mt-1 font-display font-bold text-base text-foreground">
+                        {promo.customHeadline}
+                      </p>
+                    )}
+                    {promo.sponsorMessage && (
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {promo.sponsorMessage}
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
               <DialogHeader>
                 <div className="flex items-center gap-2 mb-2">
                   <Badge

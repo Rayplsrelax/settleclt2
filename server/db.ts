@@ -1777,6 +1777,32 @@ export async function getPromotionsForUser(userId: number) {
     .limit(50);
 }
 
+/** Public promoted-event view: active promotions joined to published events. */
+export async function getActivePromotionsPublic() {
+  const db = await getDb();
+  if (!db) return [];
+  const now = new Date();
+  const rows = await db.select({
+    eventId: eventPromotions.eventId,
+    slug: events.slug,
+    eventTitle: sql<string>`COALESCE(${events.name}, ${events.title})`,
+    level: eventPromotions.level,
+    customHeadline: eventPromotions.customHeadline,
+    sponsorMessage: eventPromotions.sponsorMessage,
+    organizerLogoUrl: eventPromotions.organizerLogoUrl,
+    endsAt: eventPromotions.endsAt,
+  })
+    .from(eventPromotions)
+    .innerJoin(events, eq(events.id, eventPromotions.eventId))
+    .where(and(
+      eq(eventPromotions.status, "active"),
+      eq(events.status, "published"),
+      sql`${eventPromotions.endsAt} > ${now}`,
+    ))
+    .limit(20);
+  return rows;
+}
+
 export async function getSponsorshipsForBusiness(serviceKey: string) {
   const db = await getDb();
   if (!db) return [];
