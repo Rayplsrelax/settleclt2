@@ -1077,7 +1077,7 @@ export const eventPromotions = mysqlTable("event_promotions", {
   startsAt: timestamp("startsAt"),
   endsAt: timestamp("endsAt"),
   /** Headliner extras */
-  customHeadline: varchar("customBadge", { length: 255 }),
+  customHeadline: varchar("customHeadline", { length: 255 }),
   sponsorMessage: varchar("sponsorMessage", { length: 500 }),
   organizerLogoUrl: varchar("organizerLogoUrl", { length: 1024 }),
   /** Social pipeline handoff */
