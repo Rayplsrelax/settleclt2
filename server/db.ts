@@ -1803,6 +1803,96 @@ export async function getActivePromotionsPublic() {
   return rows;
 }
 
+/**
+ * Sweep expired promotions: mark them expired and clear the boost on their
+ * events (only if no OTHER active promotion holds the boost). Returns the
+ * number of promotions expired.
+ */
+export async function sweepExpiredEventPromotions() {
+  const db = await getDb();
+  if (!db) return { expired: 0, unfeatured: 0 };
+  const now = new Date();
+  const expiredRows = await db.select({
+    id: eventPromotions.id,
+    eventId: eventPromotions.eventId,
+  })
+    .from(eventPromotions)
+    .where(and(
+      eq(eventPromotions.status, "active"),
+      sql`${eventPromotions.endsAt} <= ${now}`,
+    ))
+    .limit(100);
+  if (expiredRows.length === 0) return { expired: 0, unfeatured: 0 };
+  const ids = expiredRows.map(r => r.id);
+  await db.update(eventPromotions)
+    .set({ status: "expired" })
+    .where(inArray(eventPromotions.id, ids));
+  let unfeatured = 0;
+  for (const row of expiredRows) {
+    const remaining = await db.select({ id: eventPromotions.id })
+      .from(eventPromotions)
+      .where(and(
+        eq(eventPromotions.eventId, row.eventId),
+        eq(eventPromotions.status, "active"),
+      ))
+      .limit(1);
+    if (remaining.length === 0) {
+      await db.update(events).set({ featured: false }).where(eq(events.id, row.eventId));
+      unfeatured++;
+    }
+  }
+  return { expired: ids.length, unfeatured };
+}
+
+/**
+ * Queue due social posts for active promotions as owner notifications
+ * (human-approved buffer per approved Plan A design). One notification per
+ * due-but-unsent post. Returns posts queued.
+ */
+export async function queueDueEventPromotionSocialPosts() {
+  const db = await getDb();
+  if (!db) return { queued: 0 };
+  const now = new Date();
+  const due = await db.select()
+    .from(eventPromotions)
+    .where(and(
+      eq(eventPromotions.status, "active"),
+      sql`${eventPromotions.socialPostsDue} > ${eventPromotions.socialPostsSent}`,
+      sql`${eventPromotions.startsAt} <= ${now}`,
+    ))
+    .limit(20);
+  let queued = 0;
+  for (const promo of due) {
+    // Space posts evenly across the promotion window
+    const pkg = EVENT_PROMOTION_PACKAGES[promo.level];
+    const startedAt = promo.startsAt ? new Date(promo.startsAt).getTime() : now.getTime();
+    const windowMs = pkg.durationDays * 24 * 60 * 60 * 1000;
+    const postsOutstanding = promo.socialPostsDue - promo.socialPostsSent;
+    const interval = windowMs / Math.max(promo.socialPostsDue, 1);
+    const nextDueAt = startedAt + (promo.socialPostsSent + 1) * interval;
+    if (now.getTime() < nextDueAt) continue;
+    const [eventRow] = await db.select({
+      title: sql<string>`COALESCE(${events.name}, ${events.title})`,
+      slug: events.slug,
+    }).from(events).where(eq(events.id, promo.eventId)).limit(1);
+    const eventTitle = eventRow?.title ?? `Event #${promo.eventId}`;
+    await createNotification({
+      userId: 1, // site owner review queue (admin)
+      category: "system" as any,
+      title: `📣 Promoted post due: ${eventTitle}`,
+      body: `Promotion #${promo.id} (${promo.level}) — social post ${promo.socialPostsSent + 1} of ${promo.socialPostsDue} is due. Draft it into the approved-post buffer. Event: /events?highlight=${eventRow?.slug ?? promo.eventId}`,
+      actionUrl: "/admin/events",
+      icon: "📣",
+      metadata: { kind: "event_promotion_social", promotionId: promo.id },
+    });
+    await db.update(eventPromotions)
+      .set({ socialPostsSent: promo.socialPostsSent + 1 })
+      .where(eq(eventPromotions.id, promo.id));
+    queued++;
+  }
+  return { queued };
+}
+
 export async function getSponsorshipsForBusiness(serviceKey: string) {
   const db = await getDb();
   if (!db) return [];

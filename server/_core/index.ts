@@ -130,6 +130,31 @@ async function startServer() {
                     session.id,
                   priceCents: session.amount_total ?? undefined,
                 });
+                if (result.activated) {
+                  // Notify the organizer their promotion is live
+                  try {
+                    const { getDb, createNotification } = await import("../db");
+                    const { eventPromotions } = await import("../../drizzle/schema");
+                    const { eq } = await import("drizzle-orm");
+                    const db = await getDb();
+                    const [promo] = db ? await db.select().from(eventPromotions)
+                      .where(eq(eventPromotions.id, promotionId))
+                      .limit(1) : [];
+                    if (promo) {
+                      await createNotification({
+                        userId: promo.userId,
+                        category: "system" as any,
+                        title: "🚀 Your promotion is live!",
+                        body: `Your ${promo.level} promotion is active. It will run until ${promo.endsAt ? new Date(promo.endsAt).toLocaleDateString("en-US") : "the window ends"}.`,
+                        actionUrl: "/events",
+                        icon: "🚀",
+                        metadata: { kind: "event_promotion_activated", promotionId },
+                      });
+                    }
+                  } catch (e) {
+                    console.error("[Webhook] Promotion notification error:", e);
+                  }
+                }
                 console.log(
                   `[Stripe] Event promotion ${promotionId}: ${result.activated ? `activated (${result.level})` : result.reason}`
                 );
