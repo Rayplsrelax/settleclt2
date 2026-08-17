@@ -1,8 +1,8 @@
 # Plan A — Paid Event Promotion Package
 
-**Status: DRAFT — awaiting user review**
+**Status: APPROVED 2026-08-17 — defaults locked**
 **Date: 2026-08-17**
-**Scope: design document only. No code until approved.**
+**Scope: design document. Build starting (PR #1 of 3).**
 
 ---
 

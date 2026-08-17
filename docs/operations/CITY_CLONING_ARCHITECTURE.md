@@ -1,8 +1,8 @@
 # City Cloning Architecture — Settle CLT → Settle {City}
 
-**Status: DRAFT — awaiting user review**
+**Status: APPROVED 2026-08-17 — direction locked (multi-tenant)**
 **Date: 2026-08-17**
-**Scope: architecture document only. No code until approved.**
+**Scope: architecture document. Implementation phases 1–4 sequenced AFTER Plan A ships.**
 
 ---
 
