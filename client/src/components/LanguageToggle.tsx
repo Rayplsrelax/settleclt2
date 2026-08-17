@@ -15,7 +15,11 @@ export default function LanguageToggle() {
       aria-label={
         locale === "en" ? t("language.toggle") : t("language.toggleEn")
       }
-      title={locale === "en" ? "Switch to Spanish" : "Cambiar a inglés"}
+      title={
+        locale === "en"
+          ? t("language.switchToSpanish")
+          : t("language.switchToEnglish")
+      }
     >
       <Languages className="w-4 h-4" />
       <span className="hidden sm:inline">

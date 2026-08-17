@@ -48,6 +48,7 @@ export const es = {
   "footer.privacyPolicy": "Política de Privacidad",
   "footer.termsOfService": "Términos de Servicio",
   "footer.contact": "Contacto",
+  "footer.neighborhoods": "Barrios",
 
   // Home page
   "home.heroTitle1": "Tu guía completa para",
@@ -86,4 +87,6 @@ export const es = {
   // Language toggle
   "language.toggle": "Español",
   "language.toggleEn": "English",
+  "language.switchToSpanish": "Cambiar a español",
+  "language.switchToEnglish": "Switch to English",
 } as const;
