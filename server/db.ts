@@ -1827,16 +1827,17 @@ export async function sweepExpiredEventPromotions() {
   await db.update(eventPromotions)
     .set({ status: "expired" })
     .where(inArray(eventPromotions.id, ids));
+  // Batched: which of these events still have another ACTIVE promotion?
+  const stillActive = await db.selectDistinct({ eventId: eventPromotions.eventId })
+    .from(eventPromotions)
+    .where(and(
+      inArray(eventPromotions.eventId, expiredRows.map(r => r.eventId)),
+      eq(eventPromotions.status, "active"),
+    ));
+  const stillActiveSet = new Set(stillActive.map(r => r.eventId));
   let unfeatured = 0;
   for (const row of expiredRows) {
-    const remaining = await db.select({ id: eventPromotions.id })
-      .from(eventPromotions)
-      .where(and(
-        eq(eventPromotions.eventId, row.eventId),
-        eq(eventPromotions.status, "active"),
-      ))
-      .limit(1);
-    if (remaining.length === 0) {
+    if (!stillActiveSet.has(row.eventId)) {
       await db.update(events).set({ featured: false }).where(eq(events.id, row.eventId));
       unfeatured++;
     }
@@ -1862,6 +1863,7 @@ export async function queueDueEventPromotionSocialPosts() {
     ))
     .limit(20);
   let queued = 0;
+  let ownerUserId = 0;
   for (const promo of due) {
     // Space posts evenly across the promotion window
     const pkg = EVENT_PROMOTION_PACKAGES[promo.level];
@@ -1876,8 +1878,15 @@ export async function queueDueEventPromotionSocialPosts() {
       slug: events.slug,
     }).from(events).where(eq(events.id, promo.eventId)).limit(1);
     const eventTitle = eventRow?.title ?? `Event #${promo.eventId}`;
+    // Owner review queue: notify the first admin (site owner)
+    if (queued === 0) {
+      // resolve owner once per run
+      const [owner] = await db.select({ id: users.id }).from(users).where(eq(users.role, "admin")).orderBy(asc(users.id)).limit(1);
+      if (owner) ownerUserId = owner.id;
+      else break; // no admin to notify
+    }
     await createNotification({
-      userId: 1, // site owner review queue (admin)
+      userId: ownerUserId,
       category: "system" as any,
       title: `📣 Promoted post due: ${eventTitle}`,
       body: `Promotion #${promo.id} (${promo.level}) — social post ${promo.socialPostsSent + 1} of ${promo.socialPostsDue} is due. Draft it into the approved-post buffer. Event: /events?highlight=${eventRow?.slug ?? promo.eventId}`,
