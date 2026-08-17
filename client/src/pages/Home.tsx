@@ -81,7 +81,7 @@ function Hero() {
               className="bg-clt-teal-dark hover:bg-clt-teal text-white font-semibold px-6 shadow-lg shadow-clt-teal-dark/20"
             >
               <Link href="/neighborhoods">
-                Explore Neighborhoods
+                {t("home.exploreNeighborhoods")}
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
             </Button>
@@ -100,7 +100,7 @@ function Hero() {
             >
               <Link href="/find-your-home?source=homepage">
                 <HomeIcon className="mr-2 w-4 h-4" />
-                Find Your Home
+                {t("home.findYourHome")}
               </Link>
             </Button>
           </div>
@@ -129,6 +129,7 @@ function Hero() {
 }
 
 function QuizCTA() {
+  const { t } = useI18n();
   return (
     <section className="py-14 md:py-18">
       <div className="container">
@@ -158,7 +159,7 @@ function QuizCTA() {
                 className="bg-clt-gold hover:bg-clt-gold/90 text-clt-navy font-bold text-base px-8 py-6 rounded-xl shadow-lg gap-2 whitespace-nowrap"
               >
                 <Link href="/quiz?source=homepage">
-                  Take the Quiz <ArrowRight className="w-5 h-5" />
+                  {t("home.takeTheQuiz")} <ArrowRight className="w-5 h-5" />
                 </Link>
               </Button>
               <Button
@@ -168,7 +169,7 @@ function QuizCTA() {
                 className="border-white/40 text-white hover:bg-white/10 font-semibold text-base px-8 py-6 rounded-xl gap-2 whitespace-nowrap"
               >
                 <Link href="/newcomer-plan?source=homepage">
-                  Build My Plan <ArrowRight className="w-5 h-5" />
+                  {t("home.buildMyPlan")} <ArrowRight className="w-5 h-5" />
                 </Link>
               </Button>
             </div>
@@ -180,6 +181,7 @@ function QuizCTA() {
 }
 
 function NewsletterSignup() {
+  const { t } = useI18n();
   const { user } = useAuth();
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -247,7 +249,7 @@ function NewsletterSignup() {
               className="mt-8 flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
             >
               <label htmlFor="newsletter-email" className="sr-only">
-                Email address
+                {t("home.emailAddress")}
               </label>
               <input
                 id="newsletter-email"
@@ -281,6 +283,7 @@ function NewsletterSignup() {
 }
 
 function BlogPreview() {
+  const { t } = useI18n();
   const { data: dbPosts, isLoading } = trpc.blog.getRecent.useQuery({
     limit: 3,
   });
@@ -330,11 +333,11 @@ function BlogPreview() {
             <div className="flex items-center gap-2 mb-2">
               <BookOpen className="w-5 h-5 text-primary" />
               <span className="text-sm font-semibold text-primary uppercase tracking-wide">
-                Charlotte Blog
+                {t("home.charlotteBlog")}
               </span>
             </div>
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">
-              Latest from Settle CLT
+              {t("home.latestFromSettle")}
             </h2>
             <p className="mt-2 text-muted-foreground max-w-md">
               Weekly guides, neighborhood deep-dives, and local intel for
@@ -345,7 +348,7 @@ function BlogPreview() {
             href="/blog"
             className="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline no-underline shrink-0"
           >
-            View all posts <ArrowRight className="w-4 h-4" />
+            {t("home.viewAllPosts")} <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
 
@@ -465,6 +468,7 @@ const CATEGORY_EMOJI: Record<string, string> = {
 };
 
 function ThisWeekInCLT() {
+  const { t } = useI18n();
   const { trackClickByName } = useTagTrackingWithLookup();
   const { data: events, isLoading } = trpc.events.getThisWeek.useQuery();
 
@@ -498,7 +502,7 @@ function ThisWeekInCLT() {
               Live Updates
             </Badge>
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">
-              This Week in Charlotte
+              {t("home.thisWeekInCharlotte")}
             </h2>
             <p className="mt-2 text-muted-foreground">
               Don't miss what's happening around the Queen City
@@ -580,7 +584,7 @@ function ThisWeekInCLT() {
           href="/events"
           className="sm:hidden flex items-center justify-center gap-1 mt-6 text-sm font-medium text-primary no-underline"
         >
-          View all events <ChevronRight className="w-4 h-4" />
+          {t("home.viewAllEvents")} <ChevronRight className="w-4 h-4" />
         </Link>
       </div>
     </section>

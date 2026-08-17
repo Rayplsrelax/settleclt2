@@ -612,7 +612,7 @@ export default function Directory() {
                   {t("directory.newThisWeek")}
                 </h2>
                 <p className="text-xs text-muted-foreground">
-                  Recently added to the directory
+                  {t("directory.recentlyAdded")}
                 </p>
               </div>
             </div>
@@ -1033,7 +1033,7 @@ export default function Directory() {
                                 })
                               }
                             >
-                              <Map className="w-3 h-3" /> Get Directions
+                              <Map className="w-3 h-3" /> {t("directory.getDirections")}
                             </a>
                           );
                         })()}
@@ -1098,7 +1098,7 @@ export default function Directory() {
                 })}
               </div>
 
-              {/* Load More / Infinite Scroll Trigger */}
+              {/* {t("directory.loadMore")} / Infinite Scroll Trigger */}
               {hasMore && (
                 <div
                   ref={loadMoreRef}
@@ -1117,7 +1117,7 @@ export default function Directory() {
                     }
                     className="gap-2"
                   >
-                    Load More
+                    {t("directory.loadMore")}
                   </Button>
                 </div>
               )}
@@ -1174,7 +1174,7 @@ export default function Directory() {
                     onClick={clearFilters}
                     className="mt-4"
                   >
-                    Clear all filters
+                    {t("directory.clearAllFilters")}
                   </Button>
                 </div>
               )}
