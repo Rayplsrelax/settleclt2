@@ -2,7 +2,7 @@ import { eq, and, desc, asc, sql, gte, lte, inArray } from "drizzle-orm";
 import { randomUUID } from "node:crypto";
 import { drizzle } from "drizzle-orm/mysql2";
 import { assertCheckoutIdentifiersCompatible, assertNoConflictingBillingOwner, assertUniquePremiumServiceKeys } from "./business-memberships";
-import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessMemberships, type InsertBusinessMembership, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, stripeCheckoutReconciliations, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription, businessLeads, type BusinessLead, type InsertBusinessLead, listingAnalyticsDaily, businessFaqs, authTokens, type InsertAuthToken, type BusinessFaq, type InsertBusinessFaq, businessPromotions, type BusinessPromotion, type InsertBusinessPromotion, eventSponsorships, type EventSponsorship, type InsertEventSponsorship, businessReferrals, type BusinessReferral, type InsertBusinessReferral, businessReferralInvitations, type BusinessReferralInvitation, type InsertBusinessReferralInvitation } from "../drizzle/schema";
+import { InsertUser, users, businessSubmissions, newsletterSubscribers, enrichedServices, directoryListings, passportEntries, bingoCards, bingoProgress, wishlists, comments, commentVotes, blogPosts, events, tags, contentTags, searchQueries, userTagPreferences, type InsertBusinessSubmission, type InsertNewsletterSubscriber, type InsertEnrichedService, type InsertDirectoryListing, type InsertPassportEntry, type InsertBingoCard, type InsertBingoProgress, type InsertWishlistEntry, type InsertComment, type InsertCommentVote, type InsertBlogPost, type InsertEvent, type InsertTag, type InsertContentTag, type InsertSearchQuery, type InsertUserTagPreference, reviews, type InsertReview, referrals, type InsertReferral, businessClaims, type InsertBusinessClaim, businessMemberships, type InsertBusinessMembership, businessListingOverrides, type InsertBusinessListingOverride, premiumListings, type InsertPremiumListing, stripeCheckoutReconciliations, notifications, type InsertNotification, notificationPreferences, type InsertNotificationPreference, pushSubscriptions, type InsertPushSubscription, businessLeads, type BusinessLead, type InsertBusinessLead, listingAnalyticsDaily, businessFaqs, authTokens, type InsertAuthToken, type BusinessFaq, type InsertBusinessFaq, businessPromotions, type BusinessPromotion, type InsertBusinessPromotion, eventSponsorships, type EventSponsorship, type InsertEventSponsorship, eventPromotions, type EventPromotion, type InsertEventPromotion, businessReferrals, type BusinessReferral, type InsertBusinessReferral, businessReferralInvitations, type BusinessReferralInvitation, type InsertBusinessReferralInvitation } from "../drizzle/schema";
 import { scoreRealtorLead } from "../shared/realtorLeadOps";
 import { ENV } from './_core/env';
 
@@ -967,6 +967,7 @@ export async function updateUserNewsletter(userId: number, optIn: boolean) {
 
 // --- Tag Engagement ---
 import { tagEngagement, type InsertTagEngagement } from "../drizzle/schema";
+import { EVENT_PROMOTION_PACKAGES } from "@shared/event-promotions";
 export async function trackTagEngagement(data: InsertTagEngagement) {
   const db = await getDb();
   if (!db) return null;
@@ -1703,6 +1704,77 @@ export async function getActiveSponsorshipsForEvent(eventId: number) {
     ))
     .orderBy(sql`CASE ${eventSponsorships.level} WHEN 'gold' THEN 1 WHEN 'silver' THEN 2 ELSE 3 END`)
     .limit(20);
+}
+
+// ─── Event Promotions (Plan A) ───
+
+export async function createEventPromotion(data: InsertEventPromotion) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(eventPromotions).values(data);
+  return { id: Number(result.insertId) };
+}
+
+export async function getEventPromotionById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const [row] = await db.select().from(eventPromotions).where(eq(eventPromotions.id, id)).limit(1);
+  return row ?? null;
+}
+
+/** Idempotently activate a paid promotion from a Stripe webhook. */
+export async function activateEventPromotion(promotionId: number, patch: { stripePaymentRef?: string; priceCents?: number }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [row] = await db.select().from(eventPromotions).where(eq(eventPromotions.id, promotionId)).limit(1);
+  if (!row) return { activated: false as const, reason: "not_found" as const };
+  if (row.status === "active") return { activated: false as const, reason: "already_active" as const };
+  if (row.status === "canceled" || row.status === "expired") return { activated: false as const, reason: `terminal_${row.status}` as const };
+  const durationDays = EVENT_PROMOTION_PACKAGES[row.level].durationDays;
+  const now = new Date();
+  const endsAt = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
+  await db.update(eventPromotions).set({
+    status: "active",
+    startsAt: now,
+    endsAt,
+    stripePaymentRef: patch.stripePaymentRef ?? row.stripePaymentRef,
+    priceCents: patch.priceCents ?? row.priceCents,
+  }).where(eq(eventPromotions.id, promotionId));
+  // Boost the event itself while the promotion runs
+  await db.update(events).set({ featured: true }).where(eq(events.id, row.eventId));
+  return { activated: true as const, eventId: row.eventId, level: row.level };
+}
+
+export async function cancelEventPromotion(promotionId: number, markEventUnfeatured = true) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [row] = await db.select().from(eventPromotions).where(eq(eventPromotions.id, promotionId)).limit(1);
+  if (!row) return { canceled: false as const };
+  await db.update(eventPromotions).set({ status: "canceled" }).where(eq(eventPromotions.id, promotionId));
+  if (markEventUnfeatured) {
+    await db.update(events).set({ featured: false }).where(eq(events.id, row.eventId));
+  }
+  return { canceled: true as const };
+}
+
+export async function getActivePromotionsForEvent(eventId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(eventPromotions)
+    .where(and(
+      eq(eventPromotions.eventId, eventId),
+      eq(eventPromotions.status, "active"),
+    ))
+    .limit(10);
+}
+
+export async function getPromotionsForUser(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(eventPromotions)
+    .where(eq(eventPromotions.userId, userId))
+    .orderBy(desc(eventPromotions.createdAt))
+    .limit(50);
 }
 
 export async function getSponsorshipsForBusiness(serviceKey: string) {

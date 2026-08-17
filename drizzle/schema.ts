@@ -1059,6 +1059,37 @@ export const eventSponsorships = mysqlTable("event_sponsorships", {
 export type EventSponsorship = typeof eventSponsorships.$inferSelect;
 export type InsertEventSponsorship = typeof eventSponsorships.$inferInsert;
 
+// ─── Event Promotions (Plan A paid promotion packages) ───
+
+export const eventPromotions = mysqlTable("event_promotions", {
+  id: int("id").autoincrement().primaryKey(),
+  eventId: int("eventId").notNull(),
+  /** Purchaser (event organizer) user id */
+  userId: int("userId").notNull(),
+  /** Package level: boost, spotlight, headliner */
+  level: mysqlEnum("level", ["boost", "spotlight", "headliner"]).notNull(),
+  /** Payment status: pending, active, expired, canceled */
+  status: mysqlEnum("status", ["pending", "active", "expired", "canceled"]).default("pending").notNull(),
+  /** Stripe payment intent (cs_ fallback session id) */
+  stripePaymentRef: varchar("stripePaymentRef", { length: 255 }),
+  /** Price paid in cents */
+  priceCents: int("priceCents").default(0).notNull(),
+  startsAt: timestamp("startsAt"),
+  endsAt: timestamp("endsAt"),
+  /** Headliner extras */
+  customHeadline: varchar("customHeadline", { length: 255 }),
+  sponsorMessage: varchar("sponsorMessage", { length: 500 }),
+  organizerLogoUrl: varchar("organizerLogoUrl", { length: 1024 }),
+  /** Social pipeline handoff */
+  socialPostsDue: int("socialPostsDue").default(0).notNull(),
+  socialPostsSent: int("socialPostsSent").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").onUpdateNow().defaultNow().notNull(),
+});
+
+export type EventPromotion = typeof eventPromotions.$inferSelect;
+export type InsertEventPromotion = typeof eventPromotions.$inferInsert;
+
 // ─── Business Referrals (general, extends real estate referrals) ───
 
 export const businessReferrals = mysqlTable("business_referrals", {

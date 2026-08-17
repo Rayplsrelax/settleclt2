@@ -1,4 +1,8 @@
 import { COOKIE_NAME } from "@shared/const";
+import {
+  EVENT_PROMOTION_PACKAGES,
+  EVENT_PROMOTION_LEVEL_SCHEMA,
+} from "@shared/event-promotions";
 import { TRPCError } from "@trpc/server";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
@@ -52,6 +56,9 @@ import {
   getAllEvents,
   getEventBySlug,
   getEventById,
+  createEventPromotion,
+  getActivePromotionsForEvent,
+  getPromotionsForUser,
   createTag,
   getAllTags,
   getTagBySlug,
@@ -1101,6 +1108,67 @@ export const appRouter = router({
         }).catch(() => {}); // fire-and-forget
         return { success: true };
       }),
+
+    // --- Event Promotions (Plan A) ---
+    createPromotionCheckout: protectedProcedure
+      .input(
+        z.object({
+          eventId: z.number().int().positive(),
+          level: EVENT_PROMOTION_LEVEL_SCHEMA,
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        assertFeatureEnabled("eventPromotions");
+        const event = await getEventById(input.eventId);
+        if (!event) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Event not found",
+          });
+        }
+        // Ownership: submitter of the event, or admin
+        const isOwner = event.submittedBy === ctx.user.id;
+        const isAdmin = ctx.user.role === "admin";
+        if (!isOwner && !isAdmin) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Only the event organizer can promote this event",
+          });
+        }
+        // One active/pending promotion per event at a time
+        const existing = await getActivePromotionsForEvent(input.eventId);
+        if (existing.length > 0) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "This event already has an active promotion",
+          });
+        }
+        const pkg = EVENT_PROMOTION_PACKAGES[input.level];
+        const { id: promotionId } = await createEventPromotion({
+          eventId: input.eventId,
+          userId: ctx.user.id,
+          level: input.level,
+          status: "pending",
+          priceCents: pkg.priceCents,
+          socialPostsDue: pkg.socialPosts,
+        });
+        const { createEventPromotionCheckout } = await import(
+          "./event-promotion-checkout"
+        );
+        const { url } = await createEventPromotionCheckout({
+          level: input.level,
+          eventId: input.eventId,
+          eventName: event.title ?? event.name ?? `Event #${input.eventId}`,
+          promotionId,
+          userId: ctx.user.id,
+          userEmail: ctx.user.email ?? "",
+        });
+        return { url, promotionId };
+      }),
+
+    myPromotions: protectedProcedure.query(async ({ ctx }) => {
+      return getPromotionsForUser(ctx.user.id);
+    }),
   }),
 
   // --- Activity Feed ---

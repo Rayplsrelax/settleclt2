@@ -118,6 +118,24 @@ async function startServer() {
         switch (event.type) {
           case "checkout.session.completed": {
             const session = event.data.object as any;
+            // Plan A: event promotion activation (one-time payment)
+            if (session.metadata?.kind === "event_promotion") {
+              const promotionId = Number(session.metadata.promotion_id);
+              if (Number.isSafeInteger(promotionId) && promotionId > 0) {
+                const { activateEventPromotion } = await import("../db");
+                const result = await activateEventPromotion(promotionId, {
+                  stripePaymentRef:
+                    (typeof session.payment_intent === "string" &&
+                      session.payment_intent) ||
+                    session.id,
+                  priceCents: session.amount_total ?? undefined,
+                });
+                console.log(
+                  `[Stripe] Event promotion ${promotionId}: ${result.activated ? `activated (${result.level})` : result.reason}`
+                );
+              }
+              break;
+            }
             const result = await processCheckoutCompletion(event.id, session, {
               activateCanonicalCheckout,
               reconcileRejectedCheckout: details =>
@@ -148,6 +166,34 @@ async function startServer() {
                 );
               } catch (e) {
                 console.error("[Webhook] Notification error:", e);
+              }
+            }
+            break;
+          }
+          case "charge.refunded": {
+            // Plan A: refund cancels the event promotion (matched by payment intent)
+            const charge = event.data.object as any;
+            const paymentIntent =
+              typeof charge.payment_intent === "string"
+                ? charge.payment_intent
+                : null;
+            if (paymentIntent) {
+              const { getDb, cancelEventPromotion } = await import("../db");
+              const { eventPromotions } = await import("../../drizzle/schema");
+              const { eq } = await import("drizzle-orm");
+              const db = await getDb();
+              if (db) {
+                const rows = await db
+                  .select()
+                  .from(eventPromotions)
+                  .where(eq(eventPromotions.stripePaymentRef, paymentIntent))
+                  .limit(1);
+                if (rows.length > 0 && rows[0].status !== "canceled") {
+                  await cancelEventPromotion(rows[0].id);
+                  console.log(
+                    `[Stripe] Event promotion ${rows[0].id} canceled (refund)`
+                  );
+                }
               }
             }
             break;

@@ -13,6 +13,7 @@ describe("server-enforced feature flags", () => {
     expect(loadFeatureFlags({})).toEqual({
       businessCheckout: true,
       eventSubmissions: true,
+      eventPromotions: true,
     });
     expect(
       loadFeatureFlags({
@@ -22,6 +23,7 @@ describe("server-enforced feature flags", () => {
     ).toEqual({
       businessCheckout: false,
       eventSubmissions: true,
+      eventPromotions: true,
     });
   });
 
@@ -35,6 +37,7 @@ describe("server-enforced feature flags", () => {
     expect(() =>
       assertFeatureEnabled(
         "businessCheckout",
+        "eventPromotions",
         loadFeatureFlags({ FEATURE_BUSINESS_CHECKOUT: "false" })
       )
     ).toThrowError(FeatureDisabledError);
@@ -52,6 +55,7 @@ describe("server-enforced feature flags", () => {
     expect(response.body).toEqual({
       businessCheckout: true,
       eventSubmissions: false,
+      eventPromotions: true,
     });
   });
 });
