@@ -1,7 +1,9 @@
 import { Link } from "wouter";
 import SocialFollowLinks from "@/components/SocialFollowLinks";
+import { useI18n } from "@/i18n/I18nContext";
 
 export default function Footer() {
+  const { t } = useI18n();
   return (
     <footer className="bg-card border-t border-border mt-auto">
       <div className="container py-12">
@@ -11,50 +13,150 @@ export default function Footer() {
               Settle<span className="text-primary">CLT</span>
             </span>
             <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-              Your complete guide to living in Charlotte, NC. Discover neighborhoods, local businesses, events, and everything that makes the Queen City home.
+              {t("footer.tagline")}
             </p>
             <div className="mt-4">
-              <p className="mb-2 text-xs font-medium text-foreground">Follow Settle CLT</p>
+              <p className="mb-2 text-xs font-medium text-foreground">
+                {t("footer.follow")}
+              </p>
               <SocialFollowLinks surface="footer" />
             </div>
           </div>
           <div>
-            <h4 className="font-display font-semibold text-sm text-foreground mb-3">Explore</h4>
+            <h4 className="font-display font-semibold text-sm text-foreground mb-3">
+              {t("footer.explore")}
+            </h4>
             <div className="flex flex-col gap-2">
-              <Link href="/neighborhoods" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Neighborhoods</Link>
-              <Link href="/directory" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Services Directory</Link>
-              <Link href="/events" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Events</Link>
-              <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Blog & Guides</Link>
+              <Link
+                href="/neighborhoods"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline"
+              >
+                {t("footer.neighborhoods")}
+              </Link>
+              <Link
+                href="/directory"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline"
+              >
+                {t("footer.servicesDirectory")}
+              </Link>
+              <Link
+                href="/events"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline"
+              >
+                {t("footer.events")}
+              </Link>
+              <Link
+                href="/blog"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline"
+              >
+                {t("footer.blogGuides")}
+              </Link>
             </div>
           </div>
           <div>
-            <h4 className="font-display font-semibold text-sm text-foreground mb-3">Community</h4>
+            <h4 className="font-display font-semibold text-sm text-foreground mb-3">
+              {t("footer.community")}
+            </h4>
             <div className="flex flex-col gap-2">
-              <Link href="/passport" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">CLT Passport</Link>
-              <Link href="/bingo" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">CLT Bingo Cards</Link>
-              <Link href="/leaderboard" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Leaderboard</Link>
-              <Link href="/list-your-business" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">List Your Business</Link>
-              <Link href="/business-pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Business Pricing</Link>
-              <Link href="/referrals" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Request a Referral</Link>
+              <Link
+                href="/passport"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline"
+              >
+                {t("footer.cltPassport")}
+              </Link>
+              <Link
+                href="/bingo"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline"
+              >
+                {t("footer.cltBingoCards")}
+              </Link>
+              <Link
+                href="/leaderboard"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline"
+              >
+                {t("footer.leaderboard")}
+              </Link>
+              <Link
+                href="/list-your-business"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline"
+              >
+                {t("footer.listYourBusiness")}
+              </Link>
+              <Link
+                href="/business-pricing"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline"
+              >
+                {t("footer.businessPricing")}
+              </Link>
+              <Link
+                href="/referrals"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline"
+              >
+                {t("footer.requestReferral")}
+              </Link>
             </div>
           </div>
           <div>
-            <h4 className="font-display font-semibold text-sm text-foreground mb-3">Get Started</h4>
+            <h4 className="font-display font-semibold text-sm text-foreground mb-3">
+              {t("footer.getStarted")}
+            </h4>
             <div className="flex flex-col gap-2">
-              <Link href="/quiz" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Neighborhood Quiz</Link>
-              <Link href="/neighborhoods" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Find Your Neighborhood</Link>
-              <Link href="/find-your-home" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Find Your Home</Link>
-              <Link href="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Moving Guides</Link>
-              <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline">Contact Us</Link>
+              <Link
+                href="/quiz"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline"
+              >
+                {t("footer.neighborhoodQuiz")}
+              </Link>
+              <Link
+                href="/neighborhoods"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline"
+              >
+                {t("footer.findYourNeighborhood")}
+              </Link>
+              <Link
+                href="/find-your-home"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline"
+              >
+                {t("footer.findYourHome")}
+              </Link>
+              <Link
+                href="/blog"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline"
+              >
+                {t("footer.movingGuides")}
+              </Link>
+              <Link
+                href="/contact"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors no-underline"
+              >
+                {t("footer.contactUs")}
+              </Link>
             </div>
           </div>
         </div>
         <div className="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-muted-foreground">&copy; {new Date().getFullYear()} Settle CLT. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground">
+            &copy; {new Date().getFullYear()} Settle CLT. All rights reserved.
+          </p>
           <div className="flex items-center gap-4">
-            <Link href="/privacy" className="text-xs text-muted-foreground hover:text-primary transition-colors no-underline">Privacy Policy</Link>
-            <Link href="/terms" className="text-xs text-muted-foreground hover:text-primary transition-colors no-underline">Terms of Service</Link>
-            <Link href="/contact" className="text-xs text-muted-foreground hover:text-primary transition-colors no-underline">Contact</Link>
+            <Link
+              href="/privacy"
+              className="text-xs text-muted-foreground hover:text-primary transition-colors no-underline"
+            >
+              {t("footer.privacyPolicy")}
+            </Link>
+            <Link
+              href="/terms"
+              className="text-xs text-muted-foreground hover:text-primary transition-colors no-underline"
+            >
+              {t("footer.termsOfService")}
+            </Link>
+            <Link
+              href="/contact"
+              className="text-xs text-muted-foreground hover:text-primary transition-colors no-underline"
+            >
+              {t("footer.contact")}
+            </Link>
           </div>
         </div>
       </div>

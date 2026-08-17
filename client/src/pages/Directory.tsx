@@ -1,11 +1,33 @@
 import PageLayout from "@/components/PageLayout";
-import { SERVICE_SUPER_GROUPS, SERVICE_CATEGORIES, SERVICES } from "@shared/services";
+import {
+  SERVICE_SUPER_GROUPS,
+  SERVICE_CATEGORIES,
+  SERVICES,
+} from "@shared/services";
 import { neighborhoods } from "@shared/neighborhoods";
 import { CORE_NEIGHBORHOOD_NAMES } from "@shared/metroAreas";
 import { useMyNeighborhood } from "@/hooks/useMyNeighborhood";
 import { MapView } from "@/components/Map";
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
-import { Search, ExternalLink, Phone, X, MapPin, Star, Filter, Map, List, Home, ArrowRight, Building2, Sparkles, TrendingUp, ArrowUpDown, Crown, Award } from "lucide-react";
+import {
+  Search,
+  ExternalLink,
+  Phone,
+  X,
+  MapPin,
+  Star,
+  Filter,
+  Map,
+  List,
+  Home,
+  ArrowRight,
+  Building2,
+  Sparkles,
+  TrendingUp,
+  ArrowUpDown,
+  Crown,
+  Award,
+} from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
@@ -14,13 +36,20 @@ import QuickStampButton from "@/components/QuickStampButton";
 import ShareButtons from "@/components/ShareButtons";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import { useSEO } from "@/hooks/useSEO";
-import { useStructuredData, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
+import {
+  useStructuredData,
+  buildBreadcrumbSchema,
+} from "@/hooks/useStructuredData";
 import ClaimBusinessDialog from "@/components/ClaimBusinessDialog";
 import { trackBusinessAction, trackFindHomeIntent } from "@/lib/mixpanel";
+import { useI18n } from "@/i18n/I18nContext";
 
 // Generate a slug key from service name
 function toSlug(name: string): string {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 function getUrlParams() {
@@ -39,31 +68,31 @@ const CLT_CENTER = { lat: 35.2271, lng: -80.8431 };
 
 // Approximate coordinates for areas (for map markers)
 const AREA_COORDS: Record<string, { lat: number; lng: number }> = {
-  "South End": { lat: 35.2100, lng: -80.8570 },
-  "NoDa": { lat: 35.2500, lng: -80.8150 },
-  "Plaza Midwood": { lat: 35.2200, lng: -80.8100 },
-  "Dilworth": { lat: 35.2050, lng: -80.8500 },
-  "Myers Park": { lat: 35.1900, lng: -80.8350 },
-  "Uptown": { lat: 35.2271, lng: -80.8431 },
-  "Ballantyne": { lat: 35.0550, lng: -80.8500 },
-  "Camp North End": { lat: 35.2450, lng: -80.8550 },
-  "SouthPark": { lat: 35.1550, lng: -80.8300 },
-  "Elizabeth": { lat: 35.2150, lng: -80.8250 },
-  "LoSo": { lat: 35.2000, lng: -80.8600 },
-  "East Charlotte": { lat: 35.2100, lng: -80.7700 },
-  "South Charlotte": { lat: 35.1200, lng: -80.8500 },
-  "West Charlotte": { lat: 35.2300, lng: -80.8800 },
-  "University Area": { lat: 35.3100, lng: -80.7400 },
-  "Huntersville": { lat: 35.4100, lng: -80.8400 },
-  "Lake Norman": { lat: 35.4500, lng: -80.8700 },
-  "Matthews": { lat: 35.1200, lng: -80.7200 },
-  "Concord": { lat: 35.4100, lng: -80.5800 },
-  "Fort Mill": { lat: 35.0100, lng: -80.9400 },
-  "Pineville": { lat: 35.0800, lng: -80.8900 },
+  "South End": { lat: 35.21, lng: -80.857 },
+  NoDa: { lat: 35.25, lng: -80.815 },
+  "Plaza Midwood": { lat: 35.22, lng: -80.81 },
+  Dilworth: { lat: 35.205, lng: -80.85 },
+  "Myers Park": { lat: 35.19, lng: -80.835 },
+  Uptown: { lat: 35.2271, lng: -80.8431 },
+  Ballantyne: { lat: 35.055, lng: -80.85 },
+  "Camp North End": { lat: 35.245, lng: -80.855 },
+  SouthPark: { lat: 35.155, lng: -80.83 },
+  Elizabeth: { lat: 35.215, lng: -80.825 },
+  LoSo: { lat: 35.2, lng: -80.86 },
+  "East Charlotte": { lat: 35.21, lng: -80.77 },
+  "South Charlotte": { lat: 35.12, lng: -80.85 },
+  "West Charlotte": { lat: 35.23, lng: -80.88 },
+  "University Area": { lat: 35.31, lng: -80.74 },
+  Huntersville: { lat: 35.41, lng: -80.84 },
+  "Lake Norman": { lat: 35.45, lng: -80.87 },
+  Matthews: { lat: 35.12, lng: -80.72 },
+  Concord: { lat: 35.41, lng: -80.58 },
+  "Fort Mill": { lat: 35.01, lng: -80.94 },
+  Pineville: { lat: 35.08, lng: -80.89 },
   "Charlotte Metro": { lat: 35.2271, lng: -80.8431 },
-  "Charlotte": { lat: 35.2271, lng: -80.8431 },
-  "Mecklenburg County": { lat: 35.2500, lng: -80.8300 },
-  "North End": { lat: 35.2450, lng: -80.8550 },
+  Charlotte: { lat: 35.2271, lng: -80.8431 },
+  "Mecklenburg County": { lat: 35.25, lng: -80.83 },
+  "North End": { lat: 35.245, lng: -80.855 },
 };
 
 // Color palette for map markers by category group
@@ -77,33 +106,42 @@ const GROUP_COLORS: Record<string, string> = {
 };
 
 export default function Directory() {
+  const { t } = useI18n();
   useSEO({
     title: "Charlotte Business Directory — 700+ Local Businesses",
-    description: "Browse 700+ Charlotte businesses across 50+ categories. Restaurants, breweries, coffee shops, nightlife, and more with ratings and reviews.",
-    keywords: "Charlotte restaurants, Charlotte breweries, Charlotte businesses, Charlotte food trucks, Charlotte coffee shops, local directory Charlotte NC, Charlotte services",
+    description:
+      "Browse 700+ Charlotte businesses across 50+ categories. Restaurants, breweries, coffee shops, nightlife, and more with ratings and reviews.",
+    keywords:
+      "Charlotte restaurants, Charlotte breweries, Charlotte businesses, Charlotte food trucks, Charlotte coffee shops, local directory Charlotte NC, Charlotte services",
     path: "/directory",
   });
 
-  useStructuredData([{
-    "@context": "https://schema.org",
-    ...buildBreadcrumbSchema([
-      { name: "Home", url: "https://settleclt.com" },
-      { name: "Business Directory", url: "https://settleclt.com/directory" },
-    ]),
-  }]);
+  useStructuredData([
+    {
+      "@context": "https://schema.org",
+      ...buildBreadcrumbSchema([
+        { name: "Home", url: "https://settleclt.com" },
+        { name: "Business Directory", url: "https://settleclt.com/directory" },
+      ]),
+    },
+  ]);
 
   const urlParams = getUrlParams();
   const { myNeighborhood } = useMyNeighborhood();
-  const myNeighborhoodData = neighborhoods.find((n) => n.id === myNeighborhood);
+  const myNeighborhoodData = neighborhoods.find(n => n.id === myNeighborhood);
 
   const [search, setSearch] = useState("");
   const [activeGroup, setActiveGroup] = useState(urlParams.group || "");
-  const [activeCategory, setActiveCategory] = useState(urlParams.category || "");
+  const [activeCategory, setActiveCategory] = useState(
+    urlParams.category || ""
+  );
   const [activeArea, setActiveArea] = useState(urlParams.area || "");
   const { trackClickByName } = useTagTrackingWithLookup();
   const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "map">("list");
-  const [sortBy, setSortBy] = useState<"default" | "top-rated" | "most-reviewed" | "newest">("default");
+  const [sortBy, setSortBy] = useState<
+    "default" | "top-rated" | "most-reviewed" | "newest"
+  >("default");
   const PAGE_SIZE = 30;
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -111,7 +149,17 @@ export default function Directory() {
   // Fetch enrichment data for all services
   const enrichmentQuery = trpc.enrichment.getAll.useQuery();
   const enrichmentMap = useMemo(() => {
-    const m: Record<string, { googleRating: string | null; reviewCount: number | null; verifiedAddress: string | null; verifiedPhone: string | null; hoursJson: string | null; priceLevel: number | null }> = {};
+    const m: Record<
+      string,
+      {
+        googleRating: string | null;
+        reviewCount: number | null;
+        verifiedAddress: string | null;
+        verifiedPhone: string | null;
+        hoursJson: string | null;
+        priceLevel: number | null;
+      }
+    > = {};
     if (enrichmentQuery.data) {
       for (const e of enrichmentQuery.data) {
         m[e.serviceKey] = e;
@@ -121,7 +169,9 @@ export default function Directory() {
   }, [enrichmentQuery.data]);
 
   // Fetch all review stats in one query (prevents 700+ individual queries)
-  const bulkReviewStats = trpc.reviews.bulkStats.useQuery({ targetType: "directory" });
+  const bulkReviewStats = trpc.reviews.bulkStats.useQuery({
+    targetType: "directory",
+  });
   const reviewStatsMap = useMemo(() => {
     const m: Record<string, { avgRating: number; count: number }> = {};
     if (bulkReviewStats.data) {
@@ -149,12 +199,22 @@ export default function Directory() {
 
   // Derive unique areas from services, split into core and metro
   const EXCLUDED_AREAS = new Set([
-    "Anywhere", "Online", "Expanding", "Select Areas", "Rural Areas",
-    "North Carolina", "Yorkmont Rd", "Suburbs", "SouthPark Mall", "Shalom Park"
+    "Anywhere",
+    "Online",
+    "Expanding",
+    "Select Areas",
+    "Rural Areas",
+    "North Carolina",
+    "Yorkmont Rd",
+    "Suburbs",
+    "SouthPark Mall",
+    "Shalom Park",
   ]);
   const { coreAreas, metroAreas } = useMemo(() => {
-    const areas = new Set(SERVICES.map((s) => s.area));
-    const all = Array.from(areas).filter(a => !EXCLUDED_AREAS.has(a)).sort();
+    const areas = new Set(SERVICES.map(s => s.area));
+    const all = Array.from(areas)
+      .filter(a => !EXCLUDED_AREAS.has(a))
+      .sort();
     const core: string[] = [];
     const metro: string[] = [];
     all.forEach(a => {
@@ -170,7 +230,7 @@ export default function Directory() {
   // Filter categories by active group
   const visibleCategories = useMemo(() => {
     if (!activeGroup) return SERVICE_CATEGORIES;
-    return SERVICE_CATEGORIES.filter((c) => c.group === activeGroup);
+    return SERVICE_CATEGORIES.filter(c => c.group === activeGroup);
   }, [activeGroup]);
 
   // Filter services
@@ -178,20 +238,24 @@ export default function Directory() {
     let result = [...SERVICES];
 
     if (activeCategory) {
-      result = result.filter((s) => s.category === activeCategory);
+      result = result.filter(s => s.category === activeCategory);
     } else if (activeGroup) {
-      const groupCats = SERVICE_CATEGORIES.filter((c) => c.group === activeGroup).map((c) => c.id);
-      result = result.filter((s) => groupCats.includes(s.category));
+      const groupCats = SERVICE_CATEGORIES.filter(
+        c => c.group === activeGroup
+      ).map(c => c.id);
+      result = result.filter(s => groupCats.includes(s.category));
     }
 
     if (activeArea) {
-      result = result.filter((s) => s.area.toLowerCase().includes(activeArea.toLowerCase()));
+      result = result.filter(s =>
+        s.area.toLowerCase().includes(activeArea.toLowerCase())
+      );
     }
 
     if (search) {
       const q = search.toLowerCase();
       result = result.filter(
-        (s) =>
+        s =>
           s.name.toLowerCase().includes(q) ||
           s.description.toLowerCase().includes(q) ||
           s.category.toLowerCase().includes(q)
@@ -201,17 +265,27 @@ export default function Directory() {
     // Sort based on selected sort option
     if (sortBy === "top-rated") {
       result.sort((a, b) => {
-        const aRating = parseFloat(enrichmentMap[toSlug(a.name)]?.googleRating || "0");
-        const bRating = parseFloat(enrichmentMap[toSlug(b.name)]?.googleRating || "0");
+        const aRating = parseFloat(
+          enrichmentMap[toSlug(a.name)]?.googleRating || "0"
+        );
+        const bRating = parseFloat(
+          enrichmentMap[toSlug(b.name)]?.googleRating || "0"
+        );
         if (bRating !== aRating) return bRating - aRating;
-        return (enrichmentMap[toSlug(b.name)]?.reviewCount || 0) - (enrichmentMap[toSlug(a.name)]?.reviewCount || 0);
+        return (
+          (enrichmentMap[toSlug(b.name)]?.reviewCount || 0) -
+          (enrichmentMap[toSlug(a.name)]?.reviewCount || 0)
+        );
       });
     } else if (sortBy === "most-reviewed") {
       result.sort((a, b) => {
         const aReviews = enrichmentMap[toSlug(a.name)]?.reviewCount || 0;
         const bReviews = enrichmentMap[toSlug(b.name)]?.reviewCount || 0;
         if (bReviews !== aReviews) return bReviews - aReviews;
-        return parseFloat(enrichmentMap[toSlug(b.name)]?.googleRating || "0") - parseFloat(enrichmentMap[toSlug(a.name)]?.googleRating || "0");
+        return (
+          parseFloat(enrichmentMap[toSlug(b.name)]?.googleRating || "0") -
+          parseFloat(enrichmentMap[toSlug(a.name)]?.googleRating || "0")
+        );
       });
     } else if (sortBy === "newest") {
       result.reverse();
@@ -249,7 +323,15 @@ export default function Directory() {
     }
 
     return result;
-  }, [activeCategory, activeGroup, activeArea, search, myNeighborhoodData, sortBy, enrichmentMap]);
+  }, [
+    activeCategory,
+    activeGroup,
+    activeArea,
+    search,
+    myNeighborhoodData,
+    sortBy,
+    enrichmentMap,
+  ]);
 
   const clearFilters = () => {
     setSearch("");
@@ -262,7 +344,12 @@ export default function Directory() {
     }
   };
 
-  const activeFilterCount = [search, activeGroup, activeCategory, activeArea].filter(Boolean).length;
+  const activeFilterCount = [
+    search,
+    activeGroup,
+    activeCategory,
+    activeArea,
+  ].filter(Boolean).length;
   const hasFilters = activeFilterCount > 0 || sortBy !== "default";
 
   // Fetch active promotions for boosted placements
@@ -272,8 +359,27 @@ export default function Directory() {
     return new Set(promotionsQuery.data.map(p => p.serviceKey));
   }, [promotionsQuery.data]);
   const activePromotionMap = useMemo(() => {
-    if (!promotionsQuery.data) return {} as Record<string, { headline: string; subtitle?: string | null; type: string; targetCategory?: string | null; targetNeighborhood?: string | null }>;
-    const map: Record<string, { headline: string; subtitle?: string | null; type: string; targetCategory?: string | null; targetNeighborhood?: string | null }> = {};
+    if (!promotionsQuery.data)
+      return {} as Record<
+        string,
+        {
+          headline: string;
+          subtitle?: string | null;
+          type: string;
+          targetCategory?: string | null;
+          targetNeighborhood?: string | null;
+        }
+      >;
+    const map: Record<
+      string,
+      {
+        headline: string;
+        subtitle?: string | null;
+        type: string;
+        targetCategory?: string | null;
+        targetNeighborhood?: string | null;
+      }
+    > = {};
     for (const p of promotionsQuery.data) {
       map[p.serviceKey] = {
         headline: p.headline ?? "",
@@ -286,19 +392,34 @@ export default function Directory() {
     return map;
   }, [promotionsQuery.data]);
 
-  const isPromotionRelevant = useCallback((service: typeof SERVICES[number]) => {
-    const promotion = activePromotionMap[toSlug(service.name)];
-    if (!promotion) return false;
-    if (promotion.type === "directory_boost") return true;
-    if (promotion.type === "category_spotlight") return !promotion.targetCategory || promotion.targetCategory === service.category;
-    if (promotion.type === "neighborhood_spotlight") return !promotion.targetNeighborhood || service.area.toLowerCase() === promotion.targetNeighborhood.toLowerCase();
-    return false;
-  }, [activePromotionMap]);
+  const isPromotionRelevant = useCallback(
+    (service: (typeof SERVICES)[number]) => {
+      const promotion = activePromotionMap[toSlug(service.name)];
+      if (!promotion) return false;
+      if (promotion.type === "directory_boost") return true;
+      if (promotion.type === "category_spotlight")
+        return (
+          !promotion.targetCategory ||
+          promotion.targetCategory === service.category
+        );
+      if (promotion.type === "neighborhood_spotlight")
+        return (
+          !promotion.targetNeighborhood ||
+          service.area.toLowerCase() ===
+            promotion.targetNeighborhood.toLowerCase()
+        );
+      return false;
+    },
+    [activePromotionMap]
+  );
 
   // Sort paid placements to the top, including their category/neighborhood targets.
   const sortedWithBoosts = useMemo(() => {
     if (activePromotionMap && Object.keys(activePromotionMap).length > 0) {
-      return [...filteredServices].sort((a, b) => Number(isPromotionRelevant(b)) - Number(isPromotionRelevant(a)));
+      return [...filteredServices].sort(
+        (a, b) =>
+          Number(isPromotionRelevant(b)) - Number(isPromotionRelevant(a))
+      );
     }
     return filteredServices;
   }, [filteredServices, activePromotionMap, isPromotionRelevant]);
@@ -321,9 +442,11 @@ export default function Directory() {
     const el = loadMoreRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      (entries) => {
+      entries => {
         if (entries[0].isIntersecting) {
-          setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, sortedWithBoosts.length));
+          setVisibleCount(prev =>
+            Math.min(prev + PAGE_SIZE, sortedWithBoosts.length)
+          );
         }
       },
       { rootMargin: "400px" }
@@ -343,7 +466,7 @@ export default function Directory() {
     if (!mapRef.current || !window.google) return;
 
     // Clear existing markers
-    markersRef.current.forEach(m => m.map = null);
+    markersRef.current.forEach(m => (m.map = null));
     markersRef.current = [];
 
     // Group services by area for clustering
@@ -360,10 +483,12 @@ export default function Directory() {
       // Add slight random offset for each service so they don't stack
       areaServices.slice(0, 20).forEach((s, i) => {
         const cat = SERVICE_CATEGORIES.find(c => c.id === s.category);
-        const groupColor = cat ? (GROUP_COLORS[cat.group] || "#6B7280") : "#6B7280";
+        const groupColor = cat
+          ? GROUP_COLORS[cat.group] || "#6B7280"
+          : "#6B7280";
 
         const offset = i * 0.001;
-        const angle = (i * 137.5) * (Math.PI / 180); // golden angle spread
+        const angle = i * 137.5 * (Math.PI / 180); // golden angle spread
         const pos = {
           lat: coords.lat + offset * Math.cos(angle),
           lng: coords.lng + offset * Math.sin(angle),
@@ -379,8 +504,12 @@ export default function Directory() {
           transition: transform 0.2s;
         `;
         markerDiv.textContent = cat?.icon || "📍";
-        markerDiv.addEventListener("mouseenter", () => { markerDiv.style.transform = "scale(1.3)"; });
-        markerDiv.addEventListener("mouseleave", () => { markerDiv.style.transform = "scale(1)"; });
+        markerDiv.addEventListener("mouseenter", () => {
+          markerDiv.style.transform = "scale(1.3)";
+        });
+        markerDiv.addEventListener("mouseleave", () => {
+          markerDiv.style.transform = "scale(1)";
+        });
 
         const marker = new google.maps.marker.AdvancedMarkerElement({
           map: mapRef.current!,
@@ -436,10 +565,20 @@ export default function Directory() {
         <div className="container">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="font-display font-extrabold text-3xl md:text-4xl text-white">Services Directory</h1>
-              <p className="mt-2 text-white/70">{SERVICES.length}+ Charlotte businesses across {SERVICE_CATEGORIES.length} categories</p>
+              <h1 className="font-display font-extrabold text-3xl md:text-4xl text-white">
+                {t("directory.title")}
+              </h1>
+              <p className="mt-2 text-white/70">
+                {SERVICES.length}+ Charlotte businesses across{" "}
+                {SERVICE_CATEGORIES.length} categories
+              </p>
             </div>
-            <ShareButtons compact title="Charlotte Services Directory - Settle CLT" description="Discover 700+ local businesses in Charlotte" className="text-white hover:text-white/80" />
+            <ShareButtons
+              compact
+              title="Charlotte Services Directory - Settle CLT"
+              description="Discover 700+ local businesses in Charlotte"
+              className="text-white hover:text-white/80"
+            />
           </div>
 
           {/* Neighborhood banner */}
@@ -469,31 +608,52 @@ export default function Directory() {
                 <Sparkles className="w-4 h-4 text-amber-600" />
               </div>
               <div>
-                <h2 className="font-display font-bold text-lg text-foreground">New This Week</h2>
-                <p className="text-xs text-muted-foreground">Recently added to the directory</p>
+                <h2 className="font-display font-bold text-lg text-foreground">
+                  {t("directory.newThisWeek")}
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  Recently added to the directory
+                </p>
               </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              {SERVICES.slice(-12).reverse().slice(0, 6).map((s, i) => {
-                const cat = SERVICE_CATEGORIES.find((c) => c.id === s.category);
-                const sSlug = toSlug(s.name);
-                return (
-                  <Link key={`new-${i}`} href={`/directory/${sSlug}`}>
-                    <div className="group relative p-3 rounded-xl border border-amber-200/60 bg-white hover:shadow-md hover:border-amber-300 transition-all cursor-pointer">
-                      <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[9px] font-bold uppercase tracking-wider">New</span>
-                      <span className="text-xl mb-1.5 block">{cat?.icon || "📍"}</span>
-                      <h3 className="font-semibold text-xs text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">{s.name}</h3>
-                      <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
-                        <MapPin className="w-2.5 h-2.5" /> {s.area}
-                      </p>
-                    </div>
-                  </Link>
-                );
-              })}
+              {SERVICES.slice(-12)
+                .reverse()
+                .slice(0, 6)
+                .map((s, i) => {
+                  const cat = SERVICE_CATEGORIES.find(c => c.id === s.category);
+                  const sSlug = toSlug(s.name);
+                  return (
+                    <Link key={`new-${i}`} href={`/directory/${sSlug}`}>
+                      <div className="group relative p-3 rounded-xl border border-amber-200/60 bg-white hover:shadow-md hover:border-amber-300 transition-all cursor-pointer">
+                        <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[9px] font-bold uppercase tracking-wider">
+                          New
+                        </span>
+                        <span className="text-xl mb-1.5 block">
+                          {cat?.icon || "📍"}
+                        </span>
+                        <h3 className="font-semibold text-xs text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+                          {s.name}
+                        </h3>
+                        <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+                          <MapPin className="w-2.5 h-2.5" /> {s.area}
+                        </p>
+                      </div>
+                    </Link>
+                  );
+                })}
             </div>
             <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
               <TrendingUp className="w-3.5 h-3.5" />
-              <span>{SERVICES.length} businesses and growing — <Link href="/list-your-business" className="text-primary hover:underline">Add yours</Link></span>
+              <span>
+                {SERVICES.length} businesses and growing —{" "}
+                <Link
+                  href="/list-your-business"
+                  className="text-primary hover:underline"
+                >
+                  {t("directory.addYours")}
+                </Link>
+              </span>
             </div>
           </div>
         </section>
@@ -509,7 +669,7 @@ export default function Directory() {
                 type="text"
                 aria-label="Search businesses and categories"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={e => setSearch(e.target.value)}
                 placeholder="Search businesses, categories..."
                 className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />
@@ -519,7 +679,9 @@ export default function Directory() {
                 onClick={() => setViewMode("list")}
                 aria-pressed={viewMode === "list"}
                 className={`px-3 py-2 flex items-center gap-1.5 text-sm transition-colors ${
-                  viewMode === "list" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"
+                  viewMode === "list"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background text-muted-foreground hover:bg-muted"
                 }`}
               >
                 <List className="w-4 h-4" /> List
@@ -528,7 +690,9 @@ export default function Directory() {
                 onClick={() => setViewMode("map")}
                 aria-pressed={viewMode === "map"}
                 className={`px-3 py-2 flex items-center gap-1.5 text-sm transition-colors ${
-                  viewMode === "map" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"
+                  viewMode === "map"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-background text-muted-foreground hover:bg-muted"
                 }`}
               >
                 <Map className="w-4 h-4" /> Map
@@ -540,7 +704,7 @@ export default function Directory() {
               <select
                 aria-label="Sort directory results"
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                onChange={e => setSortBy(e.target.value as typeof sortBy)}
                 className={`pl-9 pr-8 py-2.5 rounded-lg border text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring ${
                   sortBy !== "default"
                     ? "border-primary/40 bg-primary/5 text-primary font-medium"
@@ -548,9 +712,11 @@ export default function Directory() {
                 }`}
               >
                 <option value="default">Sort: Recommended</option>
-                <option value="top-rated">Top Rated</option>
-                <option value="most-reviewed">Most Reviewed</option>
-                <option value="newest">Newest First</option>
+                <option value="top-rated">{t("directory.topRated")}</option>
+                <option value="most-reviewed">
+                  {t("directory.mostReviewed")}
+                </option>
+                <option value="newest">{t("directory.newestFirst")}</option>
               </select>
             </div>
             <Button
@@ -563,7 +729,11 @@ export default function Directory() {
               Filters{activeFilterCount > 0 && ` (${activeFilterCount})`}
             </Button>
             {hasFilters && (
-              <Button variant="ghost" onClick={clearFilters} className="text-muted-foreground">
+              <Button
+                variant="ghost"
+                onClick={clearFilters}
+                className="text-muted-foreground"
+              >
                 <X className="w-4 h-4 mr-1" /> Clear
               </Button>
             )}
@@ -574,22 +744,35 @@ export default function Directory() {
             <div className="mb-6 p-5 rounded-xl bg-card border border-border space-y-4">
               {/* Super groups */}
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-2">Category Group</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-2">
+                  {t("directory.categoryGroup")}
+                </label>
                 <div className="flex flex-wrap gap-2">
                   <button
-                    onClick={() => { setActiveGroup(""); setActiveCategory(""); }}
+                    onClick={() => {
+                      setActiveGroup("");
+                      setActiveCategory("");
+                    }}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                      !activeGroup ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      !activeGroup
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80"
                     }`}
                   >
                     All
                   </button>
-                  {SERVICE_SUPER_GROUPS.map((sg) => (
+                  {SERVICE_SUPER_GROUPS.map(sg => (
                     <button
                       key={sg.id}
-                      onClick={() => { setActiveGroup(sg.id); setActiveCategory(""); trackClickByName(sg.id, 'directory-group'); }}
+                      onClick={() => {
+                        setActiveGroup(sg.id);
+                        setActiveCategory("");
+                        trackClickByName(sg.id, "directory-group");
+                      }}
                       className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                        activeGroup === sg.id ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        activeGroup === sg.id
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80"
                       }`}
                     >
                       {sg.icon} {sg.label.replace(sg.icon + " ", "")}
@@ -600,22 +783,31 @@ export default function Directory() {
 
               {/* Categories */}
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-2">Category</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-2">
+                  Category
+                </label>
                 <div className="flex flex-wrap gap-1.5">
                   <button
                     onClick={() => setActiveCategory("")}
                     className={`px-2.5 py-1 rounded-full text-xs transition-colors ${
-                      !activeCategory ? "bg-primary/10 text-primary font-medium" : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      !activeCategory
+                        ? "bg-primary/10 text-primary font-medium"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80"
                     }`}
                   >
                     All
                   </button>
-                  {visibleCategories.map((cat) => (
+                  {visibleCategories.map(cat => (
                     <button
                       key={cat.id}
-                      onClick={() => { setActiveCategory(cat.id); trackClickByName(cat.id, 'directory-category'); }}
+                      onClick={() => {
+                        setActiveCategory(cat.id);
+                        trackClickByName(cat.id, "directory-category");
+                      }}
                       className={`px-2.5 py-1 rounded-full text-xs transition-colors ${
-                        activeCategory === cat.id ? "bg-primary/10 text-primary font-medium" : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        activeCategory === cat.id
+                          ? "bg-primary/10 text-primary font-medium"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80"
                       }`}
                     >
                       {cat.icon} {cat.name}
@@ -626,22 +818,32 @@ export default function Directory() {
 
               {/* Area filter — grouped */}
               <div>
-                <label className="block text-xs font-medium text-muted-foreground mb-2">Area</label>
+                <label className="block text-xs font-medium text-muted-foreground mb-2">
+                  Area
+                </label>
                 <select
                   aria-label="Filter by area"
                   value={activeArea}
-                  onChange={(e) => { setActiveArea(e.target.value); if (e.target.value) trackClickByName(e.target.value, 'directory-area'); }}
+                  onChange={e => {
+                    setActiveArea(e.target.value);
+                    if (e.target.value)
+                      trackClickByName(e.target.value, "directory-area");
+                  }}
                   className="px-3 py-2 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring min-w-[200px]"
                 >
-                  <option value="">All Areas</option>
+                  <option value="">{t("directory.allAreas")}</option>
                   <optgroup label="── Core Neighborhoods ──">
-                    {coreAreas.map((area) => (
-                      <option key={area} value={area}>{area}</option>
+                    {coreAreas.map(area => (
+                      <option key={area} value={area}>
+                        {area}
+                      </option>
                     ))}
                   </optgroup>
                   <optgroup label="── Metro Charlotte ──">
-                    {metroAreas.map((area) => (
-                      <option key={area} value={area}>{area}</option>
+                    {metroAreas.map(area => (
+                      <option key={area} value={area}>
+                        {area}
+                      </option>
                     ))}
                   </optgroup>
                 </select>
@@ -654,7 +856,8 @@ export default function Directory() {
             {viewMode === "map"
               ? `Showing all ${filteredServices.length} ${filteredServices.length === 1 ? "business" : "businesses"} on the map`
               : `Showing ${Math.min(visibleCount, filteredServices.length)} of ${filteredServices.length} ${filteredServices.length === 1 ? "business" : "businesses"}`}
-            {activeCategory && ` in ${SERVICE_CATEGORIES.find((c) => c.id === activeCategory)?.name || activeCategory}`}
+            {activeCategory &&
+              ` in ${SERVICE_CATEGORIES.find(c => c.id === activeCategory)?.name || activeCategory}`}
             {activeArea && ` near ${activeArea}`}
           </p>
 
@@ -669,10 +872,15 @@ export default function Directory() {
               />
               {/* Map legend */}
               <div className="p-3 bg-card border-t border-border">
-                <p className="text-xs font-medium text-muted-foreground mb-2">Legend by category group</p>
+                <p className="text-xs font-medium text-muted-foreground mb-2">
+                  {t("directory.legendByCategoryGroup")}
+                </p>
                 <div className="flex flex-wrap gap-3">
                   {SERVICE_SUPER_GROUPS.map(sg => (
-                    <span key={sg.id} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <span
+                      key={sg.id}
+                      className="flex items-center gap-1.5 text-xs text-muted-foreground"
+                    >
                       <span
                         className="w-3 h-3 rounded-full inline-block border border-white shadow-sm"
                         style={{ background: GROUP_COLORS[sg.id] || "#6B7280" }}
@@ -690,33 +898,39 @@ export default function Directory() {
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {visibleServices.map((s, i) => {
-                  const cat = SERVICE_CATEGORIES.find((c) => c.id === s.category);
-                  const isLocal = myNeighborhoodData && s.area.includes(myNeighborhoodData.name);
+                  const cat = SERVICE_CATEGORIES.find(c => c.id === s.category);
+                  const isLocal =
+                    myNeighborhoodData &&
+                    s.area.includes(myNeighborhoodData.name);
                   const sSlug = toSlug(s.name);
                   const premiumTier = premiumMap[sSlug];
                   return (
                     <div
                       key={`${s.name}-${i}`}
                       className={`p-4 rounded-xl border bg-card transition-all hover:shadow-md ${
-                        premiumTier === 'premium'
+                        premiumTier === "premium"
                           ? "border-purple-300 ring-1 ring-purple-100 bg-gradient-to-br from-purple-50/30 to-card"
-                          : premiumTier === 'featured'
-                          ? "border-amber-300 ring-1 ring-amber-100 bg-gradient-to-br from-amber-50/30 to-card"
-                          : isLocal ? "border-primary/30 ring-1 ring-primary/10" : "border-border"
+                          : premiumTier === "featured"
+                            ? "border-amber-300 ring-1 ring-amber-100 bg-gradient-to-br from-amber-50/30 to-card"
+                            : isLocal
+                              ? "border-primary/30 ring-1 ring-primary/10"
+                              : "border-border"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <Link href={`/directory/${sSlug}`}>
-                            <h3 className="font-semibold text-sm text-foreground hover:text-primary transition-colors cursor-pointer">{s.name}</h3>
-                          </Link>
-                            {premiumTier === 'premium' && (
+                              <h3 className="font-semibold text-sm text-foreground hover:text-primary transition-colors cursor-pointer">
+                                {s.name}
+                              </h3>
+                            </Link>
+                            {premiumTier === "premium" && (
                               <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 text-[10px] font-bold uppercase">
                                 <Crown className="w-2.5 h-2.5" /> Premium
                               </span>
                             )}
-                            {premiumTier === 'featured' && (
+                            {premiumTier === "featured" && (
                               <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold uppercase">
                                 <Award className="w-2.5 h-2.5" /> Featured
                               </span>
@@ -727,10 +941,15 @@ export default function Directory() {
                               </span>
                             )}
                           </div>
-                          {boostedKeys.has(sSlug) && activePromotionMap[sSlug]?.headline && (
-                            <p className="text-xs font-medium text-blue-600 mt-0.5">{activePromotionMap[sSlug].headline}</p>
-                          )}
-                          <p className="text-xs text-muted-foreground mt-1">{s.description}</p>
+                          {boostedKeys.has(sSlug) &&
+                            activePromotionMap[sSlug]?.headline && (
+                              <p className="text-xs font-medium text-blue-600 mt-0.5">
+                                {activePromotionMap[sSlug].headline}
+                              </p>
+                            )}
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {s.description}
+                          </p>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
                           <QuickStampButton serviceKey={sSlug} area={s.area} />
@@ -746,74 +965,92 @@ export default function Directory() {
                           <div className="flex items-center gap-2 mt-2">
                             <div className="flex items-center gap-1">
                               <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                              <span className="text-xs font-semibold text-foreground">{enriched.googleRating}</span>
+                              <span className="text-xs font-semibold text-foreground">
+                                {enriched.googleRating}
+                              </span>
                             </div>
                             {enriched.reviewCount && (
                               <span className="text-xs text-muted-foreground">
-                                ({enriched.reviewCount.toLocaleString()} reviews)
+                                ({enriched.reviewCount.toLocaleString()}{" "}
+                                reviews)
                               </span>
                             )}
-                            {enriched.priceLevel != null && enriched.priceLevel > 0 && (
-                              <span className="text-xs text-muted-foreground ml-auto">
-                                {'$'.repeat(enriched.priceLevel)}
-                              </span>
-                            )}
+                            {enriched.priceLevel != null &&
+                              enriched.priceLevel > 0 && (
+                                <span className="text-xs text-muted-foreground ml-auto">
+                                  {"$".repeat(enriched.priceLevel)}
+                                </span>
+                              )}
                           </div>
                         );
                       })()}
-                      {reviewStatsMap[sSlug] && reviewStatsMap[sSlug].count > 0 && (
-                        <div className="flex items-center gap-1.5 mt-2">
-                          <div className="flex items-center gap-0.5">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star
-                                key={star}
-                                className={`w-3 h-3 ${star <= Math.round(reviewStatsMap[sSlug].avgRating) ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/30'}`}
-                              />
-                            ))}
+                      {reviewStatsMap[sSlug] &&
+                        reviewStatsMap[sSlug].count > 0 && (
+                          <div className="flex items-center gap-1.5 mt-2">
+                            <div className="flex items-center gap-0.5">
+                              {[1, 2, 3, 4, 5].map(star => (
+                                <Star
+                                  key={star}
+                                  className={`w-3 h-3 ${star <= Math.round(reviewStatsMap[sSlug].avgRating) ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`}
+                                />
+                              ))}
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {reviewStatsMap[sSlug].avgRating.toFixed(1)} (
+                              {reviewStatsMap[sSlug].count})
+                            </span>
                           </div>
-                          <span className="text-xs text-muted-foreground">
-                            {reviewStatsMap[sSlug].avgRating.toFixed(1)} ({reviewStatsMap[sSlug].count})
-                          </span>
-                        </div>
-                      )}
+                        )}
                       <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                           <MapPin className="w-3 h-3" /> {s.area}
                         </span>
                         {isLocal && (
-                          <span className="text-xs text-primary font-medium">Near you</span>
+                          <span className="text-xs text-primary font-medium">
+                            {t("directory.nearYou")}
+                          </span>
                         )}
                       </div>
                       <div className="flex flex-wrap items-center gap-2 mt-3">
                         {(() => {
                           const enriched = enrichmentMap[sSlug];
-                          const addr = enriched?.verifiedAddress || s.name + ', ' + s.area + ', Charlotte, NC';
+                          const addr =
+                            enriched?.verifiedAddress ||
+                            s.name + ", " + s.area + ", Charlotte, NC";
                           return (
                             <a
                               href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-medium no-underline transition-colors"
-                              onClick={() => trackBusinessAction("directions_click", {
-                                service_key: sSlug,
-                                business_name: s.name,
-                                category: cat?.name || s.category,
-                                area: s.area,
-                                surface: "directory_card",
-                              })}
+                              onClick={() =>
+                                trackBusinessAction("directions_click", {
+                                  service_key: sSlug,
+                                  business_name: s.name,
+                                  category: cat?.name || s.category,
+                                  area: s.area,
+                                  surface: "directory_card",
+                                })
+                              }
                             >
                               <Map className="w-3 h-3" /> Get Directions
                             </a>
                           );
                         })()}
                         {s.phone && (
-                          <a href={`tel:${s.phone}`} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted text-muted-foreground hover:text-foreground text-xs font-medium no-underline transition-colors" onClick={() => trackBusinessAction("phone_click", {
-                            service_key: sSlug,
-                            business_name: s.name,
-                            category: cat?.name || s.category,
-                            area: s.area,
-                            surface: "directory_card",
-                          })}>
+                          <a
+                            href={`tel:${s.phone}`}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted text-muted-foreground hover:text-foreground text-xs font-medium no-underline transition-colors"
+                            onClick={() =>
+                              trackBusinessAction("phone_click", {
+                                service_key: sSlug,
+                                business_name: s.name,
+                                category: cat?.name || s.category,
+                                area: s.area,
+                                surface: "directory_card",
+                              })
+                            }
+                          >
                             <Phone className="w-3 h-3" /> {s.phone}
                           </a>
                         )}
@@ -823,25 +1060,35 @@ export default function Directory() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted text-primary hover:bg-primary/10 text-xs font-medium no-underline transition-colors"
-                            onClick={() => trackBusinessAction("website_click", {
-                              service_key: sSlug,
-                              business_name: s.name,
-                              category: cat?.name || s.category,
-                              area: s.area,
-                              surface: "directory_card",
-                            })}
+                            onClick={() =>
+                              trackBusinessAction("website_click", {
+                                service_key: sSlug,
+                                business_name: s.name,
+                                category: cat?.name || s.category,
+                                area: s.area,
+                                surface: "directory_card",
+                              })
+                            }
                           >
                             Visit <ExternalLink className="w-3 h-3" />
                           </a>
                         )}
-                        <ClaimBusinessDialog serviceKey={sSlug} businessName={s.name}>
-                          <button className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted text-[11px] transition-colors ml-auto" onClick={() => trackBusinessAction("claim_click", {
-                            service_key: sSlug,
-                            business_name: s.name,
-                            category: cat?.name || s.category,
-                            area: s.area,
-                            surface: "directory_card",
-                          })}>
+                        <ClaimBusinessDialog
+                          serviceKey={sSlug}
+                          businessName={s.name}
+                        >
+                          <button
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted text-[11px] transition-colors ml-auto"
+                            onClick={() =>
+                              trackBusinessAction("claim_click", {
+                                service_key: sSlug,
+                                business_name: s.name,
+                                category: cat?.name || s.category,
+                                area: s.area,
+                                surface: "directory_card",
+                              })
+                            }
+                          >
                             <Building2 className="w-3 h-3" /> Claim
                           </button>
                         </ClaimBusinessDialog>
@@ -853,13 +1100,21 @@ export default function Directory() {
 
               {/* Load More / Infinite Scroll Trigger */}
               {hasMore && (
-                <div ref={loadMoreRef} className="flex flex-col items-center justify-center py-8 gap-3">
+                <div
+                  ref={loadMoreRef}
+                  className="flex flex-col items-center justify-center py-8 gap-3"
+                >
                   <p className="text-sm text-muted-foreground">
-                    Showing {visibleCount} of {filteredServices.length} businesses
+                    Showing {visibleCount} of {filteredServices.length}{" "}
+                    businesses
                   </p>
                   <Button
                     variant="outline"
-                    onClick={() => setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, filteredServices.length))}
+                    onClick={() =>
+                      setVisibleCount(prev =>
+                        Math.min(prev + PAGE_SIZE, filteredServices.length)
+                      )
+                    }
                     className="gap-2"
                   >
                     Load More
@@ -880,11 +1135,25 @@ export default function Directory() {
                     <Home className="w-5 h-5 text-emerald-600" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-display font-semibold text-foreground text-sm">Looking for a home or apartment?</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">We'll match you with a trusted local real estate expert — completely free.</p>
+                    <h3 className="font-display font-semibold text-foreground text-sm">
+                      Looking for a home or apartment?
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      We'll match you with a trusted local real estate expert —
+                      completely free.
+                    </p>
                   </div>
                   <Link href="/find-your-home?source=directory">
-                    <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 shrink-0" onClick={() => trackFindHomeIntent({ surface: "directory_banner", source: "directory" })}>
+                    <Button
+                      size="sm"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 shrink-0"
+                      onClick={() =>
+                        trackFindHomeIntent({
+                          surface: "directory_banner",
+                          source: "directory",
+                        })
+                      }
+                    >
                       Find Your Home <ArrowRight className="w-3.5 h-3.5" />
                     </Button>
                   </Link>
@@ -894,9 +1163,17 @@ export default function Directory() {
               {filteredServices.length === 0 && (
                 <div className="text-center py-16">
                   <Search className="w-10 h-10 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="font-display font-semibold text-foreground">No results found</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Try adjusting your search or filters</p>
-                  <Button variant="outline" onClick={clearFilters} className="mt-4">
+                  <h3 className="font-display font-semibold text-foreground">
+                    {t("directory.noResults")}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {t("directory.tryAdjusting")}
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={clearFilters}
+                    className="mt-4"
+                  >
                     Clear all filters
                   </Button>
                 </div>
