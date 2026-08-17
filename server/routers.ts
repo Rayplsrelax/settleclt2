@@ -60,6 +60,8 @@ import {
   getActivePromotionsForEvent,
   getPromotionsForUser,
   getActivePromotionsPublic,
+  sweepExpiredEventPromotions,
+  queueDueEventPromotionSocialPosts,
   createTag,
   getAllTags,
   getTagBySlug,
@@ -1174,6 +1176,16 @@ export const appRouter = router({
     /** Public: active event promotions for badge + boost rendering. */
     promoted: publicProcedure.query(async () => {
       return getActivePromotionsPublic();
+    }),
+
+    /** Admin: run the Plan A maintenance sweep (expiry + social queue). */
+    sweepPromotions: protectedProcedure.mutation(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
+      }
+      const expired = await sweepExpiredEventPromotions();
+      const social = await queueDueEventPromotionSocialPosts();
+      return { ...expired, socialQueued: social.queued };
     }),
   }),
 
