@@ -84,6 +84,36 @@ export const es = {
   "directory.category": "Categoría",
   "directory.categoryGroup": "Grupo de Categorías",
 
+
+  // Events page extras
+  "events.directions": "Indicaciones",
+  "events.submit": "Enviar un evento",
+  "events.searchPlaceholder": "Buscar eventos, lugares, vecindarios...",
+  "events.clearAll": "Limpiar todo",
+  "events.clearAllFilters": "Limpiar todos los filtros",
+  "events.upcoming": "Eventos próximos",
+  "events.past": "Eventos pasados",
+  "events.recurring": "Evento recurrente",
+
+  // Directory page extras
+  "directory.getDirections": "Ver indicaciones",
+  "directory.loadMore": "Cargar más",
+  "directory.clearAllFilters": "Limpiar todos los filtros",
+  "directory.recentlyAdded": "Añadido recientemente al directorio",
+
+  // Home page extras
+  "home.exploreNeighborhoods": "Explorar vecindarios",
+  "home.findYourHome": "Encuentra tu hogar",
+  "home.takeTheQuiz": "Haz el cuestionario",
+  "home.buildMyPlan": "Crea mi plan",
+  "home.emailAddress": "Correo electrónico",
+  "home.charlotteBlog": "Blog de Charlotte",
+  "home.latestFromSettle": "Lo último de Settle CLT",
+  "home.viewAllPosts": "Ver todas las publicaciones",
+  "home.liveUpdates": "Novedades en vivo",
+  "home.thisWeekInCharlotte": "Esta semana en Charlotte",
+  "home.viewAllEvents": "Ver todos los eventos",
+
   // Language toggle
   "language.toggle": "Español",
   "language.toggleEn": "English",

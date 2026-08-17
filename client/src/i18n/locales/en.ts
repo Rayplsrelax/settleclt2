@@ -84,6 +84,36 @@ export const en = {
   "directory.category": "Category",
   "directory.categoryGroup": "Category Group",
 
+
+  // Events page extras
+  "events.directions": "Directions",
+  "events.submit": "Submit an Event",
+  "events.searchPlaceholder": "Search events, venues, neighborhoods...",
+  "events.clearAll": "Clear all",
+  "events.clearAllFilters": "Clear all filters",
+  "events.upcoming": "Upcoming Events",
+  "events.past": "Past Events",
+  "events.recurring": "Recurring event",
+
+  // Directory page extras
+  "directory.getDirections": "Get Directions",
+  "directory.loadMore": "Load More",
+  "directory.clearAllFilters": "Clear all filters",
+  "directory.recentlyAdded": "Recently added to the directory",
+
+  // Home page extras
+  "home.exploreNeighborhoods": "Explore Neighborhoods",
+  "home.findYourHome": "Find Your Home",
+  "home.takeTheQuiz": "Take the Quiz",
+  "home.buildMyPlan": "Build My Plan",
+  "home.emailAddress": "Email address",
+  "home.charlotteBlog": "Charlotte Blog",
+  "home.latestFromSettle": "Latest from Settle CLT",
+  "home.viewAllPosts": "View all posts",
+  "home.liveUpdates": "Live Updates",
+  "home.thisWeekInCharlotte": "This Week in Charlotte",
+  "home.viewAllEvents": "View all events",
+
   // Language toggle
   "language.toggle": "Español",
   "language.toggleEn": "English",

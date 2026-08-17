@@ -196,6 +196,7 @@ function EventCard({
   onNeighborhoodClick?: (neighborhood: string) => void;
   promoted?: { level: EventPromotionLevel; customHeadline?: string | null; sponsorMessage?: string | null; organizerLogoUrl?: string | null } | null;
 }) {
+  const { t } = useI18n();
   return (
     <button
       onClick={onClick}
@@ -258,7 +259,7 @@ function EventCard({
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-medium no-underline transition-colors shrink-0"
                   onClick={e => e.stopPropagation()}
                 >
-                  <Navigation className="w-3 h-3" /> Directions
+                  <Navigation className="w-3 h-3" /> {t("events.directions")}
                 </a>
               )}
             </div>
@@ -508,7 +509,7 @@ export default function Events() {
                   }
                 >
                   <CalendarPlus className="w-4 h-4 mr-2" />
-                  Submit an Event
+                  {t("events.submit")}
                 </Button>
               </Link>
               <ShareButtons
@@ -552,7 +553,7 @@ export default function Events() {
               <Input
                 type="text"
                 aria-label="Search events, venues, and neighborhoods"
-                placeholder="Search events, venues, neighborhoods..."
+                placeholder={t("events.searchPlaceholder")}
                 value={searchQuery}
                 onChange={e => {
                   setSearchQuery(e.target.value);
@@ -752,7 +753,7 @@ export default function Events() {
                 onClick={clearAllFilters}
                 className="mt-4"
               >
-                Clear all filters
+                {t("events.clearAllFilters")}
               </Button>
             )}
           </div>
@@ -762,7 +763,7 @@ export default function Events() {
             {upcomingEvents.length > 0 && (
               <div>
                 <h2 className="font-display font-bold text-2xl text-foreground mb-6">
-                  Upcoming Events
+                  {t("events.upcoming")}
                   <span className="text-muted-foreground font-normal text-base ml-2">
                     ({upcomingEvents.length})
                   </span>
@@ -792,7 +793,7 @@ export default function Events() {
             {pastEvents.length > 0 && (
               <div>
                 <h2 className="font-display font-bold text-2xl text-foreground mb-6 text-muted-foreground/70">
-                  Past Events
+                  {t("events.past")}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-70">
                   {pastEvents.slice(0, 6).map(event => (

@@ -1055,7 +1055,7 @@ export default function MyBusiness() {
                     <div className="rounded-lg bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Total requests</p><p className="text-xl font-semibold">{referralAnalytics.total}</p></div>
                     <div className="rounded-lg bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Completed</p><p className="text-xl font-semibold">{referralAnalytics.byStatus.completed ?? 0}</p></div>
                     <div className="rounded-lg bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Sources</p><p className="text-xl font-semibold">{Object.keys(referralAnalytics.bySource).length}</p></div>
-                    <div className="rounded-lg bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Payout ledger</p><p className="text-xl font-semibold">${(referralAnalytics.pendingPayoutCents / 100).toFixed(2)}</p></div>
+                    <div className="rounded-lg bg-muted/50 p-3"><p className="text-xs text-muted-foreground">Completed value</p><p className="text-xl font-semibold">${(referralAnalytics.completedValueCents / 100).toFixed(2)}</p></div>
                   </div>
                 )}
                 {referralInvitations.length > 0 && (
