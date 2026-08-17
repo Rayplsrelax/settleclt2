@@ -3,7 +3,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch, Redirect } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { ThemeProvider } from "./contexts/ThemeContext";
+import { I18nProvider } from "@/i18n/I18nContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { lazy, Suspense } from "react";
 import { useMixpanelPageView } from "@/hooks/useMixpanelPageView";
 import { useImageFallbacks } from "@/hooks/useImageFallbacks";
@@ -124,11 +125,13 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light" switchable>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-          <CookieConsent />
-        </TooltipProvider>
+        <I18nProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+            <CookieConsent />
+          </TooltipProvider>
+        </I18nProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

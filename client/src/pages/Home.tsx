@@ -33,6 +33,7 @@ import { toast } from "sonner";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import ActivityFeed from "@/components/ActivityFeed";
 import SocialFollowLinks from "@/components/SocialFollowLinks";
+import { useI18n } from "@/i18n/I18nContext";
 
 const FeaturedNeighborhoods = lazy(
   () => import("@/components/home/FeaturedNeighborhoods")
@@ -44,6 +45,7 @@ const DirectoryPreview = lazy(
 const HERO_IMAGE = "/images/hero-charlotte-skyline.webp";
 
 function Hero() {
+  const { t } = useI18n();
   return (
     <section className="relative overflow-hidden min-h-[520px] md:min-h-[600px] flex items-center">
       {/* Background image */}
@@ -66,12 +68,11 @@ function Hero() {
             Charlotte, North Carolina
           </div>
           <h1 className="font-display font-extrabold text-4xl md:text-5xl lg:text-6xl text-white leading-tight">
-            Your complete guide to
-            <span className="block text-clt-gold">settling in Charlotte</span>
+            {t("home.heroTitle1")}
+            <span className="block text-clt-gold">{t("home.heroTitle2")}</span>
           </h1>
           <p className="mt-5 text-lg md:text-xl text-white/80 leading-relaxed max-w-xl">
-            Explore 20 neighborhoods, discover 700+ local services, and get
-            honest advice from people who actually live here.
+            {t("home.heroTagline")}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button
@@ -90,7 +91,7 @@ function Hero() {
               variant="outline"
               className="border-white/25 text-white hover:bg-white/10 font-semibold px-6 backdrop-blur-sm"
             >
-              <Link href="/directory">Browse Directory</Link>
+              <Link href="/directory">{t("home.browseDirectory")}</Link>
             </Button>
             <Button
               asChild
@@ -860,6 +861,7 @@ function ForYouSection() {
 }
 
 export default function Home() {
+  const { t } = useI18n();
   useSEO({
     title: "Settle CLT \u2014 Your Complete Guide to Living in Charlotte, NC",
     description:

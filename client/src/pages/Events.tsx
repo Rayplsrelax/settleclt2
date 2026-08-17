@@ -34,6 +34,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useI18n } from "@/i18n/I18nContext";
 
 const CATEGORIES = [
   { value: "", label: "All Events" },
@@ -271,6 +272,7 @@ function EventCard({
 }
 
 export default function Events() {
+  const { t } = useI18n();
   useSEO({
     title: "Charlotte Events This Week & Weekend: Things to Do in CLT (2026)",
     description:
@@ -453,15 +455,14 @@ export default function Events() {
               className="mb-4 text-primary border-primary/30"
             >
               <Calendar className="w-3.5 h-3.5 mr-1.5" />
-              Charlotte Events
+              {t("events.charlotteBadge")}
             </Badge>
             <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-foreground mb-4">
-              What's Happening in{" "}
-              <span className="text-primary">Charlotte</span>
+              {t("events.title1")}{" "}
+              <span className="text-primary">{t("events.title2")}</span>
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Concerts, food festivals, art shows, sports, and more. Discover
-              what makes the Queen City come alive.
+              {t("events.subtitle")}
             </p>
             <div className="mt-6 flex items-center gap-3">
               <Link href="/submit-event">

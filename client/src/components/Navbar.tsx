@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import NotificationBell from "@/components/NotificationBell";
 import ThemeToggle from "@/components/ThemeToggle";
+import LanguageToggle from "@/components/LanguageToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,14 +31,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import GlobalSearch from "@/components/GlobalSearch";
+import { useI18n } from "@/i18n/I18nContext";
 
-const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/neighborhoods", label: "Neighborhoods" },
-  { href: "/directory", label: "Directory" },
-  { href: "/events", label: "Events" },
-  { href: "/blog", label: "Blog" },
+const navLinkDefs: Array<{ href: string; key: string }> = [
+  { href: "/", key: "nav.home" },
+  { href: "/neighborhoods", key: "nav.neighborhoods" },
+  { href: "/directory", key: "nav.directory" },
+  { href: "/events", key: "nav.events" },
+  { href: "/blog", key: "nav.blog" },
 ];
+const navLinks = navLinkDefs;
 
 function getInitials(name: string | null | undefined): string {
   if (!name) return "U";
@@ -51,6 +54,7 @@ function getInitials(name: string | null | undefined): string {
 }
 
 function UserMenu() {
+  const { t } = useI18n();
   const { user, logout } = useAuth();
   const [, navigate] = useLocation();
 
@@ -83,46 +87,46 @@ function UserMenu() {
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => navigate("/profile")}>
           <User className="w-4 h-4 mr-2" />
-          My Profile
+          {t("user.myProfile")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/my-business")}>
           <Building2 className="w-4 h-4 mr-2" />
-          My Business
+          {t("user.myBusiness")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/passport")}>
           <Stamp className="w-4 h-4 mr-2" />
-          CLT Passport
+          {t("user.cltPassport")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/find-your-home")}>
           <Home className="w-4 h-4 mr-2" />
-          Find Your Home
+          {t("user.findYourHome")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/business-pricing")}>
           <DollarSign className="w-4 h-4 mr-2" />
-          Business Pricing
+          {t("user.businessPricing")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/wishlist")}>
           <Heart className="w-4 h-4 mr-2" />
-          My Wishlist
+          {t("user.myWishlist")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/bingo")}>
           <Grid3X3 className="w-4 h-4 mr-2" />
-          CLT Bingo
+          {t("user.cltBingo")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/leaderboard")}>
           <Trophy className="w-4 h-4 mr-2" />
-          Leaderboard
+          {t("user.leaderboard")}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => navigate("/notifications")}>
           <Settings className="w-4 h-4 mr-2" />
-          Notification Settings
+          {t("user.notificationSettings")}
         </DropdownMenuItem>
         {user.role === "admin" && (
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => navigate("/admin/enrich")}>
               <Shield className="w-4 h-4 mr-2" />
-              Admin Dashboard
+              {t("user.adminDashboard")}
             </DropdownMenuItem>
           </>
         )}
@@ -132,7 +136,7 @@ function UserMenu() {
           className="text-destructive focus:text-destructive"
         >
           <LogOut className="w-4 h-4 mr-2" />
-          Sign Out
+          {t("nav.signOut")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -141,6 +145,7 @@ function UserMenu() {
 
 export default function Navbar() {
   const [location, navigate] = useLocation();
+  const { t } = useI18n();
   const { user, loading } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -169,7 +174,7 @@ export default function Navbar() {
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
             >
-              {link.label}
+              {t(link.key)}
             </Link>
           ))}
           <div className="ml-2">
@@ -179,10 +184,11 @@ export default function Navbar() {
             href="/list-your-business"
             className="ml-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity no-underline"
           >
-            List Your Business
+            {t("nav.listYourBusiness")}
           </Link>
 
           {/* Auth section */}
+          <LanguageToggle />
           <ThemeToggle />
           {!loading && (
             <>
@@ -197,7 +203,7 @@ export default function Navbar() {
                   className="ml-2 flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 >
                   <LogIn className="w-4 h-4" />
-                  Sign In
+                  {t("nav.signIn")}
                 </button>
               )}
             </>
@@ -207,6 +213,7 @@ export default function Navbar() {
         {/* Mobile controls */}
         <div className="flex md:hidden items-center gap-2">
           <GlobalSearch />
+          <LanguageToggle />
           <ThemeToggle />
           {!loading && user && (
             <>
@@ -217,7 +224,7 @@ export default function Navbar() {
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="p-2 rounded-lg hover:bg-muted transition-colors text-foreground"
-            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-label={mobileOpen ? t("nav.closeMenu") : t("nav.openMenu")}
             aria-expanded={mobileOpen}
             aria-controls="mobile-navigation"
           >
@@ -248,7 +255,7 @@ export default function Navbar() {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {link.label}
+                {t(link.key)}
               </Link>
             ))}
             <Link
@@ -256,7 +263,7 @@ export default function Navbar() {
               onClick={() => setMobileOpen(false)}
               className="mt-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold text-center no-underline"
             >
-              List Your Business
+              {t("nav.listYourBusiness")}
             </Link>
             {!loading && !user && (
               <button
@@ -267,7 +274,7 @@ export default function Navbar() {
                 className="mt-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors"
               >
                 <LogIn className="w-4 h-4" />
-                Sign In
+                {t("nav.signIn")}
               </button>
             )}
           </div>
