@@ -4,6 +4,7 @@ import type { Express } from "express";
 export type FeatureFlags = {
   businessCheckout: boolean;
   eventSubmissions: boolean;
+  eventPromotions: boolean;
 };
 
 export type FeatureFlagName = keyof FeatureFlags;
@@ -13,6 +14,7 @@ type FlagEnvironment = Record<string, string | undefined>;
 const FLAG_ENVIRONMENT_KEYS: Record<FeatureFlagName, string> = {
   businessCheckout: "FEATURE_BUSINESS_CHECKOUT",
   eventSubmissions: "FEATURE_EVENT_SUBMISSIONS",
+  eventPromotions: "FEATURE_EVENT_PROMOTIONS",
 };
 
 function parseFlag(value: string | undefined, environmentKey: string): boolean {
@@ -32,6 +34,10 @@ export function loadFeatureFlags(environment: FlagEnvironment): FeatureFlags {
     eventSubmissions: parseFlag(
       environment.FEATURE_EVENT_SUBMISSIONS,
       FLAG_ENVIRONMENT_KEYS.eventSubmissions
+    ),
+    eventPromotions: parseFlag(
+      environment.FEATURE_EVENT_PROMOTIONS,
+      FLAG_ENVIRONMENT_KEYS.eventPromotions
     ),
   };
 }
