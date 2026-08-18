@@ -171,7 +171,7 @@ function DeleteAccountSection() {
         </div>
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">
-            {t("profile.deleteConfirm")}
+            {t("profile.deleteConfirm")} <span className="font-mono font-bold">DELETE MY ACCOUNT</span> {t("profile.deleteConfirmSuffix")}
           </label>
           <Input
             value={confirmText}

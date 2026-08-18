@@ -236,7 +236,8 @@ export const en = {
   "profile.loading": "Loading...",
   "profile.signIn": "Sign In",
   "profile.deleteTitle": "Delete your account?",
-  "profile.deleteConfirm": "Type DELETE MY ACCOUNT to confirm",
+  "profile.deleteConfirm": "Type",
+  "profile.deleteConfirmSuffix": "to confirm",
   "profile.deleteAccount": "Delete My Account",
   "profile.logout": "Sign Out",
   "profile.journey": "Your Charlotte Journey",
@@ -245,6 +246,7 @@ export const en = {
 
   // Business portal
   "business.loading": "Loading...",
+  "business.saving": "Saving...",
   "business.ownerPortal": "Business Owner Portal",
   "business.signIn": "Sign In to Continue",
   "business.noAccess": "No Business Access",

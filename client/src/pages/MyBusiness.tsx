@@ -583,7 +583,7 @@ export default function MyBusiness() {
               {canEdit && (
                 <Button onClick={handleSave} disabled={updateListing.isPending || !formIsCurrent} className="gap-1.5 shrink-0">
                   <Save className="w-4 h-4" />
-                  {updateListing.isPending ? t("business.loading") : t("business.saveChanges")}
+                  {updateListing.isPending ? t("business.saving") : t("business.saveChanges")}
                 </Button>
               )}
             </div>

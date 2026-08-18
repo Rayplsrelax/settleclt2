@@ -238,7 +238,8 @@ export const es = {
   "profile.loading": "Cargando...",
   "profile.signIn": "Iniciar sesión",
   "profile.deleteTitle": "¿Eliminar tu cuenta?",
-  "profile.deleteConfirm": "Escribe DELETE MY ACCOUNT para confirmar",
+  "profile.deleteConfirm": "Escribe",
+  "profile.deleteConfirmSuffix": "para confirmar",
   "profile.deleteAccount": "Eliminar mi cuenta",
   "profile.logout": "Cerrar sesión",
   "profile.journey": "Tu recorrido por Charlotte",
@@ -247,6 +248,7 @@ export const es = {
 
   // Portal de negocios
   "business.loading": "Cargando...",
+  "business.saving": "Guardando...",
   "business.ownerPortal": "Portal para propietarios de negocios",
   "business.signIn": "Iniciar sesión para continuar",
   "business.noAccess": "Sin acceso al negocio",

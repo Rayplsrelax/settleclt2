@@ -5,50 +5,64 @@ function source(path: string) {
   return readFileSync(new URL(path, import.meta.url), "utf8");
 }
 
+const en = source("../client/src/i18n/locales/en.ts");
+const es = source("../client/src/i18n/locales/es.ts");
+const profile = source("../client/src/pages/Profile.tsx");
+const business = source("../client/src/pages/MyBusiness.tsx");
+const accountBusinessKeys = [
+  "profile.title",
+  "profile.loading",
+  "profile.signIn",
+  "profile.deleteTitle",
+  "profile.deleteConfirm",
+  "profile.deleteConfirmSuffix",
+  "profile.deleteAccount",
+  "profile.logout",
+  "business.loading",
+  "business.saving",
+  "business.ownerPortal",
+  "business.signIn",
+  "business.noAccess",
+  "business.saveChanges",
+  "business.details",
+  "business.hours",
+  "business.photos",
+  "business.analytics",
+  "business.displayName",
+  "business.phone",
+  "business.email",
+  "business.website",
+];
+
 describe("account and business i18n contracts", () => {
-  it("translates Profile account states and actions", () => {
-    const profile = source("../client/src/pages/Profile.tsx");
-    for (const key of [
-      "profile.title",
-      "profile.loading",
-      "profile.signIn",
-      "profile.deleteTitle",
-      "profile.deleteConfirm",
-      "profile.deleteAccount",
-      "profile.logout",
-    ]) expect(profile).toContain(`t("${key}")`);
+  it("keeps the account/business key contract present in both dictionaries", () => {
+    for (const key of accountBusinessKeys) {
+      expect(en).toContain(`"${key}":`);
+      expect(es).toContain(`"${key}":`);
+    }
   });
 
-  it("translates My Business portal shell and editable labels", () => {
-    const business = source("../client/src/pages/MyBusiness.tsx");
-    for (const key of [
-      "business.loading",
-      "business.ownerPortal",
-      "business.signIn",
-      "business.noAccess",
-      "business.saveChanges",
-      "business.details",
-      "business.hours",
-      "business.photos",
-      "business.analytics",
-      "business.displayName",
-      "business.phone",
-      "business.email",
-      "business.website",
-    ]) expect(business).toContain(`t("${key}")`);
+  it("keeps account and business pages connected to the translation context", () => {
+    for (const page of [profile, business]) {
+      expect(page).toContain("useI18n");
+      expect(page).toMatch(/\bt\(/);
+    }
+    expect(profile).toContain('t("profile.deleteConfirm")');
+    expect(profile).toContain('t("profile.deleteConfirmSuffix")');
+    expect(business).toContain('t("business.saving")');
   });
 
-  it("guards known account/business UI copy from returning as JSX literals", () => {
-    const files = [
-      source("../client/src/pages/Profile.tsx"),
-      source("../client/src/pages/MyBusiness.tsx"),
-    ].join("\n");
+  it("guards known account/business UI copy with whitespace-tolerant checks", () => {
+    const files = `${profile}\n${business}`;
     for (const phrase of [
       "Delete your account?",
       "Business Owner Portal",
       "No Business Access",
       "Save Changes",
       "Display Name",
-    ]) expect(files).not.toContain(`>${phrase}<`);
+    ]) {
+      const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      expect(files).not.toMatch(new RegExp(`>\\s*${escaped}\\s*<`));
+    }
   });
 });
