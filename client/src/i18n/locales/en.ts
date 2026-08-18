@@ -219,6 +219,8 @@ export const en = {
   "notFound.description":
     "Sorry, the page you are looking for doesn't exist. It may have been moved or deleted.",
   "notFound.goHome": "Go Home",
+  "error.title": "An unexpected error occurred.",
+  "error.reload": "Reload Page",
 
   // Language setting
   "language.choose": "Choose language",

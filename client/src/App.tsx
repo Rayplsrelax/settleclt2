@@ -124,17 +124,17 @@ function App() {
   useImageFallbacks();
 
   return (
-    <ErrorBoundary>
-      <ThemeProvider defaultTheme="light" switchable>
-        <I18nProvider>
+    <ThemeProvider defaultTheme="light" switchable>
+      <I18nProvider>
+        <ErrorBoundary>
           <TooltipProvider>
             <Toaster />
             <Router />
             <CookieConsent />
           </TooltipProvider>
-        </I18nProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+        </ErrorBoundary>
+      </I18nProvider>
+    </ThemeProvider>
   );
 }
 

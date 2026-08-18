@@ -221,6 +221,8 @@ export const es = {
   "notFound.description":
     "Lo sentimos, la página que buscas no existe. Es posible que se haya movido o eliminado.",
   "notFound.goHome": "Ir al inicio",
+  "error.title": "Ocurrió un error inesperado.",
+  "error.reload": "Volver a cargar la página",
 
   // Language setting
   "language.choose": "Elegir idioma",

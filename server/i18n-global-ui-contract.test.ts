@@ -9,6 +9,7 @@ const app = source("../client/src/App.tsx");
 const cookies = source("../client/src/components/CookieConsent.tsx");
 const map = source("../client/src/components/Map.tsx");
 const notFound = source("../client/src/pages/NotFound.tsx");
+const errorBoundary = source("../client/src/components/ErrorBoundary.tsx");
 
 describe("translated global UI contract", () => {
   it("translates the global loading state", () => {
@@ -41,5 +42,11 @@ describe("translated global UI contract", () => {
     expect(notFound).toContain('t("notFound.title")');
     expect(notFound).toContain('t("notFound.description")');
     expect(notFound).toContain('t("notFound.goHome")');
+  });
+
+  it("translates the unexpected-error fallback", () => {
+    expect(errorBoundary).toContain("function ErrorFallback");
+    expect(errorBoundary).toContain('t("error.title")');
+    expect(errorBoundary).toContain('t("error.reload")');
   });
 });
