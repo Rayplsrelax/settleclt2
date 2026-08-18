@@ -233,6 +233,34 @@ export const es = {
   "neighborhoods.metroSubtitle":
     "{count} comunidades cercanas — suburbios, pueblos del anillo interior y zonas periféricas",
 
+  // Perfil de cuenta
+  "profile.title": "Tu perfil",
+  "profile.loading": "Cargando...",
+  "profile.signIn": "Iniciar sesión",
+  "profile.deleteTitle": "¿Eliminar tu cuenta?",
+  "profile.deleteConfirm": "Escribe DELETE MY ACCOUNT para confirmar",
+  "profile.deleteAccount": "Eliminar mi cuenta",
+  "profile.logout": "Cerrar sesión",
+  "profile.journey": "Tu recorrido por Charlotte",
+  "profile.preferences": "Preferencias",
+  "profile.account": "Cuenta",
+
+  // Portal de negocios
+  "business.loading": "Cargando...",
+  "business.ownerPortal": "Portal para propietarios de negocios",
+  "business.signIn": "Iniciar sesión para continuar",
+  "business.noAccess": "Sin acceso al negocio",
+  "business.browseDirectory": "Explorar directorio",
+  "business.saveChanges": "Guardar cambios",
+  "business.details": "Detalles",
+  "business.hours": "Horario",
+  "business.photos": "Fotos",
+  "business.analytics": "Analíticas",
+  "business.displayName": "Nombre visible",
+  "business.phone": "Teléfono",
+  "business.email": "Correo electrónico",
+  "business.website": "Sitio web",
+
   // Interfaz compartida para clientes
   "common.loading": "Cargando...",
   "cookies.ariaLabel": "Consentimiento de cookies",
