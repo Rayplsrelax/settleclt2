@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import CommentSection from "@/components/CommentSection";
 import { useSEO } from "@/hooks/useSEO";
 import { useStructuredData, buildArticleSchema, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
+import { useI18n } from "@/i18n/I18nContext";
+import { formatLocalizedDate } from "@/i18n/formatters";
 
 function renderMarkdown(md: string): string {
   return md
@@ -36,6 +38,7 @@ function renderMarkdown(md: string): string {
 }
 
 export default function BlogArticle() {
+  const { locale, t } = useI18n();
   const { slug } = useParams<{ slug: string }>();
   const { data: post, isLoading, error } = trpc.blog.getBySlug.useQuery(
     { slug: slug || "" },
@@ -92,12 +95,12 @@ export default function BlogArticle() {
         <div className="min-h-[60vh] flex items-center justify-center">
           <div className="text-center">
             <BookOpen className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-foreground mb-2">Article Not Found</h1>
-            <p className="text-muted-foreground mb-6">This article may have been removed or doesn't exist.</p>
+            <h1 className="text-2xl font-bold text-foreground mb-2">{t("blog.articleNotFound")}</h1>
+            <p className="text-muted-foreground mb-6">{t("blog.articleNotFoundDescription")}</p>
             <Link href="/blog">
               <Button className="gap-2">
                 <ArrowLeft className="w-4 h-4" />
-                Back to Blog
+                {t("blog.backToBlog")}
               </Button>
             </Link>
           </div>
@@ -125,7 +128,7 @@ export default function BlogArticle() {
         <Link href="/blog" className="no-underline">
           <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
             <ArrowLeft className="w-4 h-4" />
-            All Articles
+            {t("blog.allArticles")}
           </span>
         </Link>
 
@@ -146,8 +149,10 @@ export default function BlogArticle() {
             {post.publishedAt && (
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4" />
-                {new Date(post.publishedAt).toLocaleDateString("en-US", {
-                  year: "numeric", month: "long", day: "numeric"
+                {formatLocalizedDate(post.publishedAt, locale, {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
                 })}
               </span>
             )}
@@ -182,11 +187,11 @@ export default function BlogArticle() {
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                   <Compass className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">Find Your Neighborhood</h3>
+                <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">{t("blog.findNeighborhood")}</h3>
               </div>
-              <p className="text-sm text-muted-foreground mb-3">Take our 2-minute quiz to discover which Charlotte neighborhood fits your lifestyle.</p>
+              <p className="text-sm text-muted-foreground mb-3">{t("blog.quizDescription")}</p>
               <span className="inline-flex items-center gap-1 text-sm font-medium text-primary">
-                Take the Quiz <ArrowRight className="w-3.5 h-3.5" />
+                {t("blog.takeQuiz")} <ArrowRight className="w-3.5 h-3.5" />
               </span>
             </div>
           </Link>
@@ -196,11 +201,11 @@ export default function BlogArticle() {
                 <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
                   <Home className="w-5 h-5 text-emerald-600" />
                 </div>
-                <h3 className="font-semibold text-foreground group-hover:text-emerald-700 transition-colors">Find Your Home</h3>
+                <h3 className="font-semibold text-foreground group-hover:text-emerald-700 transition-colors">{t("blog.findHome")}</h3>
               </div>
-              <p className="text-sm text-muted-foreground mb-3">Get matched with a local real estate expert — free, no obligation.</p>
+              <p className="text-sm text-muted-foreground mb-3">{t("blog.findHomeDescription")}</p>
               <span className="inline-flex items-center gap-1 text-sm font-medium text-emerald-600">
-                Get Started <ArrowRight className="w-3.5 h-3.5" />
+                {t("blog.getStarted")} <ArrowRight className="w-3.5 h-3.5" />
               </span>
             </div>
           </Link>
@@ -216,7 +221,7 @@ export default function BlogArticle() {
           <Link href="/blog">
             <Button variant="outline" className="gap-2">
               <ArrowLeft className="w-4 h-4" />
-              Back to All Articles
+              {t("blog.backToAllArticles")}
             </Button>
           </Link>
         </div>

@@ -6,6 +6,8 @@ import { Link } from "wouter";
 import { BookOpen, Clock, Calendar } from "lucide-react";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import { useSEO } from "@/hooks/useSEO";
+import { useI18n } from "@/i18n/I18nContext";
+import { formatLocalizedDate } from "@/i18n/formatters";
 
 interface UnifiedArticle {
   id: string;
@@ -22,6 +24,7 @@ interface UnifiedArticle {
 }
 
 export default function Blog() {
+  const { locale, t } = useI18n();
   useSEO({
     title: "Charlotte Blog — Local Tips, Guides & Stories",
     description: "Read insider guides to Charlotte NC including neighborhood deep dives, best restaurants, weekend plans, moving tips, and local stories from people who live here.",
@@ -54,10 +57,12 @@ export default function Blog() {
       title: p.title,
       excerpt: p.excerpt || p.content.slice(0, 150) + "...",
       category: p.category || "General",
-      date: p.publishedAt
-        ? new Date(p.publishedAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
-        : new Date(p.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }),
-      readTime: p.readTime || "3 min read",
+      date: formatLocalizedDate(p.publishedAt ?? p.createdAt, locale, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }),
+      readTime: p.readTime || t("blog.minRead", { count: 3 }),
       coverImage: p.coverImage,
       slug: p.slug,
       source: "db" as const,
@@ -65,7 +70,7 @@ export default function Blog() {
 
     // DB posts first (newest), then static
     return [...dbItems, ...staticItems];
-  }, [dbPosts]);
+  }, [dbPosts, locale, t]);
 
   // Collect all categories
   const allCategories = useMemo(() => {
@@ -83,8 +88,8 @@ export default function Blog() {
       {/* Hero */}
       <section className="bg-gradient-to-br from-clt-navy to-clt-teal-dark py-10 md:py-14">
         <div className="container">
-          <h1 className="font-display font-extrabold text-3xl md:text-4xl text-white">Blog & Guides</h1>
-          <p className="mt-2 text-white/70">Practical advice for your move to Charlotte</p>
+          <h1 className="font-display font-extrabold text-3xl md:text-4xl text-white">{t("blog.title")}</h1>
+          <p className="mt-2 text-white/70">{t("blog.subtitle")}</p>
         </div>
       </section>
 
@@ -105,7 +110,7 @@ export default function Blog() {
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
                 }`}
               >
-                {cat}
+                {cat === "All" ? t("blog.all") : cat}
               </button>
             ))}
           </div>
@@ -124,10 +129,10 @@ export default function Blog() {
                       </div>
                     )}
                     {a.featured && (
-                      <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-clt-gold/90 text-clt-navy text-xs font-bold">Featured</span>
+                      <span className="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-clt-gold/90 text-clt-navy text-xs font-bold">{t("blog.featured")}</span>
                     )}
                     {a.source === "db" && (
-                      <span className="absolute top-3 left-3 px-2 py-0.5 rounded-full bg-primary/90 text-primary-foreground text-xs font-bold">New</span>
+                      <span className="absolute top-3 left-3 px-2 py-0.5 rounded-full bg-primary/90 text-primary-foreground text-xs font-bold">{t("blog.new")}</span>
                     )}
                   </div>
                   <div className="p-5">
@@ -158,8 +163,8 @@ export default function Blog() {
           {filtered.length === 0 && (
             <div className="text-center py-16">
               <BookOpen className="w-10 h-10 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-display font-semibold text-foreground">No articles in this category yet</h3>
-              <p className="text-sm text-muted-foreground mt-1">Check back soon — we're always adding new guides.</p>
+              <h3 className="font-display font-semibold text-foreground">{t("blog.empty")}</h3>
+              <p className="text-sm text-muted-foreground mt-1">{t("blog.emptyHint")}</p>
             </div>
           )}
         </div>

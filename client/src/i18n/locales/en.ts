@@ -119,6 +119,30 @@ export const en = {
   "home.eventsSubtitle": "Don't miss what's happening around the Queen City",
   "home.viewAllEvents": "View all events",
 
+  // Blog chrome
+  "blog.title": "Blog & Guides",
+  "blog.subtitle": "Practical advice for your move to Charlotte",
+  "blog.all": "All",
+  "blog.featured": "Featured",
+  "blog.new": "New",
+  "blog.empty": "No articles in this category yet",
+  "blog.emptyHint": "Check back soon — we're always adding new guides.",
+  "blog.minRead": "{count} min read",
+  "blog.articleNotFound": "Article Not Found",
+  "blog.articleNotFoundDescription":
+    "This article may have been removed or doesn't exist.",
+  "blog.backToBlog": "Back to Blog",
+  "blog.backToAllArticles": "Back to All Articles",
+  "blog.allArticles": "All Articles",
+  "blog.findNeighborhood": "Find Your Neighborhood",
+  "blog.quizDescription":
+    "Take our 2-minute quiz to discover which Charlotte neighborhood fits your lifestyle.",
+  "blog.takeQuiz": "Take the Quiz",
+  "blog.findHome": "Find Your Home",
+  "blog.findHomeDescription":
+    "Get matched with a local real estate expert — free, no obligation.",
+  "blog.getStarted": "Get Started",
+
   // Shared customer-facing UI
   "common.loading": "Loading...",
   "cookies.ariaLabel": "Cookie consent",

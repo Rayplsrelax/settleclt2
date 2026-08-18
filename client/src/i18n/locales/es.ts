@@ -121,6 +121,30 @@ export const es = {
   "home.eventsSubtitle": "No te pierdas lo que sucede en la Queen City",
   "home.viewAllEvents": "Ver todos los eventos",
 
+  // Interfaz del blog
+  "blog.title": "Blog y guías",
+  "blog.subtitle": "Consejos prácticos para tu mudanza a Charlotte",
+  "blog.all": "Todos",
+  "blog.featured": "Destacado",
+  "blog.new": "Nuevo",
+  "blog.empty": "Todavía no hay artículos en esta categoría",
+  "blog.emptyHint": "Vuelve pronto — siempre estamos agregando nuevas guías.",
+  "blog.minRead": "{count} min de lectura",
+  "blog.articleNotFound": "Artículo no encontrado",
+  "blog.articleNotFoundDescription":
+    "Es posible que este artículo se haya eliminado o no exista.",
+  "blog.backToBlog": "Volver al blog",
+  "blog.backToAllArticles": "Volver a todos los artículos",
+  "blog.allArticles": "Todos los artículos",
+  "blog.findNeighborhood": "Encuentra tu vecindario",
+  "blog.quizDescription":
+    "Haz nuestro cuestionario de 2 minutos para descubrir qué vecindario de Charlotte encaja con tu estilo de vida.",
+  "blog.takeQuiz": "Hacer el cuestionario",
+  "blog.findHome": "Encuentra tu hogar",
+  "blog.findHomeDescription":
+    "Conéctate con un experto inmobiliario local — gratis y sin compromiso.",
+  "blog.getStarted": "Comenzar",
+
   // Interfaz compartida para clientes
   "common.loading": "Cargando...",
   "cookies.ariaLabel": "Consentimiento de cookies",
