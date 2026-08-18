@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Cookie, X } from "lucide-react";
 import { disableAnalytics, enableAnalytics } from "@/lib/mixpanel";
 import { ANALYTICS_CONSENT_KEY } from "@/lib/analytics-config";
+import { useI18n } from "@/i18n/I18nContext";
 
 const UMAMI_SCRIPT_ID = "settle-clt-umami";
 
@@ -30,6 +31,7 @@ function enableConsentedAnalytics() {
 }
 
 export default function CookieConsent() {
+  const { t } = useI18n();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -63,7 +65,7 @@ export default function CookieConsent() {
   return (
     <div
       role="region"
-      aria-label="Cookie consent"
+      aria-label={t("cookies.ariaLabel")}
       className="fixed bottom-4 right-4 z-50 w-[calc(100%-2rem)] max-w-md animate-in slide-in-from-bottom-4 duration-500 sm:bottom-6 sm:right-6"
     >
       <div className="bg-card border border-border rounded-xl shadow-lg p-3 sm:p-4">
@@ -71,22 +73,21 @@ export default function CookieConsent() {
           <Cookie className="w-5 h-5 text-primary mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm text-foreground font-medium mb-1">
-              We use cookies
+              {t("cookies.title")}
             </p>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              We use cookies and analytics tools to understand how you use
-              Settle CLT so we can improve your experience. Read our{" "}
+              {t("cookies.description")} {" "}
               <a
                 href="/privacy"
                 className="text-primary underline underline-offset-2 hover:no-underline"
               >
-                Privacy Policy
+                {t("cookies.privacyPolicy")}
               </a>{" "}
-              for details.
+              {t("cookies.details")}
             </p>
             <div className="flex items-center gap-2 mt-3">
               <Button size="sm" onClick={accept} className="text-xs h-8 px-4">
-                Accept All
+                {t("cookies.accept")}
               </Button>
               <Button
                 size="sm"
@@ -94,15 +95,15 @@ export default function CookieConsent() {
                 onClick={decline}
                 className="text-xs h-8 px-4"
               >
-                Decline
+                {t("cookies.decline")}
               </Button>
             </div>
           </div>
           <button
             onClick={dismiss}
             className="text-muted-foreground hover:text-foreground transition-colors shrink-0 min-h-11 min-w-11 inline-flex items-center justify-center"
-            aria-label="Dismiss cookie banner (decide later)"
-            title="Dismiss — we'll ask again next visit"
+            aria-label={t("cookies.dismiss")}
+            title={t("cookies.dismissTitle")}
           >
             <X className="w-4 h-4" />
           </button>

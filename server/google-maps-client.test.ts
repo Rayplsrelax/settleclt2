@@ -64,6 +64,9 @@ describe("MapView integration", () => {
     );
     expect(source).toContain('setStatus("ready")');
     expect(source).toContain('setStatus("error")');
-    expect(source).toContain('status !== "ready" && <MapStatus status={status} />');
+    expect(source).toContain('status !== "ready"');
+    expect(source).toContain('loadingLabel={t("map.loading")}');
+    expect(source).toContain('unavailableLabel={t("map.unavailable")}');
+    expect(source).toContain('fallbackLabel={t("map.openAddressInstead")}');
   });
 });

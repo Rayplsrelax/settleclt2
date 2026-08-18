@@ -114,6 +114,27 @@ export const en = {
   "home.thisWeekInCharlotte": "This Week in Charlotte",
   "home.viewAllEvents": "View all events",
 
+  // Shared customer-facing UI
+  "common.loading": "Loading...",
+  "cookies.ariaLabel": "Cookie consent",
+  "cookies.title": "We use cookies",
+  "cookies.description":
+    "We use cookies and analytics tools to understand how you use Settle CLT so we can improve your experience. Read our",
+  "cookies.privacyPolicy": "Privacy Policy",
+  "cookies.details": "for details.",
+  "cookies.accept": "Accept All",
+  "cookies.decline": "Decline",
+  "cookies.dismiss": "Dismiss cookie banner and decide later",
+  "cookies.dismissTitle": "Dismiss — we'll ask again next visit",
+  "map.loading": "Loading map...",
+  "map.unavailable": "Map unavailable",
+  "map.openAddressInstead":
+    "Please use the address link on this page to open the address in Google Maps.",
+  "notFound.title": "Page Not Found",
+  "notFound.description":
+    "Sorry, the page you are looking for doesn't exist. It may have been moved or deleted.",
+  "notFound.goHome": "Go Home",
+
   // Language setting
   "language.choose": "Choose language",
   "language.current": "Current language: {language}",

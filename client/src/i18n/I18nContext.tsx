@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import {
   type Locale,
+  decodeLocaleCookieValue,
   LOCALE_COOKIE,
   locales,
   resolveInitialLocale,
@@ -33,7 +34,7 @@ function detectInitialLocale(): Locale {
       ? navigator.languages
       : [navigator.language];
   return resolveInitialLocale(
-    match ? decodeURIComponent(match[1]) : null,
+    decodeLocaleCookieValue(match?.[1]),
     browserLanguages
   );
 }
