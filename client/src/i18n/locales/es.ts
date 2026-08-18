@@ -96,6 +96,8 @@ export const es = {
   "events.upcoming": "Eventos próximos",
   "events.past": "Eventos pasados",
   "events.recurring": "Evento recurrente",
+  "events.dateTba": "Fecha por confirmar",
+  "events.timeTba": "Hora por confirmar",
 
   // Directory page extras
   "directory.getDirections": "Ver indicaciones",
@@ -111,9 +113,12 @@ export const es = {
   "home.emailAddress": "Correo electrónico",
   "home.charlotteBlog": "Blog de Charlotte",
   "home.latestFromSettle": "Lo último de Settle CLT",
+  "home.blogSubtitle":
+    "Guías semanales, recorridos por vecindarios e información local para quienes llegan a Charlotte",
   "home.viewAllPosts": "Ver todas las publicaciones",
   "home.liveUpdates": "Novedades en vivo",
   "home.thisWeekInCharlotte": "Esta semana en Charlotte",
+  "home.eventsSubtitle": "No te pierdas lo que sucede en la Queen City",
   "home.viewAllEvents": "Ver todos los eventos",
 
   // Interfaz compartida para clientes

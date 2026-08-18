@@ -36,6 +36,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useI18n } from "@/i18n/I18nContext";
+import { formatLocalizedDate } from "@/i18n/formatters";
+import type { Locale } from "@shared/i18n";
 
 const CATEGORIES = [
   { value: "", label: "All Events" },
@@ -122,10 +124,14 @@ function parseEventDate(value: Date | string | null | undefined): Date | null {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
-function formatDate(date: Date | string | null | undefined) {
+function formatDate(
+  date: Date | string | null | undefined,
+  locale: Locale,
+  fallback: string
+) {
   const d = parseEventDate(date);
-  if (!d) return "Date TBA";
-  return d.toLocaleDateString("en-US", {
+  if (!d) return fallback;
+  return formatLocalizedDate(d, locale, {
     weekday: "short",
     month: "short",
     day: "numeric",
@@ -133,10 +139,14 @@ function formatDate(date: Date | string | null | undefined) {
   });
 }
 
-function formatTime(date: Date | string | null | undefined) {
+function formatTime(
+  date: Date | string | null | undefined,
+  locale: Locale,
+  fallback: string
+) {
   const d = parseEventDate(date);
-  if (!d) return "Time TBA";
-  return d.toLocaleTimeString("en-US", {
+  if (!d) return fallback;
+  return formatLocalizedDate(d, locale, {
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
@@ -144,10 +154,14 @@ function formatTime(date: Date | string | null | undefined) {
   });
 }
 
-function formatFullDate(date: Date | string | null | undefined) {
+function formatFullDate(
+  date: Date | string | null | undefined,
+  locale: Locale,
+  fallback: string
+) {
   const d = parseEventDate(date);
-  if (!d) return "Date TBA";
-  return d.toLocaleDateString("en-US", {
+  if (!d) return fallback;
+  return formatLocalizedDate(d, locale, {
     weekday: "long",
     month: "long",
     day: "numeric",
@@ -196,7 +210,7 @@ function EventCard({
   onNeighborhoodClick?: (neighborhood: string) => void;
   promoted?: { level: EventPromotionLevel; customHeadline?: string | null; sponsorMessage?: string | null; organizerLogoUrl?: string | null } | null;
 }) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   return (
     <button
       onClick={onClick}
@@ -243,9 +257,9 @@ function EventCard({
         <div className="space-y-1.5">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Calendar className="w-4 h-4 text-primary/70 shrink-0" />
-            <span>{formatDate(event.startDate)}</span>
+            <span>{formatDate(event.startDate, locale, t("events.dateTba"))}</span>
             <span className="text-muted-foreground/50">·</span>
-            <span>{formatTime(event.startDate)}</span>
+            <span>{formatTime(event.startDate, locale, t("events.timeTba"))}</span>
           </div>
           {event.venueName && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -289,7 +303,7 @@ function EventCard({
 }
 
 export default function Events() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   useSEO({
     title: "Charlotte Events This Week & Weekend: Things to Do in CLT (2026)",
     description:
@@ -883,12 +897,24 @@ export default function Events() {
                     <Calendar className="w-4 h-4 text-primary shrink-0" />
                     <div>
                       <div className="font-medium text-foreground">
-                        {formatFullDate(selectedEvent.startDate)}
+                        {formatFullDate(
+                          selectedEvent.startDate,
+                          locale,
+                          t("events.dateTba")
+                        )}
                       </div>
                       <div className="text-muted-foreground">
-                        {formatTime(selectedEvent.startDate)}
+                        {formatTime(
+                          selectedEvent.startDate,
+                          locale,
+                          t("events.timeTba")
+                        )}
                         {selectedEvent.endDate &&
-                          ` - ${formatTime(selectedEvent.endDate)}`}
+                          ` - ${formatTime(
+                            selectedEvent.endDate,
+                            locale,
+                            t("events.timeTba")
+                          )}`}
                       </div>
                     </div>
                   </div>

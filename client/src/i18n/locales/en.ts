@@ -94,6 +94,8 @@ export const en = {
   "events.upcoming": "Upcoming Events",
   "events.past": "Past Events",
   "events.recurring": "Recurring event",
+  "events.dateTba": "Date TBA",
+  "events.timeTba": "Time TBA",
 
   // Directory page extras
   "directory.getDirections": "Get Directions",
@@ -109,9 +111,12 @@ export const en = {
   "home.emailAddress": "Email address",
   "home.charlotteBlog": "Charlotte Blog",
   "home.latestFromSettle": "Latest from Settle CLT",
+  "home.blogSubtitle":
+    "Weekly guides, neighborhood deep-dives, and local intel for Charlotte newcomers",
   "home.viewAllPosts": "View all posts",
   "home.liveUpdates": "Live Updates",
   "home.thisWeekInCharlotte": "This Week in Charlotte",
+  "home.eventsSubtitle": "Don't miss what's happening around the Queen City",
   "home.viewAllEvents": "View all events",
 
   // Shared customer-facing UI
