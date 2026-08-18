@@ -28,7 +28,7 @@ describe("Phase 3 directory UX contracts", () => {
     expect(cookieConsent).toContain("max-w-md");
     expect(cookieConsent).toContain("min-h-11 min-w-11");
     expect(cookieConsent).toContain('role="region"');
-    expect(cookieConsent).toContain('aria-label="Cookie consent"');
+    expect(cookieConsent).toContain('aria-label={t("cookies.ariaLabel")}');
   });
 
   it("keeps every directory icon action at least 44px and accessibly named", () => {

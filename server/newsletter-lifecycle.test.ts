@@ -125,7 +125,7 @@ describe("newsletter lifecycle contracts", () => {
 
     expect(auth).toContain("newsletterOptIn");
     expect(auth).toContain("useState(false)");
-    expect(auth).toContain("Receive the Settle CLT newsletter");
+    expect(auth).toContain('t("auth.newsletterOptIn")');
     expect(routes).toContain("requestNewsletterSubscription");
     expect(routes).toContain('source: "registration"');
   });

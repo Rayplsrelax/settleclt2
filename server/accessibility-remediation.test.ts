@@ -96,7 +96,8 @@ describe("public accessibility contracts", () => {
     expect(events).toContain('const CHARLOTTE_TIME_ZONE = "America/New_York"');
     expect(events).toContain("timeZone: CHARLOTTE_TIME_ZONE");
     expect(events).toContain("if (!value) return null");
-    expect(events).toContain('if (!d) return "Time TBA"');
-    expect(events).toContain('if (!d) return "Date TBA"');
+    expect(events).toContain("if (!d) return fallback");
+    expect(events).toContain('t("events.timeTba")');
+    expect(events).toContain('t("events.dateTba")');
   });
 });
