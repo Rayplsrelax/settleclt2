@@ -6,7 +6,7 @@ import {
   normalizeLocale,
   setLocaleCookie,
 } from "@shared/i18n";
-import { en } from "./locales/en";
+import { en, type TranslationKey } from "./locales/en";
 import { es } from "./locales/es";
 
 const dictionaries: Record<Locale, Record<string, string>> = { en, es };
@@ -14,7 +14,7 @@ const dictionaries: Record<Locale, Record<string, string>> = { en, es };
 interface I18nContextType {
   locale: Locale;
   setLocale: (next: Locale) => void;
-  t: (key: string, vars?: Record<string, string | number>) => string;
+  t: (key: TranslationKey, vars?: Record<string, string | number>) => string;
 }
 
 const I18nContext = createContext<I18nContextType>({

@@ -32,8 +32,9 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import GlobalSearch from "@/components/GlobalSearch";
 import { useI18n } from "@/i18n/I18nContext";
+import type { TranslationKey } from "@/i18n/locales/en";
 
-const navLinkDefs: Array<{ href: string; key: string }> = [
+const navLinkDefs: Array<{ href: string; key: TranslationKey }> = [
   { href: "/", key: "nav.home" },
   { href: "/neighborhoods", key: "nav.neighborhoods" },
   { href: "/directory", key: "nav.directory" },

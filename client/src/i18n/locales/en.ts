@@ -120,3 +120,5 @@ export const en = {
   "language.switchToSpanish": "Switch to Spanish",
   "language.switchToEnglish": "Cambiar a inglés",
 } as const;
+
+export type TranslationKey = keyof typeof en;

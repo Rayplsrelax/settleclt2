@@ -1,3 +1,5 @@
+import type { TranslationKey } from "./en";
+
 export const es = {
   // Navigation
   "nav.home": "Inicio",
@@ -119,4 +121,4 @@ export const es = {
   "language.toggleEn": "English",
   "language.switchToSpanish": "Cambiar a español",
   "language.switchToEnglish": "Switch to English",
-} as const;
+} as const satisfies Record<TranslationKey, string>;
