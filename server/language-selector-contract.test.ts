@@ -14,9 +14,17 @@ describe("language selector contract", () => {
   });
 
   it("labels the setting accessibly and shows the current language", () => {
+    expect(source).toContain('aria-label={t("language.current"');
     expect(source).toContain('t("language.choose")');
     expect(source).toContain('t("language.current"');
     expect(source).toContain("activeLabel");
+  });
+
+  it("gets both option labels from the translation dictionaries", () => {
+    expect(source).toContain('{t("language.english")}');
+    expect(source).toContain('{t("language.spanish")}');
+    expect(source).not.toContain('value="en">English<');
+    expect(source).not.toContain('value="es">Español<');
   });
 
   it("does not use the old one-click language inversion", () => {

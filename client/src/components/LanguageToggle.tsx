@@ -23,7 +23,7 @@ export default function LanguageToggle() {
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          aria-label={t("language.choose")}
+          aria-label={t("language.current", { language: activeLabel })}
           title={t("language.current", { language: activeLabel })}
           className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
@@ -39,8 +39,12 @@ export default function LanguageToggle() {
             if (value === "en" || value === "es") setLocale(value);
           }}
         >
-          <DropdownMenuRadioItem value="en">English</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="es">Español</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="en">
+            {t("language.english")}
+          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="es">
+            {t("language.spanish")}
+          </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
