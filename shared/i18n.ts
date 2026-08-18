@@ -19,6 +19,19 @@ export function normalizeLocale(value: string | null | undefined): Locale {
     : DEFAULT_LOCALE;
 }
 
+/** Decode a persisted locale without allowing a malformed cookie to abort UI startup. */
+export function decodeLocaleCookieValue(
+  encodedValue: string | null | undefined
+): string | null {
+  if (!encodedValue) return null;
+  try {
+    const decoded = decodeURIComponent(encodedValue).trim();
+    return decoded || null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Resolve the initial locale without overriding an explicit user selection.
  * Browser preferences are considered in order only when no cookie is present.

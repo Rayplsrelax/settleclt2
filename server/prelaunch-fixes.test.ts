@@ -87,8 +87,8 @@ describe("Phase 2: Compliance & Trust", () => {
     });
 
     it("should have Accept All and Decline buttons", () => {
-      expect(cookieConsent).toContain("Accept All");
-      expect(cookieConsent).toContain("Decline");
+      expect(cookieConsent).toContain('t("cookies.accept")');
+      expect(cookieConsent).toContain('t("cookies.decline")');
     });
 
     it("should link to privacy policy", () => {
@@ -171,7 +171,7 @@ describe("Phase 2: Compliance & Trust", () => {
 
     it("should have a Contact page component", () => {
       expect(contact).toContain("Contact");
-      expect(contact).toContain("Get in Touch");
+      expect(contact).toContain('t("contact.title")');
     });
 
     it("should have name, email, subject, and message fields", () => {
@@ -186,7 +186,7 @@ describe("Phase 2: Compliance & Trust", () => {
     });
 
     it("should show success state after submission", () => {
-      expect(contact).toContain("Message Sent!");
+      expect(contact).toContain('t("contact.sentTitle")');
     });
 
     it("should include contact email", () => {

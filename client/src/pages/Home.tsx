@@ -34,6 +34,7 @@ import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import ActivityFeed from "@/components/ActivityFeed";
 import SocialFollowLinks from "@/components/SocialFollowLinks";
 import { useI18n } from "@/i18n/I18nContext";
+import { formatLocalizedDate } from "@/i18n/formatters";
 
 const FeaturedNeighborhoods = lazy(
   () => import("@/components/home/FeaturedNeighborhoods")
@@ -283,7 +284,7 @@ function NewsletterSignup() {
 }
 
 function BlogPreview() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const { data: dbPosts, isLoading } = trpc.blog.getRecent.useQuery({
     limit: 3,
   });
@@ -296,7 +297,7 @@ function BlogPreview() {
       excerpt: p.excerpt || "Read the full article on Settle CLT.",
       category: p.category || "Charlotte Guide",
       date: p.publishedAt
-        ? new Date(p.publishedAt).toLocaleDateString("en-US", {
+        ? formatLocalizedDate(p.publishedAt, locale, {
             month: "short",
             day: "numeric",
             year: "numeric",
@@ -322,7 +323,7 @@ function BlogPreview() {
       source: "static" as const,
     }));
     return [...dbItems, ...staticItems];
-  }, [dbPosts]);
+  }, [dbPosts, locale]);
 
   return (
     <section className="py-16 md:py-20">
@@ -340,8 +341,7 @@ function BlogPreview() {
               {t("home.latestFromSettle")}
             </h2>
             <p className="mt-2 text-muted-foreground max-w-md">
-              Weekly guides, neighborhood deep-dives, and local intel for
-              Charlotte newcomers
+              {t("home.blogSubtitle")}
             </p>
           </div>
           <Link
@@ -468,7 +468,7 @@ const CATEGORY_EMOJI: Record<string, string> = {
 };
 
 function ThisWeekInCLT() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const { trackClickByName } = useTagTrackingWithLookup();
   const { data: events, isLoading } = trpc.events.getThisWeek.useQuery();
 
@@ -499,31 +499,32 @@ function ThisWeekInCLT() {
               className="mb-3 text-primary border-primary/30"
             >
               <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-              Live Updates
+              {t("home.liveUpdates")}
             </Badge>
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">
               {t("home.thisWeekInCharlotte")}
             </h2>
             <p className="mt-2 text-muted-foreground">
-              Don't miss what's happening around the Queen City
+              {t("home.eventsSubtitle")}
             </p>
           </div>
           <Link
             href="/events"
             className="hidden sm:flex items-center gap-1 text-sm font-medium text-primary hover:underline no-underline"
           >
-            All events <ChevronRight className="w-4 h-4" />
+            {t("home.viewAllEvents")} <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {events.slice(0, 6).map(event => {
             const d = event.startDate ? new Date(event.startDate) : new Date(0);
-            const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
-            const monthDay = d.toLocaleDateString("en-US", {
-              month: "short",
+            const dayName = formatLocalizedDate(d, locale, {
+              weekday: "short",
+            });
+            const dayNumber = formatLocalizedDate(d, locale, {
               day: "numeric",
             });
-            const time = d.toLocaleTimeString("en-US", {
+            const time = formatLocalizedDate(d, locale, {
               hour: "numeric",
               minute: "2-digit",
               hour12: true,
@@ -540,7 +541,7 @@ function ThisWeekInCLT() {
                       {dayName}
                     </span>
                     <span className="text-lg font-extrabold leading-tight">
-                      {d.getDate()}
+                      {dayNumber}
                     </span>
                   </div>
                   <div className="min-w-0 flex-1">

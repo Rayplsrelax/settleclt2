@@ -182,8 +182,16 @@
         var cookieMatch = document.cookie.match(
           /(?:^|; )site_locale=([^;]*)/
         );
-        var candidates = cookieMatch
-          ? [decodeURIComponent(cookieMatch[1])]
+        var explicitLocale = null;
+        if (cookieMatch && cookieMatch[1]) {
+          try {
+            explicitLocale = decodeURIComponent(cookieMatch[1]).trim() || null;
+          } catch (e) {
+            /* malformed cookie — fall through to browser preferences */
+          }
+        }
+        var candidates = explicitLocale
+          ? [explicitLocale]
           : navigator.languages && navigator.languages.length
             ? navigator.languages
             : [navigator.language];

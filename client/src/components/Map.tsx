@@ -81,6 +81,7 @@ import { MapStatus, type MapLoadStatus } from "@/components/MapStatus";
 import { usePersistFn } from "@/hooks/usePersistFn";
 import { buildGoogleMapsScriptUrl } from "@/lib/googleMapsLoader";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/i18n/I18nContext";
 
 declare global {
   interface Window {
@@ -148,6 +149,7 @@ export function MapView({
   initialZoom = 12,
   onMapReady,
 }: MapViewProps) {
+  const { t } = useI18n();
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<google.maps.Map | null>(null);
   const [status, setStatus] = useState<MapViewStatus>("loading");
@@ -183,7 +185,14 @@ export function MapView({
 
   return (
     <div className={cn("relative w-full h-[500px]", className)}>
-      {status !== "ready" && <MapStatus status={status} />}
+      {status !== "ready" && (
+        <MapStatus
+          status={status}
+          loadingLabel={t("map.loading")}
+          unavailableLabel={t("map.unavailable")}
+          fallbackLabel={t("map.openAddressInstead")}
+        />
+      )}
       <div ref={mapContainer} className="absolute inset-0" />
     </div>
   );

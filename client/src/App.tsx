@@ -3,7 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch, Redirect } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { I18nProvider } from "@/i18n/I18nContext";
+import { I18nProvider, useI18n } from "@/i18n/I18nContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { lazy, Suspense } from "react";
 import { useMixpanelPageView } from "@/hooks/useMixpanelPageView";
@@ -52,10 +52,11 @@ const Auth = lazy(() => import("./pages/Auth"));
 import CookieConsent from "./components/CookieConsent";
 
 function PageLoader() {
+  const { t } = useI18n();
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="animate-pulse text-muted-foreground text-lg font-display">
-        Loading...
+        {t("common.loading")}
       </div>
     </div>
   );
@@ -123,17 +124,17 @@ function App() {
   useImageFallbacks();
 
   return (
-    <ErrorBoundary>
-      <ThemeProvider defaultTheme="light" switchable>
-        <I18nProvider>
+    <ThemeProvider defaultTheme="light" switchable>
+      <I18nProvider>
+        <ErrorBoundary>
           <TooltipProvider>
             <Toaster />
             <Router />
             <CookieConsent />
           </TooltipProvider>
-        </I18nProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+        </ErrorBoundary>
+      </I18nProvider>
+    </ThemeProvider>
   );
 }
 
