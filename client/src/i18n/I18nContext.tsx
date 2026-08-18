@@ -3,7 +3,7 @@ import {
   type Locale,
   LOCALE_COOKIE,
   locales,
-  normalizeLocale,
+  resolveInitialLocale,
   setLocaleCookie,
 } from "@shared/i18n";
 import { en, type TranslationKey } from "./locales/en";
@@ -28,7 +28,14 @@ function detectInitialLocale(): Locale {
   const match = document.cookie.match(
     new RegExp(`(?:^|; )${LOCALE_COOKIE}=([^;]*)`)
   );
-  return normalizeLocale(match ? decodeURIComponent(match[1]) : null);
+  const browserLanguages =
+    navigator.languages?.length > 0
+      ? navigator.languages
+      : [navigator.language];
+  return resolveInitialLocale(
+    match ? decodeURIComponent(match[1]) : null,
+    browserLanguages
+  );
 }
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
@@ -43,7 +50,10 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     setLocaleCookie(next);
   };
 
-  const t = (key: string, vars?: Record<string, string | number>) => {
+  const t = (
+    key: TranslationKey,
+    vars?: Record<string, string | number>
+  ) => {
     let value: string =
       dictionaries[locale]?.[key] ?? dictionaries.en[key] ?? key;
     if (vars) {

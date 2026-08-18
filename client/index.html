@@ -174,6 +174,33 @@
         }
       })();
     </script>
+    <script data-i18n-bootstrap="true">
+      // Resolve the document language before React mounts to avoid a mismatch
+      // between browser preference, persisted choice, and the first paint.
+      (function () {
+        var supported = ["en", "es"];
+        var cookieMatch = document.cookie.match(
+          /(?:^|; )site_locale=([^;]*)/
+        );
+        var candidates = cookieMatch
+          ? [decodeURIComponent(cookieMatch[1])]
+          : navigator.languages && navigator.languages.length
+            ? navigator.languages
+            : [navigator.language];
+        var locale = "en";
+        for (var i = 0; i < candidates.length; i += 1) {
+          var primary = String(candidates[i] || "")
+            .trim()
+            .toLowerCase()
+            .split(/[-_]/)[0];
+          if (supported.indexOf(primary) !== -1) {
+            locale = primary;
+            break;
+          }
+        }
+        document.documentElement.lang = locale;
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
