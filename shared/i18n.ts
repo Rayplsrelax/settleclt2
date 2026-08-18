@@ -20,6 +20,26 @@ export function normalizeLocale(value: string | null | undefined): Locale {
 }
 
 /**
+ * Resolve the initial locale without overriding an explicit user selection.
+ * Browser preferences are considered in order only when no cookie is present.
+ */
+export function resolveInitialLocale(
+  explicitLocale: string | null | undefined,
+  browserLanguages: readonly string[] = []
+): Locale {
+  if (explicitLocale) return normalizeLocale(explicitLocale);
+
+  for (const candidate of browserLanguages) {
+    const primary = candidate.trim().toLowerCase().split(/[-_]/)[0];
+    if ((locales as readonly string[]).includes(primary)) {
+      return primary as Locale;
+    }
+  }
+
+  return DEFAULT_LOCALE;
+}
+
+/**
  * Cookie so the server can read the locale on later requests (SEO, future
  * server-rendered strings). 400-day cap per RFC 6265 bis.
  */

@@ -1,3 +1,5 @@
+import type { TranslationKey } from "./en";
+
 export const es = {
   // Navigation
   "nav.home": "Inicio",
@@ -114,9 +116,13 @@ export const es = {
   "home.thisWeekInCharlotte": "Esta semana en Charlotte",
   "home.viewAllEvents": "Ver todos los eventos",
 
-  // Language toggle
+  // Language setting
+  "language.choose": "Elegir idioma",
+  "language.current": "Idioma actual: {language}",
+  "language.english": "English",
+  "language.spanish": "Español",
   "language.toggle": "Español",
   "language.toggleEn": "English",
   "language.switchToSpanish": "Cambiar a español",
   "language.switchToEnglish": "Switch to English",
-} as const;
+} as const satisfies Record<TranslationKey, string>;

@@ -114,9 +114,15 @@ export const en = {
   "home.thisWeekInCharlotte": "This Week in Charlotte",
   "home.viewAllEvents": "View all events",
 
-  // Language toggle
+  // Language setting
+  "language.choose": "Choose language",
+  "language.current": "Current language: {language}",
+  "language.english": "English",
+  "language.spanish": "Español",
   "language.toggle": "Español",
   "language.toggleEn": "English",
   "language.switchToSpanish": "Switch to Spanish",
   "language.switchToEnglish": "Cambiar a inglés",
 } as const;
+
+export type TranslationKey = keyof typeof en;
