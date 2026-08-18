@@ -10,16 +10,18 @@ import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import { useSEO } from "@/hooks/useSEO";
+import { useI18n } from "@/i18n/I18nContext";
+import type { TranslationKey } from "@/i18n/locales/en";
 
 type FilterKey = "all" | "budget" | "walkable" | "family" | "nightlife" | "transit";
 
-const FILTERS: { key: FilterKey; label: string; icon: React.ReactNode }[] = [
-  { key: "all", label: "All", icon: <SlidersHorizontal className="w-3.5 h-3.5" /> },
-  { key: "budget", label: "Budget-Friendly", icon: <DollarSign className="w-3.5 h-3.5" /> },
-  { key: "walkable", label: "Most Walkable", icon: <TrendingUp className="w-3.5 h-3.5" /> },
-  { key: "family", label: "Family-Friendly", icon: <Baby className="w-3.5 h-3.5" /> },
-  { key: "nightlife", label: "Best Nightlife", icon: <Moon className="w-3.5 h-3.5" /> },
-  { key: "transit", label: "Transit Access", icon: <Train className="w-3.5 h-3.5" /> },
+const FILTERS: { key: FilterKey; labelKey: TranslationKey; icon: React.ReactNode }[] = [
+  { key: "all", labelKey: "neighborhoods.filterAll", icon: <SlidersHorizontal className="w-3.5 h-3.5" /> },
+  { key: "budget", labelKey: "neighborhoods.filterBudget", icon: <DollarSign className="w-3.5 h-3.5" /> },
+  { key: "walkable", labelKey: "neighborhoods.filterWalkable", icon: <TrendingUp className="w-3.5 h-3.5" /> },
+  { key: "family", labelKey: "neighborhoods.filterFamily", icon: <Baby className="w-3.5 h-3.5" /> },
+  { key: "nightlife", labelKey: "neighborhoods.filterNightlife", icon: <Moon className="w-3.5 h-3.5" /> },
+  { key: "transit", labelKey: "neighborhoods.filterTransit", icon: <Train className="w-3.5 h-3.5" /> },
 ];
 
 function filterNeighborhoods(list: Neighborhood[], filter: FilterKey): Neighborhood[] {
@@ -53,10 +55,10 @@ function StatCell({ icon, label, value }: { icon: React.ReactNode; label: string
 
 type MetroType = "core" | "inner-ring" | "suburb" | "exurb";
 
-const TYPE_CONFIG: Record<Exclude<MetroType, 'core'>, { label: string; color: string; icon: React.ReactNode }> = {
-  "inner-ring": { label: "Inner Ring", color: "bg-clt-teal/15 text-clt-teal border-clt-teal/30", icon: <Building2 className="w-3 h-3" /> },
-  "suburb": { label: "Suburb", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30", icon: <TreePine className="w-3 h-3" /> },
-  "exurb": { label: "Exurb", color: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30", icon: <Globe className="w-3 h-3" /> },
+const TYPE_CONFIG: Record<Exclude<MetroType, 'core'>, { labelKey: TranslationKey; color: string; icon: React.ReactNode }> = {
+  "inner-ring": { labelKey: "neighborhoods.innerRing", color: "bg-clt-teal/15 text-clt-teal border-clt-teal/30", icon: <Building2 className="w-3 h-3" /> },
+  "suburb": { labelKey: "neighborhoods.suburb", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30", icon: <TreePine className="w-3 h-3" /> },
+  "exurb": { labelKey: "neighborhoods.exurb", color: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30", icon: <Globe className="w-3 h-3" /> },
 };
 
 function NeighborhoodCard({ n, isComparing, onToggleCompare, trackClickByName }: {
@@ -65,6 +67,7 @@ function NeighborhoodCard({ n, isComparing, onToggleCompare, trackClickByName }:
   onToggleCompare: (id: string) => void;
   trackClickByName: (identifier: string, contentType?: string, contentId?: string) => void;
 }) {
+  const { t } = useI18n();
   const metroType = n.metroType;
   const isMetro = metroType && metroType !== "core";
   const typeCfg = isMetro ? TYPE_CONFIG[metroType as Exclude<MetroType, 'core'>] : null;
@@ -79,7 +82,7 @@ function NeighborhoodCard({ n, isComparing, onToggleCompare, trackClickByName }:
             ? "bg-clt-gold text-clt-navy"
             : "bg-black/40 text-white/70 hover:bg-black/60 hover:text-white"
         }`}
-        title={isComparing ? "Remove from comparison" : "Add to comparison"}
+        title={isComparing ? t("neighborhoods.removeCompare") : t("neighborhoods.addCompare")}
       >
         <GitCompare className="w-3.5 h-3.5" />
       </button>
@@ -94,14 +97,14 @@ function NeighborhoodCard({ n, isComparing, onToggleCompare, trackClickByName }:
               <h2 className="font-display font-bold text-xl text-white group-hover:text-clt-gold transition-colors">{n.name}</h2>
               {typeCfg && (
                 <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border shrink-0 ${typeCfg.color}`}>
-                  {typeCfg.icon} {typeCfg.label}
+                  {typeCfg.icon} {t(typeCfg.labelKey)}
                 </span>
               )}
             </div>
             <p className="text-sm text-white/80 mt-0.5">{n.vibe}</p>
           </div>
           {n.featured && (
-            <span className="absolute top-4 right-4 px-2 py-0.5 rounded-full bg-clt-gold/90 text-clt-navy text-xs font-bold">Popular</span>
+            <span className="absolute top-4 right-4 px-2 py-0.5 rounded-full bg-clt-gold/90 text-clt-navy text-xs font-bold">{t("neighborhoods.popular")}</span>
           )}
         </div>
 
@@ -128,17 +131,17 @@ function NeighborhoodCard({ n, isComparing, onToggleCompare, trackClickByName }:
 
           {/* Stats Grid — 6 stats */}
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-5 pt-4 border-t border-border">
-            <StatCell icon={<Home className="w-3.5 h-3.5" />} label="Rent" value={n.stats.avgRent} />
-            <StatCell icon={<TrendingUp className="w-3.5 h-3.5" />} label="Walk" value={n.stats.walkScore} />
-            <StatCell icon={<Train className="w-3.5 h-3.5" />} label="Uptown" value={n.stats.commuteToUptown} />
-            <StatCell icon={<GraduationCap className="w-3.5 h-3.5" />} label="Schools" value={n.stats.schoolTier} />
-            <StatCell icon={<Moon className="w-3.5 h-3.5" />} label="Nightlife" value={n.stats.nightlifeLevel} />
-            <StatCell icon={<Heart className="w-3.5 h-3.5" />} label="Family" value={`${n.stats.familyScore}/5`} />
+            <StatCell icon={<Home className="w-3.5 h-3.5" />} label={t("neighborhoods.rent")} value={n.stats.avgRent} />
+            <StatCell icon={<TrendingUp className="w-3.5 h-3.5" />} label={t("neighborhoods.walk")} value={n.stats.walkScore} />
+            <StatCell icon={<Train className="w-3.5 h-3.5" />} label={t("neighborhoods.uptown")} value={n.stats.commuteToUptown} />
+            <StatCell icon={<GraduationCap className="w-3.5 h-3.5" />} label={t("neighborhoods.schools")} value={n.stats.schoolTier} />
+            <StatCell icon={<Moon className="w-3.5 h-3.5" />} label={t("neighborhoods.nightlife")} value={n.stats.nightlifeLevel} />
+            <StatCell icon={<Heart className="w-3.5 h-3.5" />} label={t("neighborhoods.family")} value={`${n.stats.familyScore}/5`} />
           </div>
 
           {/* CTA */}
           <div className="mt-4 flex items-center gap-1 text-sm font-medium text-primary group-hover:gap-2 transition-all">
-            View full guide <ArrowRight className="w-4 h-4" />
+            {t("neighborhoods.viewGuide")} <ArrowRight className="w-4 h-4" />
           </div>
         </div>
       </Link>
@@ -147,6 +150,7 @@ function NeighborhoodCard({ n, isComparing, onToggleCompare, trackClickByName }:
 }
 
 export default function Neighborhoods() {
+  const { t } = useI18n();
   useSEO({
     title: "Charlotte Neighborhoods Guide — Find Your Perfect Area",
     description: "Explore 20 Charlotte neighborhoods with detailed guides, cost of living, local tips, and honest reviews. From South End to Ballantyne, find where you belong.",
@@ -189,14 +193,14 @@ export default function Neighborhoods() {
         <div className="container relative">
           <div className="max-w-2xl">
             <h1 className="font-display font-extrabold text-3xl md:text-4xl lg:text-5xl text-white">
-              Charlotte Neighborhoods
+              {t("neighborhoods.title")}
             </h1>
             <p className="mt-4 text-lg text-white/70 leading-relaxed">
-              {allNeighborhoods.length} neighborhoods across the Charlotte metro. Full guides with insider tips, costs, and local intel. Filter by what matters to you, compare side-by-side, and find your fit.
+              {t("neighborhoods.subtitle", { count: allNeighborhoods.length })}
             </p>
             <Link href="/quiz">
               <Button className="mt-6 bg-clt-gold hover:bg-clt-gold/90 text-clt-navy font-bold gap-2 rounded-xl">
-                <Sparkles className="w-4 h-4" /> Take the Quiz — Find Your Match
+                <Sparkles className="w-4 h-4" /> {t("neighborhoods.quizCta")}
               </Button>
             </Link>
           </div>
@@ -218,7 +222,7 @@ export default function Neighborhoods() {
                 }`}
               >
                 {f.icon}
-                {f.label}
+                {t(f.labelKey)}
               </button>
             ))}
           </div>
@@ -251,7 +255,7 @@ export default function Neighborhoods() {
               disabled={compareIds.length < 2}
               className="bg-clt-gold text-clt-navy hover:bg-clt-gold/90 font-bold shrink-0"
             >
-              Compare {compareIds.length >= 2 ? `(${compareIds.length})` : ""}
+              {t("neighborhoods.compare")} {compareIds.length >= 2 ? `(${compareIds.length})` : ""}
             </Button>
           </div>
         </div>
@@ -264,8 +268,8 @@ export default function Neighborhoods() {
             <div className="flex items-center gap-3 mb-8">
               <div className="h-8 w-1 rounded-full bg-clt-gold" />
               <div>
-                <h2 className="font-display font-bold text-xl text-foreground">Core Charlotte</h2>
-                <p className="text-sm text-muted-foreground">{filteredCore.length} neighborhoods with full guides, insider tips, costs, and local intel</p>
+                <h2 className="font-display font-bold text-xl text-foreground">{t("neighborhoods.coreTitle")}</h2>
+                                <p className="text-sm text-muted-foreground">{t("neighborhoods.coreSubtitle", { count: filteredCore.length })}</p>
               </div>
             </div>
 
@@ -291,8 +295,8 @@ export default function Neighborhoods() {
             <div className="flex items-center gap-3 mb-3">
               <div className="h-8 w-1 rounded-full bg-clt-teal" />
               <div>
-                <h2 className="font-display font-bold text-xl text-foreground">Metro Charlotte</h2>
-                <p className="text-sm text-muted-foreground">{filteredMetro.length} surrounding communities — suburbs, inner-ring towns, and exurbs</p>
+                <h2 className="font-display font-bold text-xl text-foreground">{t("neighborhoods.metroTitle")}</h2>
+                                <p className="text-sm text-muted-foreground">{t("neighborhoods.metroSubtitle", { count: filteredMetro.length })}</p>
               </div>
             </div>
 
@@ -302,7 +306,7 @@ export default function Neighborhoods() {
                 const cfg = TYPE_CONFIG[type];
                 return (
                   <span key={type} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${cfg.color}`}>
-                    {cfg.icon} {cfg.label}
+                    {cfg.icon} {t(cfg.labelKey)}
                   </span>
                 );
               })}

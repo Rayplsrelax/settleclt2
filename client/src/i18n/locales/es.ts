@@ -201,6 +201,38 @@ export const es = {
   "auth.forgotPassword": "¿Olvidaste tu contraseña?",
   "auth.backToSignIn": "Volver a iniciar sesión",
 
+  // Descubrimiento de vecindarios
+  "neighborhoods.title": "Vecindarios de Charlotte",
+  "neighborhoods.subtitle":
+    "{count} vecindarios en el área metropolitana de Charlotte. Guías completas con consejos, costos e información local. Filtra por lo que te importa, compara opciones y encuentra tu lugar.",
+  "neighborhoods.quizCta": "Haz el cuestionario — encuentra tu opción ideal",
+  "neighborhoods.filterAll": "Todos",
+  "neighborhoods.filterBudget": "Más económicos",
+  "neighborhoods.filterWalkable": "Más caminables",
+  "neighborhoods.filterFamily": "Ideales para familias",
+  "neighborhoods.filterNightlife": "Mejor vida nocturna",
+  "neighborhoods.filterTransit": "Acceso al transporte",
+  "neighborhoods.innerRing": "Anillo interior",
+  "neighborhoods.suburb": "Suburbio",
+  "neighborhoods.exurb": "Periferia",
+  "neighborhoods.addCompare": "Agregar a la comparación",
+  "neighborhoods.removeCompare": "Quitar de la comparación",
+  "neighborhoods.popular": "Popular",
+  "neighborhoods.rent": "Alquiler",
+  "neighborhoods.walk": "Caminabilidad",
+  "neighborhoods.uptown": "Uptown",
+  "neighborhoods.schools": "Escuelas",
+  "neighborhoods.nightlife": "Vida nocturna",
+  "neighborhoods.family": "Familias",
+  "neighborhoods.viewGuide": "Ver guía completa",
+  "neighborhoods.compare": "Comparar",
+  "neighborhoods.coreTitle": "Charlotte central",
+  "neighborhoods.coreSubtitle":
+    "{count} vecindarios con guías completas, consejos, costos e información local",
+  "neighborhoods.metroTitle": "Área metropolitana de Charlotte",
+  "neighborhoods.metroSubtitle":
+    "{count} comunidades cercanas — suburbios, pueblos del anillo interior y zonas periféricas",
+
   // Interfaz compartida para clientes
   "common.loading": "Cargando...",
   "cookies.ariaLabel": "Consentimiento de cookies",

@@ -48,4 +48,23 @@ describe("translated public page contracts", () => {
       expect(auth).toContain(`t("${key}")`);
     }
   });
+
+  it("translates neighborhood discovery filters, cards, and page sections", () => {
+    const neighborhoods = source("../client/src/pages/Neighborhoods.tsx");
+    for (const key of [
+      "neighborhoods.title",
+      "neighborhoods.subtitle",
+      "neighborhoods.quizCta",
+      "neighborhoods.popular",
+      "neighborhoods.viewGuide",
+      "neighborhoods.compare",
+      "neighborhoods.coreTitle",
+      "neighborhoods.metroTitle",
+    ]) {
+      expect(neighborhoods).toContain(`t("${key}"`);
+    }
+    expect(neighborhoods).toContain('labelKey: "neighborhoods.filterAll"');
+    expect(neighborhoods).toContain('labelKey: "neighborhoods.filterBudget"');
+    expect(neighborhoods).toContain("t(f.labelKey)");
+  });
 });

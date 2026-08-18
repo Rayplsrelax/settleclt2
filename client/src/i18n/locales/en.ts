@@ -199,6 +199,38 @@ export const en = {
   "auth.forgotPassword": "Forgot password?",
   "auth.backToSignIn": "Back to sign in",
 
+  // Neighborhood discovery
+  "neighborhoods.title": "Charlotte Neighborhoods",
+  "neighborhoods.subtitle":
+    "{count} neighborhoods across the Charlotte metro. Full guides with insider tips, costs, and local intel. Filter by what matters to you, compare side-by-side, and find your fit.",
+  "neighborhoods.quizCta": "Take the Quiz — Find Your Match",
+  "neighborhoods.filterAll": "All",
+  "neighborhoods.filterBudget": "Budget-Friendly",
+  "neighborhoods.filterWalkable": "Most Walkable",
+  "neighborhoods.filterFamily": "Family-Friendly",
+  "neighborhoods.filterNightlife": "Best Nightlife",
+  "neighborhoods.filterTransit": "Transit Access",
+  "neighborhoods.innerRing": "Inner Ring",
+  "neighborhoods.suburb": "Suburb",
+  "neighborhoods.exurb": "Exurb",
+  "neighborhoods.addCompare": "Add to comparison",
+  "neighborhoods.removeCompare": "Remove from comparison",
+  "neighborhoods.popular": "Popular",
+  "neighborhoods.rent": "Rent",
+  "neighborhoods.walk": "Walk",
+  "neighborhoods.uptown": "Uptown",
+  "neighborhoods.schools": "Schools",
+  "neighborhoods.nightlife": "Nightlife",
+  "neighborhoods.family": "Family",
+  "neighborhoods.viewGuide": "View full guide",
+  "neighborhoods.compare": "Compare",
+  "neighborhoods.coreTitle": "Core Charlotte",
+  "neighborhoods.coreSubtitle":
+    "{count} neighborhoods with full guides, insider tips, costs, and local intel",
+  "neighborhoods.metroTitle": "Metro Charlotte",
+  "neighborhoods.metroSubtitle":
+    "{count} surrounding communities — suburbs, inner-ring towns, and exurbs",
+
   // Shared customer-facing UI
   "common.loading": "Loading...",
   "cookies.ariaLabel": "Cookie consent",
