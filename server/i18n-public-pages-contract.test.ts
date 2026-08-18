@@ -47,6 +47,8 @@ describe("translated public page contracts", () => {
     ]) {
       expect(auth).toContain(`t("${key}")`);
     }
+    expect(auth).toContain('setMessage(t("auth.resetEmailSent"))');
+    expect(auth).toContain('setMessage(t("auth.verifyEmail"))');
   });
 
   it("translates neighborhood discovery filters, cards, and page sections", () => {

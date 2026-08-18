@@ -45,7 +45,7 @@ export default function Auth() {
           { email },
           t("auth.requestFailed")
         );
-        setMessage(result.message || t("auth.resetEmailSent"));
+        setMessage(t("auth.resetEmailSent"));
         return;
       }
       if (resetToken) {
@@ -73,7 +73,7 @@ export default function Auth() {
       if (mode === "login") {
         navigate(result.returnTo || returnTo);
       } else {
-        setMessage(result.message || t("auth.verifyEmail"));
+        setMessage(t("auth.verifyEmail"));
         setMode("login");
       }
     } catch (err) {
