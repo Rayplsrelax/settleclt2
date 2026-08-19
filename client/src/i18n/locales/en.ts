@@ -231,6 +231,37 @@ export const en = {
   "neighborhoods.metroSubtitle":
     "{count} surrounding communities — suburbs, inner-ring towns, and exurbs",
 
+  // Account profile
+  "profile.title": "Your Profile",
+  "profile.loading": "Loading...",
+  "profile.signIn": "Sign In",
+  "profile.deleteTitle": "Delete your account?",
+  "profile.deleteConfirm": "Type",
+  "profile.deleteConfirmSuffix": "to confirm",
+  "profile.deleteAccount": "Delete My Account",
+  "profile.deletedSuccess": "Your account has been deleted.",
+  "profile.logout": "Sign Out",
+  "profile.journey": "Your Charlotte Journey",
+  "profile.preferences": "Preferences",
+  "profile.account": "Account",
+
+  // Business portal
+  "business.loading": "Loading...",
+  "business.saving": "Saving...",
+  "business.ownerPortal": "Business Owner Portal",
+  "business.signIn": "Sign In to Continue",
+  "business.noAccess": "No Business Access",
+  "business.browseDirectory": "Browse Directory",
+  "business.saveChanges": "Save Changes",
+  "business.details": "Details",
+  "business.hours": "Hours",
+  "business.photos": "Photos",
+  "business.analytics": "Analytics",
+  "business.displayName": "Display Name",
+  "business.phone": "Phone",
+  "business.email": "Email",
+  "business.website": "Website",
+
   // Shared customer-facing UI
   "common.loading": "Loading...",
   "cookies.ariaLabel": "Cookie consent",

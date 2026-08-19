@@ -24,6 +24,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useSEO } from "@/hooks/useSEO";
+import { useI18n } from "@/i18n/I18nContext";
 
 function formatDate(date: string | Date | null | undefined): string {
   if (!date) return "—";
@@ -90,6 +91,7 @@ const featureLinks = [
 ];
 
 function NewsletterToggle({ defaultOptIn }: { defaultOptIn: boolean }) {
+  const { t } = useI18n();
   const [optIn, setOptIn] = useState(defaultOptIn);
   const [saving, setSaving] = useState(false);
   const toggle = trpc.newsletter.toggleOptIn.useMutation();
@@ -130,11 +132,12 @@ function NewsletterToggle({ defaultOptIn }: { defaultOptIn: boolean }) {
 }
 
 function DeleteAccountSection() {
+  const { t } = useI18n();
   const [showConfirm, setShowConfirm] = useState(false);
   const [confirmText, setConfirmText] = useState("");
   const deleteAccount = trpc.auth.deleteAccount.useMutation({
     onSuccess: () => {
-      toast.success("Your account has been deleted.");
+      toast.success(t("profile.deletedSuccess"));
       window.location.href = "/";
     },
     onError: () => {
@@ -160,7 +163,7 @@ function DeleteAccountSection() {
         <div className="flex items-start gap-2">
           <AlertTriangle className="w-5 h-5 text-destructive mt-0.5 shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-destructive">Delete your account?</p>
+            <p className="text-sm font-semibold text-destructive">{t("profile.deleteTitle")}</p>
             <p className="text-xs text-muted-foreground mt-1">
               This will permanently delete your account and all associated data including passport stamps, wishlist, bingo progress, reviews, and comments. This action cannot be undone.
             </p>
@@ -168,7 +171,7 @@ function DeleteAccountSection() {
         </div>
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">
-            Type <span className="font-mono font-bold">DELETE MY ACCOUNT</span> to confirm
+            {t("profile.deleteConfirm")} <span className="font-mono font-bold">DELETE MY ACCOUNT</span> {t("profile.deleteConfirmSuffix")}
           </label>
           <Input
             value={confirmText}
@@ -184,7 +187,7 @@ function DeleteAccountSection() {
             disabled={confirmText !== "DELETE MY ACCOUNT" || deleteAccount.isPending}
             onClick={() => deleteAccount.mutate({ confirmText: "DELETE MY ACCOUNT" })}
           >
-            {deleteAccount.isPending ? "Deleting..." : "Permanently Delete"}
+            {deleteAccount.isPending ? t("profile.loading") : t("profile.deleteAccount")}
           </Button>
           <Button
             variant="outline"
@@ -200,10 +203,11 @@ function DeleteAccountSection() {
 }
 
 export default function Profile() {
+  const { t } = useI18n();
   const { user, loading, logout } = useAuth();
 
   useSEO({
-    title: "Your Profile",
+    title: t("profile.title"),
     description: "Manage your Settle CLT profile, account preferences, and saved Charlotte favorites.",
     path: "/profile",
   });
@@ -212,7 +216,7 @@ export default function Profile() {
     return (
       <PageLayout>
         <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="animate-pulse text-muted-foreground">Loading...</div>
+          <div className="animate-pulse text-muted-foreground">{t("profile.loading")}</div>
         </div>
       </PageLayout>
     );
@@ -239,7 +243,7 @@ export default function Profile() {
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity no-underline"
               >
                 <LogIn className="w-4 h-4" />
-                Sign In
+                {t("profile.signIn")}
               </a>
             </CardContent>
           </Card>
@@ -284,7 +288,7 @@ export default function Profile() {
 
         {/* Feature cards */}
         <h2 className="text-lg font-display font-semibold text-foreground mb-4">
-          Your Charlotte Journey
+          {t("profile.journey")}
         </h2>
         <div className="grid gap-3 mb-10">
           {featureLinks.map((feature) => (
@@ -332,7 +336,7 @@ export default function Profile() {
 
         {/* Newsletter preference */}
         <h2 className="text-lg font-display font-semibold text-foreground mb-4">
-          Preferences
+          {t("profile.preferences")}
         </h2>
         <Card className="mb-10">
           <CardContent className="flex items-center justify-between py-4">
@@ -351,7 +355,7 @@ export default function Profile() {
 
         {/* Account Actions */}
         <h2 className="text-lg font-display font-semibold text-foreground mb-4">
-          Account
+          {t("profile.account")}
         </h2>
         <div className="space-y-3">
           <button
@@ -359,7 +363,7 @@ export default function Profile() {
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-destructive transition-colors"
           >
             <LogOut className="w-4 h-4" />
-            Sign Out
+            {t("profile.logout")}
           </button>
           <DeleteAccountSection />
         </div>

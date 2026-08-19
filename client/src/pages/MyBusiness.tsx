@@ -21,6 +21,7 @@ import { Link } from "wouter";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 import { useSEO } from "@/hooks/useSEO";
+import { useI18n } from "@/i18n/I18nContext";
 import {
   getDefaultPortalTab,
   getPortalPermissionScopeKey,
@@ -184,10 +185,11 @@ function HoursEditor({ value, onChange }: { value: string; onChange: (v: string)
 }
 
 export default function MyBusiness() {
+  const { t } = useI18n();
   const { user, isAuthenticated } = useAuth();
 
   useSEO({
-    title: "My Business Dashboard",
+    title: t("business.ownerPortal"),
     description: "Manage your claimed Charlotte business listing on Settle CLT — update info, view analytics, and upgrade to premium.",
     path: "/my-business",
   });
@@ -486,7 +488,7 @@ export default function MyBusiness() {
     return (
       <PageLayout>
         <div className="container py-20 text-center">
-          <div className="animate-pulse text-muted-foreground">Loading...</div>
+          <div className="animate-pulse text-muted-foreground">{t("business.loading")}</div>
         </div>
       </PageLayout>
     );
@@ -497,10 +499,10 @@ export default function MyBusiness() {
       <PageLayout>
         <div className="container py-20 text-center max-w-lg mx-auto">
           <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h1 className="font-display font-bold text-2xl mb-2">Business Owner Portal</h1>
+          <h1 className="font-display font-bold text-2xl mb-2">{t("business.ownerPortal")}</h1>
           <p className="text-muted-foreground mb-6">Sign in to manage your claimed business listing.</p>
           <a href={getLoginUrl()}>
-            <Button className="gap-2">Sign In to Continue <ArrowRight className="w-4 h-4" /></Button>
+            <Button className="gap-2">{t("business.signIn")} <ArrowRight className="w-4 h-4" /></Button>
           </a>
         </div>
       </PageLayout>
@@ -512,12 +514,12 @@ export default function MyBusiness() {
       <PageLayout>
         <div className="container py-20 text-center max-w-lg mx-auto">
           <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h1 className="font-display font-bold text-2xl mb-2">No Business Access</h1>
+          <h1 className="font-display font-bold text-2xl mb-2">{t("business.noAccess")}</h1>
           <p className="text-muted-foreground mb-6">
             You don't have an active business membership yet. Visit the directory to claim your business.
           </p>
           <Link href="/directory">
-            <Button className="gap-2">Browse Directory <ArrowRight className="w-4 h-4" /></Button>
+            <Button className="gap-2">{t("business.browseDirectory")} <ArrowRight className="w-4 h-4" /></Button>
           </Link>
         </div>
       </PageLayout>
@@ -581,7 +583,7 @@ export default function MyBusiness() {
               {canEdit && (
                 <Button onClick={handleSave} disabled={updateListing.isPending || !formIsCurrent} className="gap-1.5 shrink-0">
                   <Save className="w-4 h-4" />
-                  {updateListing.isPending ? "Saving..." : "Save Changes"}
+                  {updateListing.isPending ? t("business.saving") : t("business.saveChanges")}
                 </Button>
               )}
             </div>
@@ -590,10 +592,10 @@ export default function MyBusiness() {
 
         <Tabs key={portalPermissionScopeKey} defaultValue={defaultPortalTab ?? undefined} className="space-y-4">
           <TabsList>
-            <TabsTrigger value="details" disabled={!canEdit} className="gap-1.5"><Building2 className="w-3.5 h-3.5" /> Details</TabsTrigger>
-            <TabsTrigger value="hours" disabled={!canEdit} className="gap-1.5"><Clock className="w-3.5 h-3.5" /> Hours</TabsTrigger>
-            <TabsTrigger value="photos" disabled={!canEdit} className="gap-1.5"><Image className="w-3.5 h-3.5" /> Photos</TabsTrigger>
-            <TabsTrigger value="analytics" disabled={!canViewAnalytics} className="gap-1.5"><BarChart3 className="w-3.5 h-3.5" /> Analytics</TabsTrigger>
+            <TabsTrigger value="details" disabled={!canEdit} className="gap-1.5"><Building2 className="w-3.5 h-3.5" /> {t("business.details")}</TabsTrigger>
+            <TabsTrigger value="hours" disabled={!canEdit} className="gap-1.5"><Clock className="w-3.5 h-3.5" /> {t("business.hours")}</TabsTrigger>
+            <TabsTrigger value="photos" disabled={!canEdit} className="gap-1.5"><Image className="w-3.5 h-3.5" /> {t("business.photos")}</TabsTrigger>
+            <TabsTrigger value="analytics" disabled={!canViewAnalytics} className="gap-1.5"><BarChart3 className="w-3.5 h-3.5" /> {t("business.analytics")}</TabsTrigger>
             <TabsTrigger value="referrals" disabled={!canEdit} className="gap-1.5"><Users className="w-3.5 h-3.5" /> Referrals</TabsTrigger>
             <TabsTrigger value="upgrade" disabled={!canManageBilling} className="gap-1.5"><Crown className="w-3.5 h-3.5" /> Upgrade</TabsTrigger>
           </TabsList>
@@ -608,7 +610,7 @@ export default function MyBusiness() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="displayName">Display Name</Label>
+                    <Label htmlFor="displayName">{t("business.displayName")}</Label>
                     <Input
                       id="displayName"
                       placeholder={selectedMembership?.serviceKey}
@@ -647,7 +649,7 @@ export default function MyBusiness() {
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="phone" className="flex items-center gap-1.5">
-                      <Phone className="w-3.5 h-3.5" /> Phone
+                      <Phone className="w-3.5 h-3.5" /> {t("business.phone")}
                     </Label>
                     <Input
                       id="phone"
@@ -659,7 +661,7 @@ export default function MyBusiness() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email" className="flex items-center gap-1.5">
-                      <Mail className="w-3.5 h-3.5" /> Email
+                      <Mail className="w-3.5 h-3.5" /> {t("business.email")}
                     </Label>
                     <Input
                       id="email"
@@ -671,7 +673,7 @@ export default function MyBusiness() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="website" className="flex items-center gap-1.5">
-                      <Globe className="w-3.5 h-3.5" /> Website
+                      <Globe className="w-3.5 h-3.5" /> {t("business.website")}
                     </Label>
                     <Input
                       id="website"
