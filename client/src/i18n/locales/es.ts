@@ -264,6 +264,29 @@ export const es = {
   "business.email": "Correo electrónico",
   "business.website": "Sitio web",
 
+  // Cuestionario
+  "quiz.questionProgress": "Pregunta {current} de {total}",
+  "quiz.complete": "{percent}% completado",
+  "quiz.selectUpTo": "Selecciona hasta {count}",
+  "quiz.back": "Atrás",
+  "quiz.next": "Siguiente",
+  "quiz.seeMatches": "Ver mis coincidencias",
+  "quiz.title": "Encuentra tu vecindario ideal en Charlotte",
+  "quiz.subtitle": "Responde 7 preguntas rápidas y te recomendaremos los mejores vecindarios según tu presupuesto, estilo de vida y prioridades.",
+  "quiz.time": "Toma unos 2 minutos. No necesitas registrarte.",
+  "quiz.start": "Comenzar",
+
+  // Enviar evento
+  "submitEvent.loading": "Cargando...",
+  "submitEvent.submitted": "¡Evento enviado!",
+  "submitEvent.browse": "Explorar eventos",
+  "submitEvent.another": "Enviar otro",
+  "submitEvent.title": "Enviar un evento",
+  "submitEvent.signIn": "Inicia sesión para enviar",
+  "submitEvent.community": "Eventos comunitarios",
+  "submitEvent.submit": "Enviar evento",
+  "submitEvent.submitting": "Enviando...",
+
   // Interfaz compartida para clientes
   "common.loading": "Cargando...",
   "cookies.ariaLabel": "Consentimiento de cookies",

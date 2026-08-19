@@ -262,6 +262,29 @@ export const en = {
   "business.email": "Email",
   "business.website": "Website",
 
+  // Quiz
+  "quiz.questionProgress": "Question {current} of {total}",
+  "quiz.complete": "{percent}% complete",
+  "quiz.selectUpTo": "Select up to {count}",
+  "quiz.back": "Back",
+  "quiz.next": "Next",
+  "quiz.seeMatches": "See My Matches",
+  "quiz.title": "Find Your Charlotte Neighborhood",
+  "quiz.subtitle": "Answer 7 quick questions and we'll match you with the best neighborhoods based on your budget, lifestyle, and priorities.",
+  "quiz.time": "Takes about 2 minutes. No signup required.",
+  "quiz.start": "Let's Go",
+
+  // Event submission
+  "submitEvent.loading": "Loading...",
+  "submitEvent.submitted": "Event Submitted!",
+  "submitEvent.browse": "Browse Events",
+  "submitEvent.another": "Submit Another",
+  "submitEvent.title": "Submit an Event",
+  "submitEvent.signIn": "Sign In to Submit",
+  "submitEvent.community": "Community Events",
+  "submitEvent.submit": "Submit Event",
+  "submitEvent.submitting": "Submitting...",
+
   // Shared customer-facing UI
   "common.loading": "Loading...",
   "cookies.ariaLabel": "Cookie consent",
