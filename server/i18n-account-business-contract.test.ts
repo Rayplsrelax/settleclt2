@@ -17,6 +17,7 @@ const accountBusinessKeys = [
   "profile.deleteConfirm",
   "profile.deleteConfirmSuffix",
   "profile.deleteAccount",
+  "profile.deletedSuccess",
   "profile.logout",
   "business.loading",
   "business.saving",
@@ -49,6 +50,7 @@ describe("account and business i18n contracts", () => {
     }
     expect(profile).toContain('t("profile.deleteConfirm")');
     expect(profile).toContain('t("profile.deleteConfirmSuffix")');
+    expect(profile).toContain('t("profile.deletedSuccess")');
     expect(business).toContain('t("business.saving")');
   });
 

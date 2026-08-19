@@ -239,6 +239,7 @@ export const en = {
   "profile.deleteConfirm": "Type",
   "profile.deleteConfirmSuffix": "to confirm",
   "profile.deleteAccount": "Delete My Account",
+  "profile.deletedSuccess": "Your account has been deleted.",
   "profile.logout": "Sign Out",
   "profile.journey": "Your Charlotte Journey",
   "profile.preferences": "Preferences",

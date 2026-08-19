@@ -241,6 +241,7 @@ export const es = {
   "profile.deleteConfirm": "Escribe",
   "profile.deleteConfirmSuffix": "para confirmar",
   "profile.deleteAccount": "Eliminar mi cuenta",
+  "profile.deletedSuccess": "Tu cuenta ha sido eliminada.",
   "profile.logout": "Cerrar sesión",
   "profile.journey": "Tu recorrido por Charlotte",
   "profile.preferences": "Preferencias",

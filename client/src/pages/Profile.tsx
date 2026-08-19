@@ -137,7 +137,7 @@ function DeleteAccountSection() {
   const [confirmText, setConfirmText] = useState("");
   const deleteAccount = trpc.auth.deleteAccount.useMutation({
     onSuccess: () => {
-      toast.success(t("profile.deleteAccount"));
+      toast.success(t("profile.deletedSuccess"));
       window.location.href = "/";
     },
     onError: () => {
@@ -288,7 +288,7 @@ export default function Profile() {
 
         {/* Feature cards */}
         <h2 className="text-lg font-display font-semibold text-foreground mb-4">
-          Your Charlotte Journey
+          {t("profile.journey")}
         </h2>
         <div className="grid gap-3 mb-10">
           {featureLinks.map((feature) => (
@@ -336,7 +336,7 @@ export default function Profile() {
 
         {/* Newsletter preference */}
         <h2 className="text-lg font-display font-semibold text-foreground mb-4">
-          Preferences
+          {t("profile.preferences")}
         </h2>
         <Card className="mb-10">
           <CardContent className="flex items-center justify-between py-4">
@@ -355,7 +355,7 @@ export default function Profile() {
 
         {/* Account Actions */}
         <h2 className="text-lg font-display font-semibold text-foreground mb-4">
-          Account
+          {t("profile.account")}
         </h2>
         <div className="space-y-3">
           <button
