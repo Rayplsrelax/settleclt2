@@ -282,6 +282,7 @@ export const es = {
   "submitEvent.browse": "Explorar eventos",
   "submitEvent.another": "Enviar otro",
   "submitEvent.title": "Enviar un evento",
+  "submitEvent.seoDescription": "Comparte eventos de Charlotte con la comunidad. Envía conciertos, festivales, deportes, arte y más gratis.",
   "submitEvent.signIn": "Inicia sesión para enviar",
   "submitEvent.community": "Eventos comunitarios",
   "submitEvent.submit": "Enviar evento",
@@ -289,6 +290,8 @@ export const es = {
 
   // Conexión con agentes inmobiliarios
   "realtor.title": "Encuentra tu hogar en Charlotte",
+  "realtor.description": "Conéctate con un agente inmobiliario de confianza en Charlotte para comprar, vender, alquilar o mudarte. Servicio gratuito.",
+  "realtor.keywords": "hogares en Charlotte, apartamentos en Charlotte, comprar casa Charlotte NC, mudanza a Charlotte, encontrar hogar Charlotte, alquileres Charlotte",
   "realtor.faq": "Preguntas frecuentes",
   "realtor.submit": "Encontrar mi coincidencia",
 

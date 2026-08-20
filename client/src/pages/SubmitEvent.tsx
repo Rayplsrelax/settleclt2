@@ -29,8 +29,8 @@ const CATEGORIES = [
 export default function SubmitEvent() {
   const { t } = useI18n();
   useSEO({
-    title: "Submit an Event — Settle CLT",
-    description: "Share Charlotte events with the community. Submit concerts, food festivals, sports, arts, and more for free.",
+    title: `${t("submitEvent.title")} — Settle CLT`,
+    description: t("submitEvent.seoDescription"),
     keywords: "submit Charlotte event, Charlotte community events, add event Charlotte NC, CLT event calendar",
     path: "/submit-event",
   });

@@ -280,6 +280,7 @@ export const en = {
   "submitEvent.browse": "Browse Events",
   "submitEvent.another": "Submit Another",
   "submitEvent.title": "Submit an Event",
+  "submitEvent.seoDescription": "Share Charlotte events with the community. Submit concerts, food festivals, sports, arts, and more for free.",
   "submitEvent.signIn": "Sign In to Submit",
   "submitEvent.community": "Community Events",
   "submitEvent.submit": "Submit Event",
@@ -287,6 +288,8 @@ export const en = {
 
   // Realtor matching
   "realtor.title": "Find Your Home in Charlotte",
+  "realtor.description": "Get matched with a trusted Charlotte real estate agent for buying, selling, renting, or relocating. Free service.",
+  "realtor.keywords": "Charlotte homes, Charlotte apartments, buy house Charlotte NC, Charlotte relocation, find home Charlotte, Charlotte rentals",
   "realtor.faq": "Frequently Asked Questions",
   "realtor.submit": "Find My Match",
 

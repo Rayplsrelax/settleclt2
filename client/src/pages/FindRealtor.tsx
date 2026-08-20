@@ -114,8 +114,8 @@ export default function FindRealtor() {
   const { t } = useI18n();
   useSEO({
     title: t("realtor.title"),
-    description: "Get matched with a trusted Charlotte real estate agent for buying, selling, renting, or relocating. Free service — tell us what you need and we'll connect you.",
-    keywords: "Charlotte homes, Charlotte apartments, buy house Charlotte NC, Charlotte homes for sale, Charlotte relocation, find home Charlotte, Charlotte rentals",
+    description: t("realtor.description"),
+    keywords: t("realtor.keywords"),
     path: "/find-your-home",
   });
 
