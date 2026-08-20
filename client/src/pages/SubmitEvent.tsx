@@ -10,6 +10,7 @@ import {
   CalendarPlus, CheckCircle, LogIn, Clock, MapPin,
   Users, Shield, Sparkles
 } from "lucide-react";
+import { useI18n } from "@/i18n/I18nContext";
 import { useSEO } from "@/hooks/useSEO";
 
 const CATEGORIES = [
@@ -26,9 +27,10 @@ const CATEGORIES = [
 ] as const;
 
 export default function SubmitEvent() {
+  const { t } = useI18n();
   useSEO({
-    title: "Submit an Event — Settle CLT",
-    description: "Share Charlotte events with the community. Submit concerts, food festivals, sports, arts, and more for free.",
+    title: `${t("submitEvent.title")} — Settle CLT`,
+    description: t("submitEvent.seoDescription"),
     keywords: "submit Charlotte event, Charlotte community events, add event Charlotte NC, CLT event calendar",
     path: "/submit-event",
   });
@@ -48,7 +50,7 @@ export default function SubmitEvent() {
   const submitEvent = trpc.events.submitEvent.useMutation({
     onSuccess: () => {
       setSubmitted(true);
-      toast.success("Event submitted! We'll review it shortly.");
+      toast.success(t("submitEvent.submitted"));
     },
     onError: (err) => {
       toast.error(err.message || "Something went wrong. Please try again.");
@@ -76,7 +78,7 @@ export default function SubmitEvent() {
     return (
       <PageLayout>
         <div className="min-h-[40vh] flex items-center justify-center">
-          <div className="animate-pulse text-muted-foreground">Loading...</div>
+          <div className="animate-pulse text-muted-foreground">{t("submitEvent.loading")}</div>
         </div>
       </PageLayout>
     );
@@ -89,7 +91,7 @@ export default function SubmitEvent() {
           <div className="container">
             <div className="max-w-lg mx-auto text-center">
               <CheckCircle className="w-14 h-14 text-green-500 mx-auto mb-5" />
-              <h1 className="font-display font-bold text-2xl text-foreground">Event Submitted!</h1>
+              <h1 className="font-display font-bold text-2xl text-foreground">{t("submitEvent.submitted")}</h1>
               <p className="mt-3 text-muted-foreground">
                 Thanks for sharing this event with the Charlotte community! Our team will review it and publish it within 24 hours.
               </p>
@@ -98,7 +100,7 @@ export default function SubmitEvent() {
                   href="/events"
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity no-underline"
                 >
-                  Browse Events
+                  {t("submitEvent.browse")}
                 </a>
                 <button
                   onClick={() => {
@@ -116,7 +118,7 @@ export default function SubmitEvent() {
                   }}
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-border bg-background text-foreground text-sm font-semibold hover:bg-muted transition-colors"
                 >
-                  Submit Another
+                  {t("submitEvent.another")}
                 </button>
               </div>
             </div>
@@ -133,7 +135,7 @@ export default function SubmitEvent() {
           <div className="container">
             <div className="max-w-lg mx-auto text-center">
               <CalendarPlus className="w-14 h-14 text-purple-500 mx-auto mb-5" />
-              <h1 className="font-display font-bold text-2xl text-foreground">Submit an Event</h1>
+              <h1 className="font-display font-bold text-2xl text-foreground">{t("submitEvent.title")}</h1>
               <p className="mt-3 text-muted-foreground">
                 Sign in to share events happening in Charlotte with the community.
               </p>
@@ -142,7 +144,7 @@ export default function SubmitEvent() {
                 className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity no-underline"
               >
                 <LogIn className="w-4 h-4" />
-                Sign In to Submit
+                {t("submitEvent.signIn")}
               </a>
             </div>
           </div>
@@ -159,10 +161,10 @@ export default function SubmitEvent() {
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 mb-4">
               <CalendarPlus className="w-3.5 h-3.5 text-purple-600" />
-              <span className="text-xs font-medium text-purple-700">Community Events</span>
+              <span className="text-xs font-medium text-purple-700">{t("submitEvent.community")}</span>
             </div>
             <h1 className="font-display font-extrabold text-3xl md:text-4xl text-foreground">
-              Submit an Event
+              {t("submitEvent.title")}
             </h1>
             <p className="mt-4 text-lg text-muted-foreground">
               Know about something happening in Charlotte? Share it with the community. Events are reviewed and published within 24 hours.
@@ -349,7 +351,7 @@ export default function SubmitEvent() {
                 className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold"
                 disabled={submitEvent.isPending}
               >
-                {submitEvent.isPending ? "Submitting..." : "Submit Event"}
+                {submitEvent.isPending ? t("submitEvent.submitting") : t("submitEvent.submit")}
               </Button>
               <p className="text-xs text-muted-foreground text-center">
                 Events are reviewed within 24 hours. Submitting as {user.name ?? user.email ?? "you"}.

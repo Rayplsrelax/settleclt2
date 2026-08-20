@@ -262,6 +262,45 @@ export const en = {
   "business.email": "Email",
   "business.website": "Website",
 
+  // Quiz
+  "quiz.questionProgress": "Question {current} of {total}",
+  "quiz.complete": "{percent}% complete",
+  "quiz.selectUpTo": "Select up to {count}",
+  "quiz.back": "Back",
+  "quiz.next": "Next",
+  "quiz.seeMatches": "See My Matches",
+  "quiz.title": "Find Your Charlotte Neighborhood",
+  "quiz.subtitle": "Answer 7 quick questions and we'll match you with the best neighborhoods based on your budget, lifestyle, and priorities.",
+  "quiz.time": "Takes about 2 minutes. No signup required.",
+  "quiz.start": "Let's Go",
+
+  // Event submission
+  "submitEvent.loading": "Loading...",
+  "submitEvent.submitted": "Event Submitted!",
+  "submitEvent.browse": "Browse Events",
+  "submitEvent.another": "Submit Another",
+  "submitEvent.title": "Submit an Event",
+  "submitEvent.seoDescription": "Share Charlotte events with the community. Submit concerts, food festivals, sports, arts, and more for free.",
+  "submitEvent.signIn": "Sign In to Submit",
+  "submitEvent.community": "Community Events",
+  "submitEvent.submit": "Submit Event",
+  "submitEvent.submitting": "Submitting...",
+
+  // Realtor matching
+  "realtor.title": "Find Your Home in Charlotte",
+  "realtor.description": "Get matched with a trusted Charlotte real estate agent for buying, selling, renting, or relocating. Free service.",
+  "realtor.keywords": "Charlotte homes, Charlotte apartments, buy house Charlotte NC, Charlotte relocation, find home Charlotte, Charlotte rentals",
+  "realtor.faq": "Frequently Asked Questions",
+  "realtor.submit": "Find My Match",
+
+  // Business listing
+  "business.listTitle": "List Your Business",
+  "business.submissionReceived": "Submission Received!",
+  "business.submit": "Submit",
+  "business.review": "Review",
+  "business.claim": "Claim",
+  "business.upgrade": "Upgrade",
+
   // Shared customer-facing UI
   "common.loading": "Loading...",
   "cookies.ariaLabel": "Cookie consent",

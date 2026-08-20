@@ -27,19 +27,21 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ShareButtons from "@/components/ShareButtons";
+import { useI18n } from "@/i18n/I18nContext";
 import { useSEO } from "@/hooks/useSEO";
 import { trackFindHomeIntent, trackQuizComplete } from "@/lib/mixpanel";
 
 // ─── Progress Bar ─────────────────────────────────────────────────
 function ProgressBar({ current, total }: { current: number; total: number }) {
+  const { t } = useI18n();
   const pct = (current / total) * 100;
   return (
     <div className="w-full max-w-lg mx-auto mb-8">
       <div className="flex justify-between text-xs text-muted-foreground mb-2">
         <span>
-          Question {current + 1} of {total}
+          {t("quiz.questionProgress", { current: current + 1, total })}
         </span>
-        <span>{Math.round(pct)}% complete</span>
+        <span>{t("quiz.complete", { percent: Math.round(pct) })}</span>
       </div>
       <div className="h-2 bg-muted rounded-full overflow-hidden">
         <div
@@ -69,6 +71,7 @@ function QuestionStep({
   isFirst: boolean;
   isLast: boolean;
 }) {
+  const { t } = useI18n();
   const selected =
     question.type === "multi"
       ? Array.isArray(answer)
@@ -120,7 +123,7 @@ function QuestionStep({
         </p>
         {question.type === "multi" && question.maxSelections && (
           <p className="text-xs text-clt-teal mt-2 font-medium">
-            Select up to {question.maxSelections}
+            {t("quiz.selectUpTo", { count: question.maxSelections })}
           </p>
         )}
       </div>
@@ -172,14 +175,14 @@ function QuestionStep({
           disabled={isFirst}
           className="gap-2"
         >
-          <ArrowLeft className="w-4 h-4" /> Back
+          <ArrowLeft className="w-4 h-4" /> {t("quiz.back")}
         </Button>
         <Button
           onClick={onNext}
           disabled={!canProceed}
           className="gap-2 bg-clt-teal hover:bg-clt-teal-dark text-white"
         >
-          {isLast ? "See My Matches" : "Next"}{" "}
+          {isLast ? t("quiz.seeMatches") : t("quiz.next")}{" "}
           <ArrowRight className="w-4 h-4" />
         </Button>
       </div>
@@ -189,27 +192,27 @@ function QuestionStep({
 
 // ─── Intro Screen ─────────────────────────────────────────────────
 function IntroScreen({ onStart }: { onStart: () => void }) {
+  const { t } = useI18n();
   return (
     <div className="text-center animate-in fade-in duration-500 max-w-xl mx-auto">
       <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-clt-teal to-clt-gold mb-6">
         <Sparkles className="w-10 h-10 text-white" />
       </div>
       <h1 className="font-display font-bold text-3xl md:text-4xl text-foreground mb-4">
-        Find Your Charlotte Neighborhood
+        {t("quiz.title")}
       </h1>
       <p className="text-muted-foreground text-lg mb-2 max-w-md mx-auto">
-        Answer 7 quick questions and we'll match you with the best neighborhoods
-        based on your budget, lifestyle, and priorities.
+        {t("quiz.subtitle")}
       </p>
       <p className="text-sm text-muted-foreground mb-8">
-        Takes about 2 minutes. No signup required.
+        {t("quiz.time")}
       </p>
       <Button
         onClick={onStart}
         size="lg"
         className="gap-2 bg-clt-teal hover:bg-clt-teal-dark text-white text-lg px-8 py-6 rounded-xl shadow-lg shadow-clt-teal/20"
       >
-        Let's Go <ArrowRight className="w-5 h-5" />
+        {t("quiz.start")} <ArrowRight className="w-5 h-5" />
       </Button>
 
       <div className="mt-12 grid grid-cols-3 gap-6 text-center">

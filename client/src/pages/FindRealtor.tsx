@@ -15,6 +15,7 @@ import {
   ArrowRight, Shield, Clock, MessageSquare, ChevronDown, ChevronUp,
   DollarSign, Search, UserCheck
 } from "lucide-react";
+import { useI18n } from "@/i18n/I18nContext";
 import { useSEO } from "@/hooks/useSEO";
 import { trackFindHomeIntent, trackFindHomeLead } from "@/lib/mixpanel";
 import { Link } from "wouter";
@@ -71,12 +72,13 @@ const FAQ_ITEMS = [
 ];
 
 function FAQSection() {
+  const { t } = useI18n();
   const [open, setOpen] = useState<number | null>(null);
   return (
     <section className="py-16 bg-muted/30">
       <div className="container max-w-2xl">
         <h2 className="text-2xl font-display font-bold text-foreground text-center mb-8">
-          Frequently Asked Questions
+          {t("realtor.faq")}
         </h2>
         <div className="space-y-3">
           {FAQ_ITEMS.map((item, i) => (
@@ -109,10 +111,11 @@ function FAQSection() {
 }
 
 export default function FindRealtor() {
+  const { t } = useI18n();
   useSEO({
-    title: "Find Your Home in Charlotte — Free Matching Service",
-    description: "Get matched with a trusted Charlotte real estate agent for buying, selling, renting, or relocating. Free service — tell us what you need and we'll connect you.",
-    keywords: "Charlotte homes, Charlotte apartments, buy house Charlotte NC, Charlotte homes for sale, Charlotte relocation, find home Charlotte, Charlotte rentals",
+    title: t("realtor.title"),
+    description: t("realtor.description"),
+    keywords: t("realtor.keywords"),
     path: "/find-your-home",
   });
 

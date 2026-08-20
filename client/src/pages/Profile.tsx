@@ -23,12 +23,13 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { useSEO } from "@/hooks/useSEO";
+import { formatLocalizedDate } from "@/i18n/formatters";
 import { useI18n } from "@/i18n/I18nContext";
+import { useSEO } from "@/hooks/useSEO";
 
-function formatDate(date: string | Date | null | undefined): string {
+function formatDate(date: string | Date | null | undefined, locale: "en" | "es"): string {
   if (!date) return "—";
-  return new Date(date).toLocaleDateString("en-US", {
+  return formatLocalizedDate(date, locale, {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -203,7 +204,7 @@ function DeleteAccountSection() {
 }
 
 export default function Profile() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const { user, loading, logout } = useAuth();
 
   useSEO({
@@ -274,7 +275,7 @@ export default function Profile() {
             <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5" />
-                Joined {formatDate(user.createdAt)}
+                Joined {formatDate(user.createdAt, locale)}
               </span>
               {user.role === "admin" && (
                 <span className="flex items-center gap-1 text-amber-600">

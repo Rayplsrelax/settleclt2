@@ -264,6 +264,45 @@ export const es = {
   "business.email": "Correo electrónico",
   "business.website": "Sitio web",
 
+  // Cuestionario
+  "quiz.questionProgress": "Pregunta {current} de {total}",
+  "quiz.complete": "{percent}% completado",
+  "quiz.selectUpTo": "Selecciona hasta {count}",
+  "quiz.back": "Atrás",
+  "quiz.next": "Siguiente",
+  "quiz.seeMatches": "Ver mis coincidencias",
+  "quiz.title": "Encuentra tu vecindario ideal en Charlotte",
+  "quiz.subtitle": "Responde 7 preguntas rápidas y te recomendaremos los mejores vecindarios según tu presupuesto, estilo de vida y prioridades.",
+  "quiz.time": "Toma unos 2 minutos. No necesitas registrarte.",
+  "quiz.start": "Comenzar",
+
+  // Enviar evento
+  "submitEvent.loading": "Cargando...",
+  "submitEvent.submitted": "¡Evento enviado!",
+  "submitEvent.browse": "Explorar eventos",
+  "submitEvent.another": "Enviar otro",
+  "submitEvent.title": "Enviar un evento",
+  "submitEvent.seoDescription": "Comparte eventos de Charlotte con la comunidad. Envía conciertos, festivales, deportes, arte y más gratis.",
+  "submitEvent.signIn": "Inicia sesión para enviar",
+  "submitEvent.community": "Eventos comunitarios",
+  "submitEvent.submit": "Enviar evento",
+  "submitEvent.submitting": "Enviando...",
+
+  // Conexión con agentes inmobiliarios
+  "realtor.title": "Encuentra tu hogar en Charlotte",
+  "realtor.description": "Conéctate con un agente inmobiliario de confianza en Charlotte para comprar, vender, alquilar o mudarte. Servicio gratuito.",
+  "realtor.keywords": "hogares en Charlotte, apartamentos en Charlotte, comprar casa Charlotte NC, mudanza a Charlotte, encontrar hogar Charlotte, alquileres Charlotte",
+  "realtor.faq": "Preguntas frecuentes",
+  "realtor.submit": "Encontrar mi coincidencia",
+
+  // Publicar un negocio
+  "business.listTitle": "Publica tu negocio",
+  "business.submissionReceived": "¡Solicitud recibida!",
+  "business.submit": "Enviar",
+  "business.review": "Revisar",
+  "business.claim": "Reclamar",
+  "business.upgrade": "Mejorar plan",
+
   // Interfaz compartida para clientes
   "common.loading": "Cargando...",
   "cookies.ariaLabel": "Consentimiento de cookies",

@@ -559,7 +559,7 @@ export default function BusinessDetail() {
                     {hours.map((h, i) => {
                       const [day, ...timeParts] = h.split(": ");
                       const time = timeParts.join(": ");
-                      const isToday = new Date().toLocaleDateString("en-US", { weekday: "long" }).toLowerCase() === day?.toLowerCase();
+                      const isToday = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][new Date().getDay()]?.toLowerCase() === day?.toLowerCase();
                       return (
                         <div
                           key={i}
