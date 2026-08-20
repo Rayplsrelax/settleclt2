@@ -219,18 +219,18 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
         {[
           {
             icon: <MapPin className="w-5 h-5" />,
-            label: "20 Neighborhoods",
-            sub: "Core + Metro",
+            label: t("quiz.neighborhoodsMetric"),
+            sub: t("quiz.coreMetro"),
           },
           {
             icon: <TrendingUp className="w-5 h-5" />,
-            label: "Smart Scoring",
-            sub: "6 dimensions",
+            label: t("quiz.smartScoring"),
+            sub: t("quiz.dimensions"),
           },
           {
             icon: <Heart className="w-5 h-5" />,
-            label: "Personalized",
-            sub: "Your priorities",
+            label: t("quiz.personalized"),
+            sub: t("quiz.priorities"),
           },
         ].map((item, i) => (
           <div key={i} className="flex flex-col items-center gap-2">
@@ -582,8 +582,9 @@ function ResultsScreen({
 
 // ─── Main Quiz Page ───────────────────────────────────────────────
 export default function Quiz() {
+  const { t } = useI18n();
   useSEO({
-    title: "Neighborhood Quiz — Which Charlotte Area Fits You?",
+    title: t("quiz.pageTitle"),
     description:
       "Take our 2-minute quiz to find your perfect Charlotte neighborhood. Answer questions about budget, lifestyle, and priorities for personalized results.",
     keywords:
@@ -645,7 +646,7 @@ export default function Quiz() {
           </Link>
           <Link href="/neighborhoods">
             <Button variant="ghost" size="sm" className="text-xs gap-1">
-              <MapPin className="w-3.5 h-3.5" /> Browse All
+              <MapPin className="w-3.5 h-3.5" /> {t("quiz.browseAll")}
             </Button>
           </Link>
         </div>

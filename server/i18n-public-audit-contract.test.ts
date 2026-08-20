@@ -21,7 +21,21 @@ describe("public/account translation audit guard", () => {
     const quiz = page("Quiz.tsx");
     const submitEvent = page("SubmitEvent.tsx");
     for (const [source, keys] of [
-      [quiz, ["quiz.title", "quiz.subtitle", "quiz.back", "quiz.next", "quiz.seeMatches"]],
+      [quiz, [
+        "quiz.pageTitle",
+        "quiz.browseAll",
+        "quiz.neighborhoodsMetric",
+        "quiz.coreMetro",
+        "quiz.smartScoring",
+        "quiz.dimensions",
+        "quiz.personalized",
+        "quiz.priorities",
+        "quiz.title",
+        "quiz.subtitle",
+        "quiz.back",
+        "quiz.next",
+        "quiz.seeMatches",
+      ]],
       [submitEvent, ["submitEvent.title", "submitEvent.submitted", "submitEvent.submit", "submitEvent.submitting"]],
     ] as const) {
       expect(source).toContain("useI18n");
