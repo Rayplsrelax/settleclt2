@@ -285,6 +285,19 @@ export const en = {
   "submitEvent.submit": "Submit Event",
   "submitEvent.submitting": "Submitting...",
 
+  // Realtor matching
+  "realtor.title": "Find Your Home in Charlotte",
+  "realtor.faq": "Frequently Asked Questions",
+  "realtor.submit": "Find My Match",
+
+  // Business listing
+  "business.listTitle": "List Your Business",
+  "business.submissionReceived": "Submission Received!",
+  "business.submit": "Submit",
+  "business.review": "Review",
+  "business.claim": "Claim",
+  "business.upgrade": "Upgrade",
+
   // Shared customer-facing UI
   "common.loading": "Loading...",
   "cookies.ariaLabel": "Cookie consent",

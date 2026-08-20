@@ -13,11 +13,13 @@ import {
   Crown, Sparkles, ArrowRight, Shield, BarChart3, Image, Search,
   Zap, Eye, MousePointerClick
 } from "lucide-react";
+import { useI18n } from "@/i18n/I18nContext";
 import { useSEO } from "@/hooks/useSEO";
 
 export default function ListYourBusiness() {
+  const { t } = useI18n();
   useSEO({
-    title: "List Your Business | Settle CLT",
+    title: `${t("business.listTitle")} | Settle CLT`,
     description: "Get your Charlotte business discovered by thousands of newcomers. Free basic listing with optional premium upgrades for featured placement and analytics.",
     keywords: "list business Charlotte, Charlotte business directory, promote business CLT, Charlotte advertising",
     path: "/list-your-business",
@@ -37,7 +39,7 @@ export default function ListYourBusiness() {
   const submitBusiness = trpc.leads.submitBusiness.useMutation({
     onSuccess: () => {
       setSubmitted(true);
-      toast.success("Business submitted! We'll review and add it shortly.");
+      toast.success(t("business.submissionReceived"));
     },
     onError: () => {
       toast.error("Something went wrong. Please try again.");
@@ -57,7 +59,7 @@ export default function ListYourBusiness() {
           <div className="container">
             <div className="max-w-lg mx-auto text-center">
               <CheckCircle className="w-14 h-14 text-primary mx-auto mb-5" />
-              <h1 className="font-display font-bold text-2xl text-foreground">Submission Received!</h1>
+              <h1 className="font-display font-bold text-2xl text-foreground">{t("business.submissionReceived")}</h1>
               <p className="mt-3 text-muted-foreground">
                 We'll review your business and add it to the directory within 48 hours. You'll receive a confirmation email.
               </p>
@@ -78,7 +80,7 @@ export default function ListYourBusiness() {
         <div className="container">
           <div className="max-w-2xl">
             <h1 className="font-display font-extrabold text-3xl md:text-4xl lg:text-5xl text-white">
-              List Your Business
+              {t("business.listTitle")}
             </h1>
             <p className="mt-4 text-lg text-white/70">
               Get discovered by thousands of people moving to Charlotte every month. Start with a free listing, upgrade anytime.

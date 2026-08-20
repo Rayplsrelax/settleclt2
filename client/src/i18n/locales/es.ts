@@ -287,6 +287,19 @@ export const es = {
   "submitEvent.submit": "Enviar evento",
   "submitEvent.submitting": "Enviando...",
 
+  // Conexión con agentes inmobiliarios
+  "realtor.title": "Encuentra tu hogar en Charlotte",
+  "realtor.faq": "Preguntas frecuentes",
+  "realtor.submit": "Encontrar mi coincidencia",
+
+  // Publicar un negocio
+  "business.listTitle": "Publica tu negocio",
+  "business.submissionReceived": "¡Solicitud recibida!",
+  "business.submit": "Enviar",
+  "business.review": "Revisar",
+  "business.claim": "Reclamar",
+  "business.upgrade": "Mejorar plan",
+
   // Interfaz compartida para clientes
   "common.loading": "Cargando...",
   "cookies.ariaLabel": "Consentimiento de cookies",
