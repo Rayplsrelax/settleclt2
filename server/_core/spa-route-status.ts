@@ -14,6 +14,7 @@ const STATIC_ROUTES = new Set([
   "/blog",
   "/list-your-business",
   "/business-pricing",
+  "/referrals",
   "/compare",
   "/quiz",
   "/profile",

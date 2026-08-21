@@ -16,6 +16,8 @@ import QuickStampButton from "@/components/QuickStampButton";
 import ClaimBusinessDialog from "@/components/ClaimBusinessDialog";
 import ShareButtons from "@/components/ShareButtons";
 import { MapView } from "@/components/Map";
+import { useI18n } from "@/i18n/I18nContext";
+import { formatLocalizedWholeCurrency, localeToLanguageTag } from "@/i18n/formatters";
 import { useSEO } from "@/hooks/useSEO";
 import { useStructuredData, buildLocalBusinessSchema, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
 import { trackBusinessAction } from "@/lib/mixpanel";
@@ -36,6 +38,7 @@ SERVICES.forEach((s) => {
 });
 
 export default function BusinessDetail() {
+  const { locale, t } = useI18n();
   const [, params] = useRoute("/directory/:slug");
   const slug = params?.slug || "";
   const service = SERVICE_MAP.get(slug);
@@ -66,10 +69,10 @@ export default function BusinessDetail() {
   }, [slug]);
   const trackLead = trpc.premium.trackLead.useMutation({
     onSuccess: () => {
-      toast.success("Your inquiry was sent to the business.");
+      toast.success(t("businessDetail.inquirySent"));
       setLeadForm({ name: "", email: "", phone: "", message: "" });
     },
-    onError: error => toast.error(error.message),
+    onError: () => toast.error(t("businessDetail.error")),
   });
 
   // Track views and clicks for premium listings
@@ -82,8 +85,8 @@ export default function BusinessDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug, premiumData?.active, premiumData?.tier]);
 
-  // Prefer owner-managed hours, then Google enrichment hours.
-  const hours = useMemo(() => {
+  // Preserve canonical English weekday prefixes for structured data.
+  const canonicalHours = useMemo(() => {
     if (publicProfile?.hours) {
       try {
         const ownerHours = JSON.parse(publicProfile.hours) as Record<string, string>;
@@ -107,6 +110,26 @@ export default function BusinessDetail() {
     }
   }, [enrichment?.hoursJson, publicProfile?.hours]);
 
+  const displayHours = useMemo(() => {
+    if (!canonicalHours) return null;
+    const labels = new Map<string, string>([
+      ["sunday", t("businessDetail.sunday")],
+      ["monday", t("businessDetail.monday")],
+      ["tuesday", t("businessDetail.tuesday")],
+      ["wednesday", t("businessDetail.wednesday")],
+      ["thursday", t("businessDetail.thursday")],
+      ["friday", t("businessDetail.friday")],
+      ["saturday", t("businessDetail.saturday")],
+    ]);
+    return canonicalHours.map(row => {
+      const separator = row.indexOf(": ");
+      if (separator < 0) return row;
+      const day = row.slice(0, separator);
+      const localizedDay = labels.get(day.toLowerCase());
+      return localizedDay ? `${localizedDay}${row.slice(separator)}` : row;
+    });
+  }, [canonicalHours, t]);
+
   // Prefer owner-managed photos, then include Google enrichment photos without duplicates.
   const combinedPhotos = useMemo(() => {
     let googlePhotos: string[] = [];
@@ -123,6 +146,55 @@ export default function BusinessDetail() {
 
   // Lightbox state
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const lightboxDialogRef = useRef<HTMLDivElement | null>(null);
+  const lightboxCloseButtonRef = useRef<HTMLButtonElement | null>(null);
+  const lightboxReturnFocusRef = useRef<HTMLElement | null>(null);
+  const lightboxOpen = lightboxIndex !== null;
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    lightboxReturnFocusRef.current = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    lightboxCloseButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setLightboxIndex(null);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const dialog = lightboxDialogRef.current;
+      if (!dialog) return;
+      const focusable = Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), a[href], input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      );
+      if (focusable.length === 0) {
+        event.preventDefault();
+        dialog.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      lightboxReturnFocusRef.current?.focus();
+    };
+  }, [lightboxOpen]);
 
   // Map ref for geocoding
   const mapRef = useRef<google.maps.Map | null>(null);
@@ -156,11 +228,15 @@ export default function BusinessDetail() {
   // SEO
   useSEO({
     title: service
-      ? `${service.name} \u2014 ${category?.name || "Local Business"} in ${service.area}, Charlotte NC | Hours, Phone & Reviews`
-      : "Business Not Found | Settle CLT",
+      ? t("businessDetail.seoTitle", {
+          name: service.name,
+          category: category?.name || t("businessDetail.localBusiness"),
+          area: service.area,
+        })
+      : t("businessDetail.notFound"),
     description: service
-      ? `${service.name} in ${service.area}, Charlotte NC. ${service.description} Call ${service.phone || "the business"} for appointments. See hours, reviews, photos, and get directions.`
-      : "This business listing was not found.",
+      ? t("businessDetail.seoDescription", { name: service.name })
+      : t("businessDetail.notFound"),
     keywords: service
       ? `${service.name}, ${service.name} Charlotte, ${service.name} Charlotte NC, ${category?.name || "local business"} in ${service.area}, ${service.area} Charlotte NC, Charlotte ${category?.name || "local business"}`
       : undefined,
@@ -190,8 +266,8 @@ export default function BusinessDetail() {
       };
     }
     // Add hours
-    if (hours) {
-      localBusiness.openingHours = hours;
+    if (canonicalHours) {
+      localBusiness.openingHours = canonicalHours;
     }
     // Add photos
     if (photos && photos.length > 0) {
@@ -203,8 +279,8 @@ export default function BusinessDetail() {
     }
 
     const breadcrumb = buildBreadcrumbSchema([
-      { name: "Home", url: "https://settleclt.com" },
-      { name: "Directory", url: "https://settleclt.com/directory" },
+      { name: t("businessDetail.home"), url: "https://settleclt.com" },
+      { name: t("businessDetail.directory"), url: "https://settleclt.com/directory" },
       ...(category
         ? [{ name: category.name, url: `https://settleclt.com/directory?category=${category.id}` }]
         : []),
@@ -215,9 +291,16 @@ export default function BusinessDetail() {
       { "@context": "https://schema.org", ...localBusiness },
       { "@context": "https://schema.org", ...breadcrumb },
     ];
-  }, [service, enrichment, hours, photos, category, slug]);
+  }, [service, enrichment, canonicalHours, photos, category, slug, t]);
 
   useStructuredData(structuredData);
+
+  const relatedBusinesses = useMemo(() => {
+    if (!service) return [];
+    return SERVICES.filter(
+      candidate => candidate.category === service.category && toSlug(candidate.name) !== slug
+    ).slice(0, 6);
+  }, [service, slug]);
 
   if (!service) {
     return <NotFound />;
@@ -226,17 +309,25 @@ export default function BusinessDetail() {
   // Lightbox modal component
   const lightboxModal = lightboxIndex !== null && photos && photos.length > 0 && (
     <div
+      ref={lightboxDialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("businessDetail.photos", { count: photos.length })}
+      tabIndex={-1}
       className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
       onClick={() => setLightboxIndex(null)}
     >
       <button
+        ref={lightboxCloseButtonRef}
         onClick={(e) => { e.stopPropagation(); setLightboxIndex(null); }}
+        aria-label={t("businessDetail.closePhotos")}
         className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10"
       >
         <X className="w-6 h-6" />
       </button>
       <button
         onClick={(e) => { e.stopPropagation(); setLightboxIndex(Math.max(0, lightboxIndex - 1)); }}
+        aria-label={t("businessDetail.previousPhoto")}
         className={`absolute left-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10 ${
           lightboxIndex === 0 ? 'opacity-30 cursor-not-allowed' : ''
         }`}
@@ -246,6 +337,7 @@ export default function BusinessDetail() {
       </button>
       <button
         onClick={(e) => { e.stopPropagation(); setLightboxIndex(Math.min(photos.length - 1, lightboxIndex + 1)); }}
+        aria-label={t("businessDetail.nextPhoto")}
         className={`absolute right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10 ${
           lightboxIndex === photos.length - 1 ? 'opacity-30 cursor-not-allowed' : ''
         }`}
@@ -256,7 +348,7 @@ export default function BusinessDetail() {
       <div className="max-w-4xl max-h-[85vh] px-16" onClick={(e) => e.stopPropagation()}>
         <img loading="lazy"
           src={photos[lightboxIndex]}
-          alt={`${service.name} in Charlotte NC - photo ${lightboxIndex + 1}`}
+          alt={t("businessDetail.photoAlt", { name: service.name, number: lightboxIndex + 1 })}
           className="max-w-full max-h-[80vh] object-contain rounded-lg"
         />
         <div className="text-center mt-3">
@@ -270,10 +362,6 @@ export default function BusinessDetail() {
     enrichment?.verifiedAddress || `${service.name}, ${service.area}, Charlotte, NC`
   )}`;
 
-  // Find related businesses in same category (exclude current)
-  const relatedBusinesses = useMemo(() => {
-    return SERVICES.filter((s) => s.category === service.category && toSlug(s.name) !== slug).slice(0, 6);
-  }, [service.category, slug]);
 
   const trackListingAction = (action: "phone_click" | "website_click" | "directions_click" | "claim_click" | "booking_click", surface: string) => {
     trackBusinessAction(action, {
@@ -306,9 +394,9 @@ export default function BusinessDetail() {
       <div className="bg-card border-b border-border">
         <div className="max-w-5xl mx-auto px-4 py-3">
           <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
+            <Link href="/" className="hover:text-foreground transition-colors">{t("businessDetail.home")}</Link>
             <ChevronRight className="w-3.5 h-3.5" />
-            <Link href="/directory" className="hover:text-foreground transition-colors">Directory</Link>
+            <Link href="/directory" className="hover:text-foreground transition-colors">{t("businessDetail.directory")}</Link>
             {category && (
               <>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -327,7 +415,7 @@ export default function BusinessDetail() {
         {/* Back button */}
         <Link href="/directory">
           <Button variant="ghost" size="sm" className="mb-4 gap-1.5 text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="w-4 h-4" /> Back to Directory
+            <ArrowLeft className="w-4 h-4" /> {t("businessDetail.back")}
           </Button>
         </Link>
 
@@ -347,7 +435,7 @@ export default function BusinessDetail() {
                     >
                       <img loading="lazy"
                         src={photos[0]}
-                        alt={`${displayName} - Charlotte NC local business`}
+                        alt={t("businessDetail.photoAlt", { name: displayName, number: 1 })}
                         className="w-full h-[320px] object-cover transition-transform duration-300 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
@@ -362,14 +450,14 @@ export default function BusinessDetail() {
                           >
                             <img loading="lazy"
                               src={photo}
-                              alt={`${displayName} in Charlotte NC - photo ${i + 2}`}
+                              alt={t("businessDetail.photoAlt", { name: displayName, number: i + 2 })}
                               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                               style={{ minHeight: '100px' }}
                             />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                             {i === 2 && photos.length > 4 && (
                               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                                <span className="text-white font-semibold text-sm">+{photos.length - 4} more</span>
+                                <span className="text-white font-semibold text-sm">{t("businessDetail.morePhotos", { count: photos.length - 4 })}</span>
                               </div>
                             )}
                           </button>
@@ -381,7 +469,7 @@ export default function BusinessDetail() {
                     onClick={() => setLightboxIndex(0)}
                     className="absolute bottom-3 right-3 px-3 py-1.5 rounded-lg bg-black/60 hover:bg-black/80 text-white text-xs font-medium flex items-center gap-1.5 transition-colors backdrop-blur-sm"
                   >
-                    <Camera className="w-3.5 h-3.5" /> {photos.length} photos
+                    <Camera className="w-3.5 h-3.5" /> {t("businessDetail.photos", { count: photos.length })}
                   </button>
                 </div>
               )}
@@ -405,12 +493,12 @@ export default function BusinessDetail() {
                     <div className="flex flex-wrap items-center gap-2 mt-3">
                       {premiumData?.tier === 'premium' && premiumData?.active && (
                         <Badge className="bg-purple-100 text-purple-700 border-purple-200 text-xs gap-1">
-                          <Crown className="w-3 h-3" /> Premium Listing
+                          <Crown className="w-3 h-3" /> {t("businessDetail.premium")}
                         </Badge>
                       )}
                       {premiumData?.tier === 'featured' && premiumData?.active && (
                         <Badge className="bg-amber-100 text-amber-700 border-amber-200 text-xs gap-1">
-                          <Award className="w-3 h-3" /> Featured Listing
+                          <Award className="w-3 h-3" /> {t("businessDetail.featured")}
                         </Badge>
                       )}
 
@@ -438,7 +526,7 @@ export default function BusinessDetail() {
                         </div>
                         {enrichment.reviewCount && (
                           <span className="text-sm text-muted-foreground">
-                            ({enrichment.reviewCount.toLocaleString()} Google reviews)
+                            {t("businessDetail.googleReviews", { count: new Intl.NumberFormat(localeToLanguageTag(locale)).format(enrichment.reviewCount) })}
                           </span>
                         )}
                       </div>
@@ -459,15 +547,16 @@ export default function BusinessDetail() {
                 {/* Local SEO context for thin listings */}
                 <div className="mt-4 rounded-2xl bg-muted/40 border border-border p-4 text-sm text-muted-foreground leading-relaxed space-y-2">
                   <h2 className="font-display font-semibold text-base text-foreground">
-                    About {service.name} in {service.area}, Charlotte NC
+                    {t("businessDetail.aboutTitle", { name: service.name, area: service.area })}
                   </h2>
                   <p>
-                    {service.name} is listed in Settle CLT's Charlotte directory under {category?.name || "local services"}.
-                    Use this page to quickly check contact details, hours, photos, reviews, and directions before you visit or call.
+                    {t("businessDetail.directoryContext", {
+                      name: service.name,
+                      category: category?.name || t("businessDetail.localBusiness"),
+                    })}
                   </p>
                   <p>
-                    If you are moving to Charlotte or getting settled in {service.area}, compare this listing with other
-                    {category?.name ? ` ${category.name.toLowerCase()}` : " local service"} options nearby so you can choose the right fit for your home, commute, errands, or weekend plans.
+                    {t("businessDetail.compareContext", { area: service.area })}
                   </p>
                 </div>
 
@@ -475,11 +564,11 @@ export default function BusinessDetail() {
                 <div className="flex flex-wrap gap-2 mt-5">
                   <a href={directionsUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackListingAction("directions_click", "hero_actions")}>
                     <Button size="sm" className="gap-1.5 bg-blue-600 hover:bg-blue-700 text-white">
-                      <Navigation className="w-3.5 h-3.5" /> Get Directions
+                      <Navigation className="w-3.5 h-3.5" /> {t("businessDetail.directions")}
                     </Button>
                   </a>
                   {phone && (
-                    <a href={`tel:${phone}`} onClick={() => {
+                    <a href={`tel:${phone}`} aria-label={t("businessDetail.call")} onClick={() => {
                       trackListingAction("phone_click", "hero_actions");
                       if (premiumData?.active && premiumData?.tier !== 'basic') {
                         trackClick.mutate({ serviceKey: slug });
@@ -496,7 +585,7 @@ export default function BusinessDetail() {
                       if (premiumData?.active && premiumData?.tier !== 'basic') trackClick.mutate({ serviceKey: slug });
                     }}>
                       <Button size="sm" variant="outline" className="gap-1.5">
-                        <ExternalLink className="w-3.5 h-3.5" /> Visit Website
+                        <ExternalLink className="w-3.5 h-3.5" /> {t("businessDetail.website")}
                       </Button>
                     </a>
                   )}
@@ -506,13 +595,15 @@ export default function BusinessDetail() {
                       if (premiumData?.active && premiumData?.tier !== 'basic') trackClick.mutate({ serviceKey: slug });
                     }}>
                       <Button size="sm" className="gap-1.5 bg-primary hover:bg-primary/90">
-                        <Calendar className="w-3.5 h-3.5" /> {publicProfile.bookingProvider ? `Book or Pay via ${publicProfile.bookingProvider}` : "Book or Request a Quote"}
+                        <Calendar className="w-3.5 h-3.5" /> {publicProfile.bookingProvider
+                          ? t("businessDetail.bookVia", { provider: publicProfile.bookingProvider })
+                          : t("businessDetail.bookQuote")}
                       </Button>
                     </a>
                   )}
                   <ClaimBusinessDialog serviceKey={slug} businessName={service.name}>
                     <Button size="sm" variant="ghost" className="gap-1.5 text-muted-foreground" onClick={() => trackListingAction("claim_click", "hero_actions")}>
-                      <Building2 className="w-3.5 h-3.5" /> Claim This Business
+                      <Building2 className="w-3.5 h-3.5" /> {t("businessDetail.claim")}
                     </Button>
                   </ClaimBusinessDialog>
                 </div>
@@ -531,7 +622,7 @@ export default function BusinessDetail() {
             {publicProfile?.serviceMenu?.some(serviceItem => serviceItem.active !== false && serviceItem.name) && (
               <Card>
                 <CardContent className="p-6">
-                  <h2 className="font-display font-semibold text-lg text-foreground mb-4">Services</h2>
+                  <h2 className="font-display font-semibold text-lg text-foreground mb-4">{t("businessDetail.services")}</h2>
                   <div className="space-y-3">
                     {publicProfile.serviceMenu.filter(serviceItem => serviceItem.active !== false && serviceItem.name).map((serviceItem, index) => (
                       <div key={`${serviceItem.name}-${index}`} className="flex items-start justify-between gap-4 rounded-xl border p-4">
@@ -539,27 +630,35 @@ export default function BusinessDetail() {
                           <h3 className="font-semibold text-foreground">{serviceItem.name}</h3>
                           {serviceItem.description && <p className="text-sm text-muted-foreground mt-1">{serviceItem.description}</p>}
                         </div>
-                        {serviceItem.startingPriceCents != null && <span className="shrink-0 text-sm font-medium text-primary">From ${(serviceItem.startingPriceCents / 100).toFixed(0)}</span>}
+                        {serviceItem.startingPriceCents != null && <span className="shrink-0 text-sm font-medium text-primary">{t("businessDetail.fromPrice", { price: formatLocalizedWholeCurrency(serviceItem.startingPriceCents / 100, locale) })}</span>}
                       </div>
                     ))}
                   </div>
-                  {publicProfile.bookingUrl && <p className="text-xs text-muted-foreground mt-4">Use the booking or quote button above to ask about a service.</p>}
+                  {publicProfile.bookingUrl && <p className="text-xs text-muted-foreground mt-4">{t("businessDetail.serviceHint")}</p>}
                 </CardContent>
               </Card>
             )}
 
             {/* Hours */}
-            {hours && hours.length > 0 && (
+            {displayHours && displayHours.length > 0 && (
               <Card>
                 <CardContent className="p-6">
                   <h2 className="font-display font-semibold text-lg text-foreground flex items-center gap-2 mb-4">
-                    <Clock className="w-5 h-5 text-primary" /> Business Hours
+                    <Clock className="w-5 h-5 text-primary" /> {t("businessDetail.hours")}
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {hours.map((h, i) => {
+                    {displayHours.map((h, i) => {
                       const [day, ...timeParts] = h.split(": ");
                       const time = timeParts.join(": ");
-                      const isToday = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][new Date().getDay()]?.toLowerCase() === day?.toLowerCase();
+                      const today = new Date().getDay();
+                      const englishWeekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                      const localizedWeekdays = [
+                        t("businessDetail.sunday"), t("businessDetail.monday"), t("businessDetail.tuesday"),
+                        t("businessDetail.wednesday"), t("businessDetail.thursday"), t("businessDetail.friday"),
+                        t("businessDetail.saturday"),
+                      ];
+                      const isToday = [englishWeekdays[today], localizedWeekdays[today]]
+                        .some(label => label?.toLowerCase() === day?.toLowerCase());
                       return (
                         <div
                           key={i}
@@ -581,7 +680,7 @@ export default function BusinessDetail() {
             <Card>
               <CardContent className="p-6">
                 <h2 className="font-display font-semibold text-lg text-foreground flex items-center gap-2 mb-4">
-                  <MapPin className="w-5 h-5 text-primary" /> Location
+                  <MapPin className="w-5 h-5 text-primary" /> {t("businessDetail.location")}
                 </h2>
                 {enrichment?.verifiedAddress && (
                   <p className="text-sm text-muted-foreground mb-3">{enrichment.verifiedAddress}</p>
@@ -601,32 +700,32 @@ export default function BusinessDetail() {
               <Card className="border-purple-200 bg-purple-50/30">
                 <CardContent className="p-6">
                   <h2 className="font-display font-semibold text-lg text-foreground flex items-center gap-2">
-                    <Send className="w-5 h-5 text-purple-600" /> Send an Inquiry
+                    <Send className="w-5 h-5 text-purple-600" /> {t("businessDetail.inquiry")}
                   </h2>
                   <p className="text-sm text-muted-foreground mt-1 mb-4">
-                    Contact {displayName} directly through their Premium listing.
+                    {t("businessDetail.inquiryDescription", { name: displayName })}
                   </p>
                   <form onSubmit={submitLead} className="space-y-3">
                     <div className="grid sm:grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <Label htmlFor="lead-name">Name</Label>
+                        <Label htmlFor="lead-name">{t("businessDetail.name")}</Label>
                         <Input id="lead-name" value={leadForm.name} onChange={e => setLeadForm({ ...leadForm, name: e.target.value })} required />
                       </div>
                       <div className="space-y-1.5">
-                        <Label htmlFor="lead-email">Email</Label>
+                        <Label htmlFor="lead-email">{t("businessDetail.email")}</Label>
                         <Input id="lead-email" type="email" value={leadForm.email} onChange={e => setLeadForm({ ...leadForm, email: e.target.value })} required />
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="lead-phone">Phone (optional)</Label>
+                      <Label htmlFor="lead-phone">{t("businessDetail.phoneOptional")}</Label>
                       <Input id="lead-phone" type="tel" value={leadForm.phone} onChange={e => setLeadForm({ ...leadForm, phone: e.target.value })} />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="lead-message">Message</Label>
+                      <Label htmlFor="lead-message">{t("businessDetail.message")}</Label>
                       <Textarea id="lead-message" rows={4} value={leadForm.message} onChange={e => setLeadForm({ ...leadForm, message: e.target.value })} required />
                     </div>
                     <Button type="submit" disabled={trackLead.isPending} className="gap-2 bg-purple-600 hover:bg-purple-700">
-                      <Send className="w-4 h-4" /> {trackLead.isPending ? "Sending..." : "Send Inquiry"}
+                      <Send className="w-4 h-4" /> {trackLead.isPending ? t("businessDetail.sending") : t("businessDetail.sendInquiry")}
                     </Button>
                   </form>
                 </CardContent>
@@ -636,7 +735,7 @@ export default function BusinessDetail() {
             {/* Reviews */}
             <Card>
               <CardContent className="p-6">
-                <h2 className="font-display font-semibold text-lg text-foreground mb-4">Community Reviews</h2>
+                <h2 className="font-display font-semibold text-lg text-foreground mb-4">{t("businessDetail.reviews")}</h2>
                 <ReviewSection targetType="directory" targetId={slug} />
               </CardContent>
             </Card>
@@ -647,7 +746,7 @@ export default function BusinessDetail() {
             {/* Quick info card */}
             <Card className="sticky top-4">
               <CardContent className="p-5 space-y-4">
-                <h3 className="font-display font-semibold text-foreground">Quick Info</h3>
+                <h3 className="font-display font-semibold text-foreground">{t("businessDetail.quickInfo")}</h3>
 
                 {enrichment?.verifiedAddress && (
                   <div className="flex items-start gap-3">
@@ -677,7 +776,7 @@ export default function BusinessDetail() {
                 <div className="pt-3 border-t border-border">
                   <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="block" onClick={() => trackListingAction("directions_click", "sidebar_quick_info")}>
                     <Button className="w-full gap-1.5 bg-blue-600 hover:bg-blue-700 text-white">
-                      <Navigation className="w-4 h-4" /> Get Directions
+                      <Navigation className="w-4 h-4" /> {t("businessDetail.directions")}
                     </Button>
                   </a>
                 </div>
@@ -689,7 +788,7 @@ export default function BusinessDetail() {
               <Card>
                 <CardContent className="p-5">
                   <h3 className="font-display font-semibold text-foreground mb-3">
-                    More in {category?.name || "this category"}
+                    {t("businessDetail.moreIn", { category: category?.name || t("businessDetail.localBusiness") })}
                   </h3>
                   <div className="space-y-3">
                     {relatedBusinesses.map((r) => {
@@ -709,7 +808,7 @@ export default function BusinessDetail() {
                   </div>
                   <Link href={`/directory?category=${service.category}`}>
                     <Button variant="outline" size="sm" className="w-full mt-3 gap-1.5">
-                      View all {category?.name} <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
+                      {t("businessDetail.viewAll", { category: category?.name || t("businessDetail.localBusiness") })} <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
                     </Button>
                   </Link>
                 </CardContent>

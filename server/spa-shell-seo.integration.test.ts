@@ -105,4 +105,44 @@ describe("production SPA shell per-route SEO (integration)", () => {
       "<title>Your Complete Guide to Living in Charlotte, NC | Settle CLT</title>"
     );
   });
+
+  it("serves Spanish business pricing metadata from the first response", async () => {
+    const base = await startProductionShell();
+    const res = await fetch(`${base}/business-pricing`, {
+      headers: { cookie: "site_locale=es" },
+    });
+    const html = await res.text();
+    expect(html).toContain('<html lang="es">');
+    expect(html).toContain("<title>Precios para negocios de Settle CLT</title>");
+    expect(res.headers.get("vary")).toContain("Cookie");
+    expect(res.headers.get("vary")).toContain("Accept-Language");
+  });
+
+  it("honors weighted Accept-Language preferences without a locale cookie", async () => {
+    const base = await startProductionShell();
+    const res = await fetch(`${base}/business-pricing`, {
+      headers: { "accept-language": "en;q=0.1, es;q=1" },
+    });
+    const html = await res.text();
+    expect(html).toContain('<html lang="es">');
+  });
+
+  it("owns Spanish first-response metadata for referral intake", async () => {
+    const base = await startProductionShell();
+    const res = await fetch(`${base}/referrals`, {
+      headers: { cookie: "site_locale=es" },
+    });
+    const html = await res.text();
+    expect(html).toContain("<title>Referencias de negocios locales en Charlotte | Settle CLT</title>");
+  });
+
+  it("serves localized first-response metadata for business details", async () => {
+    const base = await startProductionShell();
+    const res = await fetch(`${base}/directory/amelie-s-french-bakery`, {
+      headers: { cookie: "site_locale=es" },
+    });
+    const html = await res.text();
+    expect(html).toContain('<html lang="es">');
+    expect(html).not.toContain("reviews, details, and neighborhood info");
+  });
 });

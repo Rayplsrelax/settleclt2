@@ -23,12 +23,12 @@ describe("Business claim monetization funnel", () => {
 
   it("explains the free claim to paid upgrade path", () => {
     const page = readFileSync("client/src/pages/BusinessPricing.tsx", "utf8");
-    expect(page).toContain("Free Claim");
-    expect(page).toContain("Featured Listing");
-    expect(page).toContain("Premium Listing");
+    expect(page).toContain('nameKey: "businessPricing.freeClaim"');
+    expect(page).toContain('nameKey: "businessPricing.featured"');
+    expect(page).toContain('nameKey: "businessPricing.premium"');
     expect(page).toContain("$29");
     expect(page).toContain("$79");
-    expect(page).toContain("Claim Your Business");
+    expect(page).toContain('ctaKey: "businessPricing.claimCta"');
   });
 
   it("preserves the selected paid tier when entering the owner checkout flow", () => {
