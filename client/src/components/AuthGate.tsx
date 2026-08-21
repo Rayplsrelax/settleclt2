@@ -1,5 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
+import { useI18n } from "@/i18n/I18nContext";
 import { LogIn } from "lucide-react";
 import { ReactNode } from "react";
 
@@ -22,19 +23,20 @@ export default function AuthGate({
   featureLabel = "this feature",
   inline = false,
 }: AuthGateProps) {
+  const { t } = useI18n();
   const { user, loading } = useAuth();
 
   if (loading) {
     if (inline) {
       return (
         <div className="py-4 text-center text-muted-foreground text-sm animate-pulse">
-          Loading...
+          {t("authGate.loading")}
         </div>
       );
     }
     return (
       <div className="min-h-[40vh] flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+        <div className="animate-pulse text-muted-foreground">{t("authGate.loading")}</div>
       </div>
     );
   }
@@ -47,14 +49,14 @@ export default function AuthGate({
     return (
       <div className="rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center">
         <p className="text-sm text-muted-foreground mb-3">
-          Sign in to {featureLabel}
+          {t("authGate.inlinePrompt", { feature: featureLabel })}
         </p>
         <a
           href={getLoginUrl()}
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity no-underline"
         >
           <LogIn className="w-3.5 h-3.5" />
-          Sign In
+          {t("authGate.signIn")}
         </a>
       </div>
     );
@@ -67,18 +69,17 @@ export default function AuthGate({
           <LogIn className="w-7 h-7 text-primary" />
         </div>
         <h2 className="text-lg font-display font-bold text-foreground mb-2">
-          Sign in required
+          {t("authGate.required")}
         </h2>
         <p className="text-sm text-muted-foreground mb-6">
-          Create a free account to {featureLabel}. Browsing neighborhoods, the
-          directory, and all guides is always free — no account needed.
+          {t("authGate.description", { feature: featureLabel })}
         </p>
         <a
           href={getLoginUrl()}
           className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity no-underline"
         >
           <LogIn className="w-4 h-4" />
-          Sign In
+          {t("authGate.signIn")}
         </a>
       </div>
     </div>

@@ -8,14 +8,16 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ShareButtons from "@/components/ShareButtons";
+import { useI18n } from "@/i18n/I18nContext";
+import type { TranslationKey } from "@/i18n/locales/en";
 import { useSEO } from "@/hooks/useSEO";
 
 type Tab = "stamps" | "bingo" | "neighborhoods";
 
-const TABS: { id: Tab; label: string; icon: typeof Trophy; description: string }[] = [
-  { id: "stamps", label: "Most Stamps", icon: Stamp, description: "Places visited via CLT Passport" },
-  { id: "bingo", label: "Bingo Champs", icon: Grid3X3, description: "Bingo cards completed" },
-  { id: "neighborhoods", label: "Explorer", icon: MapPin, description: "Unique neighborhoods visited" },
+const TABS: { id: Tab; labelKey: TranslationKey; icon: typeof Trophy; descriptionKey: TranslationKey }[] = [
+  { id: "stamps", labelKey: "leaderboard.mostStamps", icon: Stamp, descriptionKey: "leaderboard.stampsDescription" },
+  { id: "bingo", labelKey: "leaderboard.bingoChamps", icon: Grid3X3, descriptionKey: "leaderboard.bingoDescription" },
+  { id: "neighborhoods", labelKey: "leaderboard.explorer", icon: MapPin, descriptionKey: "leaderboard.neighborhoodDescription" },
 ];
 
 function getRankIcon(rank: number) {
@@ -54,14 +56,15 @@ function LeaderboardTable({
   valueKey: string;
   currentUserId: number | null;
 }) {
+  const { t } = useI18n();
   if (data.length === 0) {
     return (
       <Card className="border-dashed">
         <CardContent className="py-16 text-center">
           <Trophy className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-foreground mb-2">No explorers yet</h3>
+          <h3 className="text-lg font-semibold text-foreground mb-2">{t("leaderboard.noExplorers")}</h3>
           <p className="text-sm text-muted-foreground">
-            Be the first to explore Charlotte and claim the top spot!
+            {t("leaderboard.noExplorersDescription")}
           </p>
         </CardContent>
       </Card>
@@ -83,7 +86,7 @@ function LeaderboardTable({
             }`}
           >
             {/* Rank */}
-            <div className="w-8 flex items-center justify-center shrink-0">
+            <div className="w-8 flex items-center justify-center shrink-0" aria-label={t("leaderboard.rankValue", { rank })}>
               {getRankIcon(rank)}
             </div>
 
@@ -103,9 +106,9 @@ function LeaderboardTable({
             {/* Name */}
             <div className="flex-1 min-w-0">
               <p className={`font-semibold truncate ${isCurrentUser ? "text-primary" : "text-foreground"}`}>
-                {entry.userName || "Anonymous Explorer"}
+                {entry.userName || t("leaderboard.anonymous")}
                 {isCurrentUser && (
-                  <span className="ml-2 text-xs font-medium text-primary/70">(You)</span>
+                  <span className="ml-2 text-xs font-medium text-primary/70">({t("leaderboard.you")})</span>
                 )}
               </p>
             </div>
@@ -127,10 +130,11 @@ function LeaderboardTable({
 }
 
 export default function Leaderboard() {
+  const { t } = useI18n();
   useSEO({
-    title: "CLT Leaderboard — Top Charlotte Explorers",
-    description: "See who's exploring Charlotte the most. Rankings by passport stamps, bingo completions, and neighborhoods visited.",
-    keywords: "Charlotte leaderboard, CLT explorers, Charlotte community, Charlotte passport rankings, explore Charlotte NC",
+    title: t("leaderboard.title"),
+    description: t("leaderboard.seoDescription"),
+    keywords: t("leaderboard.seoKeywords"),
     path: "/leaderboard",
   });
 
@@ -152,14 +156,13 @@ export default function Leaderboard() {
             <Trophy className="w-7 h-7 text-amber-500" />
           </div>
           <h1 className="text-3xl font-display font-bold text-foreground mb-2">
-            CLT Explorer Leaderboard
+            {t("leaderboard.title")}
           </h1>
           <p className="text-muted-foreground max-w-md mx-auto">
-            See who's exploring Charlotte the most. Earn stamps, complete bingo cards,
-            and visit neighborhoods to climb the ranks!
+            {t("leaderboard.subtitle")}
           </p>
           <div className="mt-3">
-            <ShareButtons title="CLT Explorer Leaderboard" description="See who's exploring Charlotte the most" />
+            <ShareButtons title={t("leaderboard.title")} description={t("leaderboard.shareDescription")} />
           </div>
         </div>
 
@@ -177,7 +180,7 @@ export default function Leaderboard() {
                 onClick={() => setActiveTab(tab.id)}
               >
                 <Icon className="w-4 h-4" />
-                {tab.label}
+                {t(tab.labelKey)}
               </Button>
             );
           })}
@@ -185,7 +188,7 @@ export default function Leaderboard() {
 
         {/* Description */}
         <p className="text-sm text-muted-foreground mb-4">
-          {TABS.find(t => t.id === activeTab)?.description}
+          {t(TABS.find(tab => tab.id === activeTab)?.descriptionKey ?? "leaderboard.stampsDescription")}
         </p>
 
         {/* Loading */}
@@ -200,7 +203,7 @@ export default function Leaderboard() {
             {activeTab === "stamps" && (
               <LeaderboardTable
                 data={stamps}
-                valueLabel="stamps"
+                valueLabel={t("leaderboard.stamps")}
                 valueKey="stampCount"
                 currentUserId={user?.id ?? null}
               />
@@ -208,7 +211,7 @@ export default function Leaderboard() {
             {activeTab === "bingo" && (
               <LeaderboardTable
                 data={bingo}
-                valueLabel="completed"
+                valueLabel={t("leaderboard.completed")}
                 valueKey="completedCards"
                 currentUserId={user?.id ?? null}
               />
@@ -216,7 +219,7 @@ export default function Leaderboard() {
             {activeTab === "neighborhoods" && (
               <LeaderboardTable
                 data={neighborhoods}
-                valueLabel="areas"
+                valueLabel={t("leaderboard.areas")}
                 valueKey="neighborhoodCount"
                 currentUserId={user?.id ?? null}
               />
@@ -229,13 +232,13 @@ export default function Leaderboard() {
           <Card className="mt-8 border-primary/20 bg-primary/5">
             <CardContent className="py-6 text-center">
               <p className="text-sm font-medium text-foreground mb-2">
-                Want to join the leaderboard?
+                {t("leaderboard.wantToJoin")}
               </p>
               <p className="text-xs text-muted-foreground mb-4">
-                Sign in and start exploring Charlotte to earn your spot!
+                {t("leaderboard.joinDescription")}
               </p>
               <Button size="sm" asChild>
-                <a href={`/passport`}>Start Exploring</a>
+                <a href={`/passport`}>{t("leaderboard.startExploring")}</a>
               </Button>
             </CardContent>
           </Card>

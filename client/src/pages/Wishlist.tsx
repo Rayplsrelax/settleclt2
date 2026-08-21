@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SERVICES, type Service } from "@shared/services";
 import { toast } from "sonner";
+import { useI18n } from "@/i18n/I18nContext";
 import { useSEO } from "@/hooks/useSEO";
 
 function slugify(name: string) {
@@ -16,18 +17,19 @@ function slugify(name: string) {
 }
 
 function WishlistContent() {
+  const { t } = useI18n();
   const utils = trpc.useUtils();
   const { data: entries = [], isLoading } = trpc.wishlist.getEntries.useQuery();
   const removeEntry = trpc.wishlist.remove.useMutation({
     onSuccess: () => {
       utils.wishlist.getEntries.invalidate();
-      toast.success("Removed from wishlist");
+      toast.success(t("wishlist.removed"));
     },
   });
   const updateNotes = trpc.wishlist.updateNotes.useMutation({
     onSuccess: () => {
       utils.wishlist.getEntries.invalidate();
-      toast.success("Notes updated");
+      toast.success(t("wishlist.notesUpdated"));
     },
   });
 
@@ -59,11 +61,11 @@ function WishlistContent() {
             <Heart className="w-5 h-5 text-rose-500" />
           </div>
           <h1 className="text-2xl font-display font-bold text-foreground">
-            My Wishlist
+            {t("wishlist.title")}
           </h1>
         </div>
         <p className="text-muted-foreground max-w-xl">
-          Places you want to visit in Charlotte. Heart any listing in the directory to save it here.
+          {t("wishlist.subtitle")}
         </p>
       </div>
 
@@ -72,17 +74,16 @@ function WishlistContent() {
           <CardContent className="py-16 text-center">
             <Heart className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-foreground mb-2">
-              Your wishlist is empty
+              {t("wishlist.empty")}
             </h3>
             <p className="text-sm text-muted-foreground max-w-md mx-auto mb-4">
-              Browse the directory and click the heart icon on any listing to save it
-              to your wishlist for later.
+              {t("wishlist.emptyDescription")}
             </p>
             <a
               href="/directory"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity no-underline"
             >
-              Browse Directory
+              {t("wishlist.browseDirectory")}
             </a>
           </CardContent>
         </Card>
@@ -90,7 +91,7 @@ function WishlistContent() {
         <div className="space-y-3">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg font-semibold text-foreground">
-              Saved Places ({entries.length})
+              {t("wishlist.savedPlaces", { count: entries.length })}
             </h2>
           </div>
           {entries.map(entry => {
@@ -123,7 +124,7 @@ function WishlistContent() {
                               onClick={e => e.stopPropagation()}
                             >
                               <ExternalLink className="w-3 h-3" />
-                              Website
+                              {t("wishlist.website")}
                             </a>
                           )}
                         </div>
@@ -135,13 +136,14 @@ function WishlistContent() {
                             type="text"
                             value={editNotes}
                             onChange={e => setEditNotes(e.target.value)}
-                            placeholder="Add a note..."
+                            placeholder={t("wishlist.notePlaceholder")}
                             className="flex-1 rounded-md border border-border bg-background px-2 py-1 text-sm text-foreground"
                             autoFocus
                           />
                           <Button
                             variant="ghost"
                             size="sm"
+                            aria-label={t("wishlist.saveNotes")}
                             onClick={() => {
                               updateNotes.mutate({ id: entry.id, notes: editNotes });
                               setEditingId(null);
@@ -152,6 +154,7 @@ function WishlistContent() {
                           <Button
                             variant="ghost"
                             size="sm"
+                            aria-label={t("wishlist.cancelEdit")}
                             onClick={() => setEditingId(null)}
                           >
                             <X className="w-4 h-4" />
@@ -171,7 +174,7 @@ function WishlistContent() {
                           onClick={() => { setEditingId(entry.id); setEditNotes(""); }}
                         >
                           <Pencil className="w-3 h-3" />
-                          Add a note
+                          {t("wishlist.addNote")}
                         </button>
                       )}
                     </div>
@@ -180,6 +183,7 @@ function WishlistContent() {
                       <Button
                         variant="ghost"
                         size="sm"
+                        aria-label={t("wishlist.remove")}
                         className="text-muted-foreground hover:text-destructive"
                         onClick={() => removeEntry.mutate({ serviceKey: entry.serviceKey })}
                       >
@@ -195,22 +199,23 @@ function WishlistContent() {
       )}
 
       <p className="text-xs text-muted-foreground text-center mt-8">
-        Tip: Click the heart icon on any directory listing to add it here.
+        {t("wishlist.tip")}
       </p>
     </div>
   );
 }
 
 export default function Wishlist() {
+  const { t } = useI18n();
   useSEO({
-    title: "Your Wishlist",
-    description: "Save and revisit your favorite Charlotte neighborhoods, businesses, and events on Settle CLT.",
+    title: t("wishlist.title"),
+    description: t("wishlist.seoDescription"),
     path: "/wishlist",
   });
 
   return (
     <PageLayout>
-      <AuthGate featureLabel="save your wishlist">
+      <AuthGate featureLabel={t("wishlist.authFeature")}>
         <WishlistContent />
       </AuthGate>
     </PageLayout>
