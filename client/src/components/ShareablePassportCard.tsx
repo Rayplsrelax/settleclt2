@@ -7,8 +7,8 @@ import { toast } from "sonner";
 interface BingoSquare {
   id: number;
   label: string;
-  serviceKey?: string;
-  category?: string;
+  serviceKey?: string | null;
+  category?: string | null;
 }
 
 interface ShareablePassportCardProps {

@@ -93,6 +93,15 @@ describe("server-side route SEO contracts", () => {
     expect(title).toContain("Dilworth");
   });
 
+  it("injects Spanish first-response metadata for Batch 4 routes", async () => {
+    const { injectRouteSeo } = await import("../server/_core/vite");
+    expect(injectRouteSeo(shell, "/bingo", undefined, "es")).toContain("Bingo CLT");
+    expect(injectRouteSeo(shell, "/things-to-do", undefined, "es")).toContain("Cosas que hacer");
+    const category = injectRouteSeo(shell, "/events/category/run-walk", undefined, "es");
+    expect(category).toContain('<html lang="es">');
+    expect(category).not.toContain("Running & Walking Events in Charlotte");
+  });
+
   it("the production shell middleware applies per-route SEO", () => {
     expect(viteCore).toContain("injectRouteSeo(");
     // Express 4 app.use("*") strips the route prefix into req.baseUrl,

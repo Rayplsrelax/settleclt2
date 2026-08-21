@@ -34,7 +34,7 @@ export interface SeedEvent {
   rsvpUrl?: string;
 }
 
-export const EVENT_CATEGORIES: EventCategory[] = [
+export const EVENT_CATEGORIES = [
   { id: "community", name: "Community & Markets", icon: "🏘️" },
   { id: "festivals", name: "Festivals & Major Events", icon: "🎪" },
   { id: "neighborhood", name: "Neighborhood Events", icon: "📍" },
@@ -51,7 +51,9 @@ export const EVENT_CATEGORIES: EventCategory[] = [
   { id: "meditation", name: "Meditation & Mindfulness", icon: "🧠" },
   { id: "dog-meetups", name: "Dog Meetups", icon: "🐕" },
   { id: "makers-crafts", name: "Makers & Crafts", icon: "🎨" },
-];
+] as const satisfies readonly EventCategory[];
+
+export type EventCategoryId = (typeof EVENT_CATEGORIES)[number]["id"];
 
 export const SEED_EVENTS: SeedEvent[] = [
   {
