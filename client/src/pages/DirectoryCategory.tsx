@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SERVICE_CATEGORIES, SERVICES } from "@shared/services";
 import { trpc } from "@/lib/trpc";
+import { useI18n } from "@/i18n/I18nContext";
 import { useSEO } from "@/hooks/useSEO";
 import { useStructuredData, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
 import { Link } from "wouter";
@@ -52,6 +53,7 @@ function titleCaseFromSlug(slug: string): string {
 }
 
 export default function DirectoryCategory() {
+  const { t } = useI18n();
   const slug = getCategorySlugFromPath();
   const category = SERVICE_CATEGORIES.find(c => c.id === slug);
   const categoryName = category?.name || titleCaseFromSlug(slug || "businesses");
@@ -60,11 +62,17 @@ export default function DirectoryCategory() {
   const activePaidCount = services.filter(service => activeTiers.some(tier => tier.serviceKey === toSlug(service.name))).length;
 
   const areas = Array.from(new Set(services.map(service => service.area).filter(Boolean))).slice(0, 12);
-  const seoCopy = CATEGORY_SEO_COPY[slug] || {
-    headline: `${categoryName} in Charlotte NC`,
-    intro: `Browse ${categoryName.toLowerCase()} serving Charlotte, Mecklenburg County, and nearby metro communities. Compare local options, contact details, service areas, and directory listings in one place.`,
-    checklist: ["Compare service areas", "Review websites and contact options", "Shortlist 2-3 providers", "Use verified/claimed listings when available"],
+  const genericSeoCopy = {
+    headline: t("directoryCategory.genericHeadline", { category: categoryName }),
+    intro: t("directoryCategory.genericIntro", { category: categoryName.toLowerCase() }),
+    checklist: [
+      t("directoryCategory.checkServiceAreas"),
+      t("directoryCategory.checkContact"),
+      t("directoryCategory.checkShortlist"),
+      t("directoryCategory.checkVerified"),
+    ],
   };
+  const seoCopy = CATEGORY_SEO_COPY[slug] || genericSeoCopy;
 
   useSEO({
     title: `${categoryName} in Charlotte NC: Local Directory & Service Guide`,
@@ -87,9 +95,9 @@ export default function DirectoryCategory() {
       <PageLayout>
         <div className="container py-20 max-w-2xl text-center">
           <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h1 className="font-display text-3xl font-bold">Category not found</h1>
-          <p className="text-muted-foreground mt-2">This directory category does not exist yet.</p>
-          <Link href="/directory"><Button className="mt-6">Back to Directory</Button></Link>
+          <h1 className="font-display text-3xl font-bold">{t("directoryCategory.notFound")}</h1>
+          <p className="text-muted-foreground mt-2">{t("directoryCategory.missing")}</p>
+          <Link href="/directory"><Button className="mt-6">{t("directoryCategory.back")}</Button></Link>
         </div>
       </PageLayout>
     );
@@ -99,29 +107,29 @@ export default function DirectoryCategory() {
     <PageLayout>
       <section className="bg-gradient-to-br from-primary/10 via-background to-clt-gold/10 border-b">
         <div className="container py-12 md:py-16 max-w-6xl">
-          <Badge variant="outline" className="mb-4 bg-background/80">{category.icon} Charlotte directory category</Badge>
+          <Badge variant="outline" className="mb-4 bg-background/80">{category.icon} {t("directoryCategory.badge")}</Badge>
           <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-8 items-center">
             <div>
               <h1 className="font-display text-4xl md:text-5xl font-extrabold tracking-tight">{seoCopy.headline}</h1>
               <p className="mt-5 text-lg text-muted-foreground max-w-2xl">{seoCopy.intro}</p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link href={`/directory?category=${slug}`}>
-                  <Button className="gap-2">Browse All Listings <ArrowRight className="w-4 h-4" /></Button>
+                  <Button className="gap-2">{t("directoryCategory.browseAll")} <ArrowRight className="w-4 h-4" /></Button>
                 </Link>
                 <Link href="/business-pricing">
-                  <Button variant="outline" className="gap-2">Promote Your Business</Button>
+                  <Button variant="outline" className="gap-2">{t("directoryCategory.promote")}</Button>
                 </Link>
               </div>
             </div>
             <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Building2 className="w-5 h-5 text-primary" /> Category snapshot</CardTitle>
+                <CardTitle className="flex items-center gap-2"><Building2 className="w-5 h-5 text-primary" /> {t("directoryCategory.snapshot")}</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4 text-center">
-                <div className="rounded-lg border bg-background p-4"><p className="text-3xl font-bold">{services.length}</p><p className="text-xs text-muted-foreground">Listings</p></div>
-                <div className="rounded-lg border bg-background p-4"><p className="text-3xl font-bold">{areas.length}</p><p className="text-xs text-muted-foreground">Service Areas</p></div>
-                <div className="rounded-lg border bg-background p-4"><p className="text-3xl font-bold">{activePaidCount}</p><p className="text-xs text-muted-foreground">Active paid listings</p></div>
-                <div className="rounded-lg border bg-background p-4"><p className="text-3xl font-bold">CLT</p><p className="text-xs text-muted-foreground">Metro Focus</p></div>
+                <div className="rounded-lg border bg-background p-4"><p className="text-3xl font-bold">{services.length}</p><p className="text-xs text-muted-foreground">{t("directoryCategory.listings")}</p></div>
+                <div className="rounded-lg border bg-background p-4"><p className="text-3xl font-bold">{areas.length}</p><p className="text-xs text-muted-foreground">{t("directoryCategory.serviceAreas")}</p></div>
+                <div className="rounded-lg border bg-background p-4"><p className="text-3xl font-bold">{activePaidCount}</p><p className="text-xs text-muted-foreground">{t("directoryCategory.activePaid")}</p></div>
+                <div className="rounded-lg border bg-background p-4"><p className="text-3xl font-bold">CLT</p><p className="text-xs text-muted-foreground">{t("directoryCategory.metroFocus")}</p></div>
               </CardContent>
             </Card>
           </div>
@@ -131,7 +139,7 @@ export default function DirectoryCategory() {
       <section className="container py-10 max-w-6xl grid lg:grid-cols-[0.7fr_1.3fr] gap-6">
         <div className="space-y-4">
           <Card>
-            <CardHeader><CardTitle className="text-base flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-600" /> What to check</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-base flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-600" /> {t("directoryCategory.whatToCheck")}</CardTitle></CardHeader>
             <CardContent>
               <ul className="space-y-2 text-sm">
                 {seoCopy.checklist.map(item => <li key={item} className="flex gap-2"><CheckCircle2 className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />{item}</li>)}
@@ -139,7 +147,7 @@ export default function DirectoryCategory() {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader><CardTitle className="text-base flex items-center gap-2"><MapPin className="w-4 h-4 text-primary" /> Areas mentioned</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-base flex items-center gap-2"><MapPin className="w-4 h-4 text-primary" /> {t("directoryCategory.areasMentioned")}</CardTitle></CardHeader>
             <CardContent className="flex flex-wrap gap-2">
               {areas.map(area => <Badge key={area} variant="outline">{area}</Badge>)}
             </CardContent>
@@ -148,8 +156,8 @@ export default function DirectoryCategory() {
 
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="font-display text-2xl font-bold">Top {categoryName} listings</h2>
-            <Link href={`/directory?category=${slug}`}><Button variant="outline" size="sm">View all</Button></Link>
+            <h2 className="font-display text-2xl font-bold">{t("directoryCategory.topListings", { category: categoryName })}</h2>
+            <Link href={`/directory?category=${slug}`}><Button variant="outline" size="sm">{t("directoryCategory.viewAll")}</Button></Link>
           </div>
           <div className="grid gap-3">
             {services.slice(0, 10).map(service => (
@@ -165,9 +173,9 @@ export default function DirectoryCategory() {
                       <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1"><MapPin className="w-3 h-3" /> {service.area}</p>
                     </div>
                     <div className="flex sm:flex-col gap-2 shrink-0">
-                      <Link href={`/directory/${toSlug(service.name)}`}><Button size="sm" variant="outline">Details</Button></Link>
-                      {service.phone && <a href={`tel:${service.phone}`}><Button size="sm" variant="outline" className="gap-1"><Phone className="w-3 h-3" /> Call</Button></a>}
-                      {service.website && <a href={service.website} target="_blank" rel="noopener noreferrer"><Button size="sm" variant="outline" className="gap-1"><ExternalLink className="w-3 h-3" /> Site</Button></a>}
+                      <Link href={`/directory/${toSlug(service.name)}`}><Button size="sm" variant="outline">{t("directoryCategory.details")}</Button></Link>
+                      {service.phone && <a href={`tel:${service.phone}`}><Button size="sm" variant="outline" className="gap-1"><Phone className="w-3 h-3" /> {t("directoryCategory.call")}</Button></a>}
+                      {service.website && <a href={service.website} target="_blank" rel="noopener noreferrer"><Button size="sm" variant="outline" className="gap-1"><ExternalLink className="w-3 h-3" /> {t("directoryCategory.site")}</Button></a>}
                     </div>
                   </div>
                 </CardContent>
@@ -181,10 +189,10 @@ export default function DirectoryCategory() {
         <Card className="border-primary/20 bg-primary/5">
           <CardContent className="p-6 flex flex-col md:flex-row md:items-center gap-5">
             <div className="flex-1">
-              <h2 className="font-display text-2xl font-bold flex items-center gap-2"><Shield className="w-5 h-5 text-primary" /> Own a {categoryName.toLowerCase()} business?</h2>
-              <p className="text-muted-foreground mt-1">Claim your listing for free, update details, and upgrade to Featured or Premium when you want more visibility.</p>
+              <h2 className="font-display text-2xl font-bold flex items-center gap-2"><Shield className="w-5 h-5 text-primary" /> {t("directoryCategory.ownBusiness", { category: categoryName.toLowerCase() })}</h2>
+              <p className="text-muted-foreground mt-1">{t("directoryCategory.claimDescription")}</p>
             </div>
-            <Link href="/business-pricing"><Button size="lg" className="gap-2">See Business Pricing <ArrowRight className="w-4 h-4" /></Button></Link>
+            <Link href="/business-pricing"><Button size="lg" className="gap-2">{t("directoryCategory.pricing")} <ArrowRight className="w-4 h-4" /></Button></Link>
           </CardContent>
         </Card>
       </section>

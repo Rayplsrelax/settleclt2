@@ -20,6 +20,8 @@ import ShareButtons from "@/components/ShareButtons";
 import { trpc } from "@/lib/trpc";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
+import { useI18n } from "@/i18n/I18nContext";
+import type { TranslationKey } from "@/i18n/locales/en";
 import { useSEO } from "@/hooks/useSEO";
 import { useStructuredData, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
 import {
@@ -31,20 +33,20 @@ const CITY_LABELS: Record<string, string> = {
   nyc: "New York City", chicago: "Chicago", atlanta: "Atlanta", dc: "Washington DC", houston: "Houston",
 };
 
-const SECTIONS = [
-  { id: "overview", label: "Overview" },
-  { id: "vibe-check", label: "Vibe Check" },
-  { id: "day-in-life", label: "Day in Life" },
-  { id: "costs", label: "Costs" },
-  { id: "hidden-gems", label: "Hidden Gems" },
-  { id: "settling", label: "Get Settled" },
-  { id: "moving-from", label: "Moving From" },
-  { id: "sports-rec", label: "Sports & Rec" },
-  { id: "whats-coming", label: "What's Coming" },
-  { id: "map", label: "Map" },
-  { id: "services", label: "Services" },
-  { id: "reviews", label: "Reviews" },
-  { id: "community", label: "Community" },
+const SECTIONS: Array<{ id: string; labelKey: TranslationKey }> = [
+  { id: "overview", labelKey: "neighborhoodDetail.overview" },
+  { id: "vibe-check", labelKey: "neighborhoodDetail.vibeCheck" },
+  { id: "day-in-life", labelKey: "neighborhoodDetail.dayInLife" },
+  { id: "costs", labelKey: "neighborhoodDetail.costs" },
+  { id: "hidden-gems", labelKey: "neighborhoodDetail.hiddenGems" },
+  { id: "settling", labelKey: "neighborhoodDetail.getSettled" },
+  { id: "moving-from", labelKey: "neighborhoodDetail.movingFrom" },
+  { id: "sports-rec", labelKey: "neighborhoodDetail.sportsRec" },
+  { id: "whats-coming", labelKey: "neighborhoodDetail.whatsComing" },
+  { id: "map", labelKey: "neighborhoodDetail.map" },
+  { id: "services", labelKey: "neighborhoodDetail.services" },
+  { id: "reviews", labelKey: "neighborhoodDetail.reviews" },
+  { id: "community", labelKey: "neighborhoodDetail.community" },
 ];
 
 // Map pin colors by type
@@ -62,6 +64,7 @@ const PIN_COLORS: Record<string, string> = {
 };
 
 export default function NeighborhoodDetail() {
+  const { t } = useI18n();
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const n = allNeighborhoods.find((nb) => nb.id === params.id);
@@ -214,7 +217,7 @@ export default function NeighborhoodDetail() {
         <div className="absolute bottom-0 left-0 right-0 z-10 pb-8">
           <div className="container">
             <Link href="/neighborhoods" className="inline-flex items-center gap-1 text-white/60 text-sm hover:text-white/80 no-underline mb-3">
-              <ChevronRight className="w-3 h-3 rotate-180" /> All Neighborhoods
+              <ChevronRight className="w-3 h-3 rotate-180" /> {t("neighborhoodDetail.allNeighborhoods")}
             </Link>
             <h1 className="font-display font-extrabold text-4xl md:text-5xl lg:text-6xl text-white">{n.name}</h1>
             <p className="mt-2 text-xl text-white/80">{n.vibe}</p>
@@ -246,11 +249,11 @@ export default function NeighborhoodDetail() {
                 }
               >
                 <Heart className={`w-3.5 h-3.5 mr-1.5 ${isMyNeighborhood ? 'fill-current' : ''}`} />
-                {isMyNeighborhood ? 'Your neighborhood ✕' : 'Set as my neighborhood'}
+                {isMyNeighborhood ? t("neighborhoodDetail.yourNeighborhood") : t("neighborhoodDetail.setAsMine")}
               </Button>
               <Link href={`/compare?ids=${n.id}`}>
                 <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/10 rounded-full">
-                  <GitCompare className="w-3.5 h-3.5 mr-1.5" /> Compare
+                  <GitCompare className="w-3.5 h-3.5 mr-1.5" /> {t("neighborhoodDetail.compare")}
                 </Button>
               </Link>
               <ShareButtons compact title={`${n.name} - Charlotte Neighborhood`} description={n.vibe} className="text-white hover:text-white/80" />
@@ -314,7 +317,7 @@ export default function NeighborhoodDetail() {
                     : "text-muted-foreground hover:bg-muted"
                 }`}
               >
-                {s.label}
+                {t(s.labelKey)}
               </button>
             ))}
           </div>
@@ -326,16 +329,16 @@ export default function NeighborhoodDetail() {
 
         {/* Overview */}
         <section id="overview" ref={el => { sectionRefs.current["overview"] = el; }}>
-          <SectionHeader icon={<MapPin className="w-5 h-5" />} title={`About ${n.name}`} />
+          <SectionHeader icon={<MapPin className="w-5 h-5" />} title={t("neighborhoodDetail.about", { name: n.name })} />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <p className="text-muted-foreground leading-relaxed">{n.description}</p>
               <blockquote className="mt-6 pl-4 border-l-4 border-clt-gold italic text-foreground/80">
-                Best for: {n.bestFor}
+                {t("neighborhoodDetail.bestFor", { value: n.bestFor })}
               </blockquote>
             </div>
             <div className="p-5 rounded-xl bg-card border border-border">
-              <h3 className="font-display font-semibold text-sm text-foreground mb-3">Who Lives Here</h3>
+              <h3 className="font-display font-semibold text-sm text-foreground mb-3">{t("neighborhoodDetail.whoLivesHere")}</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{n.whoLivesHere.split("\n\n")[0]?.slice(0, 300)}...</p>
             </div>
           </div>
@@ -352,12 +355,12 @@ export default function NeighborhoodDetail() {
 
         {/* Vibe Check — Locals Love / Don't Love */}
         <section id="vibe-check" ref={el => { sectionRefs.current["vibe-check"] = el; }}>
-          <SectionHeader icon={<Zap className="w-5 h-5" />} title="Vibe Check" />
+          <SectionHeader icon={<Zap className="w-5 h-5" />} title={t("neighborhoodDetail.vibeCheck")} />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="p-6 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
               <div className="flex items-center gap-2 mb-4">
                 <ThumbsUp className="w-5 h-5 text-emerald-500" />
-                <h3 className="font-display font-semibold text-foreground">Locals Love</h3>
+                <h3 className="font-display font-semibold text-foreground">{t("neighborhoodDetail.localsLove")}</h3>
               </div>
               <ul className="space-y-3">
                 {n.localsLove.map((item, i) => (
@@ -371,7 +374,7 @@ export default function NeighborhoodDetail() {
             <div className="p-6 rounded-xl bg-red-500/5 border border-red-500/20">
               <div className="flex items-center gap-2 mb-4">
                 <ThumbsDown className="w-5 h-5 text-red-500" />
-                <h3 className="font-display font-semibold text-foreground">Locals Don't Love</h3>
+                <h3 className="font-display font-semibold text-foreground">{t("neighborhoodDetail.localsDontLove")}</h3>
               </div>
               <ul className="space-y-3">
                 {n.localsDontLove.map((item, i) => (
@@ -387,7 +390,7 @@ export default function NeighborhoodDetail() {
 
         {/* Day in the Life */}
         <section id="day-in-life" ref={el => { sectionRefs.current["day-in-life"] = el; }}>
-          <SectionHeader icon={<Clock className="w-5 h-5" />} title="A Day in the Life" />
+          <SectionHeader icon={<Clock className="w-5 h-5" />} title={t("neighborhoodDetail.dayInLife")} />
           <div className="max-w-3xl">
             {n.dayInTheLife.split("\n\n").map((p, i) => (
               <p key={i} className="text-muted-foreground leading-relaxed mb-4">{p}</p>
@@ -397,19 +400,19 @@ export default function NeighborhoodDetail() {
 
         {/* Monthly Costs */}
         <section id="costs" ref={el => { sectionRefs.current["costs"] = el; }}>
-          <SectionHeader icon={<DollarSign className="w-5 h-5" />} title="Monthly Cost Breakdown" />
+          <SectionHeader icon={<DollarSign className="w-5 h-5" />} title={t("neighborhoodDetail.monthlyCostBreakdown")} />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {[
-                  { label: "1BR Rent", value: n.monthlyCosts.rent1br },
-                  { label: "2BR Rent", value: n.monthlyCosts.rent2br },
-                  { label: "Utilities", value: n.monthlyCosts.utilities },
-                  { label: "Groceries", value: n.monthlyCosts.groceries },
-                  { label: "Dining Out", value: n.monthlyCosts.dining },
-                  { label: "Transit", value: n.monthlyCosts.transit },
-                  { label: "Entertainment", value: n.monthlyCosts.entertainment },
-                  { label: "Total (1BR)", value: totalMonthlyCost - n.monthlyCosts.rent2br + n.monthlyCosts.rent1br },
+                  { label: t("neighborhoodDetail.rent1br"), value: n.monthlyCosts.rent1br },
+                  { label: t("neighborhoodDetail.rent2br"), value: n.monthlyCosts.rent2br },
+                  { label: t("neighborhoodDetail.utilities"), value: n.monthlyCosts.utilities },
+                  { label: t("neighborhoodDetail.groceries"), value: n.monthlyCosts.groceries },
+                  { label: t("neighborhoodDetail.dining"), value: n.monthlyCosts.dining },
+                  { label: t("neighborhoodDetail.transit"), value: n.monthlyCosts.transit },
+                  { label: t("neighborhoodDetail.entertainment"), value: n.monthlyCosts.entertainment },
+                  { label: t("neighborhoodDetail.total1br"), value: totalMonthlyCost - n.monthlyCosts.rent2br + n.monthlyCosts.rent1br },
                 ].map((item) => (
                   <div key={item.label} className="p-4 rounded-xl bg-card border border-border text-center">
                     <p className="text-xs text-muted-foreground mb-1">{item.label}</p>
@@ -418,12 +421,12 @@ export default function NeighborhoodDetail() {
                 ))}
               </div>
               <div className="mt-6">
-                <h3 className="font-display font-semibold text-sm text-foreground mb-3">Cost Reality</h3>
+                <h3 className="font-display font-semibold text-sm text-foreground mb-3">{t("neighborhoodDetail.costReality")}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{n.costReality.split("\n\n")[0]}</p>
               </div>
             </div>
             <div className="p-5 rounded-xl bg-clt-navy/5 border border-clt-navy/10 dark:bg-clt-gold/5 dark:border-clt-gold/10">
-              <h3 className="font-display font-semibold text-sm text-foreground mb-3">Monthly Budget Estimate</h3>
+              <h3 className="font-display font-semibold text-sm text-foreground mb-3">{t("neighborhoodDetail.monthlyBudget")}</h3>
               <div className="space-y-2">
                 {Object.entries(n.monthlyCosts).filter(([k]) => k !== "rent2br").map(([key, val]) => (
                   <div key={key} className="flex justify-between text-sm">
@@ -432,7 +435,7 @@ export default function NeighborhoodDetail() {
                   </div>
                 ))}
                 <div className="pt-2 mt-2 border-t border-border flex justify-between text-sm font-bold">
-                  <span className="text-foreground">Total</span>
+                  <span className="text-foreground">{t("neighborhoodDetail.total")}</span>
                   <span className="text-primary">${(totalMonthlyCost - n.monthlyCosts.rent2br).toLocaleString()}/mo</span>
                 </div>
               </div>
@@ -442,7 +445,7 @@ export default function NeighborhoodDetail() {
 
         {/* Hidden Gems */}
         <section id="hidden-gems" ref={el => { sectionRefs.current["hidden-gems"] = el; }}>
-          <SectionHeader icon={<Gem className="w-5 h-5" />} title="Hidden Gems" />
+          <SectionHeader icon={<Gem className="w-5 h-5" />} title={t("neighborhoodDetail.hiddenGems")} />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {n.hiddenGems.map((gem, i) => (
               <div key={i} className="p-5 rounded-xl bg-card border border-border hover:border-clt-gold/30 transition-colors">
@@ -451,7 +454,7 @@ export default function NeighborhoodDetail() {
                 </div>
                 <h4 className="font-display font-semibold text-foreground">{gem.name}</h4>
                 <p className="text-sm text-muted-foreground mt-1">{gem.description}</p>
-                <p className="text-xs text-primary font-medium mt-3">Tip: {gem.tip}</p>
+                <p className="text-xs text-primary font-medium mt-3">{t("neighborhoodDetail.tip", { value: gem.tip })}</p>
               </div>
             ))}
           </div>
@@ -459,7 +462,7 @@ export default function NeighborhoodDetail() {
 
         {/* Settling Timeline */}
         <section id="settling" ref={el => { sectionRefs.current["settling"] = el; }}>
-          <SectionHeader icon={<CheckCircle2 className="w-5 h-5" />} title="Timeline to Settled" />
+          <SectionHeader icon={<CheckCircle2 className="w-5 h-5" />} title={t("neighborhoodDetail.timelineSettled")} />
           <div className="relative">
             <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border hidden md:block" />
             <div className="space-y-6">
@@ -485,7 +488,7 @@ export default function NeighborhoodDetail() {
 
         {/* Moving From */}
         <section id="moving-from" ref={el => { sectionRefs.current["moving-from"] = el; }}>
-          <SectionHeader icon={<Plane className="w-5 h-5" />} title="If You're Moving From..." />
+          <SectionHeader icon={<Plane className="w-5 h-5" />} title={t("neighborhoodDetail.movingFromTitle")} />
           <div className="flex flex-wrap gap-2 mb-5">
             {Object.keys(n.movingFrom).map((city) => (
               <button
@@ -510,13 +513,13 @@ export default function NeighborhoodDetail() {
           if (!sportsData) return null;
           return (
             <section id="sports-rec" ref={el => { sectionRefs.current["sports-rec"] = el; }}>
-              <SectionHeader icon={<Trophy className="w-5 h-5" />} title="Sports & Recreation" />
+              <SectionHeader icon={<Trophy className="w-5 h-5" />} title={t("neighborhoodDetail.sportsRec")} />
 
               {/* Fan Culture */}
               <div className="p-5 rounded-xl bg-card border border-border mb-6">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-lg">🏟️</span>
-                  <h3 className="font-semibold text-foreground">Game Day Culture</h3>
+                  <h3 className="font-semibold text-foreground">{t("neighborhoodDetail.gameDayCulture")}</h3>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed">{sportsData.fanCulture}</p>
               </div>
@@ -525,7 +528,7 @@ export default function NeighborhoodDetail() {
               {sportsData.nearbyVenues.length > 0 && (
                 <div className="mb-6">
                   <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-primary" /> Nearby Venues
+                    <MapPin className="w-4 h-4 text-primary" /> {t("neighborhoodDetail.nearbyVenues")}
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {sportsData.nearbyVenues.map((venue) => {
@@ -565,7 +568,7 @@ export default function NeighborhoodDetail() {
                 <div className="p-5 rounded-xl bg-card border border-border">
                   <div className="flex items-center gap-2 mb-3">
                     <Dumbbell className="w-4 h-4 text-primary" />
-                    <h3 className="font-semibold text-foreground">Fitness Scene</h3>
+                    <h3 className="font-semibold text-foreground">{t("neighborhoodDetail.fitnessScene")}</h3>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">{sportsData.fitnessScene}</p>
                 </div>
@@ -574,7 +577,7 @@ export default function NeighborhoodDetail() {
                 <div className="p-5 rounded-xl bg-card border border-border">
                   <div className="flex items-center gap-2 mb-3">
                     <Users className="w-4 h-4 text-primary" />
-                    <h3 className="font-semibold text-foreground">Youth Sports</h3>
+                    <h3 className="font-semibold text-foreground">{t("neighborhoodDetail.youthSports")}</h3>
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">{sportsData.youthSports}</p>
                 </div>
@@ -583,7 +586,7 @@ export default function NeighborhoodDetail() {
               {/* Recreation Highlights */}
               <div className="mb-6">
                 <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                  <Bike className="w-4 h-4 text-primary" /> Recreation Highlights
+                  <Bike className="w-4 h-4 text-primary" /> {t("neighborhoodDetail.recreationHighlights")}
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {sportsData.recHighlights.map((highlight, i) => (
@@ -598,7 +601,7 @@ export default function NeighborhoodDetail() {
               {/* Parks & Trails */}
               <div>
                 <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                  <TreePine className="w-4 h-4 text-primary" /> Parks & Trails
+                  <TreePine className="w-4 h-4 text-primary" /> {t("neighborhoodDetail.parksTrails")}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {sportsData.parkTrails.map((park) => (
@@ -618,7 +621,7 @@ export default function NeighborhoodDetail() {
           if (developments.length === 0) return null;
           return (
             <section id="whats-coming" ref={el => { sectionRefs.current["whats-coming"] = el; }}>
-              <SectionHeader icon={<Zap className="w-5 h-5" />} title={`What's Coming to ${n.name}`} />
+              <SectionHeader icon={<Zap className="w-5 h-5" />} title={`${t("neighborhoodDetail.whatsComing")} — ${n.name}`} />
               <p className="text-sm text-muted-foreground mb-6 -mt-3">
                 Upcoming developments, new businesses, and infrastructure projects shaping the future of {n.name}.
               </p>
@@ -665,7 +668,7 @@ export default function NeighborhoodDetail() {
 
         {/* Interactive Map */}
         <section id="map" ref={el => { sectionRefs.current["map"] = el; }}>
-          <SectionHeader icon={<MapIcon className="w-5 h-5" />} title={`Explore ${n.name}`} />
+          <SectionHeader icon={<MapIcon className="w-5 h-5" />} title={t("neighborhoodDetail.explore", { name: n.name })} />
           <div className="rounded-xl overflow-hidden border border-border">
             <MapView
               className="h-[400px] md:h-[500px]"
@@ -736,7 +739,7 @@ export default function NeighborhoodDetail() {
 
         {/* Local Businesses */}
         <section id="services" ref={el => { sectionRefs.current["services"] = el; }}>
-          <SectionHeader icon={<MapPin className="w-5 h-5" />} title={`Local Businesses in ${n.name}`} />
+          <SectionHeader icon={<MapPin className="w-5 h-5" />} title={`${t("neighborhoodDetail.services")} — ${n.name}`} />
           <p className="text-sm text-muted-foreground mb-6 -mt-3">
             {areaServices.length} businesses serving the {n.name} area
           </p>

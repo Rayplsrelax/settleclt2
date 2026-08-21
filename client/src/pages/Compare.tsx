@@ -9,34 +9,38 @@ import {
   ThumbsUp, ThumbsDown, ArrowRight
 } from "lucide-react";
 import ShareButtons from "@/components/ShareButtons";
+import { useI18n } from "@/i18n/I18nContext";
+import { formatLocalizedWholeCurrency } from "@/i18n/formatters";
+import type { TranslationKey } from "@/i18n/locales/en";
 import { useSEO } from "@/hooks/useSEO";
 
-const STAT_ROWS: { key: string; label: string; icon: React.ReactNode; format: (n: Neighborhood) => string; higher: "better" | "worse" | "neutral" }[] = [
-  { key: "avgRent", label: "Avg Rent (1BR)", icon: <DollarSign className="w-4 h-4" />, format: n => n.stats.avgRent, higher: "worse" },
-  { key: "medianHomePrice", label: "Median Home Price", icon: <Home className="w-4 h-4" />, format: n => n.stats.medianHomePrice, higher: "neutral" },
-  { key: "walkScore", label: "Walk Score", icon: <TrendingUp className="w-4 h-4" />, format: n => String(n.stats.walkScore), higher: "better" },
-  { key: "transitScore", label: "Transit Score", icon: <Train className="w-4 h-4" />, format: n => String(n.stats.transitScore), higher: "better" },
-  { key: "commuteToUptown", label: "Commute to Uptown", icon: <Train className="w-4 h-4" />, format: n => n.stats.commuteToUptown, higher: "neutral" },
-  { key: "schoolTier", label: "School Tier", icon: <GraduationCap className="w-4 h-4" />, format: n => n.stats.schoolTier, higher: "neutral" },
-  { key: "crimeLevel", label: "Crime Level", icon: <Shield className="w-4 h-4" />, format: n => n.stats.crimeLevel, higher: "neutral" },
-  { key: "nightlifeLevel", label: "Nightlife", icon: <Moon className="w-4 h-4" />, format: n => n.stats.nightlifeLevel, higher: "neutral" },
-  { key: "petFriendly", label: "Pet Score", icon: <Dog className="w-4 h-4" />, format: n => `${n.stats.petFriendly}/5`, higher: "better" },
-  { key: "familyScore", label: "Family Score", icon: <Baby className="w-4 h-4" />, format: n => `${n.stats.familyScore}/5`, higher: "better" },
+const STAT_ROWS: { key: string; labelKey: TranslationKey; icon: React.ReactNode; format: (n: Neighborhood) => string; higher: "better" | "worse" | "neutral" }[] = [
+  { key: "avgRent", labelKey: "compare.avgRent", icon: <DollarSign className="w-4 h-4" />, format: n => n.stats.avgRent, higher: "worse" },
+  { key: "medianHomePrice", labelKey: "compare.medianHomePrice", icon: <Home className="w-4 h-4" />, format: n => n.stats.medianHomePrice, higher: "neutral" },
+  { key: "walkScore", labelKey: "compare.walkScore", icon: <TrendingUp className="w-4 h-4" />, format: n => String(n.stats.walkScore), higher: "better" },
+  { key: "transitScore", labelKey: "compare.transitScore", icon: <Train className="w-4 h-4" />, format: n => String(n.stats.transitScore), higher: "better" },
+  { key: "commuteToUptown", labelKey: "compare.commute", icon: <Train className="w-4 h-4" />, format: n => n.stats.commuteToUptown, higher: "neutral" },
+  { key: "schoolTier", labelKey: "compare.schoolTier", icon: <GraduationCap className="w-4 h-4" />, format: n => n.stats.schoolTier, higher: "neutral" },
+  { key: "crimeLevel", labelKey: "compare.crimeLevel", icon: <Shield className="w-4 h-4" />, format: n => n.stats.crimeLevel, higher: "neutral" },
+  { key: "nightlifeLevel", labelKey: "compare.nightlife", icon: <Moon className="w-4 h-4" />, format: n => n.stats.nightlifeLevel, higher: "neutral" },
+  { key: "petFriendly", labelKey: "compare.petScore", icon: <Dog className="w-4 h-4" />, format: n => `${n.stats.petFriendly}/5`, higher: "better" },
+  { key: "familyScore", labelKey: "compare.familyScore", icon: <Baby className="w-4 h-4" />, format: n => `${n.stats.familyScore}/5`, higher: "better" },
 ];
 
-const COST_ROWS: { key: keyof Neighborhood["monthlyCosts"]; label: string }[] = [
-  { key: "rent1br", label: "1BR Rent" },
-  { key: "rent2br", label: "2BR Rent" },
-  { key: "utilities", label: "Utilities" },
-  { key: "groceries", label: "Groceries" },
-  { key: "dining", label: "Dining Out" },
-  { key: "transit", label: "Transit" },
-  { key: "entertainment", label: "Entertainment" },
+const COST_ROWS: { key: keyof Neighborhood["monthlyCosts"]; labelKey: TranslationKey }[] = [
+  { key: "rent1br", labelKey: "compare.rent1br" },
+  { key: "rent2br", labelKey: "compare.rent2br" },
+  { key: "utilities", labelKey: "compare.utilities" },
+  { key: "groceries", labelKey: "compare.groceries" },
+  { key: "dining", labelKey: "compare.dining" },
+  { key: "transit", labelKey: "compare.transit" },
+  { key: "entertainment", labelKey: "compare.entertainment" },
 ];
 
 export default function Compare() {
+  const { locale, t } = useI18n();
   useSEO({
-    title: "Compare Charlotte Neighborhoods Side by Side",
+    title: t("compare.pageTitle"),
     description: "Compare up to 3 Charlotte neighborhoods side by side. See rent, walkability, schools, nightlife, transit, and more to find the best fit for your lifestyle.",
     keywords: "compare Charlotte neighborhoods, Charlotte neighborhood comparison, best neighborhood Charlotte, Charlotte cost of living comparison",
     path: "/compare",
@@ -86,10 +90,10 @@ export default function Compare() {
             <div>
               <div className="flex items-center gap-3 mb-4">
                 <GitCompare className="w-8 h-8 text-clt-gold" />
-                <h1 className="font-display font-extrabold text-3xl md:text-4xl text-white">Compare Neighborhoods</h1>
+                <h1 className="font-display font-extrabold text-3xl md:text-4xl text-white">{t("compare.title")}</h1>
               </div>
               <p className="text-white/70 max-w-2xl">
-                Select up to 3 neighborhoods to compare side-by-side across stats, costs, vibes, and more.
+                {t("compare.subtitle")}
               </p>
             </div>
             <ShareButtons compact title="Compare Charlotte Neighborhoods - Settle CLT" className="text-white hover:text-white/80" />
@@ -115,7 +119,7 @@ export default function Compare() {
                 onClick={() => setShowPicker(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-dashed border-border text-sm text-muted-foreground hover:border-primary hover:text-primary transition"
               >
-                <Plus className="w-3.5 h-3.5" /> Add neighborhood
+                <Plus className="w-3.5 h-3.5" /> {t("compare.addNeighborhood")}
               </button>
             )}
           </div>
@@ -126,7 +130,7 @@ export default function Compare() {
         {/* Picker */}
         {showPicker && (
           <div className="mb-10 p-6 rounded-xl bg-card border border-border">
-            <h2 className="font-display font-bold text-lg text-foreground mb-4">Select neighborhoods to compare</h2>
+            <h2 className="font-display font-bold text-lg text-foreground mb-4">{t("compare.selectNeighborhoods")}</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {available.map(n => (
                 <button
@@ -145,7 +149,7 @@ export default function Compare() {
             </div>
             {selected.length >= 2 && (
               <Button onClick={() => setShowPicker(false)} className="mt-4" size="sm">
-                Done selecting
+                {t("compare.doneSelecting")}
               </Button>
             )}
           </div>
@@ -154,8 +158,8 @@ export default function Compare() {
         {selected.length < 2 ? (
           <div className="text-center py-20">
             <GitCompare className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h2 className="font-display font-bold text-xl text-foreground mb-2">Select at least 2 neighborhoods</h2>
-            <p className="text-muted-foreground">Choose neighborhoods above to start comparing.</p>
+            <h2 className="font-display font-bold text-xl text-foreground mb-2">{t("compare.selectAtLeastTwo")}</h2>
+            <p className="text-muted-foreground">{t("compare.chooseAbove")}</p>
           </div>
         ) : (
           <div className="space-y-12">
@@ -179,13 +183,13 @@ export default function Compare() {
             {/* Stats Comparison Table */}
             <div>
               <h2 className="font-display font-bold text-xl text-foreground mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-primary" /> Stats Comparison
+                <TrendingUp className="w-5 h-5 text-primary" /> {t("compare.stats")}
               </h2>
               <div className="rounded-xl border border-border overflow-hidden">
                 <table className="w-full">
                   <thead>
                     <tr className="bg-muted/50">
-                      <th className="text-left text-xs font-semibold text-muted-foreground p-3 w-1/4">Metric</th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground p-3 w-1/4">{t("compare.metric")}</th>
                       {selected.map(n => (
                         <th key={n.id} className="text-center text-xs font-semibold text-foreground p-3">{n.name}</th>
                       ))}
@@ -195,7 +199,7 @@ export default function Compare() {
                     {STAT_ROWS.map((row, i) => (
                       <tr key={row.key} className={i % 2 === 0 ? "bg-background" : "bg-muted/20"}>
                         <td className="p-3 text-sm text-muted-foreground flex items-center gap-2">
-                          {row.icon} {row.label}
+                          {row.icon} {t(row.labelKey)}
                         </td>
                         {selected.map(n => (
                           <td key={n.id} className="p-3 text-center text-sm font-semibold text-foreground">
@@ -212,13 +216,13 @@ export default function Compare() {
             {/* Monthly Cost Comparison */}
             <div>
               <h2 className="font-display font-bold text-xl text-foreground mb-4 flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-primary" /> Monthly Cost Comparison
+                <DollarSign className="w-5 h-5 text-primary" /> {t("compare.monthlyCosts")}
               </h2>
               <div className="rounded-xl border border-border overflow-hidden">
                 <table className="w-full">
                   <thead>
                     <tr className="bg-muted/50">
-                      <th className="text-left text-xs font-semibold text-muted-foreground p-3 w-1/4">Expense</th>
+                      <th className="text-left text-xs font-semibold text-muted-foreground p-3 w-1/4">{t("compare.expense")}</th>
                       {selected.map(n => (
                         <th key={n.id} className="text-center text-xs font-semibold text-foreground p-3">{n.name}</th>
                       ))}
@@ -229,13 +233,13 @@ export default function Compare() {
                       const lowest = lowestCost(row.key);
                       return (
                         <tr key={row.key} className={i % 2 === 0 ? "bg-background" : "bg-muted/20"}>
-                          <td className="p-3 text-sm text-muted-foreground">{row.label}</td>
+                          <td className="p-3 text-sm text-muted-foreground">{t(row.labelKey)}</td>
                           {selected.map(n => {
                             const val = n.monthlyCosts[row.key];
                             const isLowest = val === lowest && selected.length > 1;
                             return (
                               <td key={n.id} className={`p-3 text-center text-sm font-semibold ${isLowest ? "text-emerald-600 dark:text-emerald-400" : "text-foreground"}`}>
-                                ${val.toLocaleString()}
+                                {formatLocalizedWholeCurrency(val, locale)}
                                 {isLowest && <span className="text-[10px] ml-1">✓</span>}
                               </td>
                             );
@@ -244,14 +248,14 @@ export default function Compare() {
                       );
                     })}
                     <tr className="bg-primary/5 border-t-2 border-primary/20">
-                      <td className="p-3 text-sm font-bold text-foreground">Total (1BR)</td>
+                      <td className="p-3 text-sm font-bold text-foreground">{t("compare.total1br")}</td>
                       {selected.map(n => {
                         const total = Object.entries(n.monthlyCosts)
                           .filter(([k]) => k !== "rent2br")
                           .reduce((sum, [, v]) => sum + v, 0);
                         return (
                           <td key={n.id} className="p-3 text-center text-sm font-bold text-primary">
-                            ${total.toLocaleString()}/mo
+                            {t("compare.perMonth", { value: formatLocalizedWholeCurrency(total, locale) })}
                           </td>
                         );
                       })}
@@ -264,7 +268,7 @@ export default function Compare() {
             {/* Vibe Check Side-by-Side */}
             <div>
               <h2 className="font-display font-bold text-xl text-foreground mb-4 flex items-center gap-2">
-                <Heart className="w-5 h-5 text-primary" /> Vibe Check
+                <Heart className="w-5 h-5 text-primary" /> {t("compare.vibeCheck")}
               </h2>
               <div className={`grid gap-6 ${selected.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
                 {selected.map(n => (
@@ -273,7 +277,7 @@ export default function Compare() {
                     <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
                       <div className="flex items-center gap-1.5 mb-3">
                         <ThumbsUp className="w-4 h-4 text-emerald-500" />
-                        <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Love</span>
+                        <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">{t("compare.love")}</span>
                       </div>
                       <ul className="space-y-2">
                         {n.localsLove.slice(0, 3).map((item, i) => (
@@ -287,7 +291,7 @@ export default function Compare() {
                     <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/20">
                       <div className="flex items-center gap-1.5 mb-3">
                         <ThumbsDown className="w-4 h-4 text-red-500" />
-                        <span className="text-xs font-semibold text-red-500">Don't Love</span>
+                        <span className="text-xs font-semibold text-red-500">{t("compare.dontLove")}</span>
                       </div>
                       <ul className="space-y-2">
                         {n.localsDontLove.slice(0, 3).map((item, i) => (
@@ -305,14 +309,14 @@ export default function Compare() {
 
             {/* Best For */}
             <div>
-              <h2 className="font-display font-bold text-xl text-foreground mb-4">Best For</h2>
+              <h2 className="font-display font-bold text-xl text-foreground mb-4">{t("compare.bestFor")}</h2>
               <div className={`grid gap-4 ${selected.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
                 {selected.map(n => (
                   <div key={n.id} className="p-4 rounded-xl bg-card border border-border text-center">
                     <h3 className="font-display font-semibold text-sm text-foreground mb-2">{n.name}</h3>
                     <p className="text-sm text-muted-foreground">{n.bestFor}</p>
                     <Link href={`/neighborhood/${n.id}`} className="inline-flex items-center gap-1 text-xs text-primary font-medium mt-3 no-underline hover:gap-2 transition-all">
-                      Full guide <ArrowRight className="w-3 h-3" />
+                      {t("compare.fullGuide")} <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
                 ))}
