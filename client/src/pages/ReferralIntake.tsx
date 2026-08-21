@@ -13,9 +13,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
+import { useI18n } from "@/i18n/I18nContext";
+import { useSEO } from "@/hooks/useSEO";
 import { toast } from "sonner";
 
 export default function ReferralIntake() {
+  const { locale, t } = useI18n();
+  useSEO({
+    title: t("referral.seoTitle"),
+    description: t("referral.seoDescription"),
+    path: "/referrals",
+  });
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -36,9 +44,9 @@ export default function ReferralIntake() {
     onSuccess: result => {
       setMatches(result.matches);
       setForm({ name: "", email: "", phone: "", category: "", need: "" });
-      toast.success("Your referral request was received.");
+      toast.success(t("referral.success"));
     },
-    onError: error => toast.error(error.message),
+    onError: () => toast.error(t("referral.error")),
   });
 
   return (
@@ -46,19 +54,17 @@ export default function ReferralIntake() {
       <div className="mb-8 text-center">
         <Users className="mx-auto mb-3 h-10 w-10 text-primary" />
         <h1 className="font-display text-3xl font-bold">
-          Find a trusted local business
+          {t("referral.title")}
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Tell us what you need. We’ll recommend relevant Charlotte-area
-          businesses without sharing your information broadly.
+          {t("referral.subtitle")}
         </p>
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Request a referral</CardTitle>
+          <CardTitle>{t("referral.request")}</CardTitle>
           <CardDescription>
-            Your contact details are used only to follow up on this request or
-            after you choose a recommended business.
+            {t("referral.privacy")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -66,12 +72,12 @@ export default function ReferralIntake() {
             className="space-y-4"
             onSubmit={event => {
               event.preventDefault();
-              submit.mutate({ ...form, source: "referral_intake" });
+              submit.mutate({ ...form, source: "referral_intake", locale });
             }}
           >
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="ref-name">Name</Label>
+                <Label htmlFor="ref-name">{t("referral.name")}</Label>
                 <Input
                   id="ref-name"
                   value={form.name}
@@ -80,7 +86,7 @@ export default function ReferralIntake() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="ref-email">Email</Label>
+                <Label htmlFor="ref-email">{t("referral.email")}</Label>
                 <Input
                   id="ref-email"
                   type="email"
@@ -92,7 +98,7 @@ export default function ReferralIntake() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="ref-phone">Phone (optional)</Label>
+                <Label htmlFor="ref-phone">{t("referral.phone")}</Label>
                 <Input
                   id="ref-phone"
                   type="tel"
@@ -102,30 +108,30 @@ export default function ReferralIntake() {
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="ref-category">
-                  Service category (optional)
+                  {t("referral.category")}
                 </Label>
                 <Input
                   id="ref-category"
-                  placeholder="Moving, dental, childcare..."
+                  placeholder={t("referral.categoryPlaceholder")}
                   value={form.category}
                   onChange={e => setForm({ ...form, category: e.target.value })}
                 />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="ref-need">What do you need?</Label>
+              <Label htmlFor="ref-need">{t("referral.need")}</Label>
               <Textarea
                 id="ref-need"
                 rows={4}
                 maxLength={500}
-                placeholder="Describe the service or project you need help with."
+                placeholder={t("referral.needPlaceholder")}
                 value={form.need}
                 onChange={e => setForm({ ...form, need: e.target.value })}
                 required
               />
             </div>
             <Button type="submit" disabled={submit.isPending}>
-              {submit.isPending ? "Finding matches..." : "Get recommendations"}
+              {submit.isPending ? t("referral.submitting") : t("referral.submit")}
             </Button>
           </form>
         </CardContent>
@@ -133,10 +139,9 @@ export default function ReferralIntake() {
       {matches.length > 0 && (
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle className="text-lg">Recommended businesses</CardTitle>
+            <CardTitle className="text-lg">{t("referral.recommendations")}</CardTitle>
             <CardDescription>
-              These suggestions are based on your category and description.
-              Review each profile before contacting them.
+              {t("referral.recommendationsDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">

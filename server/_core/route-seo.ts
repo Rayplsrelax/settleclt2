@@ -1,6 +1,7 @@
 import { allNeighborhoods } from "../../shared/neighborhoods";
 import { SERVICES, SERVICE_CATEGORIES } from "../../shared/services";
 import { EVENT_CATEGORIES } from "../../shared/events";
+import type { Locale } from "../../shared/i18n";
 
 /**
  * Per-route SEO metadata injected server-side into the SPA shell.
@@ -81,6 +82,10 @@ const STATIC_SEO: Record<string, RouteSeo> = {
     description:
       "Pricing for Settle CLT business listings — free, featured, and premium options.",
   },
+  "/referrals": {
+    title: "Charlotte Local Business Referrals",
+    description: "Request recommendations for trusted Charlotte-area businesses.",
+  },
   "/compare": {
     title: "Compare Charlotte Neighborhoods",
     description:
@@ -113,6 +118,21 @@ const STATIC_SEO: Record<string, RouteSeo> = {
   },
 };
 
+const SPANISH_SEO: Partial<Record<string, RouteSeo>> = {
+  "/business-pricing": {
+    title: "Precios para negocios de Settle CLT",
+    description: "Reclama el perfil de tu negocio en Charlotte y compara planes de visibilidad.",
+  },
+  "/referrals": {
+    title: "Referencias de negocios locales en Charlotte",
+    description: "Solicita recomendaciones de negocios confiables del área de Charlotte.",
+  },
+  "/404": {
+    title: "Página no encontrada",
+    description: "No se pudo encontrar esta página.",
+  },
+};
+
 export function normalizePath(pathname: string): string {
   let path = pathname.split("?")[0].split("#")[0];
   if (path !== "/" && path.endsWith("/")) {
@@ -123,11 +143,14 @@ export function normalizePath(pathname: string): string {
 
 export function resolveRouteSeo(
   pathname: string,
-  blogTitles?: Map<string, string>
+  blogTitles?: Map<string, string>,
+  locale: Locale = "en"
 ): RouteSeo {
   const path = normalizePath(pathname);
 
-  const fixed = STATIC_SEO[path];
+  const fixed = locale === "es"
+    ? SPANISH_SEO[path] ?? STATIC_SEO[path]
+    : STATIC_SEO[path];
   if (fixed) return fixed;
 
   // /neighborhood/:id
@@ -177,7 +200,9 @@ export function resolveRouteSeo(
     if (business) {
       return {
         title: `${business.name} — Charlotte`,
-        description: `${business.name} in Charlotte — reviews, details, and neighborhood info on Settle CLT.`,
+        description: locale === "es"
+          ? `${business.name} en Charlotte — reseñas, detalles e información local en Settle CLT.`
+          : `${business.name} in Charlotte — reviews, details, and neighborhood info on Settle CLT.`,
       };
     }
   }

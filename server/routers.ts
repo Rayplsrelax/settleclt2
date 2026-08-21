@@ -2939,6 +2939,7 @@ export const appRouter = router({
         z.object({
           serviceKey: z.string().optional(),
           category: z.string().max(128).optional(),
+          locale: z.enum(["en", "es"]).default("en"),
           name: z.string().min(1).max(255),
           email: z.string().email(),
           phone: z.string().max(32).optional(),
@@ -2950,7 +2951,9 @@ export const appRouter = router({
         const matches = await recommendBusinessMatches(
           input.need,
           input.category,
-          input.serviceKey
+          input.serviceKey,
+          5,
+          input.locale
         );
         const referral = await createBusinessReferral({
           serviceKey: input.serviceKey ?? null,

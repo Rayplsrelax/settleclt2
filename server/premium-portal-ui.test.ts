@@ -21,7 +21,7 @@ describe("paid business portal UI contract", () => {
     expect(businessDetail).toContain('premiumData?.tier === "premium"');
     expect(businessDetail).toContain("leadFormState.scopeKey !== slug");
     expect(businessDetail).toContain("setLeadFormState({ scopeKey: slug");
-    expect(businessDetail).toContain("Send an Inquiry");
+    expect(businessDetail).toContain('t("businessDetail.inquiry")');
     expect(businessDetail).toContain("leadForm");
   });
 

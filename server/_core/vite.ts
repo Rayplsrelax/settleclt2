@@ -7,9 +7,41 @@ import { createServer as createViteServer } from "vite";
 import viteConfig from "../../vite.config";
 import { injectCspNonce } from "./csp-nonce";
 import { resolveRouteSeo } from "./route-seo";
+import {
+  decodeLocaleCookieValue,
+  LOCALE_COOKIE,
+  resolveInitialLocale,
+  type Locale,
+} from "../../shared/i18n";
 
 const HOME_HERO_IMAGE = "/images/hero-charlotte-skyline.webp";
 const SITE_URL = "https://settleclt.com";
+
+export function resolveRequestLocale(
+  cookieHeader: string | undefined,
+  acceptLanguageHeader: string | undefined
+): Locale {
+  const cookieValue = cookieHeader
+    ?.split(";")
+    .map(part => part.trim())
+    .find(part => part.startsWith(`${LOCALE_COOKIE}=`))
+    ?.slice(LOCALE_COOKIE.length + 1);
+  const explicitLocale = decodeLocaleCookieValue(cookieValue);
+  const browserLanguages = (acceptLanguageHeader ?? "")
+    .split(",")
+    .map((part, index) => {
+      const [language, ...parameters] = part.split(";");
+      const qualityParameter = parameters.find(parameter => parameter.trim().startsWith("q="));
+      const quality = qualityParameter
+        ? Number.parseFloat(qualityParameter.trim().slice(2))
+        : 1;
+      return { language: language.trim(), quality, index };
+    })
+    .filter(item => item.language && Number.isFinite(item.quality) && item.quality > 0)
+    .sort((a, b) => b.quality - a.quality || a.index - b.index)
+    .map(item => item.language);
+  return resolveInitialLocale(explicitLocale, browserLanguages);
+}
 
 function escapeHtml(value: string): string {
   return value
@@ -26,15 +58,17 @@ function escapeHtml(value: string): string {
 export function injectRouteSeo(
   template: string,
   requestPath: string,
-  blogTitles?: Map<string, string>
+  blogTitles?: Map<string, string>,
+  locale: Locale = "en"
 ) {
-  const seo = resolveRouteSeo(requestPath, blogTitles);
+  const seo = resolveRouteSeo(requestPath, blogTitles, locale);
   const canonical = `${SITE_URL}${requestPath === "/" ? "/" : requestPath.replace(/\/+$/, "")}`;
   const fullTitle = seo.title.endsWith("Settle CLT")
     ? seo.title
     : `${seo.title} | Settle CLT`;
 
   return template
+    .replace(/<html lang="[^"]*">/, `<html lang="${locale}">`)
     .replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(fullTitle)}</title>`)
     .replace(
       /<link rel="canonical" href="[^"]*" \/>/,
@@ -100,8 +134,14 @@ export async function setupVite(app: Express, server: Server) {
         `src="/src/main.tsx?v=${nanoid()}"`
       );
       template = injectRoutePreloads(template, req.path);
-      template = injectRouteSeo(template, req.path);
+      const locale = resolveRequestLocale(
+        req.headers.cookie,
+        req.headers["accept-language"]
+      );
+      template = injectRouteSeo(template, req.path, undefined, locale);
       const page = await vite.transformIndexHtml(url, template);
+      res.vary("Cookie");
+      res.vary("Accept-Language");
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
       vite.ssrFixStacktrace(e as Error);
@@ -148,6 +188,10 @@ export function serveStatic(app: Express, distPathOverride?: string) {
       // the route prefix is stripped into req.baseUrl. Derive the true
       // pathname from req.originalUrl instead.
       const spaPath = req.originalUrl.split("?")[0].split("#")[0];
+      const locale = resolveRequestLocale(
+        req.headers.cookie,
+        req.headers["accept-language"]
+      );
       // Blog titles come from the database; resolve asynchronously before
       // the sync SEO resolver runs.
       let blogTitles: Map<string, string> | undefined;
@@ -167,7 +211,8 @@ export function serveStatic(app: Express, distPathOverride?: string) {
       routeTemplate = injectRouteSeo(
         routeTemplate,
         status === 404 ? "/404" : spaPath,
-        blogTitles
+        blogTitles,
+        locale
       );
       // Preview hosts intentionally run without production CSP, so the
       // security middleware mints no nonce for them; serve the template
@@ -175,6 +220,8 @@ export function serveStatic(app: Express, distPathOverride?: string) {
       const page = res.locals.cspNonce
         ? injectCspNonce(routeTemplate, res.locals.cspNonce)
         : routeTemplate;
+      res.vary("Cookie");
+      res.vary("Accept-Language");
       res.status(status).type("html").send(page);
     } catch (error) {
       next(error);
