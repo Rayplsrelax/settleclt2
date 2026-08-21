@@ -29,3 +29,15 @@ export function formatLocalizedCurrency(
     currency: "USD",
   }).format(value);
 }
+
+export function formatLocalizedWholeCurrency(
+  value: number,
+  locale: Locale
+): string {
+  return new Intl.NumberFormat(localeToLanguageTag(locale), {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+}

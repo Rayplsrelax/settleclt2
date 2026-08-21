@@ -31,7 +31,7 @@ describe("Directory category SEO pages", () => {
     expect(page).toContain("CATEGORY_SEO_COPY");
     expect(page).toContain("moving-companies");
     expect(page).toContain("plumbers");
-    expect(page).toContain("See Business Pricing");
-    expect(page).toContain("Claim your listing for free");
+    expect(page).toContain('t("directoryCategory.pricing")');
+    expect(page).toContain('t("directoryCategory.claimDescription")');
   });
 });
