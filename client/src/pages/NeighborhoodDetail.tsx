@@ -21,6 +21,7 @@ import { trpc } from "@/lib/trpc";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import { useI18n } from "@/i18n/I18nContext";
+import { formatLocalizedWholeCurrency } from "@/i18n/formatters";
 import type { TranslationKey } from "@/i18n/locales/en";
 import { useSEO } from "@/hooks/useSEO";
 import { useStructuredData, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
@@ -49,6 +50,16 @@ const SECTIONS: Array<{ id: string; labelKey: TranslationKey }> = [
   { id: "community", labelKey: "neighborhoodDetail.community" },
 ];
 
+const MONTHLY_COST_LABEL_KEYS: Record<string, TranslationKey> = {
+  rent1br: "neighborhoodDetail.rent1br",
+  rent2br: "neighborhoodDetail.rent2br",
+  utilities: "neighborhoodDetail.utilities",
+  groceries: "neighborhoodDetail.groceries",
+  dining: "neighborhoodDetail.dining",
+  transit: "neighborhoodDetail.transit",
+  entertainment: "neighborhoodDetail.entertainment",
+};
+
 // Map pin colors by type
 const PIN_COLORS: Record<string, string> = {
   brewery: "#F59E0B",
@@ -64,7 +75,7 @@ const PIN_COLORS: Record<string, string> = {
 };
 
 export default function NeighborhoodDetail() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const n = allNeighborhoods.find((nb) => nb.id === params.id);
@@ -416,7 +427,7 @@ export default function NeighborhoodDetail() {
                 ].map((item) => (
                   <div key={item.label} className="p-4 rounded-xl bg-card border border-border text-center">
                     <p className="text-xs text-muted-foreground mb-1">{item.label}</p>
-                    <p className="text-lg font-bold text-foreground">${item.value.toLocaleString()}</p>
+                    <p className="text-lg font-bold text-foreground">{formatLocalizedWholeCurrency(item.value, locale)}</p>
                   </div>
                 ))}
               </div>
@@ -430,13 +441,13 @@ export default function NeighborhoodDetail() {
               <div className="space-y-2">
                 {Object.entries(n.monthlyCosts).filter(([k]) => k !== "rent2br").map(([key, val]) => (
                   <div key={key} className="flex justify-between text-sm">
-                    <span className="text-muted-foreground capitalize">{key.replace(/([A-Z])/g, " $1").replace("rent1br", "Rent (1BR)")}</span>
-                    <span className="font-medium text-foreground">${val.toLocaleString()}</span>
+                    <span className="text-muted-foreground">{t(MONTHLY_COST_LABEL_KEYS[key] ?? "neighborhoodDetail.costs")}</span>
+                    <span className="font-medium text-foreground">{formatLocalizedWholeCurrency(val, locale)}</span>
                   </div>
                 ))}
                 <div className="pt-2 mt-2 border-t border-border flex justify-between text-sm font-bold">
                   <span className="text-foreground">{t("neighborhoodDetail.total")}</span>
-                  <span className="text-primary">${(totalMonthlyCost - n.monthlyCosts.rent2br).toLocaleString()}/mo</span>
+                  <span className="text-primary">{t("neighborhoodDetail.perMonth", { value: formatLocalizedWholeCurrency(totalMonthlyCost - n.monthlyCosts.rent2br, locale) })}</span>
                 </div>
               </div>
             </div>

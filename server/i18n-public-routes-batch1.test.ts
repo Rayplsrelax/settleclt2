@@ -40,6 +40,7 @@ const contracts = {
     "neighborhoodDetail.costReality",
     "neighborhoodDetail.monthlyBudget",
     "neighborhoodDetail.total",
+    "neighborhoodDetail.perMonth",
     "neighborhoodDetail.tip",
     "neighborhoodDetail.timelineSettled",
   ],

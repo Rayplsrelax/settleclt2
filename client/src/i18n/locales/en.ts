@@ -411,6 +411,7 @@ export const en = {
   "neighborhoodDetail.costReality": "Cost Reality",
   "neighborhoodDetail.monthlyBudget": "Monthly Budget Estimate",
   "neighborhoodDetail.total": "Total",
+  "neighborhoodDetail.perMonth": "{value}/mo",
   "neighborhoodDetail.tip": "Tip: {value}",
   "neighborhoodDetail.timelineSettled": "Timeline to Settled",
   "neighborhoodDetail.movingFromTitle": "If You're Moving From...",

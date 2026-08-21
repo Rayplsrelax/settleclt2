@@ -413,6 +413,7 @@ export const es = {
   "neighborhoodDetail.costReality": "Realidad de los costos",
   "neighborhoodDetail.monthlyBudget": "Presupuesto mensual estimado",
   "neighborhoodDetail.total": "Total",
+  "neighborhoodDetail.perMonth": "{value}/mes",
   "neighborhoodDetail.tip": "Consejo: {value}",
   "neighborhoodDetail.timelineSettled": "Cronograma para instalarte",
   "neighborhoodDetail.movingFromTitle": "Si te mudas desde...",
