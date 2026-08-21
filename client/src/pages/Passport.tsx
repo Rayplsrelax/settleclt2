@@ -16,6 +16,12 @@ import { SERVICES, type Service } from "@shared/services";
 import { allNeighborhoods } from "@shared/neighborhoods";
 import { toast } from "sonner";
 import ShareButtons from "@/components/ShareButtons";
+import { useI18n } from "@/i18n/I18nContext";
+import {
+  formatLocalDateInputValue,
+  formatLocalizedDate,
+  parseLocalDateInputValue,
+} from "@/i18n/formatters";
 import { useSEO } from "@/hooks/useSEO";
 
 function slugify(name: string) {
@@ -25,6 +31,7 @@ function slugify(name: string) {
 type StampType = "places" | "events";
 
 function PassportContent() {
+  const { locale, t } = useI18n();
   const utils = trpc.useUtils();
   const { data: entries = [], isLoading } = trpc.passport.getEntries.useQuery();
   const { data: publishedEvents = [] } = trpc.events.getPublished.useQuery({ includeExpired: true });
@@ -36,13 +43,13 @@ function PassportContent() {
       setSelectedEvent("");
       setCustomPlace("");
       setNotes("");
-      toast.success("Stamp collected! Added to your CLT Passport.");
+      toast.success(t("passport.stampAdded"));
     },
   });
   const deleteEntry = trpc.passport.deleteEntry.useMutation({
     onSuccess: () => {
       utils.passport.getEntries.invalidate();
-      toast.success("Entry removed");
+      toast.success(t("passport.entryRemoved"));
     },
   });
 
@@ -52,7 +59,7 @@ function PassportContent() {
   const [selectedEvent, setSelectedEvent] = useState("");
   const [customPlace, setCustomPlace] = useState("");
   const [notes, setNotes] = useState("");
-  const [visitDate, setVisitDate] = useState(new Date().toISOString().split("T")[0]);
+  const [visitDate, setVisitDate] = useState(() => formatLocalDateInputValue(new Date()));
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<"all" | "places" | "events">("all");
   const [placeSearch, setPlaceSearch] = useState("");
@@ -120,7 +127,7 @@ function PassportContent() {
         eventSlug: selectedEvent,
         neighborhoodId,
         notes: notes || undefined,
-        visitedAt: new Date(visitDate),
+        visitedAt: parseLocalDateInputValue(visitDate),
       });
     } else {
       const serviceKey = selectedService || undefined;
@@ -133,7 +140,7 @@ function PassportContent() {
         customPlaceName: customPlace || undefined,
         neighborhoodId,
         notes: notes || undefined,
-        visitedAt: new Date(visitDate),
+        visitedAt: parseLocalDateInputValue(visitDate),
       });
     }
   }
@@ -162,19 +169,24 @@ function PassportContent() {
               <Stamp className="w-5 h-5 text-amber-500" />
             </div>
             <h1 className="text-xl sm:text-2xl font-display font-bold text-foreground">
-              CLT Passport
+              {t("passport.title")}
             </h1>
           </div>
           <p className="text-sm text-muted-foreground max-w-xl">
-            Collect stamps for every place you visit and event you attend in Charlotte.
+            {t("passport.subtitle")}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <ShareButtons compact title="My CLT Passport" description="Tracking my Charlotte exploration journey" />
-          <Button onClick={() => setShowAdd(!showAdd)} className="gap-2" size="sm">
+          <ShareButtons compact title={t("passport.title")} description={t("passport.subtitle")} />
+          <Button
+            onClick={() => setShowAdd(!showAdd)}
+            aria-label={t(showAdd ? "passport.cancel" : "passport.addStamp")}
+            className="gap-2"
+            size="sm"
+          >
             {showAdd ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-            <span className="hidden sm:inline">{showAdd ? "Cancel" : "Add Stamp"}</span>
-            <span className="sm:hidden">{showAdd ? "" : "Add"}</span>
+            <span className="hidden sm:inline">{showAdd ? t("passport.cancel") : t("passport.addStamp")}</span>
+            <span className="sm:hidden">{showAdd ? "" : t("passport.add")}</span>
           </Button>
         </div>
       </div>
@@ -185,28 +197,28 @@ function PassportContent() {
           <CardContent className="py-4 text-center">
             <Trophy className="w-6 h-6 text-amber-500 mx-auto mb-1" />
             <div className="text-2xl font-bold text-foreground">{entries.length}</div>
-            <div className="text-xs text-muted-foreground">Total Stamps</div>
+            <div className="text-xs text-muted-foreground">{t("passport.totalStamps")}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="py-4 text-center">
             <Ticket className="w-6 h-6 text-purple-500 mx-auto mb-1" />
             <div className="text-2xl font-bold text-foreground">{eventEntries.length}</div>
-            <div className="text-xs text-muted-foreground">Events</div>
+            <div className="text-xs text-muted-foreground">{t("passport.events")}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="py-4 text-center">
             <Map className="w-6 h-6 text-teal-500 mx-auto mb-1" />
             <div className="text-2xl font-bold text-foreground">{uniqueNeighborhoods}</div>
-            <div className="text-xs text-muted-foreground">Neighborhoods</div>
+            <div className="text-xs text-muted-foreground">{t("passport.neighborhoods")}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="py-4 text-center">
             <Star className="w-6 h-6 text-orange-500 mx-auto mb-1" />
             <div className="text-2xl font-bold text-foreground">{thisMonthCount}</div>
-            <div className="text-xs text-muted-foreground">This Month</div>
+            <div className="text-xs text-muted-foreground">{t("passport.thisMonth")}</div>
           </CardContent>
         </Card>
       </div>
@@ -215,7 +227,7 @@ function PassportContent() {
       {showAdd && (
         <Card className="mb-8 border-amber-500/30 bg-amber-500/5">
           <CardHeader>
-            <CardTitle className="text-lg">Add a Stamp</CardTitle>
+            <CardTitle className="text-lg">{t("passport.addStamp")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Type toggle */}
@@ -229,7 +241,7 @@ function PassportContent() {
                 }`}
               >
                 <MapPin className="w-4 h-4" />
-                Place
+                {t("passport.place")}
               </button>
               <button
                 onClick={() => setAddType("events")}
@@ -240,14 +252,14 @@ function PassportContent() {
                 }`}
               >
                 <CalendarDays className="w-4 h-4" />
-                Event
+                {t("passport.event")}
               </button>
             </div>
 
             {addType === "events" ? (
               <div className="relative">
                 <label className="text-sm font-medium text-foreground block mb-1">
-                  Search Events
+                  {t("passport.searchEvents")}
                 </label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -260,7 +272,8 @@ function PassportContent() {
                       setSelectedEvent("");
                     }}
                     onFocus={() => setShowEventDropdown(true)}
-                    placeholder="Type to search events..."
+                    aria-label={t("passport.searchEvents")}
+                    placeholder={t("passport.searchEventsPlaceholder")}
                     className="w-full rounded-lg border border-border bg-background pl-9 pr-3 py-2 text-sm text-foreground"
                   />
                 </div>
@@ -281,13 +294,13 @@ function PassportContent() {
                             stampedEventSlugs.has(evt.slug) ? "opacity-50 cursor-not-allowed" : ""
                           } ${selectedEvent === evt.slug ? "bg-purple-500/10 text-purple-600" : "text-foreground"}`}
                         >
-                          {evt.title || evt.name || "Untitled Event"}
+                          {evt.title || evt.name || t("passport.untitledEvent")}
                           {evt.neighborhood ? ` (${evt.neighborhood})` : ""}
                           {stampedEventSlugs.has(evt.slug) ? " ✓" : ""}
                         </button>
                       ))}
                     {publishedEvents.filter(evt => !eventSearch || (evt.title || evt.name || "").toLowerCase().includes(eventSearch.toLowerCase())).length === 0 && (
-                      <div className="px-3 py-2 text-sm text-muted-foreground">No events found</div>
+                      <div className="px-3 py-2 text-sm text-muted-foreground">{t("passport.noEvents")}</div>
                     )}
                   </div>
                 )}
@@ -295,12 +308,13 @@ function PassportContent() {
             ) : (
               <>
                 <div className="relative">
-                  <label className="text-sm font-medium text-foreground block mb-1">
-                    Search Directory
+                  <label htmlFor="passport-place-search" className="text-sm font-medium text-foreground block mb-1">
+                    {t("passport.searchDirectory")}
                   </label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
+                      id="passport-place-search"
                       type="text"
                       value={placeSearch}
                       onChange={e => {
@@ -309,7 +323,8 @@ function PassportContent() {
                         setSelectedService("");
                       }}
                       onFocus={() => setShowPlaceDropdown(true)}
-                      placeholder="Type to search places..."
+                      aria-label={t("passport.searchDirectory")}
+                      placeholder={t("passport.searchPlacesPlaceholder")}
                       className="w-full rounded-lg border border-border bg-background pl-9 pr-3 py-2 text-sm text-foreground"
                     />
                   </div>
@@ -335,21 +350,22 @@ function PassportContent() {
                           </button>
                         ))}
                       {SERVICES.filter(s => s.name.toLowerCase().includes(placeSearch.toLowerCase()) || s.category.toLowerCase().includes(placeSearch.toLowerCase())).length === 0 && (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">No places found — use custom name below</div>
+                        <div className="px-3 py-2 text-sm text-muted-foreground">{t("passport.noPlaces")}</div>
                       )}
                     </div>
                   )}
                 </div>
-                <div className="text-center text-xs text-muted-foreground">— or —</div>
+                <div className="text-center text-xs text-muted-foreground">— {t("passport.or")} —</div>
                 <div>
                   <label className="text-sm font-medium text-foreground block mb-1">
-                    Custom Place Name
+                    {t("passport.customPlace")}
                   </label>
                   <input
                     type="text"
                     value={customPlace}
                     onChange={e => { setCustomPlace(e.target.value); setSelectedService(""); setPlaceSearch(""); }}
-                    placeholder="e.g., That amazing taco truck on Trade St"
+                    aria-label={t("passport.customPlace")}
+                    placeholder={t("passport.customPlacePlaceholder")}
                     className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
                   />
                 </div>
@@ -359,9 +375,10 @@ function PassportContent() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-foreground block mb-1">
-                  {addType === "events" ? "Date Attended" : "Date Visited"}
+                  {addType === "events" ? t("passport.dateAttended") : t("passport.dateVisited")}
                 </label>
                 <input
+                  aria-label={addType === "events" ? t("passport.dateAttended") : t("passport.dateVisited")}
                   type="date"
                   value={visitDate}
                   onChange={e => setVisitDate(e.target.value)}
@@ -370,13 +387,14 @@ function PassportContent() {
               </div>
               <div>
                 <label className="text-sm font-medium text-foreground block mb-1">
-                  Notes (optional)
+                  {t("passport.notesOptional")}
                 </label>
                 <input
                   type="text"
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
-                  placeholder={addType === "events" ? "How was the event?" : "What did you think?"}
+                  aria-label={t("passport.notesOptional")}
+                  placeholder={addType === "events" ? t("passport.howWasEvent") : t("passport.whatDidYouThink")}
                   className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
                 />
               </div>
@@ -390,7 +408,7 @@ function PassportContent() {
               }
               className="w-full"
             >
-              {addEntry.isPending ? "Adding..." : "Collect Stamp"}
+              {addEntry.isPending ? t("passport.adding") : t("passport.collectStamp")}
             </Button>
           </CardContent>
         </Card>
@@ -408,17 +426,17 @@ function PassportContent() {
                 : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
-            {tab === "all" && `All (${entries.length})`}
+            {tab === "all" && t("passport.all", { count: entries.length })}
             {tab === "places" && (
               <span className="flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5" />
-                Places ({placeEntries.length})
+                {t("passport.places", { count: placeEntries.length })}
               </span>
             )}
             {tab === "events" && (
               <span className="flex items-center gap-1.5">
                 <CalendarDays className="w-3.5 h-3.5" />
-                Events ({eventEntries.length})
+                {t("passport.eventCount", { count: eventEntries.length })}
               </span>
             )}
           </button>
@@ -432,40 +450,38 @@ function PassportContent() {
             {activeTab === "events" ? (
               <>
                 <CalendarDays className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">
-                  No event stamps yet
-                </h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{t("passport.empty")}</h3>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto mb-4">
-                  Attend Charlotte events and stamp them here! Click "Add Stamp" and choose the Event tab.
+                  {t("passport.emptyInstructions")}
                 </p>
                 <Link
                   href="/events"
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-purple-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity no-underline"
                 >
-                  Browse Events
+                  {t("passport.browseEvents")}
                 </Link>
               </>
             ) : (
               <>
                 <MapPin className="w-12 h-12 text-muted-foreground/40 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-foreground mb-2">
-                  {activeTab === "places" ? "No place stamps yet" : "Your passport is empty"}
+                  {t("passport.empty")}
                 </h3>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto mb-4">
-                  Start exploring Charlotte! Click "Add Stamp" above to log places you've visited or events you've attended.
+                  {t("passport.emptyInstructions")}
                 </p>
                 <div className="flex items-center justify-center gap-3">
                   <Link
                     href="/directory"
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity no-underline"
                   >
-                    Browse Directory
+                    {t("passport.browseDirectory")}
                   </Link>
                   <Link
                     href="/events"
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-purple-600 text-white text-sm font-semibold hover:opacity-90 transition-opacity no-underline"
                   >
-                    Browse Events
+                    {t("passport.browseEvents")}
                   </Link>
                 </div>
               </>
@@ -479,8 +495,8 @@ function PassportContent() {
             const evt = isEvent && entry.eventSlug ? eventMap[entry.eventSlug] : null;
             const svc = !isEvent && entry.serviceKey ? serviceMap[entry.serviceKey] : null;
             const placeName = isEvent
-              ? (evt?.title ?? entry.eventSlug ?? "Unknown Event")
-              : (svc?.name ?? entry.customPlaceName ?? "Unknown Place");
+              ? (evt?.title ?? entry.eventSlug ?? t("passport.unknownEvent"))
+              : (svc?.name ?? entry.customPlaceName ?? t("passport.unknownPlace"));
             const neighborhood = entry.neighborhoodId
               ? neighborhoodMap[entry.neighborhoodId]
               : isEvent
@@ -516,7 +532,7 @@ function PassportContent() {
                         </span>
                         {isEvent && (
                           <span className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-600">
-                            EVENT
+                            {t("passport.event")}
                           </span>
                         )}
                       </div>
@@ -529,7 +545,7 @@ function PassportContent() {
                         )}
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
-                          {new Date(entry.visitedAt).toLocaleDateString()}
+                          {formatLocalizedDate(entry.visitedAt, locale, { year: "numeric", month: "numeric", day: "numeric" })}
                         </span>
                         {isEvent && evt?.category && (
                           <span className="capitalize">{evt.category.replace("-", " ")}</span>
@@ -552,16 +568,16 @@ function PassportContent() {
                       )}
                       {isEvent && evt && (
                         <div className="text-xs text-muted-foreground mb-3">
-                          {evt.venueName && <>Venue: {evt.venueName} &middot; </>}
+                          {evt.venueName && <>{t("passport.venue", { value: evt.venueName })} &middot; </>}
                           {evt.neighborhood ?? "Charlotte"}
                           {evt.startDate && (
-                            <> &middot; Event Date: {new Date(evt.startDate).toLocaleDateString()}</>
+                            <> &middot; {t("passport.eventDate", { value: formatLocalizedDate(evt.startDate, locale, { year: "numeric", month: "numeric", day: "numeric" }) })}</>
                           )}
                         </div>
                       )}
                       {!isEvent && svc && (
                         <div className="text-xs text-muted-foreground mb-3">
-                          Category: {svc.category} &middot; {svc.area}
+                          {t("passport.category", { value: svc.category })} &middot; {svc.area}
                         </div>
                       )}
                       <div className="flex items-center gap-2">
@@ -575,7 +591,7 @@ function PassportContent() {
                           }}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
-                          Remove
+                          {t("passport.remove")}
                         </Button>
                       </div>
                     </div>
@@ -596,12 +612,12 @@ function PassportContent() {
         <span className="text-muted-foreground/30">|</span>
         <Link href="/leaderboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline flex items-center gap-1.5">
           <Trophy className="w-4 h-4" />
-          Leaderboard
+          {t("passport.leaderboard")}
         </Link>
         <span className="text-muted-foreground/30">|</span>
         <Link href="/events" className="text-sm text-muted-foreground hover:text-foreground transition-colors no-underline flex items-center gap-1.5">
           <CalendarDays className="w-4 h-4" />
-          Browse Events
+          {t("passport.browseEvents")}
         </Link>
       </div>
     </div>
@@ -609,6 +625,7 @@ function PassportContent() {
 }
 
 function PassportLanding() {
+  const { t } = useI18n();
   return (
     <div>
       {/* Hero */}
@@ -622,15 +639,15 @@ function PassportLanding() {
           <div className="text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 mb-6">
               <Stamp className="w-4 h-4 text-amber-600" />
-              <span className="text-sm font-medium text-amber-700">Your Charlotte Adventure Tracker</span>
+              <span className="text-sm font-medium text-amber-700">{t("passport.landingTagline")}</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-4">
-              Explore Charlotte.
+              {t("passport.exploreCharlotte")}
               <br />
-              <span className="text-amber-600">Collect Every Stamp.</span>
+              <span className="text-amber-600">{t("passport.landingTitle")}</span>
             </h1>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-              The CLT Passport tracks every place you visit and event you attend in Charlotte. Collect stamps, complete bingo challenges, climb the leaderboard, and discover the Queen City like a local.
+              {t("passport.landingDescription")}
             </p>
             <div className="flex items-center justify-center gap-4">
               <a
@@ -638,10 +655,10 @@ function PassportLanding() {
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-amber-600 text-white font-semibold hover:bg-amber-700 transition-colors no-underline"
               >
                 <LogIn className="w-4 h-4" />
-                Start Your Passport
+                {t("passport.startPassport")}
               </a>
               <Link href="/events" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-border bg-background text-foreground font-semibold hover:bg-muted transition-colors no-underline">
-                Browse Events
+                {t("passport.browseEvents")}
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -652,43 +669,35 @@ function PassportLanding() {
       {/* How It Works */}
       <section className="py-16 bg-background">
         <div className="container max-w-5xl">
-          <h2 className="text-2xl font-display font-bold text-foreground text-center mb-12">How It Works</h2>
+          <h2 className="text-2xl font-display font-bold text-foreground text-center mb-12">{t("passport.howItWorks")}</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="text-center">
               <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
                 <MapPin className="w-7 h-7 text-amber-600" />
               </div>
-              <h3 className="font-semibold text-foreground mb-2">Visit Places</h3>
-              <p className="text-sm text-muted-foreground">
-                Explore Charlotte's restaurants, breweries, parks, and hidden gems across 20 neighborhoods.
-              </p>
+              <h3 className="font-semibold text-foreground mb-2">{t("passport.visitPlaces")}</h3>
+              <p className="text-sm text-muted-foreground">{t("passport.visitPlacesDescription")}</p>
             </div>
             <div className="text-center">
               <div className="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center mx-auto mb-4">
                 <CalendarDays className="w-7 h-7 text-purple-600" />
               </div>
-              <h3 className="font-semibold text-foreground mb-2">Attend Events</h3>
-              <p className="text-sm text-muted-foreground">
-                From food festivals to concerts, stamp every Charlotte event you experience.
-              </p>
+              <h3 className="font-semibold text-foreground mb-2">{t("passport.attendEvents")}</h3>
+              <p className="text-sm text-muted-foreground">{t("passport.attendEventsDescription")}</p>
             </div>
             <div className="text-center">
               <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <Stamp className="w-7 h-7 text-primary" />
               </div>
-              <h3 className="font-semibold text-foreground mb-2">Collect Stamps</h3>
-              <p className="text-sm text-muted-foreground">
-                Log each visit to earn stamps. Add notes, dates, and track your exploration journey.
-              </p>
+              <h3 className="font-semibold text-foreground mb-2">{t("passport.collectStamps")}</h3>
+              <p className="text-sm text-muted-foreground">{t("passport.collectStampsDescription")}</p>
             </div>
             <div className="text-center">
               <div className="w-14 h-14 rounded-2xl bg-green-500/10 flex items-center justify-center mx-auto mb-4">
                 <Trophy className="w-7 h-7 text-green-600" />
               </div>
-              <h3 className="font-semibold text-foreground mb-2">Earn Achievements</h3>
-              <p className="text-sm text-muted-foreground">
-                Complete bingo challenges, climb the leaderboard, and share your progress.
-              </p>
+              <h3 className="font-semibold text-foreground mb-2">{t("passport.earnAchievements")}</h3>
+              <p className="text-sm text-muted-foreground">{t("passport.earnAchievementsDescription")}</p>
             </div>
           </div>
         </div>
@@ -697,7 +706,7 @@ function PassportLanding() {
       {/* Features */}
       <section className="py-16 bg-muted/30">
         <div className="container max-w-5xl">
-          <h2 className="text-2xl font-display font-bold text-foreground text-center mb-12">What's Inside Your Passport</h2>
+          <h2 className="text-2xl font-display font-bold text-foreground text-center mb-12">{t("passport.inside")}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
@@ -706,8 +715,8 @@ function PassportLanding() {
                     <Stamp className="w-5 h-5 text-amber-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground mb-1">Place Stamps</h3>
-                    <p className="text-sm text-muted-foreground">Track every restaurant, brewery, park, and shop you visit with dates, notes, and neighborhood tags.</p>
+                    <h3 className="font-semibold text-foreground mb-1">{t("passport.placeStamps")}</h3>
+                    <p className="text-sm text-muted-foreground">{t("passport.placeStampsDescription")}</p>
                   </div>
                 </div>
               </CardContent>
@@ -719,8 +728,8 @@ function PassportLanding() {
                     <CalendarDays className="w-5 h-5 text-purple-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground mb-1">Event Stamps</h3>
-                    <p className="text-sm text-muted-foreground">Log festivals, concerts, food events, and community gatherings. Never forget the events that made Charlotte special.</p>
+                    <h3 className="font-semibold text-foreground mb-1">{t("passport.eventStamps")}</h3>
+                    <p className="text-sm text-muted-foreground">{t("passport.eventStampsDescription")}</p>
                   </div>
                 </div>
               </CardContent>
@@ -732,8 +741,8 @@ function PassportLanding() {
                     <Grid3X3 className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground mb-1">Bingo Challenges</h3>
-                    <p className="text-sm text-muted-foreground">Complete themed bingo cards like "Brewery Tour," "Best Coffee in CLT," and "Date Night Spots."</p>
+                    <h3 className="font-semibold text-foreground mb-1">{t("passport.bingoChallenges")}</h3>
+                    <p className="text-sm text-muted-foreground">{t("passport.bingoChallengesDescription")}</p>
                   </div>
                 </div>
               </CardContent>
@@ -745,8 +754,8 @@ function PassportLanding() {
                     <Trophy className="w-5 h-5 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground mb-1">Leaderboard</h3>
-                    <p className="text-sm text-muted-foreground">See how you rank among other CLT explorers. Top collectors earn bragging rights.</p>
+                    <h3 className="font-semibold text-foreground mb-1">{t("passport.leaderboard")}</h3>
+                    <p className="text-sm text-muted-foreground">{t("passport.leaderboardDescription")}</p>
                   </div>
                 </div>
               </CardContent>
@@ -760,17 +769,17 @@ function PassportLanding() {
         <div className="container max-w-3xl text-center">
           <Target className="w-12 h-12 text-amber-600 mx-auto mb-4" />
           <h2 className="text-2xl font-display font-bold text-foreground mb-4">
-            Ready to explore Charlotte?
+            {t("passport.readyTitle")}
           </h2>
           <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-            Create a free account and start collecting stamps today. It takes less than 30 seconds.
+            {t("passport.readyDescription")}
           </p>
           <a
             href={getLoginUrl()}
             className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg bg-amber-600 text-white font-semibold text-lg hover:bg-amber-700 transition-colors no-underline"
           >
             <LogIn className="w-5 h-5" />
-            Get Your CLT Passport
+            {t("passport.getPassport")}
           </a>
         </div>
       </section>
@@ -779,10 +788,11 @@ function PassportLanding() {
 }
 
 export default function Passport() {
+  const { t } = useI18n();
   useSEO({
-    title: "CLT Passport — Track Your Charlotte Adventures",
-    description: "Collect stamps for every Charlotte spot you visit. Explore local businesses, attend events, and build your CLT Passport. How well do you know the Queen City?",
-    keywords: "CLT Passport, Charlotte things to do, Charlotte exploration, Charlotte stamp collection, Charlotte local guide, explore Charlotte NC",
+    title: t("passport.title"),
+    description: t("passport.seoDescription"),
+    keywords: t("passport.seoKeywords"),
     path: "/passport",
   });
 
@@ -792,7 +802,7 @@ export default function Passport() {
     return (
       <PageLayout>
         <div className="min-h-[40vh] flex items-center justify-center">
-          <div className="animate-pulse text-muted-foreground">Loading...</div>
+          <div className="animate-pulse text-muted-foreground">{t("passport.loading")}</div>
         </div>
       </PageLayout>
     );
