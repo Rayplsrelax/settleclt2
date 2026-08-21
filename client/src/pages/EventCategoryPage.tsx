@@ -13,6 +13,9 @@ import {
 import PageLayout from "@/components/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useI18n } from "@/i18n/I18nContext";
+import { EVENT_CATEGORY_LABELS, eventCategoryLabel } from "@shared/event-category-i18n";
+import type { EventCategoryId } from "@shared/events";
 import { useSEO } from "@/hooks/useSEO";
 import {
   useStructuredData,
@@ -155,17 +158,18 @@ const CATEGORY_EMOJI: Record<string, string> = {
   "makers-crafts": "🎨",
 };
 
-const COST_LABELS: Record<string, string> = {
-  free: "Free",
-  paid: "Paid",
-  mixed: "Free–Paid",
-};
-
 function getCategoryName(categoryId: string): string {
   return EVENT_CATEGORIES.find((c) => c.id === categoryId)?.name ?? categoryId;
 }
 
+function getLocalizedCategoryName(categoryId: string, locale: "en" | "es"): string {
+  return categoryId in EVENT_CATEGORY_LABELS
+    ? eventCategoryLabel(categoryId as EventCategoryId, locale)
+    : getCategoryName(categoryId);
+}
+
 function EventListItem({ event }: { event: SeedEvent }) {
+  const { locale, t } = useI18n();
   return (
     <div className="rounded-xl border border-border bg-card p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 hover:border-primary/20">
       <div className="flex items-start justify-between gap-2 mb-3">
@@ -176,7 +180,7 @@ function EventListItem({ event }: { event: SeedEvent }) {
           variant="outline"
           className={`text-xs font-medium shrink-0 ${CATEGORY_COLORS[event.category] ?? "bg-gray-100 text-gray-800"}`}
         >
-          {CATEGORY_EMOJI[event.category]} {getCategoryName(event.category)}
+          {CATEGORY_EMOJI[event.category]} {getLocalizedCategoryName(event.category, locale)}
         </Badge>
       </div>
 
@@ -214,12 +218,18 @@ function EventListItem({ event }: { event: SeedEvent }) {
         <div className="flex items-center gap-2 flex-wrap">
           {event.cost && (
             <Badge variant="secondary" className="text-xs">
-              {COST_LABELS[event.cost] ?? event.cost}
+              {event.cost === "free"
+                ? t("eventCategory.free")
+                : event.cost === "paid"
+                  ? t("eventCategory.paid")
+                  : event.cost === "mixed"
+                    ? t("eventCategory.mixed")
+                    : event.cost}
             </Badge>
           )}
           {event.newcomerFriendly && (
             <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
-              🌟 Newcomer Friendly
+              🌟 {t("eventCategory.newcomerFriendly")}
             </Badge>
           )}
         </div>
@@ -231,7 +241,7 @@ function EventListItem({ event }: { event: SeedEvent }) {
             className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
           >
             <ExternalLink className="w-3.5 h-3.5" />
-            More Info
+            {t("eventCategory.moreInfo")}
           </a>
         )}
       </div>
@@ -240,11 +250,12 @@ function EventListItem({ event }: { event: SeedEvent }) {
 }
 
 export default function EventCategoryPage() {
+  const { locale, t } = useI18n();
   const params = useParams<{ categoryId: string }>();
   const categoryId = params.categoryId ?? "";
 
   const seo = CATEGORY_SEO[categoryId];
-  const categoryName = getCategoryName(categoryId);
+  const categoryName = getLocalizedCategoryName(categoryId, locale);
   const categoryEmoji = CATEGORY_EMOJI[categoryId] ?? "📅";
 
   // Filter SEED_EVENTS by this category — prefer recurring events first
@@ -262,15 +273,21 @@ export default function EventCategoryPage() {
   const freeCount = categoryEvents.filter((e) => e.cost === "free").length;
 
   // SEO — use a safe fallback if category is not in the SEO mapping
-  const seoTitle = seo?.title ?? `${categoryName} in Charlotte | Settle CLT`;
-  const seoDescription =
-    seo?.description ??
-    `Find ${categoryName.toLowerCase()} and recurring events in Charlotte, NC.`;
-  const seoKeywords = seo?.keywords ?? `Charlotte ${categoryName.toLowerCase()}`;
-  const h1 = seo?.h1 ?? `${categoryName} in Charlotte`;
-  const intro =
-    seo?.intro ??
-    `Browse ${categoryName.toLowerCase()} and recurring community events across Charlotte, NC.`;
+  const seoTitle = locale === "es"
+    ? t("eventCategory.genericTitle", { category: categoryName })
+    : seo?.title ?? `${categoryName} in Charlotte | Settle CLT`;
+  const seoDescription = locale === "es"
+    ? t("eventCategory.genericIntro", { category: categoryName.toLowerCase() })
+    : seo?.description ?? `Find ${categoryName.toLowerCase()} and recurring events in Charlotte, NC.`;
+  const seoKeywords = locale === "es"
+    ? undefined
+    : seo?.keywords ?? `Charlotte ${categoryName.toLowerCase()}`;
+  const h1 = locale === "es"
+    ? t("eventCategory.genericTitle", { category: categoryName })
+    : seo?.h1 ?? `${categoryName} in Charlotte`;
+  const intro = locale === "es"
+    ? t("eventCategory.genericIntro", { category: categoryName.toLowerCase() })
+    : seo?.intro ?? `Browse ${categoryName.toLowerCase()} and recurring community events across Charlotte, NC.`;
 
   useSEO({
     title: seoTitle,
@@ -284,8 +301,8 @@ export default function EventCategoryPage() {
     const crumbs = {
       "@context": "https://schema.org",
       ...buildBreadcrumbSchema([
-        { name: "Home", url: "https://settleclt.com" },
-        { name: "Events", url: "https://settleclt.com/events" },
+        { name: t("eventCategory.home"), url: "https://settleclt.com" },
+        { name: t("eventCategory.events"), url: "https://settleclt.com/events" },
         { name: categoryName, url: `https://settleclt.com/events/category/${categoryId}` },
       ]),
     };
@@ -304,7 +321,7 @@ export default function EventCategoryPage() {
       }),
     }));
     return [crumbs, ...eventSchemas];
-  }, [categoryId, categoryName, categoryEvents]);
+  }, [categoryId, categoryName, categoryEvents, t]);
 
   useStructuredData(structuredData);
 
@@ -317,16 +334,15 @@ export default function EventCategoryPage() {
         <div className="container py-20 text-center">
           <Calendar className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
           <h1 className="font-display font-bold text-3xl text-foreground mb-2">
-            Category Not Found
+            {t("eventCategory.notFound")}
           </h1>
           <p className="text-muted-foreground max-w-md mx-auto mb-6">
-            We couldn't find the event category "{categoryId}". Browse all
-            Charlotte events instead.
+            {t("eventCategory.notFoundDescription", { category: categoryId })}
           </p>
           <Link href="/events">
             <Button className="gap-2">
               <ArrowRight className="w-4 h-4" />
-              Explore All Events
+              {t("eventCategory.allEvents")}
             </Button>
           </Link>
         </div>
@@ -341,13 +357,13 @@ export default function EventCategoryPage() {
         <ol className="flex items-center gap-1.5 text-sm text-muted-foreground flex-wrap">
           <li>
             <Link href="/" className="hover:text-primary transition-colors">
-              Home
+              {t("eventCategory.home")}
             </Link>
           </li>
           <ChevronRight className="w-3.5 h-3.5" />
           <li>
             <Link href="/events" className="hover:text-primary transition-colors">
-              Events
+              {t("eventCategory.events")}
             </Link>
           </li>
           <ChevronRight className="w-3.5 h-3.5" />
@@ -375,17 +391,21 @@ export default function EventCategoryPage() {
               <div className="mt-6 flex items-center gap-4 flex-wrap text-sm">
                 <Badge variant="secondary" className="bg-primary/10 text-primary border-0">
                   <Calendar className="w-3.5 h-3.5 mr-1.5" />
-                  {categoryEvents.length} event{categoryEvents.length !== 1 ? "s" : ""}
+                  {categoryEvents.length === 1
+                    ? t("eventCategory.eventSingular")
+                    : t("eventCategory.eventsCount", { count: categoryEvents.length })}
                 </Badge>
                 {recurringCount > 0 && (
                   <Badge variant="secondary" className="bg-primary/10 text-primary border-0">
                     <Clock className="w-3.5 h-3.5 mr-1.5" />
-                    {recurringCount} recurring
+                    {recurringCount === 1
+                      ? t("eventCategory.recurringSingular")
+                      : t("eventCategory.recurringCount", { count: recurringCount })}
                   </Badge>
                 )}
                 {freeCount > 0 && (
                   <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 border-0">
-                    {freeCount} free
+                    {t("eventCategory.freeCount", { count: freeCount })}
                   </Badge>
                 )}
               </div>
@@ -400,16 +420,15 @@ export default function EventCategoryPage() {
           <div className="text-center py-20">
             <Calendar className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
             <h2 className="font-display font-bold text-2xl text-foreground mb-2">
-              No events in this category yet
+              {t("eventCategory.empty")}
             </h2>
             <p className="text-muted-foreground max-w-md mx-auto mb-6">
-              We're still gathering {categoryName.toLowerCase()} events for
-              Charlotte. Check back soon or explore all events.
+              {t("eventCategory.emptyDescription")}
             </p>
             <Link href="/events">
               <Button variant="outline" className="gap-2">
                 <ArrowRight className="w-4 h-4" />
-                Explore All Events
+                {t("eventCategory.allEvents")}
               </Button>
             </Link>
           </div>
@@ -424,16 +443,15 @@ export default function EventCategoryPage() {
             {/* CTA */}
             <div className="mt-12 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 p-8 text-center">
               <h2 className="font-display font-bold text-2xl text-foreground mb-2">
-                Explore More Charlotte Events
+                {t("eventCategory.moreEvents")}
               </h2>
               <p className="text-muted-foreground max-w-lg mx-auto mb-4">
-                Discover festivals, concerts, food events, and everything
-                happening in the Queen City.
+                {t("eventCategory.moreDescription")}
               </p>
               <Link href="/events">
                 <Button className="gap-2">
                   <Calendar className="w-4 h-4" />
-                  Browse All Charlotte Events
+                  {t("eventCategory.browseAll")}
                   <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>

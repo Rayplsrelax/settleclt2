@@ -1,6 +1,8 @@
 import { allNeighborhoods } from "../../shared/neighborhoods";
 import { SERVICES, SERVICE_CATEGORIES } from "../../shared/services";
 import { EVENT_CATEGORIES } from "../../shared/events";
+import type { EventCategoryId } from "../../shared/events";
+import { EVENT_CATEGORY_LABELS } from "../../shared/event-category-i18n";
 import type { Locale } from "../../shared/i18n";
 
 /**
@@ -119,6 +121,14 @@ const STATIC_SEO: Record<string, RouteSeo> = {
 };
 
 const SPANISH_SEO: Partial<Record<string, RouteSeo>> = {
+  "/bingo": {
+    title: "Bingo CLT — Tarjetas de desafíos de Charlotte",
+    description: "Juega tarjetas temáticas y explora Charlotte una casilla a la vez.",
+  },
+  "/things-to-do": {
+    title: "Cosas que hacer en Charlotte NC",
+    description: "Descubre eventos, actividades gratuitas, diversión familiar y aventuras en Charlotte.",
+  },
   "/business-pricing": {
     title: "Precios para negocios de Settle CLT",
     description: "Reclama el perfil de tu negocio en Charlotte y compara planes de visibilidad.",
@@ -132,6 +142,7 @@ const SPANISH_SEO: Partial<Record<string, RouteSeo>> = {
     description: "No se pudo encontrar esta página.",
   },
 };
+
 
 export function normalizePath(pathname: string): string {
   let path = pathname.split("?")[0].split("#")[0];
@@ -185,9 +196,14 @@ export function resolveRouteSeo(
     const catId = decodeURIComponent(evtCatMatch[1]);
     const category = EVENT_CATEGORIES.find(c => c.id === catId);
     if (category) {
+      const localizedName = locale === "es"
+        ? EVENT_CATEGORY_LABELS[catId as EventCategoryId].es
+        : category.name;
       return {
-        title: `${category.name} in Charlotte`,
-        description: `${category.name} events across Charlotte — dates, venues, and details.`,
+        title: locale === "es" ? `${localizedName} en Charlotte` : `${localizedName} in Charlotte`,
+        description: locale === "es"
+          ? `Eventos de ${localizedName.toLowerCase()} en Charlotte — fechas, lugares y detalles.`
+          : `${localizedName} events across Charlotte — dates, venues, and details.`,
       };
     }
   }
