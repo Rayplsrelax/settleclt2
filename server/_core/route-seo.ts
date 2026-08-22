@@ -141,6 +141,16 @@ const SPANISH_SEO: Partial<Record<string, RouteSeo>> = {
     title: "Referencias de negocios locales en Charlotte",
     description: "Solicita recomendaciones de negocios confiables del área de Charlotte.",
   },
+  "/privacy": {
+    title: "Política de Privacidad — Settle CLT",
+    description:
+      "Conozca cómo Settle CLT recopila, usa y protege su información personal. Lea nuestra política de privacidad completa.",
+  },
+  "/terms": {
+    title: "Términos de Servicio — Settle CLT",
+    description:
+      "Lea los Términos de Servicio para usar la plataforma Settle CLT, incluidas las responsabilidades del usuario, las divulgaciones de referencias y las políticas de contenido.",
+  },
   "/404": {
     title: "Página no encontrada",
     description: "No se pudo encontrar esta página.",
