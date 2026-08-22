@@ -33,7 +33,10 @@ async function startProductionShell() {
   writeFileSync(join(distRoot, "index.html"), SHELL);
 
   const app = express();
-  serveStatic(app, distPublic);
+  serveStatic(app, distPublic, {
+    blogExists: async () => true,
+    tagExists: async () => true,
+  });
 
   const server = createServer(app);
   await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve));
@@ -144,5 +147,20 @@ describe("production SPA shell per-route SEO (integration)", () => {
     const html = await res.text();
     expect(html).toContain('<html lang="es">');
     expect(html).not.toContain("reviews, details, and neighborhood info");
+  });
+
+  it.each([
+    ["/newcomer-plan", "Plan para recién llegados a Charlotte"],
+    ["/tag/food-drink", "Etiqueta Food Drink en Charlotte"],
+  ])("serves Spanish Batch 5 metadata and preserves the %s canonical", async (path, title) => {
+    const base = await startProductionShell();
+    const res = await fetch(`${base}${path}`, {
+      headers: { cookie: "site_locale=es" },
+    });
+    const html = await res.text();
+    expect(res.status).toBe(200);
+    expect(html).toContain('<html lang="es">');
+    expect(html).toContain(`<title>${title} | Settle CLT</title>`);
+    expect(html).toContain(`<link rel="canonical" href="https://settleclt.com${path}" />`);
   });
 });

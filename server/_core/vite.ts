@@ -13,6 +13,7 @@ import {
   resolveInitialLocale,
   type Locale,
 } from "../../shared/i18n";
+import type { RouteLookups } from "./spa-route-status";
 
 const HOME_HERO_IMAGE = "/images/hero-charlotte-skyline.webp";
 const SITE_URL = "https://settleclt.com";
@@ -150,7 +151,11 @@ export async function setupVite(app: Express, server: Server) {
   });
 }
 
-export function serveStatic(app: Express, distPathOverride?: string) {
+export function serveStatic(
+  app: Express,
+  distPathOverride?: string,
+  routeLookupsOverride?: RouteLookups
+) {
   const distPath =
     distPathOverride ??
     (process.env.NODE_ENV === "development"
@@ -171,11 +176,13 @@ export function serveStatic(app: Express, distPathOverride?: string) {
     const { resolveSpaStatus, getProductionLookups } = await import(
       "./spa-route-status"
     );
-    let lookups;
-    try {
-      lookups = await getProductionLookups();
-    } catch {
-      // no DB available — optimistic
+    let lookups = routeLookupsOverride;
+    if (!lookups) {
+      try {
+        lookups = await getProductionLookups();
+      } catch {
+        // no DB available — optimistic
+      }
     }
     try {
       const status = await resolveSpaStatus(req.originalUrl, lookups);

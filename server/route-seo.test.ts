@@ -102,6 +102,21 @@ describe("server-side route SEO contracts", () => {
     expect(category).not.toContain("Running & Walking Events in Charlotte");
   });
 
+  it("injects Spanish first-response metadata for Batch 5 newcomer and tag routes while preserving canonicals", async () => {
+    const { injectRouteSeo } = await import("../server/_core/vite");
+    const newcomer = injectRouteSeo(shell, "/newcomer-plan", undefined, "es");
+    expect(newcomer).toContain("<title>Plan para recién llegados a Charlotte | Settle CLT</title>");
+    expect(newcomer.match(CANONICAL_RE)?.[1]).toBe("https://settleclt.com/newcomer-plan");
+
+    const tag = injectRouteSeo(shell, "/tag/food-drink", undefined, "es");
+    expect(tag).toContain("<title>Etiqueta Food Drink en Charlotte | Settle CLT</title>");
+    expect(tag).toContain('<html lang="es">');
+    expect(tag.match(CANONICAL_RE)?.[1]).toBe("https://settleclt.com/tag/food-drink");
+    expect(tag.match(DESCRIPTION_RE)?.[1]).toBe(
+      "Explora eventos, negocios, vecindarios y artículos de Charlotte con la etiqueta Food Drink."
+    );
+  });
+
   it("the production shell middleware applies per-route SEO", () => {
     expect(viteCore).toContain("injectRouteSeo(");
     // Express 4 app.use("*") strips the route prefix into req.baseUrl,

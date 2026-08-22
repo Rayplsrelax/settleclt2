@@ -6,6 +6,7 @@ import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "@/lib/timeUtils";
+import { useI18n } from "@/i18n/I18nContext";
 
 const CATEGORY_ICONS: Record<string, string> = {
   claim: "🏢",
@@ -26,6 +27,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function NotificationBell() {
+  const { locale } = useI18n();
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const [open, setOpen] = useState(false);
@@ -125,22 +127,33 @@ export default function NotificationBell() {
                 <p className="text-sm">No notifications yet</p>
               </div>
             ) : (
-              notifications.map((notif) => (
-                <div
-                  key={notif.id}
-                  className={`flex gap-3 px-4 py-3 border-b border-border/50 hover:bg-muted/50 transition-colors cursor-pointer ${
-                    !notif.isRead ? "bg-primary/5" : ""
-                  }`}
-                  onClick={() => {
-                    if (!notif.isRead) {
-                      markRead.mutate({ id: notif.id });
-                    }
-                    if (notif.actionUrl) {
-                      setOpen(false);
-                      navigate(notif.actionUrl);
-                    }
-                  }}
-                >
+              notifications.map(notif => {
+                const activateNotification = () => {
+                  if (!notif.isRead) {
+                    markRead.mutate({ id: notif.id });
+                  }
+                  if (notif.actionUrl) {
+                    setOpen(false);
+                    navigate(notif.actionUrl);
+                  }
+                };
+                return (
+                  <div
+                    key={notif.id}
+                    className={`group flex gap-3 px-4 py-3 border-b border-border/50 hover:bg-muted/50 transition-colors cursor-pointer ${
+                      !notif.isRead ? "bg-primary/5" : ""
+                    }`}
+                    role="button"
+                    tabIndex={0}
+                    onClick={activateNotification}
+                    onKeyDown={event => {
+                      if (event.target !== event.currentTarget) return;
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        activateNotification();
+                      }
+                    }}
+                  >
                   {/* Category icon */}
                   <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm ${CATEGORY_COLORS[notif.category] || "bg-muted"}`}>
                     {CATEGORY_ICONS[notif.category] || "🔔"}
@@ -158,25 +171,26 @@ export default function NotificationBell() {
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{notif.body}</p>
                     <p className="text-[10px] text-muted-foreground/60 mt-1">
-                      {formatDistanceToNow(new Date(notif.createdAt))}
+                      {formatDistanceToNow(new Date(notif.createdAt), locale)}
                     </p>
                   </div>
 
                   {/* Actions */}
-                  <div className="flex-shrink-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100">
+                  <div className="flex-shrink-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         deleteNotif.mutate({ id: notif.id });
                       }}
-                      className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                      className="p-1 rounded opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100 hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
                       title="Delete"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                </div>
-              ))
+                  </div>
+                );
+              })
             )}
           </div>
 

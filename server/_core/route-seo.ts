@@ -121,6 +121,10 @@ const STATIC_SEO: Record<string, RouteSeo> = {
 };
 
 const SPANISH_SEO: Partial<Record<string, RouteSeo>> = {
+  "/newcomer-plan": {
+    title: "Plan para recién llegados a Charlotte",
+    description: "Un plan paso a paso para tus primeros 90 días en Charlotte.",
+  },
   "/bingo": {
     title: "Bingo CLT — Tarjetas de desafíos de Charlotte",
     description: "Juega tarjetas temáticas y explora Charlotte una casilla a la vez.",
@@ -163,6 +167,34 @@ export function resolveRouteSeo(
     ? SPANISH_SEO[path] ?? STATIC_SEO[path]
     : STATIC_SEO[path];
   if (fixed) return fixed;
+
+  // /tag/:slug — tag names are represented by their human-readable slug on
+  // the first response, before the client can resolve the database record.
+  const tagMatch = path.match(/^\/tag\/([^/]+)$/);
+  if (tagMatch) {
+    let slug = tagMatch[1];
+    try {
+      slug = decodeURIComponent(tagMatch[1]);
+    } catch {
+      // Preserve malformed slugs as raw text rather than failing the SPA shell.
+    }
+    const name = slug
+      .split("-")
+      .filter(Boolean)
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(" ");
+    if (name) {
+      return locale === "es"
+        ? {
+            title: `Etiqueta ${name} en Charlotte`,
+            description: `Explora eventos, negocios, vecindarios y artículos de Charlotte con la etiqueta ${name}.`,
+          }
+        : {
+            title: `${name} in Charlotte`,
+            description: `Explore Charlotte events, businesses, neighborhoods, and articles tagged ${name}.`,
+          };
+    }
+  }
 
   // /neighborhood/:id
   const neighborhoodMatch = path.match(/^\/neighborhood\/([^/]+)$/);

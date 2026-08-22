@@ -63,6 +63,8 @@ export function useSEO({
     setMeta("name", "description", description);
     if (keywords) {
       setMeta("name", "keywords", keywords);
+    } else {
+      document.querySelector('meta[name="keywords"]')?.remove();
     }
 
     // Open Graph

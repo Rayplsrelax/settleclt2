@@ -2,7 +2,13 @@ import { useState, useCallback, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 
-type PushState = "unsupported" | "denied" | "granted" | "default" | "loading";
+type PushState =
+  | "unsupported"
+  | "denied"
+  | "granted"
+  | "default"
+  | "loading"
+  | "error";
 
 /**
  * Hook for managing browser push notification registration.
@@ -27,11 +33,18 @@ export function usePushNotifications() {
     setState(permission as PushState);
 
     // Check for existing subscription
-    navigator.serviceWorker.ready.then((reg) => {
-      reg.pushManager.getSubscription().then((sub) => {
-        if (sub) setSubscription(sub);
+    navigator.serviceWorker.ready
+      .then(reg => reg.pushManager.getSubscription())
+      .then(sub => {
+        if (sub) {
+          setSubscription(sub);
+          setState("granted");
+        }
+      })
+      .catch(err => {
+        console.error("[Push] State check failed:", err);
+        setState(Notification.permission === "denied" ? "denied" : "error");
       });
-    });
   }, []);
 
   const subscribe = useCallback(async () => {
@@ -53,13 +66,15 @@ export function usePushNotifications() {
 
       // Create push subscription
       // Using a VAPID public key - in production this should come from the server
-      const sub = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(
-          // This is a placeholder VAPID key - replace with real one when push server is set up
-          "BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkGs-GDjN1_fSjp_eYXJNEEIKPocChVlqDFlHkqNDs"
-        ) as BufferSource,
-      });
+      const sub =
+        (await registration.pushManager.getSubscription()) ??
+        (await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(
+            // This is a placeholder VAPID key - replace with real one when push server is set up
+            "BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkGs-GDjN1_fSjp_eYXJNEEIKPocChVlqDFlHkqNDs"
+          ) as BufferSource,
+        }));
 
       // Save subscription to server
       const subJson = sub.toJSON();
@@ -73,7 +88,7 @@ export function usePushNotifications() {
       setState("granted");
     } catch (err) {
       console.error("[Push] Subscription failed:", err);
-      setState("denied");
+      setState(Notification.permission === "denied" ? "denied" : "error");
     }
   }, [user, saveSub]);
 
@@ -87,6 +102,7 @@ export function usePushNotifications() {
       setState("default");
     } catch (err) {
       console.error("[Push] Unsubscribe failed:", err);
+      setState(Notification.permission === "denied" ? "denied" : "error");
     }
   }, [subscription, removeSub]);
 
