@@ -17,6 +17,8 @@ import {
   useStructuredData,
 } from "@/hooks/useStructuredData";
 import { trackNewcomerJourneyAction } from "@/lib/mixpanel";
+import { useI18n } from "@/i18n/I18nContext";
+import type { TranslationKey } from "@/i18n/locales/en";
 import {
   buildNewcomerSteps,
   NEWCOMER_PROGRESS_KEY,
@@ -26,22 +28,65 @@ import {
 
 const STEP_ICONS = [MapPinned, Compass, Store, CalendarDays, Check];
 
+const STEP_COPY: Record<
+  NewcomerStepId,
+  {
+    stage: TranslationKey;
+    title: TranslationKey;
+    description: TranslationKey;
+    action: TranslationKey;
+  }
+> = {
+  quiz: {
+    stage: "newcomerPlan.steps.quiz.stage",
+    title: "newcomerPlan.steps.quiz.title",
+    description: "newcomerPlan.steps.quiz.description",
+    action: "newcomerPlan.steps.quiz.action",
+  },
+  compare: {
+    stage: "newcomerPlan.steps.compare.stage",
+    title: "newcomerPlan.steps.compare.title",
+    description: "newcomerPlan.steps.compare.description",
+    action: "newcomerPlan.steps.compare.action",
+  },
+  services: {
+    stage: "newcomerPlan.steps.services.stage",
+    title: "newcomerPlan.steps.services.title",
+    description: "newcomerPlan.steps.services.description",
+    action: "newcomerPlan.steps.services.action",
+  },
+  events: {
+    stage: "newcomerPlan.steps.events.stage",
+    title: "newcomerPlan.steps.events.title",
+    description: "newcomerPlan.steps.events.description",
+    action: "newcomerPlan.steps.events.action",
+  },
+  passport: {
+    stage: "newcomerPlan.steps.passport.stage",
+    title: "newcomerPlan.steps.passport.title",
+    description: "newcomerPlan.steps.passport.description",
+    action: "newcomerPlan.steps.passport.action",
+  },
+};
+
 export default function NewcomerPlan() {
+  const { t } = useI18n();
   useSEO({
-    title: "Your Charlotte Newcomer Plan — A Guided Move Checklist",
-    description:
-      "Build your Charlotte move plan: find and compare neighborhoods, save local services and events, and track discoveries with Passport.",
-    keywords:
-      "Charlotte newcomer checklist, moving to Charlotte plan, Charlotte relocation guide, first week Charlotte NC",
+    title: t("newcomerPlan.seoTitle"),
+    description: t("newcomerPlan.seoDescription"),
+    keywords: t("newcomerPlan.seoKeywords"),
     path: "/newcomer-plan",
   });
   useStructuredData([
     {
       "@context": "https://schema.org",
       ...buildBreadcrumbSchema([
-        { name: "Home", url: "https://settleclt.com" },
         {
-          name: "Newcomer Plan",
+          name: t("newcomerPlan.breadcrumbHome"),
+          url: "https://settleclt.com",
+        },
+        {
+          name: t("newcomerPlan.breadcrumbCurrent"),
           url: "https://settleclt.com/newcomer-plan",
         },
       ]),
@@ -84,14 +129,13 @@ export default function NewcomerPlan() {
       <section className="bg-gradient-to-br from-clt-navy via-clt-navy to-clt-teal-dark py-14 md:py-20 text-white">
         <div className="container max-w-4xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-sm text-clt-gold">
-            <Compass className="h-4 w-4" /> Free · no signup required
+            <Compass className="h-4 w-4" /> {t("newcomerPlan.badge")}
           </div>
           <h1 className="mt-5 max-w-3xl font-display text-4xl font-extrabold leading-tight md:text-5xl">
-            Your guided plan for settling into Charlotte
+            {t("newcomerPlan.title")}
           </h1>
           <p className="mt-4 max-w-2xl text-lg leading-relaxed text-white/75">
-            Move from neighborhood research to a practical first week. Check off
-            each stage here; your progress stays on this device.
+            {t("newcomerPlan.subtitle")}
           </p>
         </div>
       </section>
@@ -101,10 +145,18 @@ export default function NewcomerPlan() {
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="text-sm font-semibold text-foreground">
-                {completed.length} of {steps.length} stages complete
+                {completed.length === 1
+                  ? t("newcomerPlan.progressSingular", {
+                      completed: completed.length,
+                      total: steps.length,
+                    })
+                  : t("newcomerPlan.progressPlural", {
+                      completed: completed.length,
+                      total: steps.length,
+                    })}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Start anywhere and return whenever you need the next step.
+                {t("newcomerPlan.progressHint")}
               </p>
             </div>
             <span className="font-display text-2xl font-bold text-clt-teal">
@@ -114,7 +166,7 @@ export default function NewcomerPlan() {
           <div
             className="mt-4 h-2 overflow-hidden rounded-full bg-muted"
             role="progressbar"
-            aria-label="Newcomer plan progress"
+            aria-label={t("newcomerPlan.progressAria")}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={percent}
@@ -130,6 +182,7 @@ export default function NewcomerPlan() {
           {steps.map((step, index) => {
             const done = completed.includes(step.id);
             const Icon = STEP_ICONS[index];
+            const copy = STEP_COPY[step.id];
             return (
               <li
                 key={step.id}
@@ -143,13 +196,14 @@ export default function NewcomerPlan() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold uppercase tracking-wide text-clt-teal">
-                      Step {index + 1} · {step.stage}
+                      {t("newcomerPlan.step", { number: index + 1 })} ·{" "}
+                      {t(copy.stage)}
                     </p>
                     <h2 className="mt-1 font-display text-xl font-bold text-foreground">
-                      {step.title}
+                      {t(copy.title)}
                     </h2>
                     <p className="mt-2 leading-relaxed text-muted-foreground">
-                      {step.description}
+                      {t(copy.description)}
                     </p>
                     <div className="mt-5 flex flex-wrap gap-3">
                       <Link href={step.href}>
@@ -164,7 +218,7 @@ export default function NewcomerPlan() {
                             })
                           }
                         >
-                          {step.action} <ArrowRight className="h-4 w-4" />
+                          {t(copy.action)} <ArrowRight className="h-4 w-4" />
                         </Button>
                       </Link>
                       <Button
@@ -186,7 +240,9 @@ export default function NewcomerPlan() {
                         ) : (
                           <Circle className="h-4 w-4" />
                         )}
-                        {done ? "Completed" : "Mark complete"}
+                        {done
+                          ? t("newcomerPlan.completed")
+                          : t("newcomerPlan.markComplete")}
                       </Button>
                     </div>
                   </div>
@@ -197,9 +253,7 @@ export default function NewcomerPlan() {
         </ol>
 
         <p className="mt-8 text-center text-sm text-muted-foreground">
-          This first version stores checklist progress locally. Saved
-          businesses, event stamps, and Passport history continue to use their
-          existing Settle CLT features.
+          {t("newcomerPlan.footerNote")}
         </p>
       </section>
     </PageLayout>
