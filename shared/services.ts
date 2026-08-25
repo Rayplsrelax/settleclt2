@@ -27,16 +27,16 @@ export interface Service {
   affiliate?: boolean;
 }
 
-export const SERVICE_SUPER_GROUPS: SuperGroup[] = [
+export const SERVICE_SUPER_GROUPS = [
   { id: 'moving', label: '📦 Moving & Settling', icon: '📦' },
   { id: 'official', label: '🪪 Official Business', icon: '🪪' },
   { id: 'home', label: '🏡 Home & Property', icon: '🏡' },
   { id: 'personal', label: '💇 Personal Services', icon: '💇' },
   { id: 'daily', label: '🛒 Daily Essentials', icon: '🛒' },
   { id: 'lifestyle', label: '🎉 Lifestyle & Entertainment', icon: '🎉' }
-];
+] as const satisfies readonly SuperGroup[];
 
-export const SERVICE_CATEGORIES: ServiceCategory[] = [
+export const SERVICE_CATEGORIES = [
   // MOVING & SETTLING
   { id: 'moving-companies', name: 'Moving Companies', icon: '🚛', group: 'moving' },
   { id: 'storage', name: 'Storage & Moving Pods', icon: '🗃️', group: 'moving' },
@@ -98,7 +98,7 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
   { id: 'classes-workshops', name: 'Classes & Workshops', icon: '🎓', group: 'lifestyle' },
   { id: 'shopping-boutiques', name: 'Shopping & Boutiques', icon: '🛍️', group: 'lifestyle' },
   { id: 'wedding-events', name: 'Wedding & Events', icon: '💒', group: 'lifestyle' }
-];
+] as const satisfies readonly ServiceCategory[];
 
 export const SERVICES: Service[] = [
   // ========================================

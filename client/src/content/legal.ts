@@ -68,12 +68,12 @@ export const legalContent = {
                   text: "Information you voluntarily provide, such as neighborhood preferences, quiz responses, and passport stamps.",
                 },
                 {
-                  label: "Referral Form Data:",
-                  text: "If you submit a housing referral request, we collect your name, email, phone number, housing preferences, budget range, and timeline.",
+                  label: "Submission and Lead Data:",
+                  text: "Contact submissions, business listing submissions and claims, premium or business leads, and housing referral requests may include contact, message, and business details, such as your name, email, phone number, business information, housing preferences, budget range, and timeline.",
                 },
                 {
                   label: "Usage Data:",
-                  text: "We collect anonymous analytics data including page views, search queries, and feature usage to improve the platform.",
+                  text: "Usage and search analytics, including page views, search queries, and feature usage, may be associated with account, user, session, or pseudonymous identifiers. Authenticated searches persist with user IDs.",
                 },
                 {
                   label: "Reviews:",
@@ -91,11 +91,11 @@ export const legalContent = {
             {
               type: "list",
               items: [
-                { text: "Provide and personalize the Settle CLT platform experience" },
-                { text: "Connect you with real estate professionals and apartment locators when you submit a referral request" },
+                { text: "Provide and personalize the Settle CLT platform experience and respond to submissions, review listings, claims, leads, and referrals, and support platform operations" },
+                { text: "Review housing referral requests and, when appropriate, share them with independent real estate professionals or apartment locators; a referral or response is not guaranteed" },
                 { text: "Send you newsletter updates about Charlotte (if you opted in)" },
                 { text: "Track your CLT Passport stamps, bingo progress, and leaderboard ranking" },
-                { text: "Improve our services through anonymous usage analytics" },
+                { text: "Improve our services through usage and search analytics that may use account, user, session, or pseudonymous identifiers" },
                 { text: "Display your reviews to help other users make informed decisions" },
               ],
             },
@@ -114,11 +114,11 @@ export const legalContent = {
               items: [
                 {
                   label: "Referral Partners:",
-                  text: "When you submit a housing referral request, your contact information and preferences are shared with licensed real estate professionals or apartment locators to fulfill your request.",
+                  text: "When you submit a housing referral request, we may review and share your contact information and preferences with independent real estate professionals or apartment locators when appropriate. A referral or response is not guaranteed.",
                 },
                 {
                   label: "Service Providers:",
-                  text: "We use third-party services for authentication, analytics (Mixpanel), and hosting that may process your data on our behalf.",
+                  text: "We use third-party services for notification, authentication, analytics (including Mixpanel), and hosting that may process data on our behalf to support responses, review, and platform operations.",
                 },
                 {
                   label: "Legal Requirements:",
@@ -134,7 +134,7 @@ export const legalContent = {
           blocks: [
             {
               type: "paragraph",
-              text: "Settle CLT is operated by a licensed North Carolina real estate broker. When you submit a housing referral request, you may be connected with a licensed real estate agent or apartment locator. Settle CLT may receive a referral fee from the agent or locator you are matched with. This referral fee does not increase your cost. All referral arrangements comply with the North Carolina Real Estate Commission regulations. You are under no obligation to work with any referred professional.",
+              text: "We may review and share your housing request with an independent licensed real estate professional or apartment locator when appropriate; a referral or response is not guaranteed. Settle CLT may receive a referral fee where permitted and disclosed if a referral results in a transaction. You are under no obligation to respond to or work with any professional. Independently verify any professional's license with the North Carolina Real Estate Commission (NCREC) at www.ncrec.gov.",
             },
           ],
         },
@@ -144,7 +144,7 @@ export const legalContent = {
           blocks: [
             {
               type: "paragraph",
-              text: "We use essential cookies for authentication and session management. We also use Mixpanel for anonymous usage analytics. You can disable cookies in your browser settings, though this may affect some features of the platform.",
+              text: "We use essential cookies for authentication and session management. We also use Mixpanel for usage analytics that may be associated with account, user, session, or pseudonymous identifiers. You can disable cookies in your browser settings, though this may affect some features of the platform.",
             },
           ],
         },
@@ -168,7 +168,7 @@ export const legalContent = {
               items: [
                 { text: "Access the personal information we hold about you" },
                 { text: "Request correction of inaccurate information" },
-                { text: "Request deletion of your account and associated data" },
+                { text: "Request deletion of your account and associated data; deletion requests remain subject to legal and operational retention requirements" },
                 { text: "Opt out of newsletter communications at any time through your profile settings" },
                 { text: "Withdraw consent for data processing where applicable" },
               ],
@@ -286,17 +286,17 @@ export const legalContent = {
           blocks: [
             {
               type: "paragraph",
-              text: "Settle CLT offers a housing referral service (\"Find Your Home\") that connects users with licensed real estate professionals and apartment locators. By using this service:",
+              text: "Settle CLT offers a housing request review service (\"Find Your Home\"). By using this service:",
             },
             {
               type: "list",
               items: [
-                { text: "You understand that Settle CLT is operated by a licensed North Carolina real estate broker" },
-                { text: "You acknowledge that Settle CLT may receive referral fees from professionals you are matched with" },
-                { text: "You understand that referral fees do not increase your cost as a buyer or renter" },
-                { text: "You are under no obligation to work with any referred professional" },
-                { text: "Settle CLT does not guarantee the quality of service provided by referred professionals" },
-                { text: "All real estate transactions are subject to applicable North Carolina laws and regulations" },
+                { text: "Settle CLT may review and share your request only when appropriate, including with an independent licensed real estate professional or apartment locator" },
+                { text: "A referral or response is not guaranteed" },
+                { text: "Settle CLT may receive a referral fee where permitted and disclosed if a referral results in a transaction" },
+                { text: "Any professional relationship is independent of Settle CLT" },
+                { text: "You are under no obligation to respond to or work with any professional" },
+                { text: "Independently verify any professional's license with the North Carolina Real Estate Commission (NCREC) at www.ncrec.gov" },
               ],
             },
           ],
@@ -414,12 +414,12 @@ export const legalContent = {
                   text: "Información que proporciona voluntariamente, como preferencias de vecindarios, respuestas al cuestionario y sellos del pasaporte.",
                 },
                 {
-                  label: "Datos del Formulario de Referencia:",
-                  text: "Si envía una solicitud de referencia de vivienda, recopilamos su nombre, correo electrónico, número de teléfono, preferencias de vivienda, rango de presupuesto y plazo.",
+                  label: "Datos de Envíos y Clientes Potenciales:",
+                  text: "Los formularios de contacto, las publicaciones y reclamaciones de fichas de negocios, los clientes potenciales premium o comerciales y las solicitudes de referencia de vivienda pueden incluir datos de contacto, mensajes y negocios, como su nombre, correo electrónico, número de teléfono, información comercial, preferencias de vivienda, rango de presupuesto y plazo.",
                 },
                 {
                   label: "Datos de Uso:",
-                  text: "Recopilamos datos analíticos anónimos, incluidas las visualizaciones de páginas, las consultas de búsqueda y el uso de funciones, para mejorar la plataforma.",
+                  text: "Los análisis de uso y búsqueda, incluidas las visualizaciones de páginas, las consultas de búsqueda y el uso de funciones, pueden estar asociados con identificadores de cuenta, usuario, sesión o seudónimos. Las búsquedas autenticadas persisten con ID de usuario.",
                 },
                 {
                   label: "Reseñas:",
@@ -437,11 +437,11 @@ export const legalContent = {
             {
               type: "list",
               items: [
-                { text: "Proporcionar y personalizar la experiencia de la plataforma Settle CLT" },
-                { text: "Conectarlo con profesionales de bienes raíces y localizadores de apartamentos cuando envía una solicitud de referencia" },
+                { text: "Proporcionar y personalizar la experiencia de Settle CLT, responder a los envíos, revisar fichas, reclamaciones, clientes potenciales y referencias, y respaldar las operaciones de la plataforma" },
+                { text: "Revisar solicitudes de referencia de vivienda y, cuando corresponda, compartirlas con profesionales independientes de bienes raíces o localizadores de apartamentos; no se garantiza una referencia ni una respuesta" },
                 { text: "Enviarle actualizaciones del boletín sobre Charlotte (si optó por recibirlas)" },
                 { text: "Registrar sus sellos del Pasaporte CLT, su progreso en el bingo y su posición en la clasificación" },
-                { text: "Mejorar nuestros servicios mediante análisis anónimos de uso" },
+                { text: "Mejorar nuestros servicios mediante análisis de uso y búsqueda que pueden utilizar identificadores de cuenta, usuario, sesión o seudónimos" },
                 { text: "Mostrar sus reseñas para ayudar a otros usuarios a tomar decisiones informadas" },
               ],
             },
@@ -460,11 +460,11 @@ export const legalContent = {
               items: [
                 {
                   label: "Socios de Referencia:",
-                  text: "Cuando envía una solicitud de referencia de vivienda, su información de contacto y sus preferencias se comparten con profesionales de bienes raíces con licencia o localizadores de apartamentos para atender su solicitud.",
+                  text: "Cuando envía una solicitud de referencia de vivienda, podemos revisar y compartir su información de contacto y sus preferencias con profesionales independientes de bienes raíces o localizadores de apartamentos cuando corresponda. No se garantiza una referencia ni una respuesta.",
                 },
                 {
                   label: "Proveedores de Servicios:",
-                  text: "Usamos servicios de terceros para autenticación, análisis (Mixpanel) y alojamiento que pueden procesar sus datos en nuestro nombre.",
+                  text: "Usamos servicios de terceros para notificaciones, autenticación, análisis (incluido Mixpanel) y alojamiento que pueden procesar datos en nuestro nombre para respaldar respuestas, revisiones y operaciones de la plataforma.",
                 },
                 {
                   label: "Requisitos Legales:",
@@ -480,7 +480,7 @@ export const legalContent = {
           blocks: [
             {
               type: "paragraph",
-              text: "Settle CLT es operado por un corredor de bienes raíces con licencia de Carolina del Norte. Cuando envía una solicitud de referencia de vivienda, puede ser conectado con un agente de bienes raíces con licencia o un localizador de apartamentos. Settle CLT puede recibir una tarifa de referencia del agente o localizador con quien se le vincule. Esta tarifa de referencia no aumenta su costo. Todos los acuerdos de referencia cumplen con las regulaciones de la Comisión de Bienes Raíces de Carolina del Norte. Usted no tiene obligación alguna de trabajar con ningún profesional referido.",
+              text: "Podemos revisar y compartir su solicitud de vivienda con un profesional inmobiliario independiente con licencia o un localizador de apartamentos cuando corresponda; no se garantiza una referencia ni una respuesta. Settle CLT puede recibir una tarifa de referencia, cuando esté permitido y se divulgue, si una referencia resulta en una transacción. Usted no tiene ninguna obligación de responder ni de trabajar con ningún profesional. Verifique de forma independiente la licencia de cualquier profesional con la Comisión de Bienes Raíces de Carolina del Norte (NCREC) en www.ncrec.gov.",
             },
           ],
         },
@@ -490,7 +490,7 @@ export const legalContent = {
           blocks: [
             {
               type: "paragraph",
-              text: "Usamos cookies esenciales para la autenticación y la administración de sesiones. También usamos Mixpanel para análisis anónimos de uso. Puede desactivar las cookies en la configuración de su navegador, aunque esto puede afectar algunas funciones de la plataforma.",
+              text: "Usamos cookies esenciales para la autenticación y la administración de sesiones. También usamos Mixpanel para análisis de uso que pueden estar asociados con identificadores de cuenta, usuario, sesión o seudónimos. Puede desactivar las cookies en la configuración de su navegador, aunque esto puede afectar algunas funciones de la plataforma.",
             },
           ],
         },
@@ -514,7 +514,7 @@ export const legalContent = {
               items: [
                 { text: "Acceder a la información personal que mantenemos sobre usted" },
                 { text: "Solicitar la corrección de información inexacta" },
-                { text: "Solicitar la eliminación de su cuenta y de los datos asociados" },
+                { text: "Solicitar la eliminación de su cuenta y de los datos asociados; las solicitudes de eliminación siguen sujetas a requisitos de retención legal y operativa" },
                 { text: "Dejar de recibir comunicaciones del boletín en cualquier momento mediante la configuración de su perfil" },
                 { text: "Retirar su consentimiento para el procesamiento de datos cuando corresponda" },
               ],
@@ -632,17 +632,17 @@ export const legalContent = {
           blocks: [
             {
               type: "paragraph",
-              text: "Settle CLT ofrece un servicio de referencia de vivienda (\"Find Your Home\") que conecta a los usuarios con profesionales de bienes raíces con licencia y localizadores de apartamentos. Al usar este servicio:",
+              text: "Settle CLT ofrece un servicio de revisión de solicitudes de vivienda (\"Find Your Home\"). Al usar este servicio:",
             },
             {
               type: "list",
               items: [
-                { text: "Usted entiende que Settle CLT es operado por un corredor de bienes raíces con licencia de Carolina del Norte" },
-                { text: "Usted reconoce que Settle CLT puede recibir tarifas de referencia de los profesionales con quienes se le vincule" },
-                { text: "Usted entiende que las tarifas de referencia no aumentan su costo como comprador o inquilino" },
-                { text: "Usted no tiene obligación alguna de trabajar con ningún profesional referido" },
-                { text: "Settle CLT no garantiza la calidad del servicio proporcionado por los profesionales referidos" },
-                { text: "Todas las transacciones de bienes raíces están sujetas a las leyes y regulaciones aplicables de Carolina del Norte" },
+                { text: "Settle CLT puede revisar y compartir su solicitud solo cuando corresponda, incluso con un profesional inmobiliario independiente con licencia o un localizador de apartamentos" },
+                { text: "No se garantiza una referencia ni una respuesta" },
+                { text: "Settle CLT puede recibir una tarifa de referencia, cuando esté permitido y se divulgue, si una referencia resulta en una transacción" },
+                { text: "Toda relación profesional es independiente de Settle CLT" },
+                { text: "Usted no tiene ninguna obligación de responder ni de trabajar con ningún profesional" },
+                { text: "Verifique de forma independiente la licencia de cualquier profesional con la Comisión de Bienes Raíces de Carolina del Norte (NCREC) en www.ncrec.gov" },
               ],
             },
           ],

@@ -1,18 +1,26 @@
 import { trpc } from "@/lib/trpc";
 import { Stamp, MessageCircle, Grid3X3, Activity, Clock } from "lucide-react";
+import { useI18n } from "@/i18n/I18nContext";
+import type { Locale } from "@shared/i18n";
+import type { TranslationKey } from "@/i18n/locales/en";
+import {
+  formatActivityDescription,
+  shouldRenderActivityDetail,
+} from "@/i18n/activityLabels";
 
-function timeAgo(date: Date | string) {
+function timeAgo(date: Date | string, locale: Locale, t: (key: TranslationKey) => string) {
   const now = new Date();
   const d = new Date(date);
   const diffMs = now.getTime() - d.getTime();
   const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 1) return "just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffMins < 1) return t("activity.justNow");
+  const formatter = new Intl.RelativeTimeFormat(locale, { numeric: "always", style: "narrow" });
+  if (diffMins < 60) return formatter.format(-diffMins, "minute");
   const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffHours < 24) return formatter.format(-diffHours, "hour");
   const diffDays = Math.floor(diffHours / 24);
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  if (diffDays < 7) return formatter.format(-diffDays, "day");
+  return d.toLocaleDateString(locale, { month: "short", day: "numeric" });
 }
 
 function getActivityIcon(type: string) {
@@ -41,8 +49,8 @@ function getActivityColor(type: string) {
   }
 }
 
-function anonymize(name: string | null) {
-  if (!name) return "A CLT explorer";
+function anonymize(name: string | null, anonymousLabel: string) {
+  if (!name) return anonymousLabel;
   const parts = name.trim().split(" ");
   if (parts.length > 1) {
     return `${parts[0]} ${parts[1][0]}.`;
@@ -51,6 +59,7 @@ function anonymize(name: string | null) {
 }
 
 export default function ActivityFeed({ limit = 10 }: { limit?: number }) {
+  const { locale, t } = useI18n();
   const { data: activities, isLoading } = trpc.activity.recent.useQuery(
     { limit },
     { refetchInterval: 30000 }
@@ -76,7 +85,7 @@ export default function ActivityFeed({ limit = 10 }: { limit?: number }) {
     return (
       <div className="text-center py-8">
         <Activity className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-        <p className="text-sm text-muted-foreground">No activity yet. Be the first to explore Charlotte!</p>
+        <p className="text-sm text-muted-foreground">{t("activity.empty")}</p>
       </div>
     );
   }
@@ -91,16 +100,16 @@ export default function ActivityFeed({ limit = 10 }: { limit?: number }) {
           <div className="mt-0.5 flex-shrink-0">{getActivityIcon(activity.type)}</div>
           <div className="flex-1 min-w-0">
             <p className="text-sm text-foreground">
-              <span className="font-semibold">{anonymize(activity.userName)}</span>{" "}
-              <span className="text-muted-foreground">{activity.description}</span>
+              <span className="font-semibold">{anonymize(activity.userName, t("activity.anonymous"))}</span>{" "}
+              <span className="text-muted-foreground">{formatActivityDescription(activity, t)}</span>
             </p>
-            {activity.detail && (
+            {shouldRenderActivityDetail(activity) && (
               <p className="text-xs text-muted-foreground mt-0.5 truncate">{activity.detail}</p>
             )}
           </div>
           <div className="flex items-center gap-1 text-xs text-muted-foreground/70 flex-shrink-0">
             <Clock className="w-3 h-3" />
-            <span>{timeAgo(activity.timestamp)}</span>
+            <span>{timeAgo(activity.timestamp, locale, t)}</span>
           </div>
         </div>
       ))}

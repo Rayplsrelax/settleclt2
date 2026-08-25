@@ -35,6 +35,22 @@ import ActivityFeed from "@/components/ActivityFeed";
 import SocialFollowLinks from "@/components/SocialFollowLinks";
 import { useI18n } from "@/i18n/I18nContext";
 import { formatLocalizedDate } from "@/i18n/formatters";
+import type { TranslationKey } from "@/i18n/locales/en";
+
+const BLOG_CATEGORY_KEYS: Record<string, TranslationKey> = {
+  "Getting Started": "blog.category.gettingStarted",
+  "Cost of Living": "blog.category.costOfLiving",
+  Lifestyle: "blog.category.lifestyle",
+  Schools: "blog.category.schools",
+  Transportation: "blog.category.transportation",
+  Relocation: "blog.category.relocation",
+  Pets: "blog.category.pets",
+};
+
+function blogCategoryLabel(category: string, t: (key: TranslationKey) => string) {
+  const key = BLOG_CATEGORY_KEYS[category];
+  return key ? t(key) : category;
+}
 
 const FeaturedNeighborhoods = lazy(
   () => import("@/components/home/FeaturedNeighborhoods")
@@ -109,9 +125,9 @@ function Hero() {
           {/* Quick stats bar */}
           <div className="mt-10 flex flex-wrap gap-6 md:gap-10">
             {[
-              { value: "20", label: "Neighborhoods" },
-              { value: "700+", label: "Local Services" },
-              { value: "50+", label: "Categories" },
+              { value: "20", label: t("home.neighborhoodsStat") },
+              { value: "700+", label: t("home.servicesStat") },
+              { value: "50+", label: t("home.categoriesStat") },
             ].map(stat => (
               <div key={stat.label} className="text-center">
                 <div className="text-2xl md:text-3xl font-display font-extrabold text-clt-gold">
@@ -142,15 +158,13 @@ function QuizCTA() {
           <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
             <div className="flex-1 text-center md:text-left">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-clt-gold text-xs font-semibold mb-4">
-                <Sparkles className="w-3.5 h-3.5" /> 2-Minute Quiz
+                <Sparkles className="w-3.5 h-3.5" /> {t("home.quizBadge")}
               </div>
               <h2 className="font-display font-bold text-2xl md:text-3xl text-white mb-3">
-                Not sure where to live?
+                {t("home.quizPrompt")}
               </h2>
               <p className="text-white/70 max-w-md">
-                Answer 6 quick questions about your budget, lifestyle, and
-                priorities — we'll match you with the best Charlotte
-                neighborhoods.
+                {t("home.quizDescription")}
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
@@ -190,10 +204,10 @@ function NewsletterSignup() {
   const subscribe = trpc.newsletter.subscribe.useMutation({
     onSuccess: () => {
       setSubmitted(true);
-      toast.success("Your subscription request was received.");
+      toast.success(t("home.newsletterSuccess"));
     },
     onError: () => {
-      toast.error("Something went wrong. Please try again.");
+      toast.error(t("home.newsletterError"));
     },
   });
 
@@ -211,11 +225,10 @@ function NewsletterSignup() {
             <Mail className="w-7 h-7" />
           </div>
           <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground">
-            Get the Charlotte Insider Newsletter
+            {t("home.newsletterTitle")}
           </h2>
           <p className="mt-3 text-muted-foreground max-w-lg mx-auto leading-relaxed">
-            Weekly tips on neighborhoods, hidden gems, cost-saving hacks, and
-            everything you need to know before (and after) your move.
+            {t("home.newsletterDescription")}
           </p>
 
           {submitted ? (
@@ -223,20 +236,18 @@ function NewsletterSignup() {
               <div className="flex flex-col items-center gap-3">
                 <Sparkles className="w-8 h-8 text-primary" />
                 <p className="font-display font-semibold text-foreground">
-                  Your subscription request was received
+                  {t("home.newsletterSuccess")}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  If eligible, confirmation instructions may be sent to the
-                  address provided.
+                  {t("home.newsletterSuccessHint")}
                 </p>
               </div>
               <div className="mt-6 border-t border-primary/15 pt-5">
                 <p className="font-display font-semibold text-foreground">
-                  Follow Settle CLT around Charlotte
+                  {t("home.newsletterFollow")}
                 </p>
                 <p className="mb-4 mt-1 text-sm text-muted-foreground">
-                  Pick your favorite platform for local finds between
-                  newsletters.
+                  {t("home.newsletterFollowHint")}
                 </p>
                 <SocialFollowLinks
                   surface="newsletter-success"
@@ -267,15 +278,14 @@ function NewsletterSignup() {
                 className="bg-primary text-primary-foreground font-semibold px-6 rounded-xl whitespace-nowrap"
                 disabled={subscribe.isPending}
               >
-                {subscribe.isPending ? "Joining..." : "Subscribe"}
+                {subscribe.isPending ? t("home.joining") : t("home.subscribe")}
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
             </form>
           )}
 
           <p className="text-xs text-muted-foreground mt-4">
-            By subscribing, you agree to receive the Settle CLT newsletter. Free
-            forever. Unsubscribe anytime.
+            {t("home.newsletterConsent")}
           </p>
         </div>
       </div>
@@ -294,8 +304,8 @@ function BlogPreview() {
     const dbItems = (dbPosts || []).map(p => ({
       id: p.slug || String(p.id),
       title: p.title,
-      excerpt: p.excerpt || "Read the full article on Settle CLT.",
-      category: p.category || "Charlotte Guide",
+      excerpt: p.excerpt || t("home.articleFallbackExcerpt"),
+      category: p.category || t("home.articleFallbackCategory"),
       date: p.publishedAt
         ? formatLocalizedDate(p.publishedAt, locale, {
             month: "short",
@@ -303,9 +313,9 @@ function BlogPreview() {
             year: "numeric",
           })
         : "",
-      readTime:
-        p.readTime ||
-        `${Math.ceil((p.content?.length || 800) / 1500)} min read`,
+      readTime: p.readTime || t("blog.minRead", {
+        count: Math.ceil((p.content?.length || 800) / 1500),
+      }),
       image: p.coverImage || undefined,
       slug: p.slug,
       source: "db" as const,
@@ -316,14 +326,19 @@ function BlogPreview() {
       title: a.title,
       excerpt: a.excerpt,
       category: a.category,
-      date: a.date || "",
-      readTime: a.readTime,
+      date: a.date
+        ? formatLocalizedDate(new Date(`${a.date} 1`), locale, {
+            month: "long",
+            year: "numeric",
+          })
+        : "",
+      readTime: t("blog.minRead", { count: Number.parseInt(a.readTime, 10) }),
       image: a.image || undefined,
       slug: undefined as string | undefined,
       source: "static" as const,
     }));
     return [...dbItems, ...staticItems];
-  }, [dbPosts, locale]);
+  }, [dbPosts, locale, t]);
 
   return (
     <section className="py-16 md:py-20">
@@ -400,13 +415,13 @@ function BlogPreview() {
                     {/* Category badge overlay */}
                     <div className="absolute bottom-3 left-3">
                       <span className="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white text-xs font-semibold">
-                        {a.category}
+                        {blogCategoryLabel(a.category, t)}
                       </span>
                     </div>
                     {idx === 0 && (
                       <div className="absolute top-3 right-3">
                         <span className="px-2.5 py-1 rounded-full bg-clt-gold text-clt-navy text-xs font-bold">
-                          Latest
+                          {t("home.latest")}
                         </span>
                       </div>
                     )}
@@ -431,7 +446,7 @@ function BlogPreview() {
                         )}
                       </div>
                       <span className="text-xs font-semibold text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
-                        Read <ArrowRight className="w-3 h-3" />
+                        {t("home.read")} <ArrowRight className="w-3 h-3" />
                       </span>
                     </div>
                   </div>
@@ -445,7 +460,7 @@ function BlogPreview() {
         <div className="mt-6 text-center sm:hidden">
           <Link href="/blog" className="no-underline">
             <Button variant="outline" className="gap-2">
-              View all blog posts <ArrowRight className="w-4 h-4" />
+              {t("home.viewAllBlogPosts")} <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>
         </div>
@@ -593,6 +608,7 @@ function ThisWeekInCLT() {
 }
 
 function TrendingInCLT() {
+  const { t } = useI18n();
   const { data: trending, isLoading } = trpc.trending.getTrending.useQuery({
     limit: 8,
     days: 30,
@@ -627,10 +643,10 @@ function TrendingInCLT() {
           <div>
             <h2 className="font-display font-bold text-xl md:text-2xl text-foreground flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-primary" />
-              Trending in CLT
+              {t("home.trendingTitle")}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Popular topics and tags people are exploring
+              {t("home.trendingDescription")}
             </p>
           </div>
         </div>
@@ -667,6 +683,7 @@ function TrendingInCLT() {
 }
 
 function CommunityActivity() {
+  const { t } = useI18n();
   return (
     <section className="py-14 md:py-18 bg-muted/30">
       <div className="container">
@@ -674,10 +691,10 @@ function CommunityActivity() {
           <div>
             <h2 className="font-display font-bold text-2xl md:text-3xl text-foreground flex items-center gap-2">
               <Activity className="w-6 h-6 text-primary" />
-              Community Activity
+              {t("home.communityActivity")}
             </h2>
             <p className="mt-2 text-muted-foreground">
-              See what Charlotte explorers are up to right now
+              {t("home.communityActivityDescription")}
             </p>
           </div>
         </div>
@@ -690,24 +707,24 @@ function CommunityActivity() {
 }
 
 function CTABanner() {
+  const { t } = useI18n();
   return (
     <section className="py-16 md:py-20">
       <div className="container">
         <div className="rounded-2xl bg-gradient-to-r from-clt-navy to-clt-teal-dark p-8 md:p-12 text-center">
           <Building2 className="w-10 h-10 text-clt-gold mx-auto mb-4" />
           <h2 className="font-display font-bold text-2xl md:text-3xl text-white">
-            Own a Charlotte Business?
+            {t("home.businessCtaTitle")}
           </h2>
           <p className="mt-3 text-white/70 max-w-lg mx-auto">
-            Get discovered by thousands of people moving to Charlotte. List your
-            business for free.
+            {t("home.businessCtaDescription")}
           </p>
           <Link href="/list-your-business">
             <Button
               size="lg"
               className="mt-6 bg-clt-gold text-clt-navy font-bold hover:opacity-90"
             >
-              List Your Business — Free
+              {t("home.businessCtaButton")}
             </Button>
           </Link>
         </div>
@@ -717,6 +734,7 @@ function CTABanner() {
 }
 
 function ForYouSection() {
+  const { t } = useI18n();
   const { user } = useAuth();
   const recommendations = trpc.recommendations.getForUser.useQuery(undefined, {
     enabled: !!user,
@@ -747,10 +765,10 @@ function ForYouSection() {
           </div>
           <div>
             <h2 className="font-display font-bold text-xl md:text-2xl text-foreground">
-              For You, {user.name?.split(" ")[0] || "Explorer"}
+              {t("home.forYou", { name: user.name?.split(" ")[0] || t("home.explorer") })}
             </h2>
             <p className="text-sm text-muted-foreground">
-              Based on your browsing and engagement
+              {t("home.forYouDescription")}
             </p>
           </div>
         </div>
@@ -759,7 +777,7 @@ function ForYouSection() {
         {preferences.data && preferences.data.length > 0 && (
           <div className="mb-6">
             <p className="text-xs text-muted-foreground mb-2">
-              Your top interests
+              {t("home.topInterests")}
             </p>
             <div className="flex flex-wrap gap-2">
               {preferences.data.slice(0, 8).map((p, i) => (
@@ -786,7 +804,7 @@ function ForYouSection() {
               <div className="flex items-center gap-2 mb-3">
                 <MapPin className="w-4 h-4 text-primary" />
                 <h3 className="font-semibold text-foreground text-sm">
-                  Neighborhoods for You
+                  {t("home.neighborhoodsForYou")}
                 </h3>
               </div>
               <div className="space-y-2">
@@ -814,7 +832,7 @@ function ForYouSection() {
               <div className="flex items-center gap-2 mb-3">
                 <Calendar className="w-4 h-4 text-primary" />
                 <h3 className="font-semibold text-foreground text-sm">
-                  Events You'd Like
+                  {t("home.eventsForYou")}
                 </h3>
               </div>
               <div className="space-y-2">
@@ -840,7 +858,7 @@ function ForYouSection() {
               <div className="flex items-center gap-2 mb-3">
                 <Building2 className="w-4 h-4 text-primary" />
                 <h3 className="font-semibold text-foreground text-sm">
-                  Places to Check Out
+                  {t("home.placesForYou")}
                 </h3>
               </div>
               <div className="space-y-2">
@@ -868,11 +886,9 @@ function ForYouSection() {
 export default function Home() {
   const { t } = useI18n();
   useSEO({
-    title: "Settle CLT \u2014 Your Complete Guide to Living in Charlotte, NC",
-    description:
-      "Explore 20 Charlotte neighborhoods, discover 700+ local businesses, find events, and get honest advice from locals.",
-    keywords:
-      "Charlotte NC, moving to Charlotte, Charlotte neighborhoods, Charlotte local guide, CLT relocation",
+    title: t("home.seoTitle"),
+    description: t("home.seoDescription"),
+    keywords: t("home.seoKeywords"),
     path: "/",
     noSuffix: true,
   });

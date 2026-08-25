@@ -19,10 +19,11 @@ import { MapView } from "@/components/Map";
 import { useI18n } from "@/i18n/I18nContext";
 import { formatLocalizedWholeCurrency, localeToLanguageTag } from "@/i18n/formatters";
 import { useSEO } from "@/hooks/useSEO";
+import { hydratedDynamicCanonicalPath } from "@/lib/dynamic-canonical";
 import { useStructuredData, buildLocalBusinessSchema, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
 import { trackBusinessAction } from "@/lib/mixpanel";
 import { toast } from "sonner";
-import NotFound from "@/pages/NotFound";
+import { NotFoundContent } from "@/pages/NotFound";
 
 function toSlug(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -240,7 +241,10 @@ export default function BusinessDetail() {
     keywords: service
       ? `${service.name}, ${service.name} Charlotte, ${service.name} Charlotte NC, ${category?.name || "local business"} in ${service.area}, ${service.area} Charlotte NC, Charlotte ${category?.name || "local business"}`
       : undefined,
-    path: slug ? `/directory/${slug}` : "/directory",
+    path: hydratedDynamicCanonicalPath(
+      `/directory/${slug}`,
+      service ? "found" : "missing"
+    ),
     noSuffix: true,
   });
 
@@ -303,7 +307,7 @@ export default function BusinessDetail() {
   }, [service, slug]);
 
   if (!service) {
-    return <NotFound />;
+    return <NotFoundContent />;
   }
 
   // Lightbox modal component
@@ -388,7 +392,7 @@ export default function BusinessDetail() {
 
   return (
     <>
-    <div className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background">
       {lightboxModal}
       {/* Breadcrumb */}
       <div className="bg-card border-b border-border">
@@ -817,7 +821,7 @@ export default function BusinessDetail() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
     <BusinessChatWidget
       serviceKey={slug}
       businessName={displayName || service.name}

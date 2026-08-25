@@ -181,8 +181,9 @@ describe("Phase 2: Compliance & Trust", () => {
       expect(contact).toContain("setMessage");
     });
 
-    it("should use notifyOwner to send contact form submissions", () => {
-      expect(contact).toContain("system.notifyOwner");
+    it("should use the dedicated public contact procedure", () => {
+      expect(contact).toContain("contact.submit");
+      expect(contact).not.toContain("system.notifyOwner");
     });
 
     it("should show success state after submission", () => {

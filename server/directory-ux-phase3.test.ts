@@ -13,15 +13,15 @@ const wishlist = readSource("client/src/components/WishlistButton.tsx");
 
 describe("Phase 3 directory UX contracts", () => {
   it("labels the default sort with the behavior users can expect", () => {
-    expect(directory).toContain("Sort: Recommended");
+    expect(directory).toContain('t("directory.sortRecommended")');
     expect(directory).not.toContain("Sort: Default");
   });
 
   it("exposes the visible result count and active filter count", () => {
     expect(directory).toContain("Math.min(visibleCount, filteredServices.length)");
-    expect(directory).toContain("Showing all");
+    expect(directory).toContain('t("directory.showingMap"');
     expect(directory).toContain("activeFilterCount");
-    expect(directory).toMatch(/Filters\s*\{activeFilterCount\s*>\s*0/);
+    expect(directory).toMatch(/t\("directory\.filters"\)\}\{activeFilterCount\s*>\s*0/);
   });
 
   it("keeps consent compact and its dismiss control touch accessible", () => {

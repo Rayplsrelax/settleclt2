@@ -1,9 +1,10 @@
 import { allNeighborhoods } from "../../shared/neighborhoods";
 import { SERVICES, SERVICE_CATEGORIES } from "../../shared/services";
 import { EVENT_CATEGORIES, SEED_EVENTS } from "../../shared/events";
+import { safeDecodeURIComponent } from "./safe-decode";
 
 export interface RouteLookups {
-  blogExists: (slug: string) => Promise<boolean>;
+  getPublishedBlog: (slug: string) => Promise<{ title: string } | null>;
   tagExists: (slug: string) => Promise<boolean>;
 }
 
@@ -78,43 +79,49 @@ export async function resolveSpaStatus(
   // /neighborhood/:id
   const neighborhoodMatch = path.match(/^\/neighborhood\/([^/]+)$/);
   if (neighborhoodMatch) {
-    const id = decodeURIComponent(neighborhoodMatch[1]);
+    const id = safeDecodeURIComponent(neighborhoodMatch[1]);
+    if (id === null) return 404;
     return allNeighborhoods.some(n => n.id === id) ? 200 : 404;
   }
 
   // /directory/category/:slug
   const dirCatMatch = path.match(/^\/directory\/category\/([^/]+)$/);
   if (dirCatMatch) {
-    const slug = decodeURIComponent(dirCatMatch[1]);
+    const slug = safeDecodeURIComponent(dirCatMatch[1]);
+    if (slug === null) return 404;
     return SERVICE_CATEGORIES.some(c => c.id === slug) ? 200 : 404;
   }
 
   // /events/category/:categoryId
   const evtCatMatch = path.match(/^\/events\/category\/([^/]+)$/);
   if (evtCatMatch) {
-    const catId = decodeURIComponent(evtCatMatch[1]);
+    const catId = safeDecodeURIComponent(evtCatMatch[1]);
+    if (catId === null) return 404;
     return EVENT_CATEGORIES.some(c => c.id === catId) ? 200 : 404;
   }
 
   // /directory/:slug — business detail
   const bizMatch = path.match(/^\/directory\/([^/]+)$/);
   if (bizMatch) {
-    const slug = decodeURIComponent(bizMatch[1]);
+    const slug = safeDecodeURIComponent(bizMatch[1]);
+    if (slug === null) return 404;
     return SERVICES.some(s => toSlug(s.name) === slug) ? 200 : 404;
   }
 
   // /blog/:slug — database-backed
   const blogMatch = path.match(/^\/blog\/([^/]+)$/);
   if (blogMatch) {
-    const slug = decodeURIComponent(blogMatch[1]);
+    const slug = safeDecodeURIComponent(blogMatch[1]);
+    if (slug === null) return 404;
     if (!lookups) return 200; // optimistic when no DB
-    return (await lookups.blogExists(slug)) ? 200 : 404;
+    return (await lookups.getPublishedBlog(slug)) ? 200 : 404;
   }
 
   // /tag/:slug — database-backed
   const tagMatch = path.match(/^\/tag\/([^/]+)$/);
   if (tagMatch) {
-    const slug = decodeURIComponent(tagMatch[1]);
+    const slug = safeDecodeURIComponent(tagMatch[1]);
+    if (slug === null) return 404;
     if (!lookups) return 200; // optimistic when no DB
     return (await lookups.tagExists(slug)) ? 200 : 404;
   }
@@ -126,9 +133,11 @@ export async function resolveSpaStatus(
 export async function getProductionLookups(): Promise<RouteLookups> {
   const { getBlogPostBySlug, getTagBySlug } = await import("../db");
   return {
-    blogExists: async (slug: string) => {
+    getPublishedBlog: async (slug: string) => {
       const post = await getBlogPostBySlug(slug);
-      return Boolean(post);
+      return post?.status === "published" && post.title
+        ? { title: post.title }
+        : null;
     },
     tagExists: async (slug: string) => {
       try {

@@ -121,13 +121,13 @@ describe("server-side route SEO contracts", () => {
     expect(viteCore).toContain("injectRouteSeo(");
     // Express 4 app.use("*") strips the route prefix into req.baseUrl,
     // so the SEO path must derive from req.originalUrl, never req.path.
-    expect(viteCore).toContain('req.originalUrl.split("?")[0].split("#")[0]');
+    expect(viteCore).toContain("normalizePath(req.originalUrl)");
     expect(viteCore).toContain('status === 404 ? "/404" : spaPath');
     expect(viteCore).toContain("blogTitles");
   });
 
-  it("blog slugs resolve titles from the database", () => {
-    expect(viteCore).toContain("getBlogPostBySlug");
+  it("blog slugs resolve published titles through the production lookup contract", () => {
+    expect(viteCore).toContain("getPublishedBlog");
     expect(routeSeoSource).toContain("blogTitles");
   });
 });

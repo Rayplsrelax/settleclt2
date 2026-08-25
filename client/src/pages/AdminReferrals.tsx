@@ -308,7 +308,7 @@ export default function AdminReferrals() {
                     {needsFollowUp} lead{needsFollowUp > 1 ? 's' : ''} overdue for follow-up
                   </p>
                   <p className="text-xs text-red-600 mt-0.5">
-                    These leads have been in "New" status for more than 48 hours. Respond promptly to maintain the 48-hour promise.
+                    These new leads are due for follow-up review. Respond when appropriate; no response timing is promised.
                   </p>
                 </div>
                 <Button size="sm" variant="outline" className="ml-auto border-red-300 text-red-700 hover:bg-red-100 shrink-0" onClick={() => { setStatusFilter('new'); setView('list'); }}>

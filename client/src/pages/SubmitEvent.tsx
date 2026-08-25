@@ -29,7 +29,7 @@ const CATEGORIES = [
 export default function SubmitEvent() {
   const { t } = useI18n();
   useSEO({
-    title: `${t("submitEvent.title")} — Settle CLT`,
+    title: t("submitEvent.title"),
     description: t("submitEvent.seoDescription"),
     keywords: "submit Charlotte event, Charlotte community events, add event Charlotte NC, CLT event calendar",
     path: "/submit-event",
@@ -137,7 +137,7 @@ export default function SubmitEvent() {
               <CalendarPlus className="w-14 h-14 text-purple-500 mx-auto mb-5" />
               <h1 className="font-display font-bold text-2xl text-foreground">{t("submitEvent.title")}</h1>
               <p className="mt-3 text-muted-foreground">
-                Sign in to share events happening in Charlotte with the community.
+                {t("submitEvent.signInDescription")}
               </p>
               <a
                 href={getLoginUrl()}

@@ -452,8 +452,9 @@ function HomeCTA({
                 </Link>
               </div>
               <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Free
-                service — no obligations. We match you with vetted local agents.
+                <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Submitting a
+                request does not guarantee a referral or response. You are under
+                no obligation to work with a referred professional.
               </p>
             </div>
           </div>
@@ -586,9 +587,9 @@ export default function Quiz() {
   useSEO({
     title: t("quiz.pageTitle"),
     description:
-      "Take our 2-minute quiz to find your perfect Charlotte neighborhood. Answer questions about budget, lifestyle, and priorities for personalized results.",
+      "Take our 2-minute quiz to compare Charlotte neighborhoods. Answer questions about budget, lifestyle, and priorities for personalized results.",
     keywords:
-      "Charlotte neighborhood quiz, which Charlotte neighborhood, best neighborhood Charlotte NC, Charlotte relocation quiz, where to live Charlotte",
+      "Charlotte neighborhood quiz, which Charlotte neighborhood, compare neighborhoods Charlotte NC, Charlotte relocation quiz, where to live Charlotte",
     path: "/quiz",
   });
 

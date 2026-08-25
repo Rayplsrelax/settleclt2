@@ -41,8 +41,8 @@ export default function Compare() {
   const { locale, t } = useI18n();
   useSEO({
     title: t("compare.pageTitle"),
-    description: "Compare up to 3 Charlotte neighborhoods side by side. See rent, walkability, schools, nightlife, transit, and more to find the best fit for your lifestyle.",
-    keywords: "compare Charlotte neighborhoods, Charlotte neighborhood comparison, best neighborhood Charlotte, Charlotte cost of living comparison",
+    description: "Compare up to 3 Charlotte neighborhoods side by side. See rent, walkability, schools, nightlife, transit, and more to assess fit for your lifestyle.",
+    keywords: "compare Charlotte neighborhoods, Charlotte neighborhood comparison, neighborhood fit Charlotte, Charlotte cost of living comparison",
     path: "/compare",
   });
 

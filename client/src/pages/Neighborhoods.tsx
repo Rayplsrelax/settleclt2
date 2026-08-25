@@ -152,9 +152,9 @@ function NeighborhoodCard({ n, isComparing, onToggleCompare, trackClickByName }:
 export default function Neighborhoods() {
   const { t } = useI18n();
   useSEO({
-    title: "Charlotte Neighborhoods Guide — Find Your Perfect Area",
-    description: "Explore 20 Charlotte neighborhoods with detailed guides, cost of living, local tips, and honest reviews. From South End to Ballantyne, find where you belong.",
-    keywords: "Charlotte neighborhoods, best neighborhoods Charlotte NC, where to live Charlotte, South End, NoDa, Uptown Charlotte",
+    title: t("neighborhoods.seoTitle"),
+    description: t("neighborhoods.seoDescription"),
+    keywords: t("neighborhoods.seoKeywords"),
     path: "/neighborhoods",
   });
 

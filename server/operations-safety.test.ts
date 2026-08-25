@@ -543,5 +543,15 @@ describe("scheduled operations and rollback documentation", () => {
     expect(checklist).toContain("/api/version");
     expect(checklist).toContain("Do not restore the database");
     expect(checklist).toContain("schema-compatible");
+    const rollbackBlock = checklist.match(/```bash\r?\n([\s\S]*?rollback-traffic\.sh[\s\S]*?)```/)?.[1];
+    expect(rollbackBlock).toBeTruthy();
+    const invocationLines = rollbackBlock!
+      .split(/\r?\n/)
+      .map(line => line.trim().replace(/\\$/, "").trim())
+      .filter(Boolean);
+    expect(invocationLines).toHaveLength(6);
+    expect(invocationLines[0]).toMatch(/rollback-traffic\.sh$/);
+    expect(readFileSync(resolve("ops/release/rollback-traffic.sh"), "utf8"))
+      .toContain("[[ $# -eq 5 ]]");
   });
 });

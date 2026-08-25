@@ -874,6 +874,10 @@ export async function getRecentActivity(limit = 20) {
     userId: number;
     userName: string | null;
     description: string;
+    action?: 'stamped' | 'attended' | 'commented' | 'bingo_progress';
+    entityName?: string;
+    targetType?: string;
+    completed?: boolean;
     detail: string | null;
     timestamp: Date;
   };
@@ -888,6 +892,8 @@ export async function getRecentActivity(limit = 20) {
       userId: s.userId,
       userName: s.userName,
       description: s.eventSlug ? `attended ${placeName}` : `stamped ${placeName}`,
+      action: s.eventSlug ? 'attended' : 'stamped',
+      entityName: placeName,
       detail: s.neighborhoodId || null,
       timestamp: s.createdAt,
     });
@@ -901,6 +907,9 @@ export async function getRecentActivity(limit = 20) {
       userId: c.userId,
       userName: c.userName,
       description: `commented on ${c.targetType} ${c.targetId}`,
+      action: 'commented',
+      entityName: c.targetId,
+      targetType: c.targetType,
       detail: preview,
       timestamp: c.createdAt,
     });
@@ -913,6 +922,9 @@ export async function getRecentActivity(limit = 20) {
       userId: b.userId,
       userName: b.userName,
       description: b.cardTitle ? `made progress on "${b.cardTitle}"` : 'made bingo progress',
+      action: 'bingo_progress',
+      entityName: b.cardTitle || undefined,
+      completed: Boolean(b.completedAt),
       detail: b.completedAt ? 'Completed!' : null,
       timestamp: b.updatedAt,
     });
@@ -2170,13 +2182,13 @@ export async function getBusinessClaimStats() {
   return { total, pending, approved, rejected };
 }
 
-export async function hasExistingClaim(serviceKey: string, email: string) {
+export async function hasExistingClaim(serviceKey: string, userId: number) {
   const db = await getDb();
   if (!db) return false;
   const existing = await db.select().from(businessClaims)
     .where(and(
       eq(businessClaims.serviceKey, serviceKey),
-      eq(businessClaims.claimantEmail, email)
+      eq(businessClaims.userId, userId)
     ));
   return existing.length > 0;
 }

@@ -5,22 +5,16 @@ import { useLocation } from "wouter";
 import { useSEO } from "@/hooks/useSEO";
 import { useI18n } from "@/i18n/I18nContext";
 
-export default function NotFound() {
+export function NotFoundContent() {
   const { t } = useI18n();
   const [, setLocation] = useLocation();
-
-  useSEO({
-    title: "Page Not Found (404)",
-    description: "The page you're looking for doesn't exist on Settle CLT. Head back home to explore Charlotte neighborhoods, businesses, and events.",
-    path: "/404",
-  });
 
   const handleGoHome = () => {
     setLocation("/");
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+    <main className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
       <Card className="w-full max-w-lg mx-4 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
         <CardContent className="pt-8 pb-8 text-center">
           <div className="flex justify-center mb-6">
@@ -30,11 +24,16 @@ export default function NotFound() {
             </div>
           </div>
 
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">404</h1>
+          <p
+            className="text-4xl font-bold text-slate-900 mb-2"
+            aria-hidden="true"
+          >
+            404
+          </p>
 
-          <h2 className="text-xl font-semibold text-slate-700 mb-4">
+          <h1 className="text-xl font-semibold text-slate-700 mb-4">
             {t("notFound.title")}
-          </h2>
+          </h1>
 
           <p className="text-slate-600 mb-8 leading-relaxed">
             {t("notFound.description")}
@@ -54,6 +53,16 @@ export default function NotFound() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
+}
+
+export default function NotFound() {
+  const { t } = useI18n();
+  useSEO({
+    title: t("notFound.seoTitle"),
+    description: t("notFound.seoDescription"),
+    path: "/404",
+  });
+  return <NotFoundContent />;
 }

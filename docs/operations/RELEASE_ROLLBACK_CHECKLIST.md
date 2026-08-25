@@ -24,8 +24,11 @@ Run only after the approval gate:
 
 ```bash
 /opt/settleclt2/ops/release/rollback-traffic.sh \
-  /opt/settleclt2 \
-  /etc/nginx/settleclt-active-upstream.conf
+  /etc/nginx/sites-enabled/settleclt-com \
+  /var/backups/settleclt-nginx \
+  10.10.10.101 \
+  blue \
+  PREVIOUS_FULL_40_CHARACTER_SHA
 ```
 
 The command smoke-tests the previous slot, atomically restores its upstream, runs `nginx -t`, and reloads Nginx. If validation or reload fails, stop and inspect the preserved configuration; do not improvise another traffic change.

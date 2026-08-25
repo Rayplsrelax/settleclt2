@@ -25,6 +25,10 @@ import {
   createOperationalMetrics,
   registerOperationalSummaryRoute,
 } from "../operational-metrics";
+import {
+  createStrictPublicFormLimiter,
+  mountStrictPublicFormLimiter,
+} from "./public-form-rate-limit";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -448,20 +452,8 @@ async function startServer() {
   // Hermes revenue ops agent REST API (Bearer token auth)
   app.use("/api/hermes", express.json({ limit: "2mb" }), hermesRouter);
 
-  // Stricter rate limit for form submissions (contact, event submit, business claim)
-  const formLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 10, // limit each IP to 10 form submissions per hour
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: { error: "Too many submissions, please try again later." },
-  });
-
-  // Apply form limiter to mutation-heavy tRPC paths
-  app.use("/api/trpc/event.submit", formLimiter);
-  app.use("/api/trpc/system.notifyOwner", formLimiter);
-  app.use("/api/trpc/claim.submit", formLimiter);
-  app.use("/api/trpc/newsletter.subscribe", formLimiter);
+  // Apply the same strict bucket to every public form mutation by exact tRPC path.
+  mountStrictPublicFormLimiter(app, createStrictPublicFormLimiter());
 
   // tRPC API
   app.use(

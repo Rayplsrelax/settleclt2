@@ -33,9 +33,9 @@ describe("mobile homepage performance", () => {
 
     expect(search).toContain('"loading" | "ready" | "error"');
     expect(search).toContain(".catch(error =>");
-    expect(search).toContain("Loading search data");
-    expect(search).toContain("Search data couldn't be loaded");
-    expect(search).toContain("Retry");
+    expect(search).toContain('t("search.loading")');
+    expect(search).toContain('t("search.loadError")');
+    expect(search).toContain('t("search.retry")');
   });
 
   it("reloads the app when a deployment makes lazy search chunks stale", () => {
@@ -46,7 +46,7 @@ describe("mobile homepage performance", () => {
       'setSearchIndexRecovery(isStaleChunkError(error) ? "reload" : "retry")'
     );
     expect(search).toContain("window.location.reload()");
-    expect(search).toContain("Reload search");
+    expect(search).toContain('t("search.reload")');
   });
 
   it("defers passport neighborhood data until a stamp is clicked", () => {

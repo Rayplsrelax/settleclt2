@@ -87,9 +87,27 @@ describe("SPA HTTP status resolution", () => {
     ).resolves.toBe(404);
   });
 
+  it("returns 404 instead of throwing for malformed encoding in every dynamic family", async () => {
+    const lookups = {
+      getPublishedBlog: async () => ({ title: "Fixture post" }),
+      tagExists: async () => true,
+    };
+    for (const path of [
+      "/neighborhood/%E0%A4%A",
+      "/directory/category/%E0%A4%A",
+      "/events/category/%E0%A4%A",
+      "/directory/%E0%A4%A",
+      "/blog/%E0%A4%A",
+      "/tag/%E0%A4%A",
+    ]) {
+      await expect(resolveSpaStatus(path, lookups), path).resolves.toBe(404);
+    }
+  });
+
   it("uses injected lookups for database-backed slugs", async () => {
     const lookups = {
-      blogExists: async (slug: string) => slug === "known-post",
+      getPublishedBlog: async (slug: string) =>
+        slug === "known-post" ? { title: "Known post" } : null,
       tagExists: async (slug: string) => slug === "known-tag",
     };
 

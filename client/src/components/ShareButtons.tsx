@@ -7,6 +7,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { toast } from "sonner";
+import { useI18n } from "@/i18n/I18nContext";
 
 interface ShareButtonsProps {
   /** The page title to share */
@@ -28,22 +29,24 @@ export default function ShareButtons({
   compact = false,
   className = "",
 }: ShareButtonsProps) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
-  const shareUrl = url || (typeof window !== "undefined" ? window.location.href : "");
+  const shareUrl =
+    url || (typeof window !== "undefined" ? window.location.href : "");
   const shareText = description ? `${title} — ${description}` : title;
 
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
   const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-  const emailUrl = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`Check this out: ${shareText}\n\n${shareUrl}`)}`;
+  const emailUrl = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`${t("share.emailBody", { text: shareText })}\n\n${shareUrl}`)}`;
 
   async function handleCopyLink() {
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      toast.success("Link copied to clipboard!");
+      toast.success(t("share.copySuccess"));
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error("Failed to copy link");
+      toast.error(t("share.copyError"));
     }
   }
 
@@ -75,7 +78,7 @@ export default function ShareButtons({
       color: "hover:bg-blue-50 hover:text-blue-600",
     },
     {
-      label: "Email",
+      label: t("share.email"),
       icon: <Mail className="w-4 h-4" />,
       href: emailUrl,
       color: "hover:bg-amber-50 hover:text-amber-600",
@@ -90,25 +93,22 @@ export default function ShareButtons({
             variant="ghost"
             size="icon"
             className={`h-8 w-8 text-muted-foreground hover:text-foreground ${className}`}
-            title="Share"
+            title={t("share.share")}
+            aria-label={t("share.share")}
           >
             <Share2 className="w-4 h-4" />
           </Button>
         ) : (
-          <Button
-            variant="outline"
-            size="sm"
-            className={`gap-2 ${className}`}
-          >
+          <Button variant="outline" size="sm" className={`gap-2 ${className}`}>
             <Share2 className="w-4 h-4" />
-            Share
+            {t("share.share")}
           </Button>
         )}
       </PopoverTrigger>
       <PopoverContent className="w-52 p-2" align="end">
         <div className="space-y-1">
           <p className="text-xs font-medium text-muted-foreground px-2 py-1">
-            Share this page
+            {t("share.page")}
           </p>
 
           {/* Native share (mobile) */}
@@ -118,19 +118,23 @@ export default function ShareButtons({
               className="w-full flex items-center gap-3 px-2 py-2 rounded-md text-sm hover:bg-primary/10 hover:text-primary transition-colors"
             >
               <Share2 className="w-4 h-4" />
-              Share via...
+              {t("share.via")}
             </button>
           )}
 
           {/* Social links */}
-          {shareOptions.map((opt) => (
+          {shareOptions.map(opt => (
             <button
               key={opt.label}
               onClick={() => {
-                if (opt.href.startsWith('mailto:')) {
+                if (opt.href.startsWith("mailto:")) {
                   window.location.href = opt.href;
                 } else {
-                  window.open(opt.href, '_blank', 'width=600,height=400,scrollbars=yes,resizable=yes');
+                  window.open(
+                    opt.href,
+                    "_blank",
+                    "width=600,height=400,scrollbars=yes,resizable=yes"
+                  );
                 }
               }}
               className={`w-full flex items-center gap-3 px-2 py-2 rounded-md text-sm transition-colors text-foreground ${opt.color}`}
@@ -150,7 +154,7 @@ export default function ShareButtons({
             ) : (
               <Link2 className="w-4 h-4" />
             )}
-            {copied ? "Copied!" : "Copy Link"}
+            {copied ? t("share.copied") : t("share.copy")}
           </button>
         </div>
       </PopoverContent>

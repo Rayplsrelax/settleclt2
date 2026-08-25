@@ -9,6 +9,7 @@ import { useEffect, useRef } from "react";
 import { useI18n } from "@/i18n/I18nContext";
 import type { TranslationKey } from "@/i18n/locales/en";
 import { useSEO } from "@/hooks/useSEO";
+import { hydratedDynamicCanonicalPath } from "@/lib/dynamic-canonical";
 
 const CONTENT_TYPE_ICONS: Record<string, { icon: typeof Tag; labelKey: TranslationKey }> = {
   event: { icon: Calendar, labelKey: "tag.events" },
@@ -60,13 +61,17 @@ export default function TagPage() {
     keywords: locale === "en" && tag?.name
       ? `${tag.name}, Charlotte NC, Charlotte tag`
       : undefined,
-    path: slug ? `/tag/${slug}` : "/tag",
+    path: hydratedDynamicCanonicalPath(
+      `/tag/${slug}`,
+      tagLoading ? "loading" : tag ? "found" : "missing"
+    ),
   });
 
   if (isLoading) {
     return (
       <PageLayout>
         <div className="container py-16">
+          <h1 className="sr-only">{t("tag.fallbackTitle")}</h1>
           <div className="animate-pulse space-y-6">
             <div className="h-10 w-48 bg-muted rounded" />
             <div className="h-6 w-96 bg-muted rounded" />

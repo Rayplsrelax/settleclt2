@@ -39,32 +39,33 @@ import { useI18n } from "@/i18n/I18nContext";
 import { formatLocalizedDate } from "@/i18n/formatters";
 import type { Locale } from "@shared/i18n";
 
-const CATEGORIES = [
-  { value: "", label: "All Events" },
-  { value: "concerts", label: "Concerts & Music" },
-  { value: "food-drink", label: "Food & Drink" },
-  { value: "sports", label: "Sports" },
-  { value: "arts-culture", label: "Arts & Culture" },
-  { value: "festivals", label: "Festivals" },
-  { value: "family", label: "Family & Kids" },
-  { value: "nightlife", label: "Nightlife" },
-  { value: "free", label: "Free Events" },
-  { value: "markets", label: "Markets & Pop-ups" },
-  { value: "community", label: "Community" },
-  // Recurring community event categories
-  { value: "run-walk", label: "Run & Walk Clubs" },
-  { value: "yoga-fitness", label: "Yoga & Fitness" },
-  { value: "farmers-markets", label: "Farmers Markets" },
-  { value: "game-nights", label: "Game Nights & Trivia" },
-  { value: "veteran", label: "Veteran & Military" },
-  { value: "music-jam", label: "Live Music & Open Mic" },
-  { value: "kids-storytime", label: "Kids & Storytime" },
-  { value: "meditation", label: "Meditation & Mindfulness" },
-  { value: "dog-meetups", label: "Dog Meetups" },
-  { value: "makers-crafts", label: "Makers & Crafts" },
-  { value: "neighborhood", label: "Neighborhood Events" },
-  { value: "professional", label: "Professional & Networking" },
-] as const;
+import type { TranslationKey } from "@/i18n/locales/en";
+
+const CATEGORIES: ReadonlyArray<{ value: string; labelKey: TranslationKey }> = [
+  { value: "", labelKey: "events.category.all" },
+  { value: "concerts", labelKey: "events.category.concerts" },
+  { value: "food-drink", labelKey: "events.category.foodDrink" },
+  { value: "sports", labelKey: "events.category.sports" },
+  { value: "arts-culture", labelKey: "events.category.artsCulture" },
+  { value: "festivals", labelKey: "events.category.festivals" },
+  { value: "family", labelKey: "events.category.family" },
+  { value: "nightlife", labelKey: "events.category.nightlife" },
+  { value: "free", labelKey: "events.category.free" },
+  { value: "markets", labelKey: "events.category.markets" },
+  { value: "community", labelKey: "events.category.community" },
+  { value: "run-walk", labelKey: "events.category.runWalk" },
+  { value: "yoga-fitness", labelKey: "events.category.yogaFitness" },
+  { value: "farmers-markets", labelKey: "events.category.farmersMarkets" },
+  { value: "game-nights", labelKey: "events.category.gameNights" },
+  { value: "veteran", labelKey: "events.category.veteran" },
+  { value: "music-jam", labelKey: "events.category.musicJam" },
+  { value: "kids-storytime", labelKey: "events.category.kidsStorytime" },
+  { value: "meditation", labelKey: "events.category.meditation" },
+  { value: "dog-meetups", labelKey: "events.category.dogMeetups" },
+  { value: "makers-crafts", labelKey: "events.category.makersCrafts" },
+  { value: "neighborhood", labelKey: "events.category.neighborhood" },
+  { value: "professional", labelKey: "events.category.professional" },
+];
 
 const CATEGORY_COLORS: Record<string, string> = {
   concerts: "bg-purple-100 text-purple-800 border-purple-200",
@@ -170,8 +171,9 @@ function formatFullDate(
   });
 }
 
-function getCategoryLabel(value: string) {
-  return CATEGORIES.find(c => c.value === value)?.label ?? value;
+function getCategoryLabel(value: string, t: (key: TranslationKey) => string) {
+  const key = CATEGORIES.find(c => c.value === value)?.labelKey;
+  return key ? t(key) : value;
 }
 
 type EventType = {
@@ -233,7 +235,7 @@ function EventCard({
               <Badge
                 className={`text-xs font-semibold border border-amber-300 ${PROMOTED_STYLES[promoted.level] ?? PROMOTED_STYLES.boost}`}
               >
-                ★ Promoted
+                ★ {t("events.promoted")}
               </Badge>
             )}
             <Badge
@@ -241,7 +243,7 @@ function EventCard({
               className={`text-xs font-medium ${CATEGORY_COLORS[event.category] ?? "bg-gray-100 text-gray-800"}`}
             >
               {CATEGORY_EMOJI[event.category]}{" "}
-              {getCategoryLabel(event.category)}
+              {getCategoryLabel(event.category, t)}
             </Badge>
           </div>
           <QuickStampButton
@@ -305,11 +307,9 @@ function EventCard({
 export default function Events() {
   const { locale, t } = useI18n();
   useSEO({
-    title: "Charlotte Events This Week & Weekend: Things to Do in CLT (2026)",
-    description:
-      "Your complete Charlotte events calendar. Find concerts, festivals, sports, food events, family activities, and things to do in Charlotte NC this week and weekend.",
-    keywords:
-      "Charlotte events, events in Charlotte NC, things to do in Charlotte this weekend, Charlotte events this weekend, Charlotte concerts, Charlotte festivals, what to do in Charlotte",
+    title: t("events.seoTitle"),
+    description: t("events.seoDescription"),
+    keywords: t("events.seoKeywords"),
     path: "/events",
   });
 
@@ -539,20 +539,13 @@ export default function Events() {
       <section className="bg-muted/30 border-b border-border">
         <div className="container py-6 max-w-4xl">
           <h2 className="font-display font-bold text-xl text-foreground mb-3">
-            Things to Do in Charlotte, NC This Week & Weekend
+            {t("events.seoHeading")}
           </h2>
           <p className="text-sm text-muted-foreground leading-relaxed mb-2">
-            Looking for things to do in Charlotte this weekend? Settle CLT's
-            events calendar covers everything happening in the Queen City — from
-            live concerts and music festivals to family-friendly activities,
-            free community events, food and drink experiences, professional
-            sports games, and seasonal festivals.
+            {t("events.seoParagraph1")}
           </p>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Whether you just moved to Charlotte or you're a lifelong local, use
-            this page to find Charlotte events this week, plan your weekend, and
-            discover new experiences across every neighborhood. Filter by date,
-            category, or search for specific venues and artists.
+            {t("events.seoParagraph2")}
           </p>
         </div>
       </section>
@@ -566,7 +559,7 @@ export default function Events() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 type="text"
-                aria-label="Search events, venues, and neighborhoods"
+                aria-label={t("events.searchAria")}
                 placeholder={t("events.searchPlaceholder")}
                 value={searchQuery}
                 onChange={e => {
@@ -583,7 +576,7 @@ export default function Events() {
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  aria-label="Clear event search"
+                  aria-label={t("events.clearSearchAria")}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -603,7 +596,7 @@ export default function Events() {
               }`}
             >
               <CalendarRange className="w-4 h-4" />
-              Date Range
+              {t("events.dateRange")}
               {(dateFrom || dateTo) && (
                 <span className="w-2 h-2 rounded-full bg-primary" />
               )}
@@ -616,7 +609,7 @@ export default function Events() {
                 className="text-muted-foreground hover:text-foreground gap-1 shrink-0"
               >
                 <X className="w-3.5 h-3.5" />
-                Clear all
+                {t("events.clearAll")}
               </Button>
             )}
           </div>
@@ -632,7 +625,7 @@ export default function Events() {
                   htmlFor="events-date-from"
                   className="text-xs font-medium text-muted-foreground"
                 >
-                  From
+                  {t("events.from")}
                 </label>
                 <Input
                   id="events-date-from"
@@ -647,7 +640,7 @@ export default function Events() {
                   htmlFor="events-date-to"
                   className="text-xs font-medium text-muted-foreground"
                 >
-                  To
+                  {t("events.to")}
                 </label>
                 <Input
                   id="events-date-to"
@@ -667,7 +660,7 @@ export default function Events() {
                   }}
                   className="text-xs text-muted-foreground h-8"
                 >
-                  Clear dates
+                  {t("events.clearDates")}
                 </Button>
               )}
             </div>
@@ -684,7 +677,7 @@ export default function Events() {
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               }`}
             >
-              🔁 Recurring Events
+              🔁 {t("events.recurringEvents")}
             </button>
             <button
               onClick={() => setNewcomerFriendlyOnly(!newcomerFriendlyOnly)}
@@ -695,7 +688,7 @@ export default function Events() {
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               }`}
             >
-              🌟 Newcomer Friendly
+              🌟 {t("events.newcomerFriendly")}
             </button>
           </div>
 
@@ -722,7 +715,7 @@ export default function Events() {
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
                 }`}
               >
-                {cat.value && CATEGORY_EMOJI[cat.value]} {cat.label}
+                {cat.value && CATEGORY_EMOJI[cat.value]} {t(cat.labelKey)}
               </button>
             ))}
           </div>
@@ -751,14 +744,14 @@ export default function Events() {
           <div className="text-center py-20">
             <Calendar className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
             <h2 className="font-display font-bold text-2xl text-foreground mb-2">
-              {hasActiveFilters ? "No matching events" : "No events yet"}
+              {hasActiveFilters ? t("events.noMatching") : t("events.noEventsYet")}
             </h2>
             <p className="text-muted-foreground max-w-md mx-auto">
               {hasActiveFilters
-                ? "Try adjusting your search, date range, or category filters."
+                ? t("events.noMatchingHint")
                 : selectedCategory
-                  ? "No events found in this category. Try a different filter or check back soon."
-                  : "Events are coming soon! Check back for concerts, festivals, food events, and more happening in Charlotte."}
+                  ? t("events.noCategoryHint")
+                  : t("events.comingSoon")}
             </p>
             {hasActiveFilters && (
               <Button
@@ -852,7 +845,7 @@ export default function Events() {
                           className="w-6 h-6 rounded-full object-cover"
                         />
                       )}
-                      ★ Promoted Event
+                      ★ {t("events.promotedEvent")}
                     </div>
                     {promo.customHeadline && (
                       <p className="mt-1 font-display font-bold text-base text-foreground">
@@ -874,7 +867,7 @@ export default function Events() {
                     className={`text-xs ${CATEGORY_COLORS[selectedEvent.category] ?? ""}`}
                   >
                     {CATEGORY_EMOJI[selectedEvent.category]}{" "}
-                    {getCategoryLabel(selectedEvent.category)}
+                    {getCategoryLabel(selectedEvent.category, t)}
                   </Badge>
                 </div>
                 <DialogTitle className="font-display text-xl">
@@ -949,8 +942,7 @@ export default function Events() {
                               })
                             }
                           >
-                            <Navigation className="w-3.5 h-3.5" /> Get
-                            Directions
+                            <Navigation className="w-3.5 h-3.5" /> {t("events.directions")}
                           </a>
                         )}
                       </div>
@@ -970,7 +962,7 @@ export default function Events() {
                     <div className="flex items-center gap-3 text-sm">
                       <Clock className="w-4 h-4 text-primary shrink-0" />
                       <span className="text-muted-foreground">
-                        Recurring event
+                        {t("events.recurring")}
                       </span>
                     </div>
                   )}
@@ -1001,7 +993,7 @@ export default function Events() {
                   >
                     <Button className="gap-2">
                       <ExternalLink className="w-4 h-4" />
-                      Get Tickets / More Info
+                      {t("events.moreInfo")}
                     </Button>
                   </a>
                 )}

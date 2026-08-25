@@ -1,5 +1,5 @@
 import PageLayout from "@/components/PageLayout";
-import { Link, useParams, useLocation } from "wouter";
+import { Link, useParams } from "wouter";
 import { allNeighborhoods } from "@shared/neighborhoods";
 import { SERVICES, SERVICE_CATEGORIES, type Service } from "@shared/services";
 import { useMyNeighborhood } from "@/hooks/useMyNeighborhood";
@@ -23,7 +23,10 @@ import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import { useI18n } from "@/i18n/I18nContext";
 import { formatLocalizedWholeCurrency } from "@/i18n/formatters";
 import type { TranslationKey } from "@/i18n/locales/en";
+import { HOUSING_COPY } from "@shared/housing-copy";
 import { useSEO } from "@/hooks/useSEO";
+import { hydratedDynamicCanonicalPath } from "@/lib/dynamic-canonical";
+import { NotFoundContent } from "@/pages/NotFound";
 import { useStructuredData, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
 import {
   RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
@@ -77,8 +80,58 @@ const PIN_COLORS: Record<string, string> = {
 export default function NeighborhoodDetail() {
   const { locale, t } = useI18n();
   const params = useParams<{ id: string }>();
-  const [, setLocation] = useLocation();
   const n = allNeighborhoods.find((nb) => nb.id === params.id);
+
+  useSEO({
+    title: n
+      ? t("neighborhoodDetail.seoTitle", { name: n.name })
+      : t("neighborhoods.seoTitle"),
+    description: n
+      ? t("neighborhoodDetail.seoDescription", {
+          name: n.name,
+          vibe: n.vibe,
+          bestFor: n.bestFor,
+        })
+      : t("neighborhoods.seoDescription"),
+    keywords: n
+      ? t("neighborhoodDetail.seoKeywords", {
+          nameLower: n.name.toLowerCase(),
+        })
+      : t("neighborhoods.seoKeywords"),
+    path: hydratedDynamicCanonicalPath(
+      `/neighborhood/${params.id ?? ""}`,
+      n ? "found" : "missing"
+    ),
+    ogImage: n?.photoUrls?.[0],
+  });
+
+  useStructuredData(
+    n
+      ? [{
+          "@context": "https://schema.org",
+          ...buildBreadcrumbSchema([
+            { name: "Home", url: "https://settleclt.com" },
+            { name: "Neighborhoods", url: "https://settleclt.com/neighborhoods" },
+            { name: n.name, url: `https://settleclt.com/neighborhood/${n.id}` },
+          ]),
+        }]
+      : null
+  );
+
+  if (!n) return <NotFoundContent />;
+
+  return <NeighborhoodDetailContent key={n.id} n={n} locale={locale} t={t} />;
+}
+
+function NeighborhoodDetailContent({
+  n,
+  locale,
+  t,
+}: {
+  n: (typeof allNeighborhoods)[number];
+  locale: ReturnType<typeof useI18n>["locale"];
+  t: ReturnType<typeof useI18n>["t"];
+}) {
   const { myNeighborhood, setMyNeighborhood, clearMyNeighborhood } = useMyNeighborhood();
   const { trackClickByName } = useTagTrackingWithLookup();
   const [selectedCity, setSelectedCity] = useState<string>("nyc");
@@ -101,33 +154,6 @@ export default function NeighborhoodDetail() {
     Object.values(sectionRefs.current).forEach(el => { if (el) observer.observe(el); });
     return () => observer.disconnect();
   }, [n]);
-
-  useSEO({
-    title: n ? `${n.name} Charlotte NC Neighborhood Guide (2026): Vibe, Costs & Reviews` : "Charlotte Neighborhood Guide",
-    description: n
-      ? `${n.name} Charlotte NC: ${n.vibe}. ${n.bestFor} See real costs, crime stats, schools, day-in-the-life, honest pros and cons, and local businesses in ${n.name}.`
-      : "Explore Charlotte NC neighborhoods with detailed guides, real costs, and honest reviews.",
-    keywords: n
-      ? `${n.name.toLowerCase()}, ${n.name.toLowerCase()} charlotte nc, ${n.name.toLowerCase()} neighborhood guide, ${n.name.toLowerCase()} charlotte, moving to ${n.name.toLowerCase()}, ${n.name.toLowerCase()} apartments, ${n.name.toLowerCase()} restaurants, charlotte nc neighborhoods`
-      : "Charlotte NC neighborhoods, Charlotte neighborhood guide, moving to Charlotte",
-    path: n ? `/neighborhood/${n.id}` : "/neighborhoods",
-    ogImage: n?.photoUrls?.[0],
-  });
-
-  useStructuredData(
-    n
-      ? [{
-          "@context": "https://schema.org",
-          ...buildBreadcrumbSchema([
-            { name: "Home", url: "https://settleclt.com" },
-            { name: "Neighborhoods", url: "https://settleclt.com/neighborhoods" },
-            { name: n.name, url: `https://settleclt.com/neighborhood/${n.id}` },
-          ]),
-        }]
-      : null
-  );
-
-  if (!n) { setLocation("/404"); return null; }
 
   const isMyNeighborhood = myNeighborhood === n.id;
   const handleSetMyNeighborhood = () => {
@@ -177,13 +203,13 @@ export default function NeighborhoodDetail() {
 
   // Radar chart data — normalize scores to 0-100 scale
   const radarData = useMemo(() => [
-    { stat: "Walk", value: n.stats.walkScore, fullMark: 100 },
-    { stat: "Nightlife", value: n.stats.nightlifeLevel === "active" ? 90 : n.stats.nightlifeLevel === "moderate" ? 60 : 30, fullMark: 100 },
-    { stat: "Family", value: n.stats.familyScore * 20, fullMark: 100 },
-    { stat: "Pet", value: n.stats.petFriendly * 20, fullMark: 100 },
-    { stat: "Schools", value: n.stats.schoolTier === "A+" ? 100 : n.stats.schoolTier === "A" ? 90 : n.stats.schoolTier === "B+" ? 80 : n.stats.schoolTier === "B" ? 70 : 60, fullMark: 100 },
-    { stat: "Safety", value: n.stats.crimeLevel === "low" ? 90 : n.stats.crimeLevel === "medium" ? 60 : 30, fullMark: 100 },
-  ], [n]);
+    { stat: t("neighborhoodDetail.radarWalk"), value: n.stats.walkScore, fullMark: 100 },
+    { stat: t("neighborhoodDetail.radarNightlife"), value: n.stats.nightlifeLevel === "active" ? 90 : n.stats.nightlifeLevel === "moderate" ? 60 : 30, fullMark: 100 },
+    { stat: t("neighborhoodDetail.radarFamily"), value: n.stats.familyScore * 20, fullMark: 100 },
+    { stat: t("neighborhoodDetail.radarPet"), value: n.stats.petFriendly * 20, fullMark: 100 },
+    { stat: t("neighborhoodDetail.radarSchools"), value: n.stats.schoolTier === "A+" ? 100 : n.stats.schoolTier === "A" ? 90 : n.stats.schoolTier === "B+" ? 80 : n.stats.schoolTier === "B" ? 70 : 60, fullMark: 100 },
+    { stat: t("neighborhoodDetail.radarSafety"), value: n.stats.crimeLevel === "low" ? 90 : n.stats.crimeLevel === "medium" ? 60 : 30, fullMark: 100 },
+  ], [n, t]);
 
   // Map center from keyPlaces average
   const mapCenter = useMemo(() => {
@@ -210,15 +236,15 @@ export default function NeighborhoodDetail() {
         {/* Carousel controls */}
         {n.photoUrls.length > 1 && (
           <>
-            <button onClick={() => setHeroIdx(i => (i - 1 + n.photoUrls.length) % n.photoUrls.length)} className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition">
+            <button aria-label={t("neighborhoodDetail.previousPhoto")} onClick={() => setHeroIdx(i => (i - 1 + n.photoUrls.length) % n.photoUrls.length)} className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition">
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <button onClick={() => setHeroIdx(i => (i + 1) % n.photoUrls.length)} className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition">
+            <button aria-label={t("neighborhoodDetail.nextPhoto")} onClick={() => setHeroIdx(i => (i + 1) % n.photoUrls.length)} className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition">
               <ChevronRight className="w-5 h-5" />
             </button>
             <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 flex gap-2">
               {n.photoUrls.map((_, i) => (
-                <button key={i} onClick={() => setHeroIdx(i)} className={`w-2.5 h-2.5 rounded-full transition ${i === heroIdx ? "bg-white" : "bg-white/40"}`} />
+                <button key={i} aria-label={t("neighborhoodDetail.photoButton", { number: i + 1 })} aria-current={i === heroIdx ? "true" : undefined} onClick={() => setHeroIdx(i)} className={`w-2.5 h-2.5 rounded-full transition ${i === heroIdx ? "bg-white" : "bg-white/40"}`} />
               ))}
             </div>
           </>
@@ -300,15 +326,15 @@ export default function NeighborhoodDetail() {
             </div>
             {/* Key stats grid */}
             <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3">
-              <StatCard icon={<DollarSign className="w-4 h-4" />} label="Avg Rent" value={n.stats.avgRent} />
-              <StatCard icon={<Home className="w-4 h-4" />} label="Home Price" value={n.stats.medianHomePrice} />
-              <StatCard icon={<TrendingUp className="w-4 h-4" />} label="Walk Score" value={String(n.stats.walkScore)} highlight />
-              <StatCard icon={<Train className="w-4 h-4" />} label="To Uptown" value={n.stats.commuteToUptown} />
-              <StatCard icon={<GraduationCap className="w-4 h-4" />} label="Schools" value={n.stats.schoolTier} />
-              <StatCard icon={<Shield className="w-4 h-4" />} label="Crime" value={n.stats.crimeLevel} />
-              <StatCard icon={<Moon className="w-4 h-4" />} label="Nightlife" value={n.stats.nightlifeLevel} />
-              <StatCard icon={<Dog className="w-4 h-4" />} label="Pet Score" value={`${n.stats.petFriendly}/5`} />
-              <StatCard icon={<Baby className="w-4 h-4" />} label="Family" value={`${n.stats.familyScore}/5`} />
+              <StatCard icon={<DollarSign className="w-4 h-4" />} label={t("neighborhoodDetail.avgRent")} value={n.stats.avgRent} />
+              <StatCard icon={<Home className="w-4 h-4" />} label={t("neighborhoodDetail.homePrice")} value={n.stats.medianHomePrice} />
+              <StatCard icon={<TrendingUp className="w-4 h-4" />} label={t("neighborhoodDetail.walkScore")} value={String(n.stats.walkScore)} highlight />
+              <StatCard icon={<Train className="w-4 h-4" />} label={t("neighborhoodDetail.toUptown")} value={n.stats.commuteToUptown} />
+              <StatCard icon={<GraduationCap className="w-4 h-4" />} label={t("neighborhoodDetail.schools")} value={n.stats.schoolTier} />
+              <StatCard icon={<Shield className="w-4 h-4" />} label={t("neighborhoodDetail.crime")} value={n.stats.crimeLevel} />
+              <StatCard icon={<Moon className="w-4 h-4" />} label={t("neighborhoodDetail.nightlife")} value={n.stats.nightlifeLevel} />
+              <StatCard icon={<Dog className="w-4 h-4" />} label={t("neighborhoodDetail.petScore")} value={`${n.stats.petFriendly}/5`} />
+              <StatCard icon={<Baby className="w-4 h-4" />} label={t("neighborhoodDetail.family")} value={`${n.stats.familyScore}/5`} />
             </div>
           </div>
         </div>
@@ -854,7 +880,7 @@ export default function NeighborhoodDetail() {
                   Ready to make {n.name} your home?
                 </h3>
                 <p className="text-white/80 text-sm md:text-base">
-                  Get matched with a local real estate expert who knows {n.name} inside and out — whether you're buying, renting, or relocating.
+                  {HOUSING_COPY[locale].request}
                 </p>
               </div>
               <Link href={`/find-your-home?neighborhoods=${encodeURIComponent(n.name)}&source=neighborhood`}>

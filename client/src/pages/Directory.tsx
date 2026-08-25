@@ -31,6 +31,7 @@ import {
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
+import { MapMarkerGeneration } from "@/lib/map-marker-generation";
 import WishlistButton from "@/components/WishlistButton";
 import QuickStampButton from "@/components/QuickStampButton";
 import ShareButtons from "@/components/ShareButtons";
@@ -43,6 +44,10 @@ import {
 import ClaimBusinessDialog from "@/components/ClaimBusinessDialog";
 import { trackBusinessAction, trackFindHomeIntent } from "@/lib/mixpanel";
 import { useI18n } from "@/i18n/I18nContext";
+import {
+  getServiceCategoryLabel,
+  getServiceSuperGroupLabel,
+} from "@/i18n/serviceLabels";
 
 // Generate a slug key from service name
 function toSlug(name: string): string {
@@ -106,13 +111,11 @@ const GROUP_COLORS: Record<string, string> = {
 };
 
 export default function Directory() {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   useSEO({
-    title: "Charlotte Business Directory — 700+ Local Businesses",
-    description:
-      "Browse 700+ Charlotte businesses across 50+ categories. Restaurants, breweries, coffee shops, nightlife, and more with ratings and reviews.",
-    keywords:
-      "Charlotte restaurants, Charlotte breweries, Charlotte businesses, Charlotte food trucks, Charlotte coffee shops, local directory Charlotte NC, Charlotte services",
+    title: t("directory.seoTitle"),
+    description: t("directory.seoDescription"),
+    keywords: t("directory.seoKeywords"),
     path: "/directory",
   });
 
@@ -195,7 +198,14 @@ export default function Directory() {
   }, [premiumQuery.data]);
 
   const mapRef = useRef<google.maps.Map | null>(null);
-  const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
+  const markerGenerationRef = useRef(
+    new MapMarkerGeneration<
+      google.maps.Map,
+      google.maps.marker.AdvancedMarkerElement
+    >()
+  );
+  const [mapReady, setMapReady] = useState(false);
+  const [mapGeneration, setMapGeneration] = useState(0);
 
   // Derive unique areas from services, split into core and metro
   const EXCLUDED_AREAS = new Set([
@@ -240,7 +250,7 @@ export default function Directory() {
     if (activeCategory) {
       result = result.filter(s => s.category === activeCategory);
     } else if (activeGroup) {
-      const groupCats = SERVICE_CATEGORIES.filter(
+      const groupCats: string[] = SERVICE_CATEGORIES.filter(
         c => c.group === activeGroup
       ).map(c => c.id);
       result = result.filter(s => groupCats.includes(s.category));
@@ -455,19 +465,28 @@ export default function Directory() {
     return () => observer.disconnect();
   }, [hasMore, viewMode, filteredServices.length]);
 
-  // Map initialization callback
+  // Map initialization callback. A remount always gets a new generation so
+  // stale effects cannot mutate the replacement map instance.
   const handleMapReady = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
-    updateMapMarkers(filteredServices);
+    const generation = markerGenerationRef.current.attach(map);
+    setMapGeneration(generation);
+    setMapReady(true);
   }, []);
 
-  // Update markers when filtered services change
-  const updateMapMarkers = useCallback((services: typeof SERVICES) => {
-    if (!mapRef.current || !window.google) return;
+  // Update markers only for the map instance/generation captured by the effect.
+  const updateMapMarkers = useCallback((
+    services: typeof SERVICES,
+    map: google.maps.Map,
+    generation: number
+  ) => {
+    if (
+      !window.google ||
+      !markerGenerationRef.current.isCurrent(map, generation)
+    ) return;
 
-    // Clear existing markers
-    markersRef.current.forEach(m => (m.map = null));
-    markersRef.current = [];
+    markerGenerationRef.current.clear(map, generation);
+    const nextMarkers: google.maps.marker.AdvancedMarkerElement[] = [];
 
     // Group services by area for clustering
     const areaGroups: Record<string, typeof SERVICES> = {};
@@ -480,7 +499,6 @@ export default function Directory() {
       const coords = AREA_COORDS[area];
       if (!coords) return;
 
-      // Add slight random offset for each service so they don't stack
       areaServices.slice(0, 20).forEach((s, i) => {
         const cat = SERVICE_CATEGORIES.find(c => c.id === s.category);
         const groupColor = cat
@@ -488,13 +506,12 @@ export default function Directory() {
           : "#6B7280";
 
         const offset = i * 0.001;
-        const angle = i * 137.5 * (Math.PI / 180); // golden angle spread
+        const angle = i * 137.5 * (Math.PI / 180);
         const pos = {
           lat: coords.lat + offset * Math.cos(angle),
           lng: coords.lng + offset * Math.sin(angle),
         };
 
-        // Create custom marker content
         const markerDiv = document.createElement("div");
         markerDiv.style.cssText = `
           width: 28px; height: 28px; border-radius: 50%;
@@ -512,13 +529,11 @@ export default function Directory() {
         });
 
         const marker = new google.maps.marker.AdvancedMarkerElement({
-          map: mapRef.current!,
+          map,
           position: pos,
           title: `${s.name} — ${s.area}`,
           content: markerDiv,
         });
-
-        // Info window on click
         const infoWindow = new google.maps.InfoWindow({
           content: `
             <div style="max-width:220px;font-family:system-ui,sans-serif;">
@@ -526,37 +541,45 @@ export default function Directory() {
               <p style="font-size:11px;color:#666;margin:4px 0;">${s.description}</p>
               <p style="font-size:11px;color:#888;margin:2px 0;">📍 ${s.area}</p>
               ${s.phone ? `<p style="font-size:11px;margin:2px 0;">📞 ${s.phone}</p>` : ""}
-              ${s.website ? `<a href="${s.website}" target="_blank" style="font-size:11px;color:#0066cc;">Visit website →</a>` : ""}
+              ${s.website ? `<a href="${s.website}" target="_blank" style="font-size:11px;color:#0066cc;">${t("directory.visitWebsite")}</a>` : ""}
             </div>
           `,
         });
-
         marker.addListener("click", () => {
-          infoWindow.open({ anchor: marker, map: mapRef.current! });
+          if (markerGenerationRef.current.isCurrent(map, generation)) {
+            infoWindow.open({ anchor: marker, map });
+          }
         });
-
-        markersRef.current.push(marker);
+        nextMarkers.push(marker);
       });
     });
 
-    // Fit bounds to markers
-    if (markersRef.current.length > 0) {
+    if (!markerGenerationRef.current.replace(map, generation, nextMarkers)) {
+      return;
+    }
+    if (nextMarkers.length > 0) {
       const bounds = new google.maps.LatLngBounds();
-      markersRef.current.forEach(m => {
-        if (m.position) {
-          bounds.extend(m.position as google.maps.LatLng);
-        }
+      nextMarkers.forEach(marker => {
+        if (marker.position) bounds.extend(marker.position as google.maps.LatLng);
       });
-      mapRef.current.fitBounds(bounds, 50);
+      map.fitBounds(bounds, 50);
     }
-  }, []);
+  }, [t]);
 
-  // Update markers when view switches to map or filters change
-  useMemo(() => {
-    if (viewMode === "map" && mapRef.current) {
-      updateMapMarkers(filteredServices);
-    }
-  }, [filteredServices, viewMode, updateMapMarkers]);
+  useEffect(() => {
+    if (viewMode !== "map" || !mapReady || !mapRef.current) return;
+    const map = mapRef.current;
+    const generation = mapGeneration;
+    updateMapMarkers(filteredServices, map, generation);
+    return () => {
+      markerGenerationRef.current.clear(map, generation);
+    };
+  }, [filteredServices, viewMode, updateMapMarkers, mapReady, mapGeneration]);
+
+  useEffect(() => () => {
+    markerGenerationRef.current.unmount();
+    mapRef.current = null;
+  }, []);
 
   return (
     <PageLayout>
@@ -569,8 +592,10 @@ export default function Directory() {
                 {t("directory.title")}
               </h1>
               <p className="mt-2 text-white/70">
-                {SERVICES.length}+ Charlotte businesses across{" "}
-                {SERVICE_CATEGORIES.length} categories
+                {t("directory.countsSubtitle", {
+                  businesses: SERVICES.length,
+                  categories: SERVICE_CATEGORIES.length,
+                })}
               </p>
             </div>
             <ShareButtons
@@ -585,7 +610,7 @@ export default function Directory() {
           {urlParams.neighborhood && (
             <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-white text-sm">
               <MapPin className="w-3.5 h-3.5" />
-              Showing services near {urlParams.neighborhood}
+              {t("directory.neighborhoodResults", { name: urlParams.neighborhood })}
             </div>
           )}
 
@@ -593,7 +618,7 @@ export default function Directory() {
           {myNeighborhoodData && !urlParams.neighborhood && (
             <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-clt-gold/20 text-clt-gold text-sm">
               <Star className="w-3.5 h-3.5" />
-              Prioritizing results near {myNeighborhoodData.name}
+              {t("directory.prioritizing", { name: myNeighborhoodData.name })}
             </div>
           )}
         </div>
@@ -627,7 +652,7 @@ export default function Directory() {
                     <Link key={`new-${i}`} href={`/directory/${sSlug}`}>
                       <div className="group relative p-3 rounded-xl border border-amber-200/60 bg-white hover:shadow-md hover:border-amber-300 transition-all cursor-pointer">
                         <span className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[9px] font-bold uppercase tracking-wider">
-                          New
+                          {t("directory.newBadge")}
                         </span>
                         <span className="text-xl mb-1.5 block">
                           {cat?.icon || "📍"}
@@ -646,7 +671,7 @@ export default function Directory() {
             <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
               <TrendingUp className="w-3.5 h-3.5" />
               <span>
-                {SERVICES.length} businesses and growing —{" "}
+                {t("directory.growing", { count: SERVICES.length })}{" "}
                 <Link
                   href="/list-your-business"
                   className="text-primary hover:underline"
@@ -667,10 +692,10 @@ export default function Directory() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
-                aria-label="Search businesses and categories"
+                aria-label={t("directory.searchAria")}
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Search businesses, categories..."
+                placeholder={t("directory.searchPlaceholder")}
                 className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
@@ -684,7 +709,7 @@ export default function Directory() {
                     : "bg-background text-muted-foreground hover:bg-muted"
                 }`}
               >
-                <List className="w-4 h-4" /> List
+                <List className="w-4 h-4" /> {t("directory.list")}
               </button>
               <button
                 onClick={() => setViewMode("map")}
@@ -695,14 +720,14 @@ export default function Directory() {
                     : "bg-background text-muted-foreground hover:bg-muted"
                 }`}
               >
-                <Map className="w-4 h-4" /> Map
+                <Map className="w-4 h-4" /> {t("directory.map")}
               </button>
             </div>
             {/* Sort dropdown */}
             <div className="relative">
               <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
               <select
-                aria-label="Sort directory results"
+                aria-label={t("directory.sortAria")}
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value as typeof sortBy)}
                 className={`pl-9 pr-8 py-2.5 rounded-lg border text-sm appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring ${
@@ -711,7 +736,7 @@ export default function Directory() {
                     : "border-input bg-background text-foreground"
                 }`}
               >
-                <option value="default">Sort: Recommended</option>
+                <option value="default">{t("directory.sortRecommended")}</option>
                 <option value="top-rated">{t("directory.topRated")}</option>
                 <option value="most-reviewed">
                   {t("directory.mostReviewed")}
@@ -726,7 +751,7 @@ export default function Directory() {
               className={showFilters ? "bg-primary/10 border-primary/30" : ""}
             >
               <Filter className="w-4 h-4 mr-2" />
-              Filters{activeFilterCount > 0 && ` (${activeFilterCount})`}
+              {t("directory.filters")}{activeFilterCount > 0 && ` (${activeFilterCount})`}
             </Button>
             {hasFilters && (
               <Button
@@ -734,7 +759,7 @@ export default function Directory() {
                 onClick={clearFilters}
                 className="text-muted-foreground"
               >
-                <X className="w-4 h-4 mr-1" /> Clear
+                <X className="w-4 h-4 mr-1" /> {t("directory.clear")}
               </Button>
             )}
           </div>
@@ -759,7 +784,7 @@ export default function Directory() {
                         : "bg-muted text-muted-foreground hover:bg-muted/80"
                     }`}
                   >
-                    All
+                    {t("directory.all")}
                   </button>
                   {SERVICE_SUPER_GROUPS.map(sg => (
                     <button
@@ -775,7 +800,7 @@ export default function Directory() {
                           : "bg-muted text-muted-foreground hover:bg-muted/80"
                       }`}
                     >
-                      {sg.icon} {sg.label.replace(sg.icon + " ", "")}
+                      {sg.icon} {getServiceSuperGroupLabel(sg.id, locale)}
                     </button>
                   ))}
                 </div>
@@ -784,7 +809,7 @@ export default function Directory() {
               {/* Categories */}
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-2">
-                  Category
+                  {t("directory.category")}
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   <button
@@ -795,7 +820,7 @@ export default function Directory() {
                         : "bg-muted text-muted-foreground hover:bg-muted/80"
                     }`}
                   >
-                    All
+                    {t("directory.all")}
                   </button>
                   {visibleCategories.map(cat => (
                     <button
@@ -810,7 +835,7 @@ export default function Directory() {
                           : "bg-muted text-muted-foreground hover:bg-muted/80"
                       }`}
                     >
-                      {cat.icon} {cat.name}
+                      {cat.icon} {getServiceCategoryLabel(cat.id, locale)}
                     </button>
                   ))}
                 </div>
@@ -819,10 +844,10 @@ export default function Directory() {
               {/* Area filter — grouped */}
               <div>
                 <label className="block text-xs font-medium text-muted-foreground mb-2">
-                  Area
+                  {t("directory.area")}
                 </label>
                 <select
-                  aria-label="Filter by area"
+                  aria-label={t("directory.area")}
                   value={activeArea}
                   onChange={e => {
                     setActiveArea(e.target.value);
@@ -832,14 +857,14 @@ export default function Directory() {
                   className="px-3 py-2 rounded-lg border border-input bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring min-w-[200px]"
                 >
                   <option value="">{t("directory.allAreas")}</option>
-                  <optgroup label="── Core Neighborhoods ──">
+                  <optgroup label={`── ${t("directory.coreNeighborhoods")} ──`}>
                     {coreAreas.map(area => (
                       <option key={area} value={area}>
                         {area}
                       </option>
                     ))}
                   </optgroup>
-                  <optgroup label="── Metro Charlotte ──">
+                  <optgroup label={`── ${t("directory.metroCharlotte")} ──`}>
                     {metroAreas.map(area => (
                       <option key={area} value={area}>
                         {area}
@@ -854,11 +879,21 @@ export default function Directory() {
           {/* Results count */}
           <p className="text-sm text-muted-foreground mb-4">
             {viewMode === "map"
-              ? `Showing all ${filteredServices.length} ${filteredServices.length === 1 ? "business" : "businesses"} on the map`
-              : `Showing ${Math.min(visibleCount, filteredServices.length)} of ${filteredServices.length} ${filteredServices.length === 1 ? "business" : "businesses"}`}
+              ? t("directory.showingMap", {
+                  total: filteredServices.length,
+                  businesses: t(filteredServices.length === 1 ? "directory.businessSingular" : "directory.businessPlural"),
+                })
+              : t("directory.showingList", {
+                  visible: Math.min(visibleCount, filteredServices.length),
+                  total: filteredServices.length,
+                  businesses: t(filteredServices.length === 1 ? "directory.businessSingular" : "directory.businessPlural"),
+                })}
             {activeCategory &&
-              ` in ${SERVICE_CATEGORIES.find(c => c.id === activeCategory)?.name || activeCategory}`}
-            {activeArea && ` near ${activeArea}`}
+              ` ${t("directory.inCategory", { category: (() => {
+                const category = SERVICE_CATEGORIES.find(c => c.id === activeCategory);
+                return category ? getServiceCategoryLabel(category.id, locale) : activeCategory;
+              })() })}`}
+            {activeArea && ` ${t("directory.nearArea", { area: activeArea })}`}
           </p>
 
           {/* Map View */}
@@ -885,7 +920,7 @@ export default function Directory() {
                         className="w-3 h-3 rounded-full inline-block border border-white shadow-sm"
                         style={{ background: GROUP_COLORS[sg.id] || "#6B7280" }}
                       />
-                      {sg.label}
+                      {getServiceSuperGroupLabel(sg.id, locale)}
                     </span>
                   ))}
                 </div>
@@ -927,17 +962,17 @@ export default function Directory() {
                             </Link>
                             {premiumTier === "premium" && (
                               <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 text-[10px] font-bold uppercase">
-                                <Crown className="w-2.5 h-2.5" /> Premium
+                                <Crown className="w-2.5 h-2.5" /> {t("directory.premium")}
                               </span>
                             )}
                             {premiumTier === "featured" && (
                               <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-[10px] font-bold uppercase">
-                                <Award className="w-2.5 h-2.5" /> Featured
+                                <Award className="w-2.5 h-2.5" /> {t("directory.featured")}
                               </span>
                             )}
                             {boostedKeys.has(sSlug) && (
                               <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 text-[10px] font-bold uppercase">
-                                Promoted
+                                {t("directory.promoted")}
                               </span>
                             )}
                           </div>
@@ -972,7 +1007,7 @@ export default function Directory() {
                             {enriched.reviewCount && (
                               <span className="text-xs text-muted-foreground">
                                 ({enriched.reviewCount.toLocaleString()}{" "}
-                                reviews)
+                                {t("directory.reviews")})
                               </span>
                             )}
                             {enriched.priceLevel != null &&
@@ -1070,7 +1105,7 @@ export default function Directory() {
                               })
                             }
                           >
-                            Visit <ExternalLink className="w-3 h-3" />
+                            {t("directory.visit")} <ExternalLink className="w-3 h-3" />
                           </a>
                         )}
                         <ClaimBusinessDialog
@@ -1089,7 +1124,7 @@ export default function Directory() {
                               })
                             }
                           >
-                            <Building2 className="w-3 h-3" /> Claim
+                            <Building2 className="w-3 h-3" /> {t("directory.claim")}
                           </button>
                         </ClaimBusinessDialog>
                       </div>
@@ -1105,8 +1140,10 @@ export default function Directory() {
                   className="flex flex-col items-center justify-center py-8 gap-3"
                 >
                   <p className="text-sm text-muted-foreground">
-                    Showing {visibleCount} of {filteredServices.length}{" "}
-                    businesses
+                    {t("directory.loadingMore", {
+                      visible: visibleCount,
+                      total: filteredServices.length,
+                    })}
                   </p>
                   <Button
                     variant="outline"
@@ -1124,7 +1161,7 @@ export default function Directory() {
 
               {!hasMore && filteredServices.length > PAGE_SIZE && (
                 <p className="text-center text-sm text-muted-foreground py-4">
-                  Showing all {filteredServices.length} businesses
+                  {t("directory.showingAll", { total: filteredServices.length })}
                 </p>
               )}
 
@@ -1136,11 +1173,10 @@ export default function Directory() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-display font-semibold text-foreground text-sm">
-                      Looking for a home or apartment?
+                      {t("directory.homeCtaTitle")}
                     </h3>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      We'll match you with a trusted local real estate expert —
-                      completely free.
+                      {t("directory.homeCtaDescription")}
                     </p>
                   </div>
                   <Link href="/find-your-home?source=directory">
@@ -1154,7 +1190,7 @@ export default function Directory() {
                         })
                       }
                     >
-                      Find Your Home <ArrowRight className="w-3.5 h-3.5" />
+                      {t("directory.homeCtaButton")} <ArrowRight className="w-3.5 h-3.5" />
                     </Button>
                   </Link>
                 </div>
