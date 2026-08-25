@@ -352,17 +352,45 @@ describe("immutable release scripts", () => {
 
   it("rejects mismatched and dirty deployable release packaging before writing an artifact", () => {
     const root = temporaryDirectory();
+    const repository = join(root, "repository");
+    mkdirSync(repository, { recursive: true });
+    for (const path of [
+      "package.json",
+      "pnpm-lock.yaml",
+      "scripts/package-release-artifact.mjs",
+      "scripts/artifact-publication-lib.mjs",
+      "scripts/artifact-manifest-lib.mjs",
+      "scripts/migration-artifact-lib.mjs",
+      "scripts/migration-ledger-lib.mjs",
+      "scripts/migration-schema-lib.mjs",
+      "scripts/release-database-safety-lib.mjs",
+    ]) {
+      const destination = join(repository, ...path.split("/"));
+      mkdirSync(dirname(destination), { recursive: true });
+      cpSync(resolve(path), destination, { preserveTimestamps: false });
+    }
+    runGit(repository, "init", "--initial-branch=main");
+    runGit(repository, "config", "user.email", "release-test@example.invalid");
+    runGit(repository, "config", "user.name", "Release Test");
+    runGit(repository, "add", "--all");
+    runGit(repository, "commit", "-m", "minimal package validation fixture");
+    const fixturePackageScript = join(repository, "scripts", "package-release-artifact.mjs");
     const dist = join(root, "dist");
     const artifact = join(root, "artifact");
     mkdirSync(dist, { recursive: true });
     writeFileSync(join(dist, "index.js"), "local build\n");
-    const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-    for (const [sha, reason] of [
-      ["A".repeat(40), /lowercase|full/i],
-      ["0".repeat(40), /HEAD|match/i],
-      [head, /clean|worktree|release input/i],
+    const head = runGit(repository, "rev-parse", "HEAD");
+    for (const [sha, reason, makeDirty] of [
+      ["A".repeat(40), /lowercase|full/i, false],
+      ["0".repeat(40), /HEAD|match/i, false],
+      [head, /clean|worktree|release input/i, true],
     ] as const) {
-      const result = spawnSync("node", [packageScript], {
+      if (makeDirty) {
+        const packageJson = join(repository, "package.json");
+        writeFileSync(packageJson, `${readFileSync(packageJson, "utf8")}\n`);
+      }
+      const result = spawnSync("node", [fixturePackageScript], {
+        cwd: repository,
         encoding: "utf8",
         env: { ...process.env, RELEASE_GIT_SHA: sha, RELEASE_DIST_DIR: dist, RELEASE_ARTIFACT_DIR: artifact },
       });
