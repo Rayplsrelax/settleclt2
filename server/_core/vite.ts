@@ -6,7 +6,7 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import viteConfig from "../../vite.config";
 import { injectCspNonce } from "./csp-nonce";
-import { resolveRouteSeo } from "./route-seo";
+import { normalizePath, resolveRouteSeo } from "./route-seo";
 import {
   decodeLocaleCookieValue,
   LOCALE_COOKIE,
@@ -14,6 +14,7 @@ import {
   type Locale,
 } from "../../shared/i18n";
 import type { RouteLookups } from "./spa-route-status";
+import { safeDecodeURIComponent } from "./safe-decode";
 
 const HOME_HERO_IMAGE = "/images/hero-charlotte-skyline.webp";
 const SITE_URL = "https://settleclt.com";
@@ -62,8 +63,9 @@ export function injectRouteSeo(
   blogTitles?: Map<string, string>,
   locale: Locale = "en"
 ) {
-  const seo = resolveRouteSeo(requestPath, blogTitles, locale);
-  const canonical = `${SITE_URL}${requestPath === "/" ? "/" : requestPath.replace(/\/+$/, "")}`;
+  const canonicalPath = normalizePath(requestPath);
+  const seo = resolveRouteSeo(canonicalPath, blogTitles, locale);
+  const canonical = `${SITE_URL}${canonicalPath}`;
   const fullTitle = seo.title.endsWith("Settle CLT")
     ? seo.title
     : `${seo.title} | Settle CLT`;
@@ -102,7 +104,20 @@ export function injectRoutePreloads(template: string, requestPath: string) {
   );
 }
 
+export function registerLegacySpaRedirects(app: Express): void {
+  app.get("/find-a-realtor", (_req, res) => {
+    res.status(301);
+    res.setHeader("Location", "/find-your-home");
+    res.setHeader(
+      "Link",
+      `<${SITE_URL}/find-your-home>; rel=\"canonical\"`
+    );
+    res.end();
+  });
+}
+
 export async function setupVite(app: Express, server: Server) {
+  registerLegacySpaRedirects(app);
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },
@@ -167,12 +182,15 @@ export function serveStatic(
     );
   }
 
+  registerLegacySpaRedirects(app);
   app.use(express.static(distPath, { index: false }));
 
   // fall through to index.html if the file doesn't exist
   // Resolve the HTTP status based on the SPA route classifier so that
-  // genuinely unknown paths return 404 instead of 200.
-  app.use("*", async (req, res, next) => {
+  // genuinely unknown paths return 404 instead of 200. Do not register this
+  // as a wildcard route: Express decodes wildcard parameters before invoking
+  // the handler and turns malformed URI components into an early 400.
+  app.use(async (req, res, next) => {
     const { resolveSpaStatus, getProductionLookups } = await import(
       "./spa-route-status"
     );
@@ -185,7 +203,19 @@ export function serveStatic(
       }
     }
     try {
-      const status = await resolveSpaStatus(req.originalUrl, lookups);
+      const spaPath = normalizePath(req.originalUrl);
+      const blogMatch = spaPath.match(/^\/blog\/([^/]+)$/);
+      let publishedBlog: { title: string } | null | undefined;
+      let statusLookups = lookups;
+      if (blogMatch && lookups) {
+        const slug = safeDecodeURIComponent(blogMatch[1]);
+        publishedBlog = slug === null ? null : await lookups.getPublishedBlog(slug);
+        statusLookups = {
+          ...lookups,
+          getPublishedBlog: async () => publishedBlog ?? null,
+        };
+      }
+      const status = await resolveSpaStatus(spaPath, statusLookups);
       const template = await fs.promises.readFile(
         path.resolve(distPath, "index.html"),
         "utf-8"
@@ -194,7 +224,7 @@ export function serveStatic(
       // NOTE: inside app.use("*") on Express 4, req.path is always "/" —
       // the route prefix is stripped into req.baseUrl. Derive the true
       // pathname from req.originalUrl instead.
-      const spaPath = req.originalUrl.split("?")[0].split("#")[0];
+
       const locale = resolveRequestLocale(
         req.headers.cookie,
         req.headers["accept-language"]
@@ -202,24 +232,22 @@ export function serveStatic(
       // Blog titles come from the database; resolve asynchronously before
       // the sync SEO resolver runs.
       let blogTitles: Map<string, string> | undefined;
-      const blogMatch = spaPath.match(/^\/blog\/([^/]+)$/);
       if (blogMatch && status === 200) {
-        try {
-          const { getBlogPostBySlug } = await import("../db");
-          const slug = decodeURIComponent(blogMatch[1]);
-          const post = await getBlogPostBySlug(slug);
-          if (post?.title) {
-            blogTitles = new Map([[slug, post.title]]);
-          }
-        } catch {
-          // DB unavailable — fall back to generic blog metadata
+        const slug = safeDecodeURIComponent(blogMatch[1]);
+        if (slug !== null && publishedBlog?.title) {
+          blogTitles = new Map([[slug, publishedBlog.title]]);
         }
       }
+      const canonicalPath = status === 404 ? "/404" : spaPath;
       routeTemplate = injectRouteSeo(
         routeTemplate,
-        status === 404 ? "/404" : spaPath,
+        canonicalPath,
         blogTitles,
         locale
+      );
+      res.setHeader(
+        "Link",
+        `<${SITE_URL}${canonicalPath}>; rel=\"canonical\"`
       );
       // Preview hosts intentionally run without production CSP, so the
       // security middleware mints no nonce for them; serve the template

@@ -40,7 +40,7 @@ describe("social follow funnel", () => {
     const mixpanel = read("client/src/lib/mixpanel.ts");
 
     expect(home).toContain('surface="newsletter-success"');
-    expect(home).toContain("Follow Settle CLT around Charlotte");
+    expect(home).toContain('t("home.newsletterFollow")');
     expect(read("client/src/components/SocialFollowLinks.tsx")).toContain(
       "trackSocialFollowClick"
     );

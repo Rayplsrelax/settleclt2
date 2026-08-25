@@ -7,6 +7,7 @@ import ShareButtons from "@/components/ShareButtons";
 import { Button } from "@/components/ui/button";
 import CommentSection from "@/components/CommentSection";
 import { useSEO } from "@/hooks/useSEO";
+import { hydratedDynamicCanonicalPath } from "@/lib/dynamic-canonical";
 import { useStructuredData, buildArticleSchema, buildBreadcrumbSchema } from "@/hooks/useStructuredData";
 import { useI18n } from "@/i18n/I18nContext";
 import { formatLocalizedDate } from "@/i18n/formatters";
@@ -46,10 +47,13 @@ export default function BlogArticle() {
   );
 
   useSEO({
-    title: post?.title || "Blog Article",
-    description: post?.excerpt || "Read this article on Settle CLT — your guide to living in Charlotte, NC.",
-    keywords: post ? `${post.category}, Charlotte NC, ${post.title.split(' ').slice(0, 3).join(', ')}` : "Charlotte blog",
-    path: slug ? `/blog/${slug}` : "/blog",
+    title: post?.title || t("blog.articleFallbackTitle"),
+    description: post?.excerpt || t("blog.articleFallbackDescription"),
+    keywords: post ? `${post.category}, Charlotte NC, ${post.title.split(' ').slice(0, 3).join(', ')}` : t("blog.articleFallbackKeywords"),
+    path: hydratedDynamicCanonicalPath(
+      `/blog/${slug || ""}`,
+      isLoading ? "loading" : post ? "found" : "missing"
+    ),
     ogImage: post?.coverImage || undefined,
     ogType: "article",
   });

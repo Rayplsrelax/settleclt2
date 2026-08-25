@@ -500,7 +500,7 @@ export default function MyBusiness() {
         <div className="container py-20 text-center max-w-lg mx-auto">
           <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h1 className="font-display font-bold text-2xl mb-2">{t("business.ownerPortal")}</h1>
-          <p className="text-muted-foreground mb-6">Sign in to manage your claimed business listing.</p>
+          <p className="text-muted-foreground mb-6">{t("business.signInDescription")}</p>
           <a href={getLoginUrl()}>
             <Button className="gap-2">{t("business.signIn")} <ArrowRight className="w-4 h-4" /></Button>
           </a>
@@ -516,7 +516,7 @@ export default function MyBusiness() {
           <Building2 className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h1 className="font-display font-bold text-2xl mb-2">{t("business.noAccess")}</h1>
           <p className="text-muted-foreground mb-6">
-            You don't have an active business membership yet. Visit the directory to claim your business.
+            {t("business.noAccessDescription")}
           </p>
           <Link href="/directory">
             <Button className="gap-2">{t("business.browseDirectory")} <ArrowRight className="w-4 h-4" /></Button>

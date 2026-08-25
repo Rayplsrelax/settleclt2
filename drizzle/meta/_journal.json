@@ -225,6 +225,20 @@
       "when": 1786575600000,
       "tag": "0031_newsletter_subscription_lifecycle",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "5",
+      "when": 1786575601000,
+      "tag": "0032_event_promotions",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "5",
+      "when": 1786575602000,
+      "tag": "0033_business_claim_identity_unique",
+      "breakpoints": true
     }
   ]
 }

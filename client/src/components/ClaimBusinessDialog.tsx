@@ -158,7 +158,7 @@ export default function ClaimBusinessDialog({ serviceKey, businessName, children
             <form onSubmit={handleSubmit} className="space-y-4 mt-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="claimantName">Your Full Name *</Label>
+                  <Label htmlFor="claimantName">Business Contact Name *</Label>
                   <Input
                     id="claimantName"
                     required
@@ -168,7 +168,7 @@ export default function ClaimBusinessDialog({ serviceKey, businessName, children
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="claimantEmail">Email Address *</Label>
+                  <Label htmlFor="claimantEmail">Business Contact Email *</Label>
                   <Input
                     id="claimantEmail"
                     type="email"
@@ -182,7 +182,7 @@ export default function ClaimBusinessDialog({ serviceKey, businessName, children
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="claimantPhone">Phone Number</Label>
+                  <Label htmlFor="claimantPhone">Business Contact Phone</Label>
                   <Input
                     id="claimantPhone"
                     type="tel"

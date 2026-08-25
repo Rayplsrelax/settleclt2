@@ -14,9 +14,8 @@ import { useI18n } from "@/i18n/I18nContext";
 export default function Contact() {
   const { t } = useI18n();
   useSEO({
-    title: "Contact Us — Settle CLT",
-    description:
-      "Get in touch with the Settle CLT team. Questions about Charlotte, business listings, partnerships, or feedback — we'd love to hear from you.",
+    title: t("contact.title"),
+    description: t("contact.subtitle"),
     keywords:
       "contact Settle CLT, Charlotte guide contact, Settle CLT feedback, Charlotte business listing inquiry",
     path: "/contact",
@@ -28,7 +27,7 @@ export default function Contact() {
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const notifyMutation = trpc.system.notifyOwner.useMutation({
+  const contactMutation = trpc.contact.submit.useMutation({
     onSuccess: () => {
       setSubmitted(true);
       toast.success(t("contact.toastSuccess"));
@@ -44,9 +43,11 @@ export default function Contact() {
       toast.error(t("contact.requiredError"));
       return;
     }
-    notifyMutation.mutate({
-      title: `Contact Form: ${subject || "General Inquiry"}`,
-      content: `From: ${name} (${email})\nSubject: ${subject || "General Inquiry"}\n\n${message}`,
+    contactMutation.mutate({
+      name,
+      email,
+      subject,
+      message,
     });
   };
 
@@ -175,6 +176,7 @@ export default function Contact() {
                             value={name}
                             onChange={e => setName(e.target.value)}
                             placeholder={t("contact.namePlaceholder")}
+                            maxLength={120}
                             required
                           />
                         </div>
@@ -191,6 +193,7 @@ export default function Contact() {
                             value={email}
                             onChange={e => setEmail(e.target.value)}
                             placeholder="you@example.com"
+                            maxLength={254}
                             required
                           />
                         </div>
@@ -207,6 +210,7 @@ export default function Contact() {
                           value={subject}
                           onChange={e => setSubject(e.target.value)}
                           placeholder={t("contact.subjectPlaceholder")}
+                          maxLength={200}
                         />
                       </div>
                       <div>
@@ -222,16 +226,17 @@ export default function Contact() {
                           onChange={e => setMessage(e.target.value)}
                           placeholder={t("contact.messagePlaceholder")}
                           rows={6}
+                          maxLength={4000}
                           required
                         />
                       </div>
                       <Button
                         type="submit"
                         className="w-full gap-2"
-                        disabled={notifyMutation.isPending}
+                        disabled={contactMutation.isPending}
                       >
                         <Send className="w-4 h-4" />
-                        {notifyMutation.isPending
+                        {contactMutation.isPending
                           ? t("contact.sending")
                           : t("contact.send")}
                       </Button>

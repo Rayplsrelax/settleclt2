@@ -1,17 +1,13 @@
-import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
 const packageJson = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
-const gitSha = (
-  process.env.RELEASE_GIT_SHA ??
-  execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" })
-).trim().toLowerCase();
+const gitSha = process.env.RELEASE_GIT_SHA;
 const builtAt = process.env.RELEASE_BUILT_AT ?? new Date().toISOString();
 
-if (!/^[0-9a-f]{40}$/.test(gitSha)) {
-  throw new Error("RELEASE_GIT_SHA must be a full 40-character commit SHA");
+if (gitSha !== undefined && !/^[0-9a-f]{40}$/.test(gitSha)) {
+  throw new Error("RELEASE_GIT_SHA must be a full lowercase 40-character commit SHA");
 }
 if (Number.isNaN(Date.parse(builtAt))) {
   throw new Error("RELEASE_BUILT_AT must be an ISO-8601 timestamp");
@@ -21,8 +17,10 @@ const manifest = {
   schemaVersion: 1,
   app: packageJson.name,
   version: packageJson.version,
-  gitSha,
+  gitSha: gitSha ?? null,
   builtAt,
+  deployable: false,
+  manifestPurpose: "local-build-only",
 };
 const dist = resolve(root, "dist");
 const target = resolve(dist, "release-manifest.json");
@@ -33,4 +31,4 @@ writeFileSync(temporary, `${JSON.stringify(manifest, null, 2)}\n`, {
   mode: 0o644,
 });
 renameSync(temporary, target);
-console.log(`Wrote release manifest for ${gitSha}`);
+console.log("Wrote explicitly non-deployable local build manifest");

@@ -1,4 +1,5 @@
 import type { TranslationKey } from "./en";
+import { HOUSING_COPY } from "@shared/housing-copy";
 
 export const es = {
   // Navigation
@@ -59,6 +60,69 @@ export const es = {
     "Explora 20 barrios, descubre más de 700 servicios locales y recibe consejos honestos de personas que realmente viven aquí.",
   "home.browseDirectory": "Ver Directorio",
   "home.viewEvents": "Ver Eventos",
+  "home.seoTitle": "Settle CLT — Tu guía completa para vivir en Charlotte, NC",
+  "home.seoDescription":
+    "Explora 20 vecindarios de Charlotte, descubre más de 700 negocios locales, encuentra eventos y lee guías locales.",
+  "home.seoKeywords":
+    "Charlotte NC, mudarse a Charlotte, vecindarios de Charlotte, guía local de Charlotte, mudanza a CLT",
+  "home.neighborhoodsStat": "Vecindarios",
+  "home.servicesStat": "Servicios locales",
+  "home.categoriesStat": "Categorías",
+  "home.quizBadge": "Cuestionario de 2 minutos",
+  "home.quizPrompt": "¿No sabes dónde vivir?",
+  "home.quizDescription":
+    "Responde 6 preguntas rápidas sobre tu presupuesto, estilo de vida y prioridades; te recomendaremos los mejores vecindarios de Charlotte.",
+  "home.businessCtaTitle": "¿Tienes un negocio en Charlotte?",
+  "home.businessCtaDescription":
+    "Publica tu negocio de Charlotte para que quienes exploran el área puedan encontrarlo. La publicación es gratis.",
+  "home.businessCtaButton": "Publica tu negocio — Gratis",
+  "home.latest": "Lo más reciente",
+  "home.read": "Leer",
+  "home.viewAllBlogPosts": "Ver todas las publicaciones del blog",
+  "home.trendingTitle": "Tendencias en CLT",
+  "home.trendingDescription": "Temas y etiquetas populares que la gente explora",
+  "home.communityActivity": "Actividad de la comunidad",
+  "home.communityActivityDescription":
+    "Descubre qué están haciendo ahora quienes exploran Charlotte",
+  "home.newsletterTitle": "Recibe el boletín informativo de Charlotte",
+  "home.newsletterDescription":
+    "Consejos semanales sobre vecindarios, lugares ocultos, formas de ahorrar y todo lo que necesitas saber antes y después de mudarte.",
+  "home.subscribe": "Suscribirme",
+  "home.joining": "Suscribiendo...",
+  "home.newsletterConsent":
+    "Al suscribirte, aceptas recibir el boletín de Settle CLT. Siempre gratis. Cancela cuando quieras.",
+  "home.newsletterSuccess": "Recibimos tu solicitud de suscripción",
+  "home.newsletterSuccessHint":
+    "Si corresponde, enviaremos instrucciones de confirmación a la dirección proporcionada.",
+  "home.newsletterFollow": "Sigue a Settle CLT por Charlotte",
+  "home.newsletterFollowHint":
+    "Elige tu plataforma favorita para descubrir lugares locales entre boletines.",
+  "home.newsletterError": "Algo salió mal. Inténtalo de nuevo.",
+  "home.articleFallbackExcerpt": "Lee el artículo completo en Settle CLT.",
+  "home.articleFallbackCategory": "Guía de Charlotte",
+  "home.forYou": "Para ti, {name}",
+  "home.explorer": "Explorador",
+  "home.forYouDescription": "Según tu navegación e interacciones",
+  "home.topInterests": "Tus principales intereses",
+  "home.neighborhoodsForYou": "Vecindarios para ti",
+  "home.eventsForYou": "Eventos que podrían gustarte",
+  "home.placesForYou": "Lugares para explorar",
+  "activity.empty": "Todavía no hay actividad. ¡Sé la primera persona en explorar Charlotte!",
+  "activity.anonymous": "Una persona exploradora de CLT",
+  "activity.justNow": "ahora mismo",
+  "activity.stamped": "marcó {entity}",
+  "activity.stampedGeneric": "añadió un sello al pasaporte",
+  "activity.attended": "asistió a {entity}",
+  "activity.attendedGeneric": "asistió a un evento local",
+  "activity.commented": "comentó en {targetType} {entity}",
+  "activity.commentedGeneric": "comentó en una página de {targetType}",
+  "activity.bingoProgress": "avanzó en {entity}",
+  "activity.bingoProgressGeneric": "avanzó en una tarjeta de bingo",
+  "activity.bingoCompleted": "completó {entity}",
+  "activity.bingoCompletedGeneric": "completó una tarjeta de bingo",
+  "activity.targetType.neighborhood": "vecindario",
+  "activity.targetType.service": "negocio",
+  "activity.targetType.generic": "contenido local",
 
   // Events page
   "events.title1": "Qué está pasando en",
@@ -86,7 +150,6 @@ export const es = {
   "directory.category": "Categoría",
   "directory.categoryGroup": "Grupo de Categorías",
 
-
   // Events page extras
   "events.directions": "Indicaciones",
   "events.submit": "Enviar un evento",
@@ -98,12 +161,102 @@ export const es = {
   "events.recurring": "Evento recurrente",
   "events.dateTba": "Fecha por confirmar",
   "events.timeTba": "Hora por confirmar",
+  "events.seoTitle": "Eventos de Charlotte esta semana y fin de semana: qué hacer en CLT (2026)",
+  "events.seoDescription":
+    "Tu calendario completo de eventos en Charlotte. Encuentra conciertos, festivales, deportes, gastronomía, actividades familiares y planes para esta semana y fin de semana.",
+  "events.seoKeywords":
+    "eventos Charlotte, eventos en Charlotte NC, qué hacer en Charlotte este fin de semana, conciertos Charlotte, festivales Charlotte",
+  "events.seoHeading": "Qué hacer en Charlotte, NC esta semana y fin de semana",
+  "events.seoParagraph1":
+    "¿Buscas cosas que hacer en Charlotte este fin de semana? El calendario de Settle CLT reúne todo lo que sucede en la Queen City: conciertos y festivales de música, actividades familiares, eventos comunitarios gratuitos, experiencias gastronómicas, deportes profesionales y festivales de temporada.",
+  "events.seoParagraph2":
+    "Ya sea que acabes de mudarte a Charlotte o hayas vivido aquí toda la vida, usa esta página para encontrar eventos esta semana, planear tu fin de semana y descubrir experiencias en cada vecindario. Filtra por fecha o categoría, o busca lugares y artistas específicos.",
+  "events.dateRange": "Rango de fechas",
+  "events.from": "Desde",
+  "events.to": "Hasta",
+  "events.clearDates": "Limpiar fechas",
+  "events.recurringEvents": "Eventos recurrentes",
+  "events.newcomerFriendly": "Ideal para recién llegados",
+  "events.promoted": "Promocionado",
+  "events.promotedEvent": "Evento promocionado",
+  "events.noMatching": "No hay eventos que coincidan",
+  "events.noEventsYet": "Todavía no hay eventos",
+  "events.noMatchingHint": "Ajusta la búsqueda, el rango de fechas o los filtros de categoría.",
+  "events.noCategoryHint": "No hay eventos en esta categoría. Prueba otro filtro o vuelve pronto.",
+  "events.comingSoon": "¡Pronto habrá eventos! Vuelve para descubrir más planes en Charlotte.",
+  "events.moreInfo": "Entradas / Más información",
+  "events.searchAria": "Buscar eventos, lugares y vecindarios",
+  "events.clearSearchAria": "Limpiar búsqueda de eventos",
+  "events.category.all": "Todos los eventos",
+  "events.category.concerts": "Conciertos y música",
+  "events.category.foodDrink": "Comida y bebida",
+  "events.category.sports": "Deportes",
+  "events.category.artsCulture": "Arte y cultura",
+  "events.category.festivals": "Festivales",
+  "events.category.family": "Familias y niños",
+  "events.category.nightlife": "Vida nocturna",
+  "events.category.free": "Eventos gratuitos",
+  "events.category.markets": "Mercados y tiendas temporales",
+  "events.category.community": "Comunidad",
+  "events.category.runWalk": "Clubes de carrera y caminata",
+  "events.category.yogaFitness": "Yoga y acondicionamiento físico",
+  "events.category.farmersMarkets": "Mercados de agricultores",
+  "events.category.gameNights": "Noches de juegos y trivia",
+  "events.category.veteran": "Veteranos y militares",
+  "events.category.musicJam": "Música en vivo y micrófono abierto",
+  "events.category.kidsStorytime": "Niños y cuentacuentos",
+  "events.category.meditation": "Meditación y atención plena",
+  "events.category.dogMeetups": "Encuentros de perros",
+  "events.category.makersCrafts": "Creadores y artesanías",
+  "events.category.neighborhood": "Eventos vecinales",
+  "events.category.professional": "Eventos profesionales y networking",
 
   // Directory page extras
   "directory.getDirections": "Ver indicaciones",
   "directory.loadMore": "Cargar más",
   "directory.clearAllFilters": "Limpiar todos los filtros",
   "directory.recentlyAdded": "Añadido recientemente al directorio",
+  "directory.seoTitle": "Directorio de negocios de Charlotte — Más de 700 negocios locales",
+  "directory.seoDescription":
+    "Explora más de 700 negocios de Charlotte en más de 50 categorías, con calificaciones, reseñas y datos de contacto.",
+  "directory.seoKeywords":
+    "restaurantes Charlotte, negocios Charlotte, directorio local Charlotte NC, servicios Charlotte",
+  "directory.countsSubtitle": "{businesses} negocios de Charlotte en {categories} categorías",
+  "directory.newBadge": "Nuevo",
+  "directory.growing": "{count} negocios y seguimos creciendo —",
+  "directory.list": "Lista",
+  "directory.map": "Mapa",
+  "directory.sortRecommended": "Ordenar: recomendados",
+  "directory.sortAria": "Ordenar resultados del directorio",
+  "directory.filters": "Filtros",
+  "directory.clear": "Limpiar",
+  "directory.all": "Todos",
+  "directory.area": "Zona",
+  "directory.coreNeighborhoods": "Vecindarios centrales",
+  "directory.metroCharlotte": "Área metropolitana de Charlotte",
+  "directory.searchAria": "Buscar negocios y categorías",
+  "directory.searchPlaceholder": "Buscar negocios, categorías...",
+  "directory.showingList": "Mostrando {visible} de {total} {businesses}",
+  "directory.showingMap": "Mostrando los {total} {businesses} en el mapa",
+  "directory.businessSingular": "negocio",
+  "directory.businessPlural": "negocios",
+  "directory.inCategory": "en {category}",
+  "directory.nearArea": "cerca de {area}",
+  "directory.visit": "Visitar",
+  "directory.claim": "Reclamar",
+  "directory.premium": "Premium",
+  "directory.featured": "Destacado",
+  "directory.promoted": "Promocionado",
+  "directory.reviews": "reseñas",
+  "directory.loadingMore": "Mostrando {visible} de {total} negocios",
+  "directory.showingAll": "Mostrando los {total} negocios",
+  "directory.visitWebsite": "Visitar sitio web →",
+  "directory.neighborhoodResults": "Mostrando servicios cerca de {name}",
+  "directory.prioritizing": "Priorizando resultados cerca de {name}",
+  "directory.homeCtaTitle": "¿Buscas una casa o apartamento?",
+  "directory.homeCtaDescription":
+    HOUSING_COPY.es.request,
+  "directory.homeCtaButton": "Encuentra tu hogar",
 
   // Home page extras
   "home.exploreNeighborhoods": "Explorar vecindarios",
@@ -142,8 +295,24 @@ export const es = {
   "blog.takeQuiz": "Hacer el cuestionario",
   "blog.findHome": "Encuentra tu hogar",
   "blog.findHomeDescription":
-    "Conéctate con un experto inmobiliario local — gratis y sin compromiso.",
+    HOUSING_COPY.es.request,
   "blog.getStarted": "Comenzar",
+  "blog.seoTitle": "Blog de Charlotte — Consejos, guías e historias locales",
+  "blog.seoDescription":
+    "Lee guías de Charlotte NC sobre vecindarios, planes de fin de semana, consejos para mudarte e historias locales.",
+  "blog.seoKeywords":
+    "blog Charlotte, consejos Charlotte NC, guía para mudarse a Charlotte, guías de vecindarios Charlotte",
+  "blog.category.gettingStarted": "Primeros pasos",
+  "blog.category.costOfLiving": "Costo de vida",
+  "blog.category.lifestyle": "Estilo de vida",
+  "blog.category.schools": "Escuelas",
+  "blog.category.transportation": "Transporte",
+  "blog.category.relocation": "Mudanza",
+  "blog.category.pets": "Mascotas",
+  "blog.articleFallbackTitle": "Artículo del blog",
+  "blog.articleFallbackDescription":
+    "Lee este artículo en Settle CLT, tu guía para vivir en Charlotte, NC.",
+  "blog.articleFallbackKeywords": "blog de Charlotte",
 
   // Página de contacto
   "contact.title": "Ponte en contacto",
@@ -152,8 +321,8 @@ export const es = {
   "contact.emailLabel": "Correo electrónico",
   "contact.location": "Ubicación",
   "contact.locationValue": "Charlotte, Carolina del Norte",
-  "contact.responseTime": "Tiempo de respuesta",
-  "contact.responseTimeValue": "Normalmente respondemos en 24-48 horas",
+  "contact.responseTime": "Recepción de la solicitud",
+  "contact.responseTimeValue": "Las solicitudes enviadas correctamente se aceptan para revisión.",
   "contact.commonTopics": "Temas comunes",
   "contact.topicListing": "Publicar o reclamar tu negocio",
   "contact.topicEvents": "Enviar eventos al calendario",
@@ -161,9 +330,9 @@ export const es = {
   "contact.topicCorrections": "Reportar información incorrecta",
   "contact.topicFeedback": "Comentarios y sugerencias generales",
   "contact.topicAccount": "Solicitudes de cuenta y eliminación de datos",
-  "contact.sentTitle": "¡Mensaje enviado!",
+  "contact.sentTitle": "¡Mensaje recibido!",
   "contact.sentDescription":
-    "Gracias por escribirnos. Te responderemos en un plazo de 24-48 horas.",
+    "Recibimos tu mensaje y lo aceptamos para revisión.",
   "contact.sendAnother": "Enviar otro mensaje",
   "contact.formTitle": "Envíanos un mensaje",
   "contact.name": "Nombre",
@@ -175,13 +344,15 @@ export const es = {
   "contact.messagePlaceholder": "Cuéntanos qué tienes en mente...",
   "contact.sending": "Enviando...",
   "contact.send": "Enviar mensaje",
-  "contact.toastSuccess": "¡Mensaje enviado! Te responderemos pronto.",
-  "contact.toastError": "Algo salió mal. Intenta escribirnos directamente por correo.",
+  "contact.toastSuccess": "Recibimos tu mensaje y lo aceptamos para revisión.",
+  "contact.toastError":
+    "No pudimos enviar tu mensaje. Inténtalo de nuevo.",
   "contact.requiredError": "Completa todos los campos obligatorios.",
 
   // Autenticación
   "auth.requestFailed": "La solicitud falló",
-  "auth.resetEmailSent": "Si existe una cuenta, se ha enviado un correo para restablecer la contraseña.",
+  "auth.resetEmailSent":
+    "Si existe una cuenta, se ha enviado un correo para restablecer la contraseña.",
   "auth.passwordUpdated": "Contraseña actualizada. Ya puedes iniciar sesión.",
   "auth.verifyEmail": "Revisa tu correo para verificar tu cuenta.",
   "auth.welcomeBack": "Te damos la bienvenida",
@@ -232,6 +403,11 @@ export const es = {
   "neighborhoods.metroTitle": "Área metropolitana de Charlotte",
   "neighborhoods.metroSubtitle":
     "{count} comunidades cercanas — suburbios, pueblos del anillo interior y zonas periféricas",
+  "neighborhoods.seoTitle": "Guía de vecindarios de Charlotte — Encuentra tu zona ideal",
+  "neighborhoods.seoDescription":
+    "Explora 20 vecindarios de Charlotte con guías detalladas, costos, consejos locales y reseñas de la comunidad.",
+  "neighborhoods.seoKeywords":
+    "vecindarios Charlotte, comparar vecindarios Charlotte NC, dónde vivir en Charlotte, South End, NoDa, Uptown Charlotte",
 
   // Perfil de cuenta
   "profile.title": "Tu perfil",
@@ -271,7 +447,8 @@ export const es = {
   "quiz.back": "Atrás",
   "quiz.next": "Siguiente",
   "quiz.seeMatches": "Ver mis coincidencias",
-  "quiz.pageTitle": "Cuestionario de vecindarios — ¿Qué zona de Charlotte es para ti?",
+  "quiz.pageTitle":
+    "Cuestionario de vecindarios — ¿Qué zona de Charlotte es para ti?",
   "quiz.title": "Encuentra tu vecindario ideal en Charlotte",
   "quiz.browseAll": "Explorar todos",
   "quiz.neighborhoodsMetric": "20 vecindarios",
@@ -280,7 +457,8 @@ export const es = {
   "quiz.dimensions": "6 dimensiones",
   "quiz.personalized": "Personalizado",
   "quiz.priorities": "Tus prioridades",
-  "quiz.subtitle": "Responde 7 preguntas rápidas y te recomendaremos los mejores vecindarios según tu presupuesto, estilo de vida y prioridades.",
+  "quiz.subtitle":
+    "Responde 7 preguntas rápidas y te recomendaremos los mejores vecindarios según tu presupuesto, estilo de vida y prioridades.",
   "quiz.time": "Toma unos 2 minutos. No necesitas registrarte.",
   "quiz.start": "Comenzar",
 
@@ -290,7 +468,8 @@ export const es = {
   "submitEvent.browse": "Explorar eventos",
   "submitEvent.another": "Enviar otro",
   "submitEvent.title": "Enviar un evento",
-  "submitEvent.seoDescription": "Comparte eventos de Charlotte con la comunidad. Envía conciertos, festivales, deportes, arte y más gratis.",
+  "submitEvent.seoDescription":
+    "Comparte eventos de Charlotte con la comunidad. Envía conciertos, festivales, deportes, arte y más gratis.",
   "submitEvent.signIn": "Inicia sesión para enviar",
   "submitEvent.community": "Eventos comunitarios",
   "submitEvent.submit": "Enviar evento",
@@ -298,8 +477,10 @@ export const es = {
 
   // Conexión con agentes inmobiliarios
   "realtor.title": "Encuentra tu hogar en Charlotte",
-  "realtor.description": "Conéctate con un agente inmobiliario de confianza en Charlotte para comprar, vender, alquilar o mudarte. Servicio gratuito.",
-  "realtor.keywords": "hogares en Charlotte, apartamentos en Charlotte, comprar casa Charlotte NC, mudanza a Charlotte, encontrar hogar Charlotte, alquileres Charlotte",
+  "realtor.description":
+    HOUSING_COPY.es.request,
+  "realtor.keywords":
+    "hogares en Charlotte, apartamentos en Charlotte, comprar casa Charlotte NC, mudanza a Charlotte, encontrar hogar Charlotte, alquileres Charlotte",
   "realtor.faq": "Preguntas frecuentes",
   "realtor.submit": "Encontrar mi coincidencia",
 
@@ -314,12 +495,14 @@ export const es = {
   // Comparación de vecindarios
   "compare.pageTitle": "Compara vecindarios de Charlotte lado a lado",
   "compare.title": "Compara vecindarios",
-  "compare.subtitle": "Selecciona hasta 3 vecindarios para comparar estadísticas, costos, ambiente y más.",
+  "compare.subtitle":
+    "Selecciona hasta 3 vecindarios para comparar estadísticas, costos, ambiente y más.",
   "compare.addNeighborhood": "Agregar vecindario",
   "compare.selectNeighborhoods": "Selecciona vecindarios para comparar",
   "compare.doneSelecting": "Terminar selección",
   "compare.selectAtLeastTwo": "Selecciona al menos 2 vecindarios",
-  "compare.chooseAbove": "Elige vecindarios arriba para comenzar la comparación.",
+  "compare.chooseAbove":
+    "Elige vecindarios arriba para comenzar la comparación.",
   "compare.stats": "Comparación de estadísticas",
   "compare.metric": "Métrica",
   "compare.monthlyCosts": "Comparación de costos mensuales",
@@ -351,7 +534,8 @@ export const es = {
 
   // Categoría del directorio
   "directoryCategory.notFound": "Categoría no encontrada",
-  "directoryCategory.missing": "Esta categoría del directorio todavía no existe.",
+  "directoryCategory.missing":
+    "Esta categoría del directorio todavía no existe.",
   "directoryCategory.back": "Volver al directorio",
   "directoryCategory.badge": "Categoría del directorio de Charlotte",
   "directoryCategory.browseAll": "Ver todos los negocios",
@@ -370,13 +554,16 @@ export const es = {
   "directoryCategory.site": "Sitio web",
   "directoryCategory.pricing": "Ver precios para negocios",
   "directoryCategory.ownBusiness": "¿Tienes un negocio de {category}?",
-  "directoryCategory.claimDescription": "Reclama tu perfil gratis, actualiza la información y mejora el plan cuando quieras más visibilidad.",
+  "directoryCategory.claimDescription":
+    "Reclama tu perfil gratis, actualiza la información y mejora el plan cuando quieras más visibilidad.",
   "directoryCategory.genericHeadline": "{category} en Charlotte, NC",
-  "directoryCategory.genericIntro": "Explora {category} que prestan servicio en Charlotte y comunidades metropolitanas cercanas. Compara opciones, contactos y áreas de servicio.",
+  "directoryCategory.genericIntro":
+    "Explora {category} que prestan servicio en Charlotte y comunidades metropolitanas cercanas. Compara opciones, contactos y áreas de servicio.",
   "directoryCategory.checkServiceAreas": "Compara las áreas de servicio",
   "directoryCategory.checkContact": "Revisa sitios web y opciones de contacto",
   "directoryCategory.checkShortlist": "Selecciona 2 o 3 proveedores",
-  "directoryCategory.checkVerified": "Usa perfiles verificados o reclamados cuando estén disponibles",
+  "directoryCategory.checkVerified":
+    "Usa perfiles verificados o reclamados cuando estén disponibles",
 
   // Detalle del vecindario
   "neighborhoodDetail.allNeighborhoods": "Todos los vecindarios",
@@ -424,12 +611,30 @@ export const es = {
   "neighborhoodDetail.recreationHighlights": "Opciones recreativas destacadas",
   "neighborhoodDetail.parksTrails": "Parques y senderos",
   "neighborhoodDetail.explore": "Explora {name}",
+  "neighborhoodDetail.radarWalk": "Caminabilidad",
+  "neighborhoodDetail.radarNightlife": "Vida nocturna",
+  "neighborhoodDetail.radarFamily": "Familias",
+  "neighborhoodDetail.radarPet": "Mascotas",
+  "neighborhoodDetail.radarSchools": "Escuelas",
+  "neighborhoodDetail.radarSafety": "Seguridad",
+  "neighborhoodDetail.avgRent": "Alquiler prom.",
+  "neighborhoodDetail.homePrice": "Precio de vivienda",
+  "neighborhoodDetail.walkScore": "Puntuación peatonal",
+  "neighborhoodDetail.toUptown": "A Uptown",
+  "neighborhoodDetail.schools": "Escuelas",
+  "neighborhoodDetail.crime": "Delincuencia",
+  "neighborhoodDetail.nightlife": "Vida nocturna",
+  "neighborhoodDetail.petScore": "Punt. mascotas",
+  "neighborhoodDetail.family": "Familias",
 
   // Pasaporte
   "passport.title": "Pasaporte CLT",
-  "passport.seoDescription": "Colecciona sellos de lugares y eventos de Charlotte mientras registras tus aventuras locales.",
-  "passport.seoKeywords": "Pasaporte CLT, actividades Charlotte, explorar Charlotte, guía local Charlotte",
-  "passport.subtitle": "Colecciona sellos por cada lugar que visites y evento al que asistas en Charlotte.",
+  "passport.seoDescription":
+    "Colecciona sellos de lugares y eventos de Charlotte mientras registras tus aventuras locales.",
+  "passport.seoKeywords":
+    "Pasaporte CLT, actividades Charlotte, explorar Charlotte, guía local Charlotte",
+  "passport.subtitle":
+    "Colecciona sellos por cada lugar que visites y evento al que asistas en Charlotte.",
   "passport.totalStamps": "Sellos totales",
   "passport.events": "Eventos",
   "passport.neighborhoods": "Vecindarios",
@@ -444,10 +649,12 @@ export const es = {
   "passport.noEvents": "No se encontraron eventos",
   "passport.searchDirectory": "Buscar en el directorio",
   "passport.searchPlacesPlaceholder": "Escribe para buscar lugares...",
-  "passport.noPlaces": "No se encontraron lugares — usa un nombre personalizado abajo",
+  "passport.noPlaces":
+    "No se encontraron lugares — usa un nombre personalizado abajo",
   "passport.or": "o",
   "passport.customPlace": "Nombre del lugar personalizado",
-  "passport.customPlacePlaceholder": "p. ej., ese increíble camión de tacos en Trade St",
+  "passport.customPlacePlaceholder":
+    "p. ej., ese increíble camión de tacos en Trade St",
   "passport.dateAttended": "Fecha del evento",
   "passport.dateVisited": "Fecha de la visita",
   "passport.notesOptional": "Notas (opcional)",
@@ -472,19 +679,30 @@ export const es = {
   "passport.eventStamps": "Sellos de eventos",
   "passport.bingoChallenges": "Desafíos de bingo",
   "passport.leaderboard": "Tabla de clasificación",
-  "passport.landingDescription": "Registra cada lugar que visites y evento al que asistas en Charlotte. Colecciona sellos, completa desafíos y explora como residente.",
-  "passport.visitPlacesDescription": "Explora restaurantes, cervecerías, parques y lugares ocultos de Charlotte.",
-  "passport.attendEventsDescription": "Sella cada festival, concierto y evento comunitario de Charlotte que disfrutes.",
-  "passport.collectStampsDescription": "Registra visitas con fechas y notas para seguir tu recorrido.",
-  "passport.earnAchievementsDescription": "Completa desafíos, sube en la clasificación y comparte tu progreso.",
-  "passport.placeStampsDescription": "Registra restaurantes, cervecerías, parques y tiendas con fechas y notas.",
-  "passport.eventStampsDescription": "Registra festivales, conciertos, eventos gastronómicos y reuniones comunitarias.",
-  "passport.bingoChallengesDescription": "Completa tarjetas de desafíos temáticos por Charlotte.",
-  "passport.leaderboardDescription": "Descubre tu posición entre otros exploradores de CLT.",
+  "passport.landingDescription":
+    "Registra cada lugar que visites y evento al que asistas en Charlotte. Colecciona sellos, completa desafíos y explora como residente.",
+  "passport.visitPlacesDescription":
+    "Explora restaurantes, cervecerías, parques y lugares ocultos de Charlotte.",
+  "passport.attendEventsDescription":
+    "Sella cada festival, concierto y evento comunitario de Charlotte que disfrutes.",
+  "passport.collectStampsDescription":
+    "Registra visitas con fechas y notas para seguir tu recorrido.",
+  "passport.earnAchievementsDescription":
+    "Completa desafíos, sube en la clasificación y comparte tu progreso.",
+  "passport.placeStampsDescription":
+    "Registra restaurantes, cervecerías, parques y tiendas con fechas y notas.",
+  "passport.eventStampsDescription":
+    "Registra festivales, conciertos, eventos gastronómicos y reuniones comunitarias.",
+  "passport.bingoChallengesDescription":
+    "Completa tarjetas de desafíos temáticos por Charlotte.",
+  "passport.leaderboardDescription":
+    "Descubre tu posición entre otros exploradores de CLT.",
   "passport.readyTitle": "¿Listo para explorar Charlotte?",
-  "passport.readyDescription": "Crea una cuenta gratuita y comienza a coleccionar sellos hoy.",
+  "passport.readyDescription":
+    "Crea una cuenta gratuita y comienza a coleccionar sellos hoy.",
   "passport.getPassport": "Obtén tu Pasaporte CLT",
-  "passport.emptyInstructions": "Comienza a explorar Charlotte y agrega lugares o eventos que hayas visitado.",
+  "passport.emptyInstructions":
+    "Comienza a explorar Charlotte y agrega lugares o eventos que hayas visitado.",
   "passport.browseDirectory": "Explorar directorio",
   "passport.remove": "Eliminar",
   "passport.all": "Todos ({count})",
@@ -503,7 +721,8 @@ export const es = {
   "wishlist.title": "Mi lista de deseos",
   "wishlist.subtitle": "Lugares que quieres visitar en Charlotte.",
   "wishlist.empty": "Tu lista de deseos está vacía",
-  "wishlist.emptyDescription": "Explora el directorio y guarda perfiles para visitarlos más tarde.",
+  "wishlist.emptyDescription":
+    "Explora el directorio y guarda perfiles para visitarlos más tarde.",
   "wishlist.browseDirectory": "Explorar directorio",
   "wishlist.savedPlaces": "Lugares guardados ({count})",
   "wishlist.website": "Sitio web",
@@ -513,8 +732,10 @@ export const es = {
   "wishlist.saveNotes": "Guardar notas",
   "wishlist.removed": "Eliminado de la lista de deseos",
   "wishlist.notesUpdated": "Notas actualizadas",
-  "wishlist.tip": "Consejo: selecciona el corazón de un perfil del directorio para agregarlo aquí.",
-  "wishlist.seoDescription": "Guarda y vuelve a visitar tus vecindarios, negocios y eventos favoritos de Charlotte.",
+  "wishlist.tip":
+    "Consejo: selecciona el corazón de un perfil del directorio para agregarlo aquí.",
+  "wishlist.seoDescription":
+    "Guarda y vuelve a visitar tus vecindarios, negocios y eventos favoritos de Charlotte.",
   "wishlist.authFeature": "guardar tu lista de deseos",
   "wishlist.cancelEdit": "Cancelar la edición de la nota",
 
@@ -522,14 +743,16 @@ export const es = {
   "leaderboard.title": "Tabla de exploradores de CLT",
   "leaderboard.subtitle": "Descubre quién explora Charlotte más que nadie.",
   "leaderboard.noExplorers": "Todavía no hay exploradores",
-  "leaderboard.noExplorersDescription": "¡Sé la primera persona en explorar Charlotte y ocupar el primer puesto!",
+  "leaderboard.noExplorersDescription":
+    "¡Sé la primera persona en explorar Charlotte y ocupar el primer puesto!",
   "leaderboard.startExploring": "Comenzar a explorar",
   "leaderboard.rank": "Posición",
   "leaderboard.stamps": "sellos",
   "leaderboard.mostStamps": "Más sellos",
   "leaderboard.bingoChamps": "Campeones de bingo",
   "leaderboard.explorer": "Explorador",
-  "leaderboard.stampsDescription": "Lugares visitados mediante el Pasaporte CLT",
+  "leaderboard.stampsDescription":
+    "Lugares visitados mediante el Pasaporte CLT",
   "leaderboard.bingoDescription": "Tarjetas de bingo completadas",
   "leaderboard.neighborhoodDescription": "Vecindarios únicos visitados",
   "leaderboard.completed": "completadas",
@@ -537,10 +760,14 @@ export const es = {
   "leaderboard.you": "Tú",
   "leaderboard.anonymous": "Explorador anónimo",
   "leaderboard.wantToJoin": "¿Quieres aparecer en la tabla?",
-  "leaderboard.joinDescription": "Inicia sesión y explora Charlotte para ganar tu lugar.",
-  "leaderboard.seoDescription": "Consulta la clasificación de exploradores de Charlotte por sellos, bingos completados y vecindarios visitados.",
-  "leaderboard.seoKeywords": "clasificación Charlotte, exploradores CLT, comunidad Charlotte, pasaporte CLT",
-  "leaderboard.shareDescription": "Descubre quién explora Charlotte más que nadie",
+  "leaderboard.joinDescription":
+    "Inicia sesión y explora Charlotte para ganar tu lugar.",
+  "leaderboard.seoDescription":
+    "Consulta la clasificación de exploradores de Charlotte por sellos, bingos completados y vecindarios visitados.",
+  "leaderboard.seoKeywords":
+    "clasificación Charlotte, exploradores CLT, comunidad Charlotte, pasaporte CLT",
+  "leaderboard.shareDescription":
+    "Descubre quién explora Charlotte más que nadie",
   "leaderboard.rankValue": "Posición {rank}",
 
   // Detalle del negocio
@@ -549,7 +776,8 @@ export const es = {
   "businessDetail.back": "Volver al directorio",
   "businessDetail.notFound": "Negocio no encontrado",
   "businessDetail.seoTitle": "{name} — {category} en {area}, Charlotte NC",
-  "businessDetail.seoDescription": "Consulta datos de contacto, horarios, servicios, reseñas y cómo llegar a {name} en Charlotte.",
+  "businessDetail.seoDescription":
+    "Consulta datos de contacto, horarios, servicios, reseñas y cómo llegar a {name} en Charlotte.",
   "businessDetail.website": "Visitar sitio web",
   "businessDetail.directions": "Cómo llegar",
   "businessDetail.call": "Llamar",
@@ -559,7 +787,8 @@ export const es = {
   "businessDetail.reviews": "Reseñas de la comunidad",
   "businessDetail.claim": "Reclamar este negocio",
   "businessDetail.inquiry": "Enviar una consulta",
-  "businessDetail.inquiryDescription": "Contacta directamente a {name} mediante su perfil.",
+  "businessDetail.inquiryDescription":
+    "Contacta directamente a {name} mediante su perfil.",
   "businessDetail.name": "Nombre",
   "businessDetail.email": "Correo electrónico",
   "businessDetail.phoneOptional": "Teléfono (opcional)",
@@ -567,7 +796,8 @@ export const es = {
   "businessDetail.sending": "Enviando...",
   "businessDetail.sendInquiry": "Enviar consulta",
   "businessDetail.inquirySent": "Tu consulta fue enviada al negocio.",
-  "businessDetail.error": "No pudimos completar la solicitud. Inténtalo de nuevo.",
+  "businessDetail.error":
+    "No pudimos completar la solicitud. Inténtalo de nuevo.",
   "businessDetail.closePhotos": "Cerrar visor de fotos",
   "businessDetail.previousPhoto": "Foto anterior",
   "businessDetail.nextPhoto": "Foto siguiente",
@@ -580,8 +810,10 @@ export const es = {
   "businessDetail.googleReviews": "({count} reseñas en Google)",
   "businessDetail.bookVia": "Reservar o pagar mediante {provider}",
   "businessDetail.aboutTitle": "Acerca de {name} en {area}, Charlotte NC",
-  "businessDetail.directoryContext": "{name} aparece en el directorio de Charlotte de Settle CLT bajo {category}. Usa esta página para consultar datos de contacto, horarios, fotos, reseñas y cómo llegar.",
-  "businessDetail.compareContext": "Si te mudas a Charlotte o te estableces en {area}, compara este perfil con opciones cercanas para elegir la más adecuada.",
+  "businessDetail.directoryContext":
+    "{name} aparece en el directorio de Charlotte de Settle CLT bajo {category}. Usa esta página para consultar datos de contacto, horarios, fotos, reseñas y cómo llegar.",
+  "businessDetail.compareContext":
+    "Si te mudas a Charlotte o te estableces en {area}, compara este perfil con opciones cercanas para elegir la más adecuada.",
   "businessDetail.sunday": "Domingo",
   "businessDetail.monday": "Lunes",
   "businessDetail.tuesday": "Martes",
@@ -594,24 +826,34 @@ export const es = {
   "businessDetail.localBusiness": "Negocio local",
   "businessDetail.bookQuote": "Reservar o solicitar cotización",
   "businessDetail.fromPrice": "Desde {price}",
-  "businessDetail.serviceHint": "Usa el botón de reserva o cotización para preguntar por un servicio.",
+  "businessDetail.serviceHint":
+    "Usa el botón de reserva o cotización para preguntar por un servicio.",
 
   // Precios para negocios
   "businessPricing.seoTitle": "Precios para negocios de Settle CLT",
-  "businessPricing.seoDescription": "Reclama el perfil de tu negocio en Charlotte y compara planes de visibilidad.",
+  "businessPricing.seoDescription":
+    "Reclama el perfil de tu negocio en Charlotte y compara planes de visibilidad.",
   "businessPricing.badge": "Crecimiento para negocios de Charlotte",
-  "businessPricing.title": "Reclama gratis tu perfil en Settle CLT. Mejora el plan cuando quieras más visibilidad.",
-  "businessPricing.subtitle": "Ayuda a los clientes de Charlotte a encontrar tu negocio. Comienza con una reclamación verificada gratuita y mejora cuando quieras más clics y clientes potenciales.",
+  "businessPricing.title":
+    "Reclama gratis tu perfil en Settle CLT. Mejora el plan cuando quieras más visibilidad.",
+  "businessPricing.subtitle":
+    "Ayuda a los clientes de Charlotte a encontrar tu negocio. Comienza con una reclamación verificada gratuita y mejora cuando quieras más clics y clientes potenciales.",
   "businessPricing.findClaim": "Encontrar y reclamar tu negocio",
   "businessPricing.addMissing": "Agregar un negocio faltante",
   "businessPricing.howItWorks": "Cómo funciona",
-  "businessPricing.howDescription": "Un camino sencillo desde la reclamación gratuita hasta un crecimiento medible.",
-  "businessPricing.step1": "Encuentra tu perfil en el directorio y envía una reclamación gratuita.",
-  "businessPricing.step2": "Settle CLT verifica la reclamación y da acceso al propietario.",
-  "businessPricing.step3": "Edita los detalles y mejora el plan mediante un pago seguro cuando estés listo.",
-  "businessPricing.step4": "Mide vistas, clics, clientes potenciales y rendimiento.",
+  "businessPricing.howDescription":
+    "Un camino sencillo desde la reclamación gratuita hasta un crecimiento medible.",
+  "businessPricing.step1":
+    "Encuentra tu perfil en el directorio y envía una reclamación gratuita.",
+  "businessPricing.step2":
+    "Settle CLT verifica la reclamación y da acceso al propietario.",
+  "businessPricing.step3":
+    "Edita los detalles y mejora el plan mediante un pago seguro cuando estés listo.",
+  "businessPricing.step4":
+    "Mide vistas, clics, clientes potenciales y rendimiento.",
   "businessPricing.plans": "Planes para perfiles de negocios",
-  "businessPricing.plansDescription": "Comienza gratis y elige un plan pagado cuando necesites más visibilidad.",
+  "businessPricing.plansDescription":
+    "Comienza gratis y elige un plan pagado cuando necesites más visibilidad.",
   "businessPricing.freeClaim": "Reclamación gratuita",
   "businessPricing.featured": "Perfil destacado",
   "businessPricing.premium": "Perfil premium",
@@ -621,10 +863,14 @@ export const es = {
   "businessPricing.popular": "Más popular",
   "businessPricing.leadFocused": "Enfocado en clientes potenciales",
   "businessPricing.aiPowered": "Con IA",
-  "businessPricing.freeDescription": "Verifica la propiedad y controla la información básica de tu perfil.",
-  "businessPricing.featuredDescription": "Destácate en tu categoría y obtén mayor visibilidad.",
-  "businessPricing.premiumDescription": "Máxima visibilidad para negocios que buscan más clientes potenciales.",
-  "businessPricing.proDescription": "Recomendaciones de crecimiento asistidas por IA sin publicación automática.",
+  "businessPricing.freeDescription":
+    "Verifica la propiedad y controla la información básica de tu perfil.",
+  "businessPricing.featuredDescription":
+    "Destácate en tu categoría y obtén mayor visibilidad.",
+  "businessPricing.premiumDescription":
+    "Máxima visibilidad para negocios que buscan más clientes potenciales.",
+  "businessPricing.proDescription":
+    "Recomendaciones de crecimiento asistidas por IA sin publicación automática.",
   "businessPricing.claimCta": "Reclamar tu negocio",
   "businessPricing.trial14": "Comenzar prueba gratuita de 14 días",
   "businessPricing.trial7": "Comenzar prueba gratuita de 7 días",
@@ -632,71 +878,92 @@ export const es = {
   "businessPricing.trial7Note": "Prueba gratuita de 7 días",
   "businessPricing.noCharge": "sin cargo hasta que termine",
   "businessPricing.freeFeature1": "Insignia de propietario verificado",
-  "businessPricing.freeFeature2": "Editar nombre, teléfono, sitio web, descripción y horarios del negocio",
+  "businessPricing.freeFeature2":
+    "Editar nombre, teléfono, sitio web, descripción y horarios del negocio",
   "businessPricing.freeFeature3": "Aparecer en la búsqueda del directorio",
   "businessPricing.freeFeature4": "Análisis básicos del perfil",
   "businessPricing.freeFeature5": "Mejorar el plan después de la aprobación",
-  "businessPricing.featuredFeature1": "Todo lo incluido en Reclamación gratuita",
+  "businessPricing.featuredFeature1":
+    "Todo lo incluido en Reclamación gratuita",
   "businessPricing.featuredFeature2": "Insignia destacada en el perfil",
   "businessPricing.featuredFeature3": "Prioridad en la categoría",
   "businessPricing.featuredFeature4": "Galería de hasta 5 fotos",
   "businessPricing.featuredFeature5": "Análisis detallados de clics",
   "businessPricing.featuredFeature6": "Menú de servicios con precios iniciales",
-  "businessPricing.featuredFeature7": "Ideal para negocios locales de servicios que están probando la demanda",
+  "businessPricing.featuredFeature7":
+    "Ideal para negocios locales de servicios que están probando la demanda",
   "businessPricing.premiumFeature1": "Todo lo incluido en Destacado",
   "businessPricing.premiumFeature2": "Insignia premium y perfil resaltado",
   "businessPricing.premiumFeature3": "Primeras posiciones de búsqueda",
   "businessPricing.premiumFeature4": "Galería de hasta 15 fotos",
-  "businessPricing.premiumFeature5": "Análisis y bandeja de clientes potenciales",
+  "businessPricing.premiumFeature5":
+    "Análisis y bandeja de clientes potenciales",
   "businessPricing.premiumFeature6": "Fuentes y valor del embudo",
   "businessPricing.premiumFeature7": "Enlaces externos de reserva y pago",
   "businessPricing.premiumFeature8": "Informe mensual de rendimiento",
   "businessPricing.proFeature1": "Todo lo incluido en Premium",
-  "businessPricing.proFeature2": "Asistente de negocios con IA (chat disponible 24/7)",
-  "businessPricing.proFeature3": "Captura inteligente de consultas y solicitudes de reserva",
-  "businessPricing.proFeature4": "Sugerencias de temas para publicaciones basadas en datos",
-  "businessPricing.proFeature5": "Recomendaciones para el perfil y seguimiento de clientes potenciales",
+  "businessPricing.proFeature2":
+    "Asistente de negocios con IA (chat disponible 24/7)",
+  "businessPricing.proFeature3":
+    "Captura inteligente de consultas y solicitudes de reserva",
+  "businessPricing.proFeature4":
+    "Sugerencias de temas para publicaciones basadas en datos",
+  "businessPricing.proFeature5":
+    "Recomendaciones para el perfil y seguimiento de clientes potenciales",
   "businessPricing.proFeature6": "Galería de hasta 30 fotos",
   "businessPricing.trackClicks": "Medir clics",
-  "businessPricing.trackClicksCopy": "Consulta vistas, clics de contacto y acciones de clientes potenciales.",
+  "businessPricing.trackClicksCopy":
+    "Consulta vistas, clics de contacto y acciones de clientes potenciales.",
   "businessPricing.reachLocals": "Llegar a clientes locales",
-  "businessPricing.reachLocalsCopy": "Haz que te descubran residentes, personas que se mudan y clientes del área de Charlotte.",
+  "businessPricing.reachLocalsCopy":
+    "Haz que te descubran residentes, personas que se mudan y clientes del área de Charlotte.",
   "businessPricing.measureValue": "Medir el valor",
-  "businessPricing.measureValueCopy": "Usa el seguimiento de conversiones para saber qué funciona.",
+  "businessPricing.measureValueCopy":
+    "Usa el seguimiento de conversiones para saber qué funciona.",
   "businessPricing.bestOffer": "Mejor oferta inicial",
-  "businessPricing.bestOfferCopy": "Comienza con Destacado cuando quieras una mejora de visibilidad económica y fácil de explicar.",
+  "businessPricing.bestOfferCopy":
+    "Comienza con Destacado cuando quieras una mejora de visibilidad económica y fácil de explicar.",
   "businessPricing.startFree": "Comenzar con una reclamación gratuita",
 
   // Solicitud de referencias
   "referral.seoTitle": "Referencias de negocios locales en Charlotte",
-  "referral.seoDescription": "Solicita recomendaciones de negocios confiables del área de Charlotte.",
-  "referral.title": "Encuentra un negocio local confiable",
-  "referral.subtitle": "Cuéntanos qué necesitas. Te recomendaremos negocios relevantes del área de Charlotte sin compartir ampliamente tu información.",
+  "referral.seoDescription":
+    "Solicita recomendaciones de negocios del área de Charlotte.",
+  "referral.title": "Encuentra un negocio local",
+  "referral.subtitle":
+    "Cuéntanos qué necesitas. Te recomendaremos negocios relevantes del área de Charlotte sin compartir ampliamente tu información.",
   "referral.request": "Solicitar una referencia",
-  "referral.privacy": "Tus datos de contacto se usan solo para dar seguimiento a esta solicitud o después de que elijas un negocio recomendado.",
+  "referral.privacy":
+    "Tus datos de contacto se usan solo para dar seguimiento a esta solicitud o después de que elijas un negocio recomendado.",
   "referral.name": "Nombre",
   "referral.email": "Correo electrónico",
   "referral.phone": "Teléfono (opcional)",
   "referral.category": "Categoría de servicio (opcional)",
   "referral.categoryPlaceholder": "Mudanza, odontología, cuidado infantil...",
   "referral.need": "¿Qué necesitas?",
-  "referral.needPlaceholder": "Describe el servicio o proyecto para el que necesitas ayuda.",
+  "referral.needPlaceholder":
+    "Describe el servicio o proyecto para el que necesitas ayuda.",
   "referral.submit": "Obtener recomendaciones",
   "referral.submitting": "Buscando coincidencias...",
   "referral.success": "Recibimos tu solicitud de referencia.",
   "referral.error": "No pudimos enviar tu solicitud. Inténtalo de nuevo.",
   "referral.recommendations": "Negocios recomendados",
-  "referral.recommendationsDescription": "Estas sugerencias se basan en tu categoría y descripción. Revisa cada perfil antes de comunicarte.",
+  "referral.recommendationsDescription":
+    "Estas sugerencias se basan en tu categoría y descripción. Revisa cada perfil antes de comunicarte.",
 
   // Bingo
   "bingo.seoTitle": "Bingo CLT — Tarjetas de desafíos de Charlotte",
-  "bingo.seoDescription": "Juega tarjetas temáticas de Charlotte y explora una casilla a la vez.",
+  "bingo.seoDescription":
+    "Juega tarjetas temáticas de Charlotte y explora una casilla a la vez.",
   "bingo.title": "Tarjetas de Bingo CLT",
-  "bingo.subtitle": "Explora Charlotte mediante desafíos temáticos y comparte tus tarjetas completadas.",
+  "bingo.subtitle":
+    "Explora Charlotte mediante desafíos temáticos y comparte tus tarjetas completadas.",
   "bingo.empty": "Todavía no hay tarjetas de bingo",
-  "bingo.emptyDescription": "¡Vuelve pronto para ver desafíos temáticos de Charlotte!",
+  "bingo.emptyDescription":
+    "¡Vuelve pronto para ver desafíos temáticos de Charlotte!",
   "bingo.completed": "{completed}/{total} completadas",
-  "bingo.completionToast": "🎉 ¡Bingo! Completaste la tarjeta. ¡Comparte tu logro!",
+  "bingo.completionToast":
+    "🎉 ¡Bingo! Completaste la tarjeta. ¡Comparte tu logro!",
   "bingo.signIn": "Comenzar a jugar",
   "bingo.loading": "Cargando...",
   "bingo.hideShare": "Ocultar tarjeta para compartir",
@@ -706,23 +973,31 @@ export const es = {
   "bingo.challengeCards": "Tarjetas de desafíos de Charlotte",
   "bingo.explore": "Explora Charlotte.",
   "bingo.oneSquare": "Una casilla a la vez.",
-  "bingo.landingDescription": "Bingo CLT ofrece tarjetas temáticas para descubrir lo mejor de Charlotte.",
+  "bingo.landingDescription":
+    "Bingo CLT ofrece tarjetas temáticas para descubrir lo mejor de Charlotte.",
   "bingo.themedCards": "Tarjetas de desafíos temáticos",
   "bingo.breweryTour": "Ruta de cervecerías",
-  "bingo.breweryTourDescription": "Visita cervecerías de Charlotte desde NoDa hasta South End.",
+  "bingo.breweryTourDescription":
+    "Visita cervecerías de Charlotte desde NoDa hasta South End.",
   "bingo.coffeeTour": "El mejor café de CLT",
-  "bingo.coffeeTourDescription": "Descubre la creciente escena cafetera de Charlotte.",
+  "bingo.coffeeTourDescription":
+    "Descubre la creciente escena cafetera de Charlotte.",
   "bingo.dateNight": "Citas nocturnas en CLT",
-  "bingo.dateNightDescription": "Explora restaurantes románticos, terrazas y experiencias únicas.",
+  "bingo.dateNightDescription":
+    "Explora restaurantes románticos, terrazas y experiencias únicas.",
   "bingo.howItWorks": "Cómo funciona",
   "bingo.pickCard": "Elige una tarjeta",
-  "bingo.pickCardDescription": "Elige una tarjeta temática de desafíos de Charlotte.",
+  "bingo.pickCardDescription":
+    "Elige una tarjeta temática de desafíos de Charlotte.",
   "bingo.visitCheck": "Visita y marca",
-  "bingo.visitCheckDescription": "Visita lugares y marca cada casilla mientras exploras.",
+  "bingo.visitCheckDescription":
+    "Visita lugares y marca cada casilla mientras exploras.",
   "bingo.completeShare": "Completa y comparte",
-  "bingo.completeShareDescription": "Completa una tarjeta, comparte tu progreso y sube en la clasificación.",
+  "bingo.completeShareDescription":
+    "Completa una tarjeta, comparte tu progreso y sube en la clasificación.",
   "bingo.ready": "¿Listo para jugar Bingo CLT?",
-  "bingo.readyDescription": "Crea una cuenta gratuita y comienza a marcar los mejores lugares de Charlotte.",
+  "bingo.readyDescription":
+    "Crea una cuenta gratuita y comienza a marcar los mejores lugares de Charlotte.",
   "bingo.start": "Comenzar a jugar bingo",
   "bingo.foodDrink": "Comida y bebida",
   "bingo.experiences": "Experiencias",
@@ -732,7 +1007,8 @@ export const es = {
   "eventCategory.home": "Inicio",
   "eventCategory.events": "Eventos",
   "eventCategory.notFound": "Categoría no encontrada",
-  "eventCategory.notFoundDescription": "No encontramos la categoría de eventos “{category}”. Explora todos los eventos de Charlotte.",
+  "eventCategory.notFoundDescription":
+    "No encontramos la categoría de eventos “{category}”. Explora todos los eventos de Charlotte.",
   "eventCategory.allEvents": "Explorar todos los eventos",
   "eventCategory.eventsCount": "{count} eventos",
   "eventCategory.eventSingular": "1 evento",
@@ -750,9 +1026,11 @@ export const es = {
   "eventCategory.makersCrafts": "Mercados de creadores y artesanías",
   "eventCategory.freeCount": "{count} gratis",
   "eventCategory.empty": "Todavía no hay eventos en esta categoría",
-  "eventCategory.emptyDescription": "Aún estamos reuniendo eventos para esta categoría. Vuelve pronto o explora todos los eventos.",
+  "eventCategory.emptyDescription":
+    "Aún estamos reuniendo eventos para esta categoría. Vuelve pronto o explora todos los eventos.",
   "eventCategory.moreEvents": "Explora más eventos de Charlotte",
-  "eventCategory.moreDescription": "Descubre festivales, conciertos, eventos gastronómicos y todo lo que ocurre en la Ciudad Reina.",
+  "eventCategory.moreDescription":
+    "Descubre festivales, conciertos, eventos gastronómicos y todo lo que ocurre en la Ciudad Reina.",
   "eventCategory.browseAll": "Explorar todos los eventos de Charlotte",
   "eventCategory.free": "Gratis",
   "eventCategory.paid": "De pago",
@@ -760,58 +1038,78 @@ export const es = {
   "eventCategory.newcomerFriendly": "Ideal para recién llegados",
   "eventCategory.moreInfo": "Más información",
   "eventCategory.genericTitle": "{category} en Charlotte",
-  "eventCategory.genericIntro": "Explora {category} y eventos comunitarios recurrentes en Charlotte, NC.",
+  "eventCategory.genericIntro":
+    "Explora {category} y eventos comunitarios recurrentes en Charlotte, NC.",
 
   // Cosas que hacer
   "things.seoTitle": "Cosas que hacer en Charlotte NC",
-  "things.seoDescription": "Descubre eventos, actividades gratuitas, diversión familiar, comida, vida nocturna y aventuras al aire libre en Charlotte.",
+  "things.seoDescription":
+    "Descubre eventos, actividades gratuitas, diversión familiar, comida, vida nocturna y aventuras al aire libre en Charlotte.",
   "things.guideBadge": "Guía de Charlotte NC",
   "things.title": "Cosas que hacer en Charlotte, NC",
-  "things.subtitle": "Tu guía completa de eventos, actividades y experiencias en Charlotte.",
+  "things.subtitle":
+    "Tu guía completa de eventos, actividades y experiencias en Charlotte.",
   "things.browseEvents": "Explorar calendario de eventos",
   "things.exploreNeighborhoods": "Explorar vecindarios",
   "things.thisWeek": "Qué hacer en Charlotte esta semana y fin de semana",
-  "things.categoriesIntro": "Charlotte tiene algo para todos. Explora las principales categorías de actividades para hacer ahora.",
-  "things.bestNeighborhoods": "Los mejores vecindarios de Charlotte para actividades",
-  "things.neighborhoodsIntro": "Cada vecindario de Charlotte tiene su propia personalidad y actividades.",
+  "things.categoriesIntro":
+    "Charlotte tiene algo para todos. Explora las principales categorías de actividades para hacer ahora.",
+  "things.bestNeighborhoods":
+    "Los mejores vecindarios de Charlotte para actividades",
+  "things.neighborhoodsIntro":
+    "Cada vecindario de Charlotte tiene su propia personalidad y actividades.",
   "things.viewAllNeighborhoods": "Ver los 20 vecindarios de Charlotte →",
   "things.completeGuide": "Guía completa de cosas que hacer en Charlotte NC",
-  "things.completeGuideIntro": "Las escenas de entretenimiento, gastronomía y actividades al aire libre de Charlotte ofrecen opciones todo el año para recién llegados y residentes.",
+  "things.completeGuideIntro":
+    "Las escenas de entretenimiento, gastronomía y actividades al aire libre de Charlotte ofrecen opciones todo el año para recién llegados y residentes.",
   "things.localDirectory": "Explorar directorio local",
   "things.findNeighborhood": "Encuentra tu vecindario",
   "things.weekEvents": "Ver los eventos de esta semana →",
   "things.liveMusic": "Música en vivo y conciertos",
-  "things.liveMusicDescription": "Conciertos en grandes recintos y escenarios íntimos por toda Charlotte.",
+  "things.liveMusicDescription":
+    "Conciertos en grandes recintos y escenarios íntimos por toda Charlotte.",
   "things.foodEvents": "Eventos de comida y bebida",
-  "things.foodEventsDescription": "Reuniones de camiones de comida, cervecerías, degustaciones y cenas emergentes.",
+  "things.foodEventsDescription":
+    "Reuniones de camiones de comida, cervecerías, degustaciones y cenas emergentes.",
   "things.family": "Actividades familiares",
-  "things.familyDescription": "Museos, parques, festivales, mercados y actividades para toda la familia.",
+  "things.familyDescription":
+    "Museos, parques, festivales, mercados y actividades para toda la familia.",
   "things.festivals": "Festivales y mercados",
-  "things.festivalsDescription": "Mercados de temporada, ferias callejeras y festivales de Charlotte.",
+  "things.festivalsDescription":
+    "Mercados de temporada, ferias callejeras y festivales de Charlotte.",
   "things.outdoor": "Aire libre y naturaleza",
-  "things.outdoorDescription": "Vías verdes, lagos, caminatas y aventuras al aire libre cerca de Charlotte.",
+  "things.outdoorDescription":
+    "Vías verdes, lagos, caminatas y aventuras al aire libre cerca de Charlotte.",
   "things.free": "Cosas gratis que hacer",
-  "things.freeDescription": "Recorridos de galerías, conciertos en parques, bibliotecas, encuentros y eventos gratuitos.",
+  "things.freeDescription":
+    "Recorridos de galerías, conciertos en parques, bibliotecas, encuentros y eventos gratuitos.",
   "things.eventsWeekend": "Eventos de Charlotte este fin de semana",
-  "things.eventsWeekendCopy": "Cada fin de semana ofrece música, mercados, brunch, deportes y eventos vecinales.",
+  "things.eventsWeekendCopy":
+    "Cada fin de semana ofrece música, mercados, brunch, deportes y eventos vecinales.",
   "things.freeGuide": "Cosas gratis que hacer en Charlotte",
-  "things.freeGuideCopy": "Disfruta galerías, conciertos, vías verdes, bibliotecas y espacios públicos gratuitos.",
+  "things.freeGuideCopy":
+    "Disfruta galerías, conciertos, vías verdes, bibliotecas y espacios públicos gratuitos.",
   "things.familyGuide": "Actividades familiares en Charlotte NC",
-  "things.familyGuideCopy": "Charlotte ofrece museos, parques, aventuras y eventos familiares de temporada.",
+  "things.familyGuideCopy":
+    "Charlotte ofrece museos, parques, aventuras y eventos familiares de temporada.",
   "things.nightlife": "Vida nocturna y citas en Charlotte",
-  "things.nightlifeCopy": "Explora terrazas, cervecerías, música en vivo, restaurantes y artes escénicas.",
+  "things.nightlifeCopy":
+    "Explora terrazas, cervecerías, música en vivo, restaurantes y artes escénicas.",
   "things.outdoorGuide": "Aventuras al aire libre cerca de Charlotte",
-  "things.outdoorGuideCopy": "Camina, rema, escala, corre y pedalea a poca distancia de Uptown.",
+  "things.outdoorGuideCopy":
+    "Camina, rema, escala, corre y pedalea a poca distancia de Uptown.",
   "things.nodaVibe": "Distrito artístico con cervecerías y música en vivo",
   "things.southEndVibe": "Sendero transitable con terrazas y restaurantes",
   "things.plazaVibe": "Comida ecléctica, tiendas vintage y bares informales",
   "things.uptownVibe": "Deportes, museos y vistas del horizonte",
-  "things.dilworthVibe": "Encanto histórico, restaurantes de East Boulevard y Freedom Park",
+  "things.dilworthVibe":
+    "Encanto histórico, restaurantes de East Boulevard y Freedom Park",
   "things.southCharlotteVibe": "Familiar, con SouthPark y Ballantyne",
 
   // Páginas de etiquetas
   "tag.seoTitle": "{name} en Charlotte",
-  "tag.seoDescription": "Explora eventos, negocios, vecindarios y artículos de Charlotte con la etiqueta “{name}”.",
+  "tag.seoDescription":
+    "Explora eventos, negocios, vecindarios y artículos de Charlotte con la etiqueta “{name}”.",
   "tag.fallbackTitle": "Etiqueta",
   "tag.fallbackDescription": "Explora contenido de Settle CLT por etiqueta.",
   "tag.notFound": "Etiqueta no encontrada",
@@ -821,7 +1119,8 @@ export const es = {
   "tag.items": "{count} elementos con la etiqueta “{name}”",
   "tag.itemSingular": "1 elemento con la etiqueta “{name}”",
   "tag.empty": "Todavía no hay contenido con la etiqueta “{name}”.",
-  "tag.shareDescription": "Descubre contenido de Charlotte con la etiqueta {name}",
+  "tag.shareDescription":
+    "Descubre contenido de Charlotte con la etiqueta {name}",
   "tag.events": "Eventos",
   "tag.blogPosts": "Artículos del blog",
   "tag.directoryListings": "Perfiles del directorio",
@@ -834,49 +1133,62 @@ export const es = {
 
   // Plan para recién llegados
   "newcomerPlan.seoTitle": "Tu plan para mudarte a Charlotte — Lista guiada",
-  "newcomerPlan.seoDescription": "Crea tu plan para mudarte a Charlotte: encuentra y compara vecindarios, guarda servicios y eventos locales y registra tus descubrimientos con Passport.",
-  "newcomerPlan.seoKeywords": "lista para mudarse a Charlotte, plan de mudanza a Charlotte, guía de reubicación en Charlotte, primera semana en Charlotte NC",
+  "newcomerPlan.seoDescription":
+    "Crea tu plan para mudarte a Charlotte: encuentra y compara vecindarios, guarda servicios y eventos locales y registra tus descubrimientos con Passport.",
+  "newcomerPlan.seoKeywords":
+    "lista para mudarse a Charlotte, plan de mudanza a Charlotte, guía de reubicación en Charlotte, primera semana en Charlotte NC",
   "newcomerPlan.breadcrumbHome": "Inicio",
   "newcomerPlan.breadcrumbCurrent": "Plan para recién llegados",
   "newcomerPlan.badge": "Gratis · no necesitas registrarte",
   "newcomerPlan.title": "Tu plan guiado para establecerte en Charlotte",
-  "newcomerPlan.subtitle": "Pasa de investigar vecindarios a organizar una primera semana práctica. Completa cada etapa aquí; tu progreso permanece en este dispositivo.",
+  "newcomerPlan.subtitle":
+    "Pasa de investigar vecindarios a organizar una primera semana práctica. Completa cada etapa aquí; tu progreso permanece en este dispositivo.",
   "newcomerPlan.progressSingular": "{completed} de {total} etapa completada",
   "newcomerPlan.progressPlural": "{completed} de {total} etapas completadas",
-  "newcomerPlan.progressHint": "Empieza donde quieras y vuelve cuando necesites el siguiente paso.",
+  "newcomerPlan.progressHint":
+    "Empieza donde quieras y vuelve cuando necesites el siguiente paso.",
   "newcomerPlan.progressAria": "Progreso del plan para recién llegados",
   "newcomerPlan.step": "Paso {number}",
   "newcomerPlan.completed": "Completado",
   "newcomerPlan.markComplete": "Marcar como completado",
-  "newcomerPlan.footerNote": "Esta primera versión guarda el progreso de la lista localmente. Los negocios guardados, sellos de eventos y el historial de Passport siguen usando las funciones existentes de Settle CLT.",
+  "newcomerPlan.footerNote":
+    "Esta primera versión guarda el progreso de la lista localmente. Los negocios guardados, sellos de eventos y el historial de Passport siguen usando las funciones existentes de Settle CLT.",
   "newcomerPlan.steps.quiz.stage": "Antes de mudarte",
   "newcomerPlan.steps.quiz.title": "Encuentra el vecindario ideal para ti",
-  "newcomerPlan.steps.quiz.description": "Haz el cuestionario de dos minutos para convertir tus prioridades en una lista breve de Charlotte.",
+  "newcomerPlan.steps.quiz.description":
+    "Haz el cuestionario de dos minutos para convertir tus prioridades en una lista breve de Charlotte.",
   "newcomerPlan.steps.quiz.action": "Hacer el cuestionario",
   "newcomerPlan.steps.compare.stage": "Antes de mudarte",
   "newcomerPlan.steps.compare.title": "Compara tu lista",
-  "newcomerPlan.steps.compare.description": "Compara alquiler, trayecto, accesibilidad peatonal, escuelas y ambiente local.",
+  "newcomerPlan.steps.compare.description":
+    "Compara alquiler, trayecto, accesibilidad peatonal, escuelas y ambiente local.",
   "newcomerPlan.steps.compare.action": "Comparar vecindarios",
   "newcomerPlan.steps.services.stage": "Semana de la mudanza",
   "newcomerPlan.steps.services.title": "Guarda los servicios esenciales",
-  "newcomerPlan.steps.services.description": "Explora mudanzas, almacenamiento, servicios públicos, internet, seguros y otros servicios para instalarte.",
+  "newcomerPlan.steps.services.description":
+    "Explora mudanzas, almacenamiento, servicios públicos, internet, seguros y otros servicios para instalarte.",
   "newcomerPlan.steps.services.action": "Explorar servicios esenciales",
   "newcomerPlan.steps.events.stage": "Tu primera semana",
   "newcomerPlan.steps.events.title": "Elige algo local para hacer",
-  "newcomerPlan.steps.events.description": "Elige un evento ideal para recién llegados y empieza a planear tu primera semana.",
+  "newcomerPlan.steps.events.description":
+    "Elige un evento ideal para recién llegados y empieza a planear tu primera semana.",
   "newcomerPlan.steps.events.action": "Buscar un evento",
   "newcomerPlan.steps.passport.stage": "Después de llegar",
-  "newcomerPlan.steps.passport.title": "Registra tus descubrimientos en Charlotte",
-  "newcomerPlan.steps.passport.description": "Usa los sellos de Passport para recordar los negocios, eventos y vecindarios que visites.",
+  "newcomerPlan.steps.passport.title":
+    "Registra tus descubrimientos en Charlotte",
+  "newcomerPlan.steps.passport.description":
+    "Usa los sellos de Passport para recordar los negocios, eventos y vecindarios que visites.",
   "newcomerPlan.steps.passport.action": "Abrir Passport",
 
   // Notificaciones
-  "notifications.seoTitle": "Notificaciones | Settle CLT",
-  "notifications.seoDescription": "Administra tus preferencias y consulta tu historial de notificaciones.",
+  "notifications.seoTitle": "Notificaciones",
+  "notifications.seoDescription":
+    "Administra tus preferencias y consulta tu historial de notificaciones.",
   "notifications.loading": "Cargando notificaciones",
   "notifications.listLoading": "Cargando el historial de notificaciones",
   "notifications.signInTitle": "Inicia sesión para ver las notificaciones",
-  "notifications.signInDescription": "Recibe novedades sobre reclamos de negocios, reseñas, eventos y más.",
+  "notifications.signInDescription":
+    "Recibe novedades sobre reclamos de negocios, reseñas, eventos y más.",
   "notifications.signIn": "Iniciar sesión",
   "notifications.backAria": "Volver al inicio",
   "notifications.title": "Notificaciones",
@@ -890,43 +1202,58 @@ export const es = {
   "notifications.empty": "Aún no hay notificaciones",
   "notifications.emptyCategory": "No hay notificaciones de {category}",
   "notifications.deleteAria": "Eliminar notificación",
-  "notifications.sourceLanguageFallback": "El contenido de la notificación se muestra en su idioma de origen.",
+  "notifications.sourceLanguageFallback":
+    "El contenido de la notificación se muestra en su idioma de origen.",
   "notifications.preferencesTitle": "Preferencias de notificaciones",
-  "notifications.preferencesDescription": "Elige qué notificaciones quieres recibir y por qué medios.",
+  "notifications.preferencesDescription":
+    "Elige qué notificaciones quieres recibir y por qué medios.",
   "notifications.categoryHeader": "Categoría",
   "notifications.inAppHeader": "En la aplicación",
   "notifications.emailHeader": "Correo electrónico",
   "notifications.pushHeader": "Avisos push",
   "notifications.preferenceAria": "Canal {channel} para {category}",
   "notifications.pushTitle": "Notificaciones push del navegador",
-  "notifications.pushUnsupported": "Este navegador no admite notificaciones push.",
-  "notifications.pushDenied": "Las notificaciones push están bloqueadas. Actívalas en la configuración de tu navegador.",
-  "notifications.pushEnabled": "Las notificaciones push están activadas. Recibirás avisos incluso cuando el sitio esté cerrado.",
-  "notifications.pushDisabled": "Activa las notificaciones push para recibir avisos aunque no estés en el sitio.",
+  "notifications.pushUnsupported":
+    "Este navegador no admite notificaciones push.",
+  "notifications.pushDenied":
+    "Las notificaciones push están bloqueadas. Actívalas en la configuración de tu navegador.",
+  "notifications.pushEnabled":
+    "Las notificaciones push están activadas. Recibirás avisos incluso cuando el sitio esté cerrado.",
+  "notifications.pushDisabled":
+    "Activa las notificaciones push para recibir avisos aunque no estés en el sitio.",
   "notifications.pushLoading": "Actualizando las notificaciones push...",
-  "notifications.pushError": "No se pudieron actualizar las notificaciones push. Inténtalo de nuevo.",
+  "notifications.pushError":
+    "No se pudieron actualizar las notificaciones push. Inténtalo de nuevo.",
   "notifications.disable": "Desactivar",
   "notifications.enable": "Activar",
   "notifications.retry": "Intentar de nuevo",
-  "notifications.pushPermissionNote": "Las notificaciones push requieren permiso del navegador. La primera vez que las actives, se te pedirá que las autorices.",
+  "notifications.pushPermissionNote":
+    "Las notificaciones push requieren permiso del navegador. La primera vez que las actives, se te pedirá que las autorices.",
   "notifications.categories.claim.label": "Reclamos de negocios",
-  "notifications.categories.claim.description": "Novedades cuando se apruebe o rechace tu reclamo de un negocio",
+  "notifications.categories.claim.description":
+    "Novedades cuando se apruebe o rechace tu reclamo de un negocio",
   "notifications.categories.review.label": "Reseñas",
-  "notifications.categories.review.description": "Nuevas reseñas de los negocios que has reclamado",
+  "notifications.categories.review.description":
+    "Nuevas reseñas de los negocios que has reclamado",
   "notifications.categories.payment.label": "Pagos",
-  "notifications.categories.payment.description": "Confirmaciones y errores de pago, y renovaciones de suscripciones",
+  "notifications.categories.payment.description":
+    "Confirmaciones y errores de pago, y renovaciones de suscripciones",
   "notifications.categories.event.label": "Eventos",
-  "notifications.categories.event.description": "Nuevos eventos en Charlotte y en tus vecindarios favoritos",
+  "notifications.categories.event.description":
+    "Nuevos eventos en Charlotte y en tus vecindarios favoritos",
   "notifications.categories.community.label": "Comunidad",
-  "notifications.categories.community.description": "Bingos completados, cambios en la clasificación y referidos",
+  "notifications.categories.community.description":
+    "Bingos completados, cambios en la clasificación y referidos",
   "notifications.categories.system.label": "Sistema",
-  "notifications.categories.system.description": "Mensajes de bienvenida, anuncios y novedades de la plataforma",
+  "notifications.categories.system.description":
+    "Mensajes de bienvenida, anuncios y novedades de la plataforma",
 
   // Acceso autenticado
   "authGate.loading": "Cargando...",
   "authGate.inlinePrompt": "Inicia sesión para {feature}",
   "authGate.required": "Debes iniciar sesión",
-  "authGate.description": "Crea una cuenta gratuita para {feature}. La navegación pública sigue siendo gratuita sin una cuenta.",
+  "authGate.description":
+    "Crea una cuenta gratuita para {feature}. La navegación pública sigue siendo gratuita sin una cuenta.",
   "authGate.signIn": "Iniciar sesión",
 
   // Interfaz compartida para clientes
@@ -940,7 +1267,8 @@ export const es = {
   "cookies.accept": "Aceptar todo",
   "cookies.decline": "Rechazar",
   "cookies.dismiss": "Cerrar el aviso de cookies y decidir más tarde",
-  "cookies.dismissTitle": "Cerrar — volveremos a preguntar en tu próxima visita",
+  "cookies.dismissTitle":
+    "Cerrar — volveremos a preguntar en tu próxima visita",
   "map.loading": "Cargando mapa...",
   "map.unavailable": "Mapa no disponible",
   "map.openAddressInstead":
@@ -961,4 +1289,121 @@ export const es = {
   "language.toggleEn": "English",
   "language.switchToSpanish": "Cambiar a español",
   "language.switchToEnglish": "Switch to English",
+
+  // Correcciones de la auditoría renderizada
+  "footer.copyright": "© {year} Settle CLT. Todos los derechos reservados.",
+  "search.trigger": "Buscar en CLT...",
+  "search.dialogTitle": "Buscar en Settle CLT",
+  "search.dialogDescription":
+    "Busca vecindarios, negocios, eventos y artículos del blog",
+  "search.inputPlaceholder":
+    "Buscar vecindarios, negocios, eventos, artículos...",
+  "search.prompt": "Escribe para buscar en todo Settle CLT",
+  "search.scope": "Vecindarios, negocios, eventos y artículos del blog",
+  "search.popular": "Búsquedas populares",
+  "search.loading": "Cargando datos de búsqueda…",
+  "search.loadError": "No se pudieron cargar los datos de búsqueda",
+  "search.retry": "Reintentar",
+  "search.reload": "Volver a cargar la búsqueda",
+  "search.noResults": "No se encontraron resultados para «{query}»",
+  "search.tryDifferent": "Prueba con otro término de búsqueda",
+  "search.moreResults": "+{count} resultados más",
+  "search.neighborhoods": "Vecindarios",
+  "search.directory": "Directorio",
+  "search.events": "Eventos",
+  "search.blog": "Blog",
+  "search.article": "Artículo",
+  "search.dateTbd": "Por confirmar",
+  "search.untitledEvent": "Evento sin título",
+  "listing.seoDescription":
+    "Envía un negocio de Charlotte para revisión en el directorio. Los perfiles aprobados pueden usar funciones básicas y mejoras de pago opcionales.",
+  "listing.seoKeywords":
+    "publicar negocio Charlotte, directorio de negocios Charlotte, revisión de perfil, perfil Charlotte",
+  "listing.heroDescription":
+    "Envía tu negocio de Charlotte para revisión en el directorio. La publicación no está garantizada; los perfiles aprobados pueden reclamarse y actualizarse.",
+  "listing.formTitle": "Envía tu negocio",
+  "listing.submitPending": "Enviando...",
+  "listing.error": "Algo salió mal. Inténtalo de nuevo.",
+  "listing.name": "Tu nombre *",
+  "listing.email": "Correo electrónico *",
+  "listing.businessName": "Nombre del negocio *",
+  "listing.category": "Categoría *",
+  "listing.area": "Área / Vecindario",
+  "listing.phone": "Teléfono",
+  "listing.website": "Sitio web",
+  "listing.description": "Descripción",
+  "listing.selectCategory": "Selecciona una categoría",
+  "realtor.heroTitle": "Encuentra tu hogar ideal en Charlotte",
+  "realtor.successTitle": "¡Solicitud recibida!",
+  "realtor.formTitle": "Cuéntanos qué necesitas",
+  "realtor.validationRequired":
+    "Completa tu nombre, correo electrónico y lo que buscas.",
+  "realtor.submitSuccess":
+    "Recibimos tu solicitud para revisión. No se garantiza una referencia ni una respuesta.",
+  "realtor.error": "Algo salió mal. Inténtalo de nuevo.",
+  "realtor.referralTypeAria": "¿Qué estás buscando?",
+  "realtor.budgetAria": "Rango de presupuesto",
+  "realtor.timelineAria": "Plazo",
+  "share.share": "Compartir",
+  "share.page": "Compartir esta página",
+  "share.via": "Compartir mediante...",
+  "share.email": "Correo electrónico",
+  "share.emailBody": "Mira esto: {text}",
+  "share.copy": "Copiar enlace",
+  "share.copied": "¡Copiado!",
+  "share.copySuccess": "¡Enlace copiado al portapapeles!",
+  "share.copyError": "No se pudo copiar el enlace",
+  "reviews.title": "Reseñas de la comunidad",
+  "reviews.review": "reseña",
+  "reviews.reviews": "reseñas",
+  "reviews.cancel": "Cancelar",
+  "reviews.write": "Escribir una reseña",
+  "reviews.signIn": "Inicia sesión para reseñar",
+  "reviews.rating": "Tu puntuación",
+  "reviews.aspect": "Aspecto",
+  "reviews.tip": "Tu consejo o reseña",
+  "reviews.placeholder":
+    "Comparte tu experiencia — ¿qué deberían saber los recién llegados?",
+  "reviews.submit": "Enviar reseña",
+  "reviews.empty":
+    "Todavía no hay reseñas. ¡Sé la primera persona en compartir tu experiencia!",
+  "reviews.anonymous": "Anónimo",
+  "reviews.delete": "Eliminar reseña",
+  "reviews.selectRating": "Selecciona una puntuación",
+  "reviews.minimum": "Escribe al menos 5 caracteres",
+  "reviews.submitted": "¡Reseña enviada! Gracias por compartir tu experiencia.",
+  "reviews.deleted": "Reseña eliminada.",
+  "reviews.submitError": "No pudimos enviar tu reseña. Inténtalo de nuevo.",
+  "reviews.deleteError": "No pudimos eliminar tu reseña. Inténtalo de nuevo.",
+  "reviews.starAria": "{rating} de 5 estrellas",
+  "reviews.aspect.general": "General",
+  "reviews.aspect.vibe": "Ambiente y cultura",
+  "reviews.aspect.food": "Comida y restaurantes",
+  "reviews.aspect.safety": "Seguridad",
+  "reviews.aspect.transit": "Transporte y trayecto",
+  "reviews.aspect.nightlife": "Vida nocturna",
+  "reviews.aspect.cost": "Costo de vida",
+  "profile.signInTitle": "Inicia sesión en Settle CLT",
+  "profile.signInDescription":
+    "Crea una cuenta para llevar tu Pasaporte CLT, guardar tu lista de deseos y compartir tus experiencias con la comunidad.",
+  "submitEvent.signInDescription":
+    "Inicia sesión para compartir con la comunidad los eventos que suceden en Charlotte.",
+  "business.signInDescription":
+    "Inicia sesión para administrar el perfil reclamado de tu negocio.",
+  "business.noAccessDescription":
+    "Todavía no tienes una membresía de negocio activa. Visita el directorio para reclamar tu negocio.",
+  "notFound.seoTitle": "Página no encontrada (404)",
+  "notFound.seoDescription":
+    "La página que buscas no existe en Settle CLT. Vuelve al inicio para explorar Charlotte.",
+  "auth.seoTitle": "Inicia sesión o crea una cuenta",
+  "auth.seoDescription": "Inicia sesión en Settle CLT o crea una cuenta.",
+  "neighborhoodDetail.previousPhoto": "Foto anterior del vecindario",
+  "neighborhoodDetail.nextPhoto": "Foto siguiente del vecindario",
+  "neighborhoodDetail.photoButton": "Mostrar la foto {number} del vecindario",
+  "neighborhoodDetail.seoTitle":
+    "Guía del vecindario {name} en Charlotte NC (2026): ambiente, costos y reseñas",
+  "neighborhoodDetail.seoDescription":
+    "{name}, Charlotte NC: {vibe}. {bestFor} Consulta costos, seguridad, escuelas, la vida cotidiana, ventajas y desventajas, y negocios locales en {name}.",
+  "neighborhoodDetail.seoKeywords":
+    "{nameLower}, {nameLower} charlotte nc, guía del vecindario {nameLower}, vivir en {nameLower}, mudarse a {nameLower}, apartamentos en {nameLower}, restaurantes en {nameLower}, vecindarios de charlotte nc",
 } as const satisfies Record<TranslationKey, string>;

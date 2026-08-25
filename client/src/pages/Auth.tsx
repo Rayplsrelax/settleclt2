@@ -2,6 +2,7 @@ import { FormEvent, useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n/I18nContext";
+import { useSEO } from "@/hooks/useSEO";
 
 async function postJson(
   path: string,
@@ -21,6 +22,11 @@ async function postJson(
 
 export default function Auth() {
   const { t } = useI18n();
+  useSEO({
+    title: t("auth.seoTitle"),
+    description: t("auth.seoDescription"),
+    path: "/auth",
+  });
   const [, navigate] = useLocation();
   const [mode, setMode] = useState<"login" | "register" | "forgot">("login");
   const [email, setEmail] = useState("");

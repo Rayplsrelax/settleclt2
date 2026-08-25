@@ -162,19 +162,33 @@ describe("Phase 4: Marketing & Growth", () => {
         path.join(__dirname, "_core/index.ts"),
         "utf-8"
       );
+      const publicFormLimiter = fs.readFileSync(
+        path.join(__dirname, "_core/public-form-rate-limit.ts"),
+        "utf-8"
+      );
       expect(serverIndex).toContain("express-rate-limit");
       expect(serverIndex).toContain("apiLimiter");
-      expect(serverIndex).toContain("formLimiter");
+      expect(serverIndex).toContain("mountStrictPublicFormLimiter");
+      expect(publicFormLimiter).toContain("express-rate-limit");
     });
 
     it("form submission endpoints should have stricter rate limits", () => {
-      const serverIndex = fs.readFileSync(
-        path.join(__dirname, "_core/index.ts"),
+      const publicFormLimiter = fs.readFileSync(
+        path.join(__dirname, "_core/public-form-rate-limit.ts"),
         "utf-8"
       );
-      expect(serverIndex).toContain("event.submit");
-      expect(serverIndex).toContain("system.notifyOwner");
-      expect(serverIndex).toContain("claim.submit");
+      for (const path of [
+        "events.submitEvent",
+        "claims.submit",
+        "newsletter.subscribe",
+        "leads.submitBusiness",
+        "referrals.submit",
+        "premium.trackLead",
+        "premium.submitBizReferral",
+        "contact.submit",
+      ]) {
+        expect(publicFormLimiter).toContain(path);
+      }
     });
 
     it("API rate limit should be 200 requests per 15 minutes", () => {
@@ -187,12 +201,12 @@ describe("Phase 4: Marketing & Growth", () => {
     });
 
     it("form rate limit should be 10 submissions per hour", () => {
-      const serverIndex = fs.readFileSync(
-        path.join(__dirname, "_core/index.ts"),
+      const publicFormLimiter = fs.readFileSync(
+        path.join(__dirname, "_core/public-form-rate-limit.ts"),
         "utf-8"
       );
-      expect(serverIndex).toContain("max: 10");
-      expect(serverIndex).toContain("60 * 60 * 1000");
+      expect(publicFormLimiter).toContain("max: 10");
+      expect(publicFormLimiter).toContain("60 * 60 * 1000");
     });
   });
 

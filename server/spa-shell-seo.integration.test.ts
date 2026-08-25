@@ -4,7 +4,7 @@ import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { serveStatic } from "./_core/vite";
+import { injectRouteSeo, serveStatic } from "./_core/vite";
 
 const cleanup: Array<() => void> = [];
 afterEach(() => {
@@ -34,7 +34,7 @@ async function startProductionShell() {
 
   const app = express();
   serveStatic(app, distPublic, {
-    blogExists: async () => true,
+    getPublishedBlog: async slug => ({ title: `Published ${slug}` }),
     tagExists: async () => true,
   });
 
@@ -61,6 +61,32 @@ describe("production SPA shell per-route SEO (integration)", () => {
     );
     expect(html).toContain(
       "<title>Charlotte Events Calendar | Settle CLT</title>"
+    );
+  });
+
+  it.each(["/events/", "/events/?source=fixture"])(
+    "normalizes the HTML and Link canonicals for %s",
+    async requestPath => {
+      const base = await startProductionShell();
+      const res = await fetch(`${base}${requestPath}`);
+      const html = await res.text();
+      expect(res.status).toBe(200);
+      expect(res.headers.get("link")).toBe(
+        '<https://settleclt.com/events>; rel="canonical"'
+      );
+      expect(html).toContain(
+        '<link rel="canonical" href="https://settleclt.com/events" />'
+      );
+      expect(html).toContain(
+        '<meta property="og:url" content="https://settleclt.com/events" />'
+      );
+    }
+  );
+
+  it("normalizes query, hash, and trailing slash before direct metadata injection", () => {
+    const html = injectRouteSeo(SHELL, "/events/?source=fixture#calendar");
+    expect(html).toContain(
+      '<link rel="canonical" href="https://settleclt.com/events" />'
     );
   });
 
@@ -95,6 +121,65 @@ describe("production SPA shell per-route SEO (integration)", () => {
     const html = await res.text();
     expect(res.status).toBe(404);
     expect(html).toContain("<title>Page Not Found | Settle CLT</title>");
+  });
+
+  it("uses one published-blog lookup for status and title without exposing drafts", async () => {
+    const distRoot = mkdtempSync(join(tmpdir(), "settleclt-blog-seo-"));
+    mkdirSync(distRoot, { recursive: true });
+    writeFileSync(join(distRoot, "index.html"), SHELL);
+    const app = express();
+    serveStatic(app, distRoot, {
+      getPublishedBlog: async slug =>
+        slug === "published-post" ? { title: "Published Fixture Title" } : null,
+      tagExists: async () => true,
+    });
+    const server = createServer(app);
+    await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve));
+    cleanup.push(() => {
+      server.close();
+      rmSync(distRoot, { recursive: true, force: true });
+    });
+    const address = server.address();
+    if (!address || typeof address === "string") throw new Error("Missing test address");
+    const base = `http://127.0.0.1:${address.port}`;
+
+    const published = await fetch(`${base}/blog/published-post`);
+    expect(published.status).toBe(200);
+    expect(await published.text()).toContain(
+      "<title>Published Fixture Title | Settle CLT</title>"
+    );
+    for (const slug of ["draft-post", "missing-post"]) {
+      const response = await fetch(`${base}/blog/${slug}`);
+      const html = await response.text();
+      expect(response.status, slug).toBe(404);
+      expect(response.headers.get("link"), slug).toBe(
+        '<https://settleclt.com/404>; rel="canonical"'
+      );
+      expect(html, slug).not.toContain("Draft Fixture Title");
+      expect(html, slug).toContain("<title>Page Not Found | Settle CLT</title>");
+    }
+  });
+
+  it("serves malformed dynamic paths as a localized 404 shell without crashing", async () => {
+    const base = await startProductionShell();
+    for (const path of [
+      "/neighborhood/%E0%A4%A",
+      "/directory/category/%E0%A4%A",
+      "/events/category/%E0%A4%A",
+      "/directory/%E0%A4%A",
+      "/blog/%E0%A4%A",
+      "/tag/%E0%A4%A",
+    ]) {
+      const res = await fetch(`${base}${path}`, {
+        headers: { cookie: "site_locale=es" },
+      });
+      const html = await res.text();
+      expect(res.status, path).toBe(404);
+      expect(html, path).toContain('<html lang="es">');
+      expect(html, path).toContain(
+        "<title>Página no encontrada | Settle CLT</title>"
+      );
+    }
   });
 
   it("keeps the homepage canonical matching the sitemap URL", async () => {

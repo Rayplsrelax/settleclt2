@@ -77,7 +77,7 @@ export default function DirectoryCategory() {
   useSEO({
     title: `${categoryName} in Charlotte NC: Local Directory & Service Guide`,
     description: `Find ${categoryName.toLowerCase()} in Charlotte NC. Compare ${services.length || "local"} listings, service areas, contact details, and helpful tips from Settle CLT.`,
-    keywords: `${categoryName} Charlotte NC, Charlotte ${categoryName}, best ${categoryName} Charlotte, local ${categoryName.toLowerCase()} near me`,
+    keywords: `${categoryName} Charlotte NC, Charlotte ${categoryName}, compare ${categoryName} Charlotte, local ${categoryName.toLowerCase()} near me`,
     path: `/directory/category/${slug}`,
   });
 

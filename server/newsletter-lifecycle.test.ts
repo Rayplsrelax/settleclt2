@@ -112,8 +112,8 @@ describe("newsletter lifecycle contracts", () => {
     const home = readProjectFile("client/src/pages/Home.tsx");
     const analytics = readProjectFile("client/src/lib/mixpanel.ts");
 
-    expect(home).toContain("Your subscription request was received");
-    expect(home).toContain("By subscribing, you agree to receive");
+    expect(home).toContain('t("home.newsletterSuccess")');
+    expect(home).toContain('t("home.newsletterConsent")');
     expect(analytics).not.toMatch(
       /Newsletter[^\n]{0,100}(email|subscriber|token)/i
     );
@@ -135,7 +135,7 @@ describe("newsletter lifecycle contracts", () => {
     const profile = readProjectFile("client/src/pages/Profile.tsx");
     const routes = readProjectFile("server/newsletter-routes.ts");
 
-    expect(home).toContain("Your subscription request was received");
+    expect(home).toContain('t("home.newsletterSuccess")');
     expect(home).not.toContain("Check your email to confirm your subscription");
     expect(profile).toContain("Enabling this requests the newsletter");
     expect(routes).toContain('res.setHeader("Cache-Control", "no-store")');

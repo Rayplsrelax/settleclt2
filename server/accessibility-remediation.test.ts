@@ -30,11 +30,9 @@ describe("public accessibility contracts", () => {
       readProjectFile("client/src/pages/Directory.tsx")
     );
 
-    expect(directory).toContain(
-      'aria-label="Search businesses and categories"'
-    );
-    expect(directory).toContain('aria-label="Sort directory results"');
-    expect(directory).toContain('aria-label="Filter by area"');
+    expect(directory).toContain('aria-label={t("directory.searchAria")}');
+    expect(directory).toContain('aria-label={t("directory.sortAria")}');
+    expect(directory).toContain('aria-label={t("directory.area")}');
     expect(directory).toContain('aria-pressed={viewMode === "list"}');
     expect(directory).toContain('aria-pressed={viewMode === "map"}');
     expect(directory).toContain("aria-expanded={showFilters}");
@@ -43,10 +41,8 @@ describe("public accessibility contracts", () => {
   it("labels event filters and exposes selected toggle state", () => {
     const events = normalize(readProjectFile("client/src/pages/Events.tsx"));
 
-    expect(events).toContain(
-      'aria-label="Search events, venues, and neighborhoods"'
-    );
-    expect(events).toContain('aria-label="Clear event search"');
+    expect(events).toContain('aria-label={t("events.searchAria")}');
+    expect(events).toContain('aria-label={t("events.clearSearchAria")}');
     expect(events).toContain("aria-expanded={showFilters}");
     expect(events).toContain('aria-controls="events-date-filters"');
     expect(events).toContain('id="events-date-filters"');
@@ -64,7 +60,8 @@ describe("public accessibility contracts", () => {
       readProjectFile("client/src/components/GlobalSearch.tsx")
     );
 
-    expect(search).toContain('aria-label="Search CLT..."');
+    expect(search).toContain('aria-label={t("search.trigger")}');
+    expect(search).toContain('{t("search.trigger")}');
     expect(search).not.toContain('aria-label="Open site search"');
   });
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { SERVICE_CATEGORIES, SERVICES } from "../shared/services";
+import { resolveRouteSeo } from "./_core/route-seo";
 
 describe("Directory category SEO pages", () => {
   it("has service data for priority SEO categories", () => {
@@ -33,5 +34,17 @@ describe("Directory category SEO pages", () => {
     expect(page).toContain("plumbers");
     expect(page).toContain('t("directoryCategory.pricing")');
     expect(page).toContain('t("directoryCategory.claimDescription")');
+  });
+
+  it("localizes application-owned Spanish category labels and template without changing the canonical category id", () => {
+    const path = "/directory/category/moving-companies";
+    const english = resolveRouteSeo(path, undefined, "en");
+    const spanish = resolveRouteSeo(path, undefined, "es");
+
+    expect(english.title).toBe("Moving Companies in Charlotte");
+    expect(spanish.title).toBe("Empresas de mudanzas en Charlotte");
+    expect(spanish.description).toContain("Empresas de mudanzas");
+    expect(spanish.title).not.toContain("Moving Companies");
+    expect(path).toContain("moving-companies");
   });
 });

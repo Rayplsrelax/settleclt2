@@ -4,10 +4,18 @@ These scripts prepare and switch release directories. They do not restart servic
 
 ## Build artifact
 
-`pnpm run build` creates `release-artifact/` with both the executable application and the release controls needed on the target host:
+`pnpm run build` only compiles `dist/` and writes an explicitly non-deployable local-build manifest. It is safe to run on a dirty review worktree and does not create or refresh `release-artifact/`.
+
+Only `RELEASE_GIT_SHA=<full-lowercase-sha> pnpm run release:package` creates `release-artifact/`. Packaging requires that SHA to equal `HEAD` exactly and rejects tracked changes plus relevant untracked release inputs. The documented `portfolio/` tree is excluded because it is not a release input. The command never consumes the repository's existing ignored `dist/`: it creates a temporary detached worktree at the exact SHA outside the repository, runs `pnpm install --frozen-lockfile` there (preferring the offline package store and falling back to configured network access), runs the ordinary non-deployable build there, then stamps, fully hashes, verifies, and publishes the deployable artifact from staging. It revalidates the original HEAD, clean state, and tracked packaging inputs immediately before publication; a source change or any build/package failure leaves an existing artifact unchanged. The temporary worktree and registration are removed in cleanup. Because dependencies are installed from the lockfile in isolation, packaging may require a populated pnpm store or package-registry/network access.
+
+The staging-to-`release-artifact/` rename is the publication commit point. Removal of the previous-artifact backup is best-effort after that point. If cleanup fails, packaging still reports success and prints a warning with the retained `release-artifact.previous-*` path; verify the canonical artifact, then remove the retained backup manually only after confirming it is no longer needed for recovery.
+
+The deployable package contains:
 
 - `dist/`
 - `ops/release/`, including systemd templates, smoke/monitor scripts, and traffic controls
+- `migrations/`, containing every journaled Drizzle SQL file, the journal, the exact preflight/ledger/apply utilities, `package.json`, `pnpm-lock.yaml`, and `manifest.json` with SHA-256 hashes for every migration input
+- `artifact-manifest.json`, the deterministic sorted SHA-256/type/executable-mode inventory of every regular non-symlink file under all three trees, plus the release SHA and whole-manifest digest
 
 Use `release-artifact/` as the input to `prepare-release.sh`; do not construct a dist-only artifact manually.
 
@@ -17,9 +25,11 @@ Use `release-artifact/` as the input to `prepare-release.sh`; do not construct a
 ops/release/prepare-release.sh /opt/settleclt2 ./release-artifact FULL_40_CHARACTER_SHA
 ```
 
-The artifact must contain `dist/release-manifest.json` with the same SHA. A new release is copied through a staging directory, made read-only, and renamed into `releases/<sha>`. Reusing a SHA is allowed only when the existing directory exactly matches the artifact.
+The artifact must contain a deployable `dist/release-manifest.json` with the same SHA and a valid complete top-level artifact manifest. A new release is copied first, descriptor-verified in staging against that complete manifest, made read-only, verified again, and atomically renamed into `releases/<sha>`. Reusing a SHA is allowed only when the real non-symlink existing directory and the source both exactly verify to the same artifact-manifest digest.
 
 ## Activate
+
+Activation is the final application-pointer step. It descriptor-verifies every prepared artifact member immediately before switching and fails closed unless `/opt/settleclt2/migration-gates/<sha>.json` matches the prepared release SHA, journal-tip tag/timestamp/hash, required schema fingerprint, and exact top-level artifact-manifest digest.
 
 ```bash
 ops/release/activate-release.sh /opt/settleclt2 FULL_40_CHARACTER_SHA
@@ -27,7 +37,7 @@ ops/release/activate-release.sh /opt/settleclt2 FULL_40_CHARACTER_SHA
 
 The prepared release becomes `current`. The formerly active release becomes `previous`. Link replacements use a temporary symbolic link followed by atomic rename.
 
-Activation alone does not restart a process or change traffic.
+Activation alone does not restart a process or change traffic. It also does not apply or reverse migrations. Rollback remains conditional on the previous application release being compatible with the now-current schema.
 
 ## Roll back
 
@@ -100,17 +110,68 @@ The switch prints an exact backup restore command after success. Backup files mu
 
 Traffic rollback does not reverse database migrations. Confirm that the previous application release remains compatible with the current schema.
 
-## Migration ledger preflight
+## Migration release gate
 
-Production's historical migration rows came from an earlier migration-file provenance, but Drizzle's MySQL migrator uses only the newest `created_at` value to select future migrations. Do not rewrite verified historical rows merely to make every old hash match the current checkout.
+Treat database migration and application activation as separate approvals. The required order is:
 
-After applying or registering a migration, and immediately before the next production migration, run:
+1. **Load the protected database target contract.** Root provisions `/etc/settleclt-app/release-database.env` as a regular non-symlink mode-`0600` file containing exactly the runtime database connection and its approved target digest:
 
-```bash
-DATABASE_URL=... pnpm run db:verify-ledger
-```
+   ```text
+   DATABASE_URL=...
+   EXPECTED_DATABASE_TARGET_SHA256=<64 lowercase hexadecimal characters>
+   ```
 
-The command is read-only. It requires the latest production ledger timestamp and SHA-256 hash to match the latest repository journal entry. Production is reconciled at `0031_newsletter_subscription_lifecycle`; any future mismatch is a stop condition for schema and ledger inspection, not authorization to reset or replay migrations.
+   The digest is SHA-256 over the UTF-8 bytes `database-target-v1\n<canonical-server-uuid>\n<canonical-schema>`. Canonicalization trims both values, normalizes them to Unicode NFC, and lowercases the server UUID only. Generate and approve it through a protected operator workflow that reads exact `@@server_uuid` and `DATABASE()` without printing, logging, or writing either raw value or the connection URL. The digest is non-secret, but it is a protected deployment binding. Never provide either value in positional arguments.
+
+   Load the protected file without shell tracing before every preflight, migration, and activation command:
+
+   ```bash
+   set -a
+   . /etc/settleclt-app/release-database.env
+   set +a
+   ```
+
+2. **Read-only preflight.** With that protected environment loaded, run this exact command against the prepared full-SHA release:
+
+   ```bash
+   ops/release/preflight-release.sh \
+     /opt/settleclt2 \
+     FULL_40_CHARACTER_SHA
+   ```
+
+   The command first descriptor-verifies the complete immutable artifact and its whole-manifest digest, then verifies every packaged migration input and uses the packaged self-contained read-only preflight runner. Before any other live inspection it reads exact `@@server_uuid` and `DATABASE()`, computes the canonical target digest in memory, and requires an exact match to `EXPECTED_DATABASE_TARGET_SHA256`. It then inspects the complete ledger prefix, duplicate non-null `(serviceKey,userId)` identities, exact 0032 `event_promotions` table metadata, exact 0033 `business_claims_service_user_unique` index metadata, and partial-DDL state. It executes only `SELECT` queries: it does not acquire advisory locks, run DDL/DML, invoke the mutating runner, or write ledger, gate, or evidence files.
+
+   Expected non-secret JSON is either `{"status":"ready","appliedTip":"...","pending":["..."]}` or `{"status":"current","appliedTip":"0033_business_claim_identity_unique","pending":[]}`. Stop if the command exits nonzero, emits invalid JSON, reports anything other than `ready` or `current`, identifies an unexpected pending sequence, or reports ledger/schema/duplicate/read-only/partial-DDL drift. Do not proceed on warnings or by manually editing the ledger.
+3. **Verified backup and manual approval.** Only after a successful preflight, create and independently verify the database/shared-file backup described below. Record its approved identifier outside the immutable release. A human operator must approve migration after reviewing the preflight and backup. Do not proceed without both a restorable backup and that approval.
+4. **Exact apply.** Run only the migration command from the prepared full-SHA release with the same protected environment loaded:
+
+   ```bash
+   ops/release/migrate-release.sh \
+     /opt/settleclt2 \
+     FULL_40_CHARACTER_SHA
+   ```
+
+   `DATABASE_URL` and `EXPECTED_DATABASE_TARGET_SHA256` must come only from the protected process environment/defaults file; never put either in positional arguments, shell tracing, logs, or evidence other than the approved digest field. The command rereads and verifies the exact live database target before acquiring the lock. It verifies every packaged SHA-256 input, acquires a MySQL advisory lock, applies only pending entries from the packaged journal, never runs `drizzle-kit generate`, and never assigns a slot, restarts a service, or changes traffic.
+5. **Post-verify.** The migration command rereads the complete ledger and the required schema. The required schema fingerprint covers the exact `event_promotions` columns/indexes/foreign keys and the full-column ordered unique `(serviceKey,userId)` index. A ledgered-but-missing object or same-name drifted object fails closed.
+6. **Gate evidence.** Only after post-verification succeeds, the command atomically writes mode-`0600`, non-secret evidence to `/opt/settleclt2/migration-gates/<sha>.json`, outside the immutable release. Evidence requires schema version `1`, release SHA, journal-tip tag/timestamp/SQL hash, required schema fingerprint, whole-artifact manifest digest, `databaseTargetSha256`, verification time, a nonempty safe engine version of at most 128 characters, and canonical SQL mode. Canonical SQL mode is a nonempty, comma-separated, duplicate-free, lexicographically sorted list of uppercase `[A-Z][A-Z0-9_]{0,63}` tokens with a total maximum of 1024 characters. Evidence contains no URL, raw server UUID, database name, user, password, host, SQL, provider object, or stack cause.
+7. **Activate, then separately approve traffic.** With the same protected environment loaded, `activate-release.sh` requires `EXPECTED_DATABASE_TARGET_SHA256`, verifies the immutable inputs, validates every required gate field and runtime-metadata bound, and requires the gate's `databaseTargetSha256` to match exactly before changing `current`. This prevents replay of a valid gate from staging, a different server, or a different schema. Slot assignment, service start, smoke testing, and public traffic switching remain later, separately approved operations.
+
+All provider failures exposed by standalone preflight or migration are reduced to a bounded stage, optional migration tag/statement index, and allowlisted classification. Raw provider messages, SQL, URLs, host/schema identifiers, credentials, provider objects, and causes are never emitted.
+
+`pnpm run db:generate` is an authoring command only. `pnpm run db:migrate` and the compatibility alias `pnpm run db:push` apply reviewed migrations without generation. Do not use an unbuilt checkout's Drizzle files for a release migration.
+
+### Stop and recovery conditions for 0032/0033
+
+MySQL DDL auto-commits. Never repair the ledger manually and never blindly replay a whole SQL file:
+
+- **Duplicate identities before 0033:** stop before permanent 0033 DDL. Consolidate duplicates through a separately reviewed data-repair procedure, rerun the read-only preflight, take a fresh backup if the data changed, then rerun the exact release command.
+- **0032 unledgered, `event_promotions` absent:** normal retry applies 0032.
+- **0032 unledgered, `event_promotions` present in any state (including an exact-looking complete table):** stop with `partial-DDL/manual reconciliation required`. The runner never fingerprints an unjournaled table to authorize or synthesize a ledger row, never advances the ledger, and never writes a migration gate. Inspect every column, index, foreign key, trigger, and row; use a separately reviewed recovery plan and fresh backup before retry.
+- **0033 unledgered, `business_claims_service_user_unique` present in any state (including the exact full-column ordered unique index):** stop with `partial-DDL/manual reconciliation required`. The runner never treats an unjournaled index as authorization to record 0033, never advances the ledger, and never writes a migration gate. Inspect and recover under a separately reviewed, write-quiesced plan.
+- **0032 or 0033 ledgered but required schema missing/drifted:** stop as inconsistent. Do not forge, delete, or advance ledger rows.
+- **Read-only target:** stop. Confirm target identity and approved role; never disable read-only protections merely to make the command pass.
+
+After any DDL-before-ledger interruption, repeated preflight/apply attempts must stop deterministically until an operator completes a separately reviewed manual reconciliation; retries do not auto-recover or record the object. Rerun the read-only preflight first and use only the same immutable full-SHA release. A different SQL hash, journal timestamp/tag, schema fingerprint, or target state invalidates prior evidence and requires inspection. The disposable real-MySQL integration entry point is `pnpm run test:migrations:mysql`; it is intentionally excluded from the default Vitest suite and prints an explicit `SKIP:` reason only when Windows or the official download/network is unavailable.
 
 ## Persistent uploads
 

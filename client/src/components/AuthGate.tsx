@@ -36,7 +36,10 @@ export default function AuthGate({
     }
     return (
       <div className="min-h-[40vh] flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">{t("authGate.loading")}</div>
+        <h1 className="sr-only">{featureLabel}</h1>
+        <div className="animate-pulse text-muted-foreground">
+          {t("authGate.loading")}
+        </div>
       </div>
     );
   }
@@ -68,9 +71,9 @@ export default function AuthGate({
         <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
           <LogIn className="w-7 h-7 text-primary" />
         </div>
-        <h2 className="text-lg font-display font-bold text-foreground mb-2">
+        <h1 className="text-lg font-display font-bold text-foreground mb-2">
           {t("authGate.required")}
-        </h2>
+        </h1>
         <p className="text-sm text-muted-foreground mb-6">
           {t("authGate.description", { feature: featureLabel })}
         </p>

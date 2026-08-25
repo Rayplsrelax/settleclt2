@@ -8,6 +8,29 @@ import { useTagTrackingWithLookup } from "@/hooks/useTagTracking";
 import { useSEO } from "@/hooks/useSEO";
 import { useI18n } from "@/i18n/I18nContext";
 import { formatLocalizedDate } from "@/i18n/formatters";
+import type { TranslationKey } from "@/i18n/locales/en";
+
+const BLOG_CATEGORY_KEYS: Record<string, TranslationKey> = {
+  "Getting Started": "blog.category.gettingStarted",
+  "Cost of Living": "blog.category.costOfLiving",
+  Lifestyle: "blog.category.lifestyle",
+  Schools: "blog.category.schools",
+  Transportation: "blog.category.transportation",
+  Relocation: "blog.category.relocation",
+  Pets: "blog.category.pets",
+};
+
+function getBlogCategoryLabel(category: string, t: (key: TranslationKey) => string) {
+  const key = BLOG_CATEGORY_KEYS[category];
+  return key ? t(key) : category;
+}
+
+function localizeStaticDate(date: string, locale: "en" | "es") {
+  const parsed = new Date(`${date} 1`);
+  return Number.isNaN(parsed.getTime())
+    ? date
+    : formatLocalizedDate(parsed, locale, { month: "long", year: "numeric" });
+}
 
 interface UnifiedArticle {
   id: string;
@@ -26,9 +49,9 @@ interface UnifiedArticle {
 export default function Blog() {
   const { locale, t } = useI18n();
   useSEO({
-    title: "Charlotte Blog — Local Tips, Guides & Stories",
-    description: "Read insider guides to Charlotte NC including neighborhood deep dives, best restaurants, weekend plans, moving tips, and local stories from people who live here.",
-    keywords: "Charlotte blog, Charlotte NC tips, moving to Charlotte guide, Charlotte restaurants blog, Charlotte neighborhood guides, things to do Charlotte",
+    title: t("blog.seoTitle"),
+    description: t("blog.seoDescription"),
+    keywords: t("blog.seoKeywords"),
     path: "/blog",
   });
 
@@ -44,8 +67,8 @@ export default function Blog() {
       title: a.title,
       excerpt: a.excerpt,
       category: a.category,
-      date: a.date,
-      readTime: a.readTime,
+      date: localizeStaticDate(a.date, locale),
+      readTime: t("blog.minRead", { count: Number.parseInt(a.readTime, 10) }),
       gradient: a.gradient,
       coverImage: a.image || null,
       featured: a.featured,
@@ -110,7 +133,7 @@ export default function Blog() {
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
                 }`}
               >
-                {cat === "All" ? t("blog.all") : cat}
+                {cat === "All" ? t("blog.all") : getBlogCategoryLabel(cat, t)}
               </button>
             ))}
           </div>
@@ -136,7 +159,7 @@ export default function Blog() {
                     )}
                   </div>
                   <div className="p-5">
-                    <span className="text-xs font-medium text-primary">{a.category}</span>
+                    <span className="text-xs font-medium text-primary">{getBlogCategoryLabel(a.category, t)}</span>
                     <h2 className="font-display font-semibold text-foreground mt-1 group-hover:text-primary transition-colors">{a.title}</h2>
                     <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{a.excerpt}</p>
                     <div className="flex items-center gap-4 mt-4 text-xs text-muted-foreground">

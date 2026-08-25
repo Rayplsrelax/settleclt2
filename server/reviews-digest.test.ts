@@ -241,7 +241,7 @@ describe("ReviewSection Component", () => {
     const path = await import("path");
     const filePath = path.resolve(
       __dirname,
-      "../client/src/components/ReviewSection.tsx"
+      "../client/src/i18n/reviewLabels.ts"
     );
     const content = fs.readFileSync(filePath, "utf-8");
     const aspects = [

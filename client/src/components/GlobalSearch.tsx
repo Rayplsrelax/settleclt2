@@ -20,6 +20,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { articles } from "../../../shared/articles";
 import { trpc } from "@/lib/trpc";
+import { useI18n } from "@/i18n/I18nContext";
 
 interface SearchResult {
   id: string;
@@ -38,6 +39,7 @@ function isStaleChunkError(error: unknown): boolean {
 }
 
 export default function GlobalSearch() {
+  const { locale, t } = useI18n();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [searchIndex, setSearchIndex] = useState<SearchResult[] | null>(null);
@@ -168,7 +170,7 @@ export default function GlobalSearch() {
         results.push({
           id: `blog-db-${p.id}`,
           title: p.title,
-          subtitle: `Blog · ${p.category ?? "Article"}`,
+          subtitle: `Blog · ${p.category ?? t("search.article")}`,
           type: "blog",
           href: `/blog/${p.slug}`,
           icon: <FileText className="w-4 h-4 text-blue-600" />,
@@ -180,14 +182,17 @@ export default function GlobalSearch() {
     if (dbEvents) {
       for (const e of dbEvents) {
         const date = e.startDate
-          ? new Date(e.startDate).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-            })
-          : "TBD";
+          ? new Date(e.startDate).toLocaleDateString(
+              locale === "es" ? "es-US" : "en-US",
+              {
+                month: "short",
+                day: "numeric",
+              }
+            )
+          : t("search.dateTbd");
         results.push({
           id: `event-${e.id}`,
-          title: e.title || e.name || "Untitled Event",
+          title: e.title || e.name || t("search.untitledEvent"),
           subtitle: `${date} · ${e.venueName ?? e.neighborhood ?? "Charlotte"}`,
           type: "event",
           href: `/events?event=${e.slug}`,
@@ -197,7 +202,7 @@ export default function GlobalSearch() {
     }
 
     return results;
-  }, [dbBlogPosts, dbEvents]);
+  }, [dbBlogPosts, dbEvents, locale, t]);
 
   // Combined and filtered results
   const allResults = useMemo(
@@ -228,10 +233,10 @@ export default function GlobalSearch() {
   }, [filteredResults]);
 
   const typeLabels: Record<string, string> = {
-    neighborhood: "Neighborhoods",
-    directory: "Directory",
-    event: "Events",
-    blog: "Blog",
+    neighborhood: t("search.neighborhoods"),
+    directory: t("search.directory"),
+    event: t("search.events"),
+    blog: t("search.blog"),
   };
 
   // Track search query with debounce on dialog close
@@ -279,11 +284,11 @@ export default function GlobalSearch() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Search CLT..."
+        aria-label={t("search.trigger")}
         className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-muted/50 hover:bg-muted text-muted-foreground text-sm transition-colors"
       >
         <Search className="w-3.5 h-3.5" />
-        <span className="hidden lg:inline">Search CLT...</span>
+        <span className="hidden lg:inline">{t("search.trigger")}</span>
         <kbd className="hidden lg:inline-flex h-5 items-center gap-0.5 rounded border border-border bg-background px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
           <span className="text-xs">⌘</span>K
         </kbd>
@@ -293,11 +298,11 @@ export default function GlobalSearch() {
       <CommandDialog
         open={open}
         onOpenChange={setOpen}
-        title="Search Settle CLT"
-        description="Search across neighborhoods, businesses, events, and blog articles"
+        title={t("search.dialogTitle")}
+        description={t("search.dialogDescription")}
       >
         <CommandInput
-          placeholder="Search neighborhoods, businesses, events, articles..."
+          placeholder={t("search.inputPlaceholder")}
           value={query}
           onValueChange={setQuery}
         />
@@ -306,15 +311,15 @@ export default function GlobalSearch() {
             <div className="px-4 py-6 text-center">
               <Compass className="w-10 h-10 mx-auto text-muted-foreground/40 mb-3" />
               <p className="text-sm text-muted-foreground">
-                Type to search across all of Settle CLT
+                {t("search.prompt")}
               </p>
               <p className="text-xs text-muted-foreground/60 mt-1">
-                Neighborhoods, businesses, events, and blog articles
+                {t("search.scope")}
               </p>
               {popularSearches && popularSearches.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-border">
                   <p className="text-xs text-muted-foreground/60 mb-2">
-                    Popular searches
+                    {t("search.popular")}
                   </p>
                   <div className="flex flex-wrap justify-center gap-2">
                     {popularSearches.map((s, i) => (
@@ -332,19 +337,21 @@ export default function GlobalSearch() {
             </div>
           ) : searchIndexStatus === "loading" ? (
             <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-              Loading search data…
+              {t("search.loading")}
             </div>
           ) : searchIndexStatus === "error" ? (
             <div className="px-4 py-8 text-center">
               <p className="text-sm text-muted-foreground">
-                Search data couldn't be loaded
+                {t("search.loadError")}
               </p>
               <button
                 type="button"
                 onClick={recoverSearchIndex}
                 className="mt-3 rounded-md border border-border px-3 py-1.5 text-sm font-medium hover:bg-muted"
               >
-                {searchIndexRecovery === "reload" ? "Reload search" : "Retry"}
+                {searchIndexRecovery === "reload"
+                  ? t("search.reload")
+                  : t("search.retry")}
               </button>
             </div>
           ) : (
@@ -352,10 +359,10 @@ export default function GlobalSearch() {
               <CommandEmpty>
                 <div className="py-4">
                   <p className="text-muted-foreground">
-                    No results found for "{query}"
+                    {t("search.noResults", { query })}
                   </p>
                   <p className="text-xs text-muted-foreground/60 mt-1">
-                    Try a different search term
+                    {t("search.tryDifferent")}
                   </p>
                 </div>
               </CommandEmpty>
@@ -389,7 +396,7 @@ export default function GlobalSearch() {
                     ))}
                     {items.length > 5 && (
                       <div className="px-2 py-1.5 text-xs text-muted-foreground">
-                        +{items.length - 5} more results
+                        {t("search.moreResults", { count: items.length - 5 })}
                       </div>
                     )}
                   </CommandGroup>

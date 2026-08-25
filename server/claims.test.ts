@@ -78,39 +78,38 @@ describe("Business Claims Router Input Validation", () => {
 });
 
 describe("Business Claims Workflow Logic", () => {
-  it("should prevent duplicate claims from the same email for the same business", () => {
-    // This tests the logic concept — the actual DB check is in hasExistingClaim
+  it("should prevent duplicate claims from the same user for the same business after email rotation", () => {
     const existingClaims = [
-      { serviceKey: "amelies-french-bakery", claimantEmail: "jane@amelies.com", status: "pending" },
+      { serviceKey: "amelies-french-bakery", userId: 42, claimantEmail: "old@example.com", status: "pending" },
     ];
-    
-    const newClaim = { serviceKey: "amelies-french-bakery", claimantEmail: "jane@amelies.com" };
+
+    const newClaim = { serviceKey: "amelies-french-bakery", userId: 42, claimantEmail: "new@example.com" };
     const isDuplicate = existingClaims.some(
-      c => c.serviceKey === newClaim.serviceKey && c.claimantEmail === newClaim.claimantEmail
+      c => c.serviceKey === newClaim.serviceKey && c.userId === newClaim.userId
     );
     expect(isDuplicate).toBe(true);
   });
 
-  it("should allow different emails to claim the same business", () => {
+  it("should allow different users to claim the same business", () => {
     const existingClaims = [
-      { serviceKey: "amelies-french-bakery", claimantEmail: "jane@amelies.com", status: "pending" },
+      { serviceKey: "amelies-french-bakery", userId: 42, status: "pending" },
     ];
-    
-    const newClaim = { serviceKey: "amelies-french-bakery", claimantEmail: "john@amelies.com" };
+
+    const newClaim = { serviceKey: "amelies-french-bakery", userId: 43 };
     const isDuplicate = existingClaims.some(
-      c => c.serviceKey === newClaim.serviceKey && c.claimantEmail === newClaim.claimantEmail
+      c => c.serviceKey === newClaim.serviceKey && c.userId === newClaim.userId
     );
     expect(isDuplicate).toBe(false);
   });
 
-  it("should allow the same email to claim different businesses", () => {
+  it("should allow the same user to claim different businesses", () => {
     const existingClaims = [
-      { serviceKey: "amelies-french-bakery", claimantEmail: "jane@amelies.com", status: "pending" },
+      { serviceKey: "amelies-french-bakery", userId: 42, status: "pending" },
     ];
-    
-    const newClaim = { serviceKey: "not-just-coffee", claimantEmail: "jane@amelies.com" };
+
+    const newClaim = { serviceKey: "not-just-coffee", userId: 42 };
     const isDuplicate = existingClaims.some(
-      c => c.serviceKey === newClaim.serviceKey && c.claimantEmail === newClaim.claimantEmail
+      c => c.serviceKey === newClaim.serviceKey && c.userId === newClaim.userId
     );
     expect(isDuplicate).toBe(false);
   });

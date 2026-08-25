@@ -217,6 +217,7 @@ export default function Profile() {
     return (
       <PageLayout>
         <div className="min-h-[60vh] flex items-center justify-center">
+          <h1 className="sr-only">{t("profile.title")}</h1>
           <div className="animate-pulse text-muted-foreground">{t("profile.loading")}</div>
         </div>
       </PageLayout>
@@ -232,12 +233,11 @@ export default function Profile() {
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <User className="w-8 h-8 text-primary" />
               </div>
-              <h2 className="text-xl font-display font-bold text-foreground mb-2">
-                Sign in to Settle CLT
-              </h2>
+              <h1 className="text-xl font-display font-bold text-foreground mb-2">
+                {t("profile.signInTitle")}
+              </h1>
               <p className="text-muted-foreground text-sm mb-6">
-                Create an account to track your CLT Passport, save your wishlist,
-                and share your experiences with the community.
+                {t("profile.signInDescription")}
               </p>
               <a
                 href={getLoginUrl()}

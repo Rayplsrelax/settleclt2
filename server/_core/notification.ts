@@ -14,9 +14,7 @@ const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
 
 const buildEndpointUrl = (baseUrl: string): string => {
-  const normalizedBase = baseUrl.endsWith("/")
-    ? baseUrl
-    : `${baseUrl}/`;
+  const normalizedBase = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
   return new URL(
     "webdevtoken.v1.WebDevService/SendNotification",
     normalizedBase
@@ -97,18 +95,29 @@ export async function notifyOwner(
     });
 
     if (!response.ok) {
-      const detail = await response.text().catch(() => "");
+      const status =
+        Number.isInteger(response.status) &&
+        response.status >= 100 &&
+        response.status <= 599
+          ? response.status
+          : "unknown";
+      const classification =
+        typeof status === "number" && status >= 500
+          ? "provider_server_error"
+          : typeof status === "number" && status >= 400
+            ? "provider_client_error"
+            : "provider_rejection";
       console.warn(
-        `[Notification] Failed to notify owner (${response.status} ${response.statusText})${
-          detail ? `: ${detail}` : ""
-        }`
+        `[Notification] operation=notifyOwner status=${status} classification=${classification}`
       );
       return false;
     }
 
     return true;
-  } catch (error) {
-    console.warn("[Notification] Error calling notification service:", error);
+  } catch {
+    console.warn(
+      "[Notification] operation=notifyOwner status=unavailable classification=transport_error"
+    );
     return false;
   }
 }

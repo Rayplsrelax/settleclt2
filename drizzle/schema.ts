@@ -580,7 +580,9 @@ export const businessClaims = mysqlTable("business_claims", {
   adminNotes: text("adminNotes"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, table => [
+  uniqueIndex("business_claims_service_user_unique").on(table.serviceKey, table.userId),
+]);
 
 export type BusinessClaim = typeof businessClaims.$inferSelect;
 export type InsertBusinessClaim = typeof businessClaims.$inferInsert;

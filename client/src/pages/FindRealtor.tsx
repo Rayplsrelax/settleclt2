@@ -1,555 +1,445 @@
-import { useState, useEffect } from "react";
-import { trpc } from "@/lib/trpc";
+import { useEffect, useState } from "react";
+import { Link } from "wouter";
+import {
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  Clock,
+  DollarSign,
+  Home,
+  MapPin,
+  MessageSquare,
+  Search,
+  Shield,
+  TrendingUp,
+  UserCheck,
+  Users,
+} from "lucide-react";
+import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
 import {
-  Home, MapPin, CheckCircle2, Building2, TrendingUp, Users,
-  ArrowRight, Shield, Clock, MessageSquare, ChevronDown, ChevronUp,
-  DollarSign, Search, UserCheck
-} from "lucide-react";
-import { useI18n } from "@/i18n/I18nContext";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useSEO } from "@/hooks/useSEO";
+import { useI18n } from "@/i18n/I18nContext";
+import { trpc } from "@/lib/trpc";
 import { trackFindHomeIntent, trackFindHomeLead } from "@/lib/mixpanel";
-import { Link } from "wouter";
+import type { Locale } from "@shared/i18n";
+import { HOUSING_COPY } from "@shared/housing-copy";
 
-const BUYING_BUDGET_RANGES = [
-  "Under $200K",
-  "$200K - $350K",
-  "$350K - $500K",
-  "$500K - $750K",
-  "$750K - $1M",
-  "$1M+",
-  "Not sure yet",
-];
+type ReferralType = "buying" | "selling" | "renting" | "relocating" | "investing";
+type Option = { value: string; label: string };
+type RealtorCopy = {
+  badge: string;
+  heroDescription: string;
+  benefits: string[];
+  stats: Array<{ value: string; label: string }>;
+  howTitle: string;
+  steps: Array<{ title: string; description: string }>;
+  formDescription: string;
+  name: string;
+  namePlaceholder: string;
+  email: string;
+  emailPlaceholder: string;
+  phone: string;
+  phonePlaceholder: string;
+  referralLabel: string;
+  selectOption: string;
+  referralOptions: Array<{ value: ReferralType; label: string }>;
+  currentCity: string;
+  currentCityPlaceholder: string;
+  rentalNoticeStrong: string;
+  rentalNotice: string;
+  monthlyBudget: string;
+  budgetRange: string;
+  selectBudget: string;
+  buyingBudgets: Option[];
+  rentalBudgets: Option[];
+  timeline: string;
+  timelinePlaceholder: string;
+  timelines: Option[];
+  neighborhoods: string;
+  neighborhoodsPlaceholder: string;
+  quizHintBefore: string;
+  quizHintLink: string;
+  quizHintAfter: string;
+  notes: string;
+  notesPlaceholder: string;
+  submitting: string;
+  submitHome: string;
+  submitApartment: string;
+  consentBeforePrivacy: string;
+  privacy: string;
+  consentBetween: string;
+  terms: string;
+  consentAfter: string;
+  trust: string[];
+  quizTitle: string;
+  quizDescription: string;
+  quizButton: string;
+  faqTitle: string;
+  faqs: Array<{ question: string; answer: string }>;
+  disclosureTitle: string;
+  disclosure: string;
+  disclosureBeforeSite: string;
+  disclosureAfterSite: string;
+  successDescriptionHome: string;
+  successDescriptionApartment: string;
+  successNext: string;
+  exploreNeighborhoods: string;
+  backHome: string;
+  quizSourceNote: string;
+};
 
-const RENTAL_BUDGET_RANGES = [
-  "Under $1,200/mo",
-  "$1,200 - $1,500/mo",
-  "$1,500 - $1,800/mo",
-  "$1,800 - $2,200/mo",
-  "$2,200 - $3,000/mo",
-  "$3,000+/mo",
-  "Not sure yet",
-];
-
-const TIMELINES = [
-  "ASAP (within 30 days)",
-  "1-3 months",
-  "3-6 months",
-  "6-12 months",
-  "Just exploring",
-];
-
-const FAQ_ITEMS = [
-  {
-    q: "Is this really free?",
-    a: "Yes, 100% free for you. Real estate agents pay referral fees to the referring broker, so there's no cost to you at any point.",
+const REALTOR_COPY = {
+  en: {
+    badge: "Charlotte Housing Request",
+    heroDescription: HOUSING_COPY.en.request,
+    benefits: ["No fee to submit", "Charlotte-area requests", "NCREC license lookup"],
+    stats: [
+      { value: "1", label: "Request Form" },
+      { value: "CLT", label: "Charlotte Focus" },
+      { value: "NCREC", label: "License Lookup" },
+      { value: "$0", label: "Submission Fee" },
+    ],
+    howTitle: "How It Works",
+    steps: [
+      { title: "Tell Us What You Need", description: "Submit the form with the type of housing help you are seeking." },
+      { title: "Request Review", description: "Settle CLT reviews the request and may share it with an independent professional when appropriate." },
+      { title: "Choose What Comes Next", description: "You decide whether to respond to or work with any professional who contacts you." },
+    ],
+    formDescription: "Submit the form below for review. A referral or response is not guaranteed.",
+    name: "Full Name *",
+    namePlaceholder: "Your name",
+    email: "Email *",
+    emailPlaceholder: "you@email.com",
+    phone: "Phone (optional)",
+    phonePlaceholder: "(555) 123-4567",
+    referralLabel: "What are you looking for? *",
+    selectOption: "Select an option",
+    referralOptions: [
+      { value: "buying", label: "Buying a home" },
+      { value: "selling", label: "Selling a home" },
+      { value: "renting", label: "Renting an apartment" },
+      { value: "relocating", label: "Relocating to Charlotte" },
+      { value: "investing", label: "Real estate investing" },
+    ],
+    currentCity: "Where are you moving from?",
+    currentCityPlaceholder: "e.g. New York, Chicago, Atlanta...",
+    rentalNoticeStrong: "Review provider terms before proceeding.",
+    rentalNotice: "If a professional contacts you, ask them to explain any fees, compensation, and relationships.",
+    monthlyBudget: "Monthly Budget",
+    budgetRange: "Budget Range",
+    selectBudget: "Select budget",
+    buyingBudgets: [
+      { value: "Under $200K", label: "Under $200K" },
+      { value: "$200K - $350K", label: "$200K - $350K" },
+      { value: "$350K - $500K", label: "$350K - $500K" },
+      { value: "$500K - $750K", label: "$500K - $750K" },
+      { value: "$750K - $1M", label: "$750K - $1M" },
+      { value: "$1M+", label: "$1M+" },
+      { value: "Not sure yet", label: "Not sure yet" },
+    ],
+    rentalBudgets: [
+      { value: "Under $1,200/mo", label: "Under $1,200/mo" },
+      { value: "$1,200 - $1,500/mo", label: "$1,200 - $1,500/mo" },
+      { value: "$1,500 - $1,800/mo", label: "$1,500 - $1,800/mo" },
+      { value: "$1,800 - $2,200/mo", label: "$1,800 - $2,200/mo" },
+      { value: "$2,200 - $3,000/mo", label: "$2,200 - $3,000/mo" },
+      { value: "$3,000+/mo", label: "$3,000+/mo" },
+      { value: "Not sure yet", label: "Not sure yet" },
+    ],
+    timeline: "Timeline",
+    timelinePlaceholder: "When do you need help?",
+    timelines: [
+      { value: "ASAP (within 30 days)", label: "ASAP (within 30 days)" },
+      { value: "1-3 months", label: "1-3 months" },
+      { value: "3-6 months", label: "3-6 months" },
+      { value: "6-12 months", label: "6-12 months" },
+      { value: "Just exploring", label: "Just exploring" },
+    ],
+    neighborhoods: "Preferred Neighborhoods",
+    neighborhoodsPlaceholder: "e.g. South End, NoDa, Ballantyne...",
+    quizHintBefore: "Not sure?",
+    quizHintLink: "Take our neighborhood quiz",
+    quizHintAfter: "to find your match.",
+    notes: "Anything else we should know?",
+    notesPlaceholder: "Tell us about your situation, must-haves, or questions...",
+    submitting: "Submitting...",
+    submitHome: "Find Your Home",
+    submitApartment: "Find My Apartment",
+    consentBeforePrivacy: "By submitting, you agree that Settle CLT may review and share your request with an independent professional. A referral or response is not guaranteed. You may also review our",
+    privacy: "Privacy Policy",
+    consentBetween: "and",
+    terms: "Terms of Service",
+    consentAfter: ".",
+    trust: ["No Fee to Submit", "No Response Guarantee", "Verify Licenses with NCREC"],
+    quizTitle: "Not Sure Where to Start?",
+    quizDescription: "Use our neighborhood quiz to explore Charlotte areas by budget and lifestyle, then return here if you want to submit a request.",
+    quizButton: "Take the Neighborhood Quiz",
+    faqTitle: "Frequently Asked Questions",
+    faqs: [
+      { question: "Is there a submission fee?", answer: "No. Settle CLT does not charge a fee to submit this request. Any professional who contacts you should separately disclose their own fees and relationships." },
+      { question: "How quickly will I hear back?", answer: "Timing varies. Submitting a request does not guarantee a referral or response." },
+      { question: "Can I submit an apartment request?", answer: "Yes. Apartment requests are reviewed under the same process, but a referral is not guaranteed." },
+      { question: "Do I have to work with someone who contacts me?", answer: "No. You decide whether to respond to or work with any professional." },
+      { question: "Do you cover areas outside Charlotte?", answer: "This form is focused on Charlotte-area requests. Coverage and referrals are not guaranteed." },
+    ],
+    disclosureTitle: "NC Real Estate Commission Disclosure:",
+    disclosure: HOUSING_COPY.en.disclosure,
+    disclosureBeforeSite: "For questions about NC real estate licensing, visit",
+    disclosureAfterSite: ".",
+    successDescriptionHome: HOUSING_COPY.en.success,
+    successDescriptionApartment: HOUSING_COPY.en.success,
+    successNext: "In the meantime, explore neighborhoods to get a head start on your search.",
+    exploreNeighborhoods: "Explore Neighborhoods",
+    backHome: "Back to Home",
+    quizSourceNote: "Came from the neighborhood quiz",
   },
-  {
-    q: "How quickly will I hear back?",
-    a: "We aim to connect you with an agent within 48 business hours. Many people hear back the same day.",
+  es: {
+    badge: "Solicitud de vivienda en Charlotte",
+    heroDescription: HOUSING_COPY.es.request,
+    benefits: ["Sin cargo por enviar", "Solicitudes del área de Charlotte", "Consulta de licencias en NCREC"],
+    stats: [
+      { value: "1", label: "Formulario de solicitud" },
+      { value: "CLT", label: "Enfoque en Charlotte" },
+      { value: "NCREC", label: "Consulta de licencias" },
+      { value: "$0", label: "Cargo por enviar" },
+    ],
+    howTitle: "Cómo funciona",
+    steps: [
+      { title: "Cuéntanos qué necesitas", description: "Envía el formulario con el tipo de ayuda de vivienda que buscas." },
+      { title: "Revisión de la solicitud", description: "Settle CLT revisa la solicitud y puede compartirla con un profesional independiente cuando corresponda." },
+      { title: "Decide qué sigue", description: "Tú decides si respondes o trabajas con cualquier profesional que se comunique contigo." },
+    ],
+    formDescription: "Envía el formulario para revisión. No se garantiza una referencia ni una respuesta.",
+    name: "Nombre completo *",
+    namePlaceholder: "Tu nombre",
+    email: "Correo electrónico *",
+    emailPlaceholder: "tu@correo.com",
+    phone: "Teléfono (opcional)",
+    phonePlaceholder: "(704) 555-0123",
+    referralLabel: "¿Qué estás buscando? *",
+    selectOption: "Selecciona una opción",
+    referralOptions: [
+      { value: "buying", label: "Comprar una casa" },
+      { value: "selling", label: "Vender una casa" },
+      { value: "renting", label: "Alquilar un apartamento" },
+      { value: "relocating", label: "Mudarse a Charlotte" },
+      { value: "investing", label: "Invertir en bienes raíces" },
+    ],
+    currentCity: "¿Desde dónde te mudas?",
+    currentCityPlaceholder: "p. ej., Nueva York, Chicago, Atlanta...",
+    rentalNoticeStrong: "Revisa las condiciones del proveedor antes de continuar.",
+    rentalNotice: "Si un profesional se comunica contigo, pídele que explique sus cargos, compensación y relaciones.",
+    monthlyBudget: "Presupuesto mensual",
+    budgetRange: "Rango de presupuesto",
+    selectBudget: "Selecciona un presupuesto",
+    buyingBudgets: [
+      { value: "Under $200K", label: "Menos de $200 mil" },
+      { value: "$200K - $350K", label: "$200 mil - $350 mil" },
+      { value: "$350K - $500K", label: "$350 mil - $500 mil" },
+      { value: "$500K - $750K", label: "$500 mil - $750 mil" },
+      { value: "$750K - $1M", label: "$750 mil - $1 millón" },
+      { value: "$1M+", label: "Más de $1 millón" },
+      { value: "Not sure yet", label: "Aún no lo sé" },
+    ],
+    rentalBudgets: [
+      { value: "Under $1,200/mo", label: "Menos de $1,200/mes" },
+      { value: "$1,200 - $1,500/mo", label: "$1,200 - $1,500/mes" },
+      { value: "$1,500 - $1,800/mo", label: "$1,500 - $1,800/mes" },
+      { value: "$1,800 - $2,200/mo", label: "$1,800 - $2,200/mes" },
+      { value: "$2,200 - $3,000/mo", label: "$2,200 - $3,000/mes" },
+      { value: "$3,000+/mo", label: "$3,000+/mes" },
+      { value: "Not sure yet", label: "Aún no lo sé" },
+    ],
+    timeline: "Plazo",
+    timelinePlaceholder: "¿Cuándo necesitas ayuda?",
+    timelines: [
+      { value: "ASAP (within 30 days)", label: "Lo antes posible (en 30 días)" },
+      { value: "1-3 months", label: "1 a 3 meses" },
+      { value: "3-6 months", label: "3 a 6 meses" },
+      { value: "6-12 months", label: "6 a 12 meses" },
+      { value: "Just exploring", label: "Solo estoy explorando" },
+    ],
+    neighborhoods: "Vecindarios preferidos",
+    neighborhoodsPlaceholder: "p. ej., South End, NoDa, Ballantyne...",
+    quizHintBefore: "¿No estás seguro?",
+    quizHintLink: "Haz nuestro cuestionario de vecindarios",
+    quizHintAfter: "para encontrar tu opción ideal.",
+    notes: "¿Algo más que debamos saber?",
+    notesPlaceholder: "Cuéntanos tus necesidades o preguntas...",
+    submitting: "Enviando...",
+    submitHome: "Encontrar mi hogar",
+    submitApartment: "Encontrar mi apartamento",
+    consentBeforePrivacy: "Al enviar, aceptas que Settle CLT revise y pueda compartir tu solicitud con un profesional independiente. No se garantiza una referencia ni una respuesta. Consulta la",
+    privacy: "Política de Privacidad",
+    consentBetween: "y los",
+    terms: "Términos de Servicio",
+    consentAfter: ".",
+    trust: ["Sin cargo por enviar", "Sin garantía de respuesta", "Verifica licencias con NCREC"],
+    quizTitle: "¿No sabes por dónde empezar?",
+    quizDescription: "Usa nuestro cuestionario para explorar zonas de Charlotte según tu presupuesto y estilo de vida.",
+    quizButton: "Hacer el cuestionario de vecindarios",
+    faqTitle: "Preguntas frecuentes",
+    faqs: [
+      { question: "¿Hay un cargo por enviar la solicitud?", answer: "No. Settle CLT no cobra por enviar esta solicitud. Cualquier profesional que se comunique contigo debe explicar por separado sus cargos y relaciones." },
+      { question: "¿Cuándo recibiré respuesta?", answer: "El plazo varía. Enviar una solicitud no garantiza una referencia ni una respuesta." },
+      { question: "¿Puedo enviar una solicitud de apartamento?", answer: "Sí. Las solicitudes de apartamentos siguen el mismo proceso de revisión, pero no se garantiza una referencia." },
+      { question: "¿Tengo que trabajar con quien me contacte?", answer: "No. Tú decides si respondes o trabajas con cualquier profesional." },
+      { question: "¿Cubren zonas fuera de Charlotte?", answer: "Este formulario se centra en el área de Charlotte. La cobertura y las referencias no están garantizadas." },
+    ],
+    disclosureTitle: "Divulgación de la Comisión de Bienes Raíces de Carolina del Norte:",
+    disclosure: HOUSING_COPY.es.disclosure,
+    disclosureBeforeSite: "Para preguntas sobre licencias inmobiliarias de Carolina del Norte, visita",
+    disclosureAfterSite: ".",
+    successDescriptionHome: HOUSING_COPY.es.success,
+    successDescriptionApartment: HOUSING_COPY.es.success,
+    successNext: "Mientras tanto, explora los vecindarios para adelantar tu búsqueda.",
+    exploreNeighborhoods: "Explorar vecindarios",
+    backHome: "Volver al inicio",
+    quizSourceNote: "Llegó desde el cuestionario de vecindarios",
   },
-  {
-    q: "Can you help me find an apartment?",
-    a: "Absolutely. We work with apartment locators and leasing specialists who know the Charlotte rental market inside and out. This service is also free — apartment communities pay the locator directly.",
-  },
-  {
-    q: "What if I don't like the agent?",
-    a: "No obligations. If the match isn't right, let us know and we'll connect you with someone else.",
-  },
-  {
-    q: "Do you cover areas outside Charlotte?",
-    a: "We can refer you to trusted agents anywhere in North Carolina, South Carolina, and across the US. Just tell us where you're looking.",
-  },
-];
-
-function FAQSection() {
-  const { t } = useI18n();
-  const [open, setOpen] = useState<number | null>(null);
-  return (
-    <section className="py-16 bg-muted/30">
-      <div className="container max-w-2xl">
-        <h2 className="text-2xl font-display font-bold text-foreground text-center mb-8">
-          {t("realtor.faq")}
-        </h2>
-        <div className="space-y-3">
-          {FAQ_ITEMS.map((item, i) => (
-            <div
-              key={i}
-              className="bg-card rounded-xl border border-border overflow-hidden"
-            >
-              <button
-                onClick={() => setOpen(open === i ? null : i)}
-                className="w-full flex items-center justify-between p-4 text-left"
-              >
-                <span className="font-semibold text-sm text-foreground">{item.q}</span>
-                {open === i ? (
-                  <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" />
-                ) : (
-                  <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
-                )}
-              </button>
-              {open === i && (
-                <div className="px-4 pb-4 text-sm text-muted-foreground animate-in fade-in slide-in-from-top-2 duration-200">
-                  {item.a}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
+} satisfies Record<Locale, RealtorCopy>;
 
 export default function FindRealtor() {
-  const { t } = useI18n();
-  useSEO({
-    title: t("realtor.title"),
-    description: t("realtor.description"),
-    keywords: t("realtor.keywords"),
-    path: "/find-your-home",
-  });
-
+  const { locale, t } = useI18n();
+  const copy = REALTOR_COPY[locale];
+  useSEO({ title: t("realtor.title"), description: t("realtor.description"), keywords: t("realtor.keywords"), path: "/find-your-home" });
   const [submitted, setSubmitted] = useState(false);
-
-  // Pre-fill from URL params (quiz → find your home flow) on initial render
   const [form, setForm] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    const neighborhoods = params.get("neighborhoods") || "";
-    const type = params.get("type");
+    const params = new URLSearchParams(typeof window === "undefined" ? "" : window.location.search);
     const source = params.get("source");
-    const budget = params.get("budget") || "";
-    let referralType = "" as "buying" | "selling" | "renting" | "relocating" | "investing" | "";
-    if (type === "renting") referralType = "renting";
-    else if (type === "buying") referralType = "buying";
-    const notes = source === "quiz" ? "Came from the neighborhood quiz" : "";
-    const referralSource = source || params.get("ref") || "direct";
+    const type = params.get("type");
     return {
       name: "",
       email: "",
       phone: "",
-      referralType,
-      budget,
-      neighborhoods,
+      referralType: (type === "renting" || type === "buying" ? type : "") as ReferralType | "",
+      budget: params.get("budget") || "",
+      neighborhoods: params.get("neighborhoods") || "",
       timeline: "",
-      notes,
+      notes: source === "quiz" ? copy.quizSourceNote : "",
       currentCity: "",
-      referralSource,
+      referralSource: source || params.get("ref") || "direct",
     };
   });
 
   useEffect(() => {
-    trackFindHomeIntent({
-      surface: "find_home_page",
-      source: form.referralSource,
-      neighborhoods: form.neighborhoods || undefined,
-      referral_type: form.referralType || undefined,
-    });
+    trackFindHomeIntent({ surface: "find_home_page", source: form.referralSource, neighborhoods: form.neighborhoods || undefined, referral_type: form.referralType || undefined });
     // Track initial entry only.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const submitMutation = trpc.referrals.submit.useMutation({
     onSuccess: () => {
-      trackFindHomeLead({
-        referral_type: form.referralType,
-        budget: form.budget || undefined,
-        neighborhoods: form.neighborhoods || undefined,
-        timeline: form.timeline || undefined,
-        referral_source: form.referralSource || undefined,
-        current_city: form.currentCity || undefined,
-      });
+      trackFindHomeLead({ referral_type: form.referralType, budget: form.budget || undefined, neighborhoods: form.neighborhoods || undefined, timeline: form.timeline || undefined, referral_source: form.referralSource || undefined, current_city: form.currentCity || undefined });
       setSubmitted(true);
-      toast.success("Your request has been submitted! We'll be in touch soon.");
+      toast.success(t("realtor.submitSuccess"));
     },
-    onError: (err) => {
-      toast.error(err.message || "Something went wrong. Please try again.");
-    },
+    onError: () => toast.error(t("realtor.error")),
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
     if (!form.name || !form.email || !form.referralType) {
-      toast.error("Please fill in your name, email, and what you're looking for.");
+      toast.error(t("realtor.validationRequired"));
       return;
     }
-    submitMutation.mutate({
-      name: form.name,
-      email: form.email,
-      phone: form.phone || undefined,
-      referralType: form.referralType as any,
-      budget: form.budget || undefined,
-      neighborhoods: form.neighborhoods || undefined,
-      timeline: form.timeline || undefined,
-      notes: form.notes || undefined,
-      currentCity: form.currentCity || undefined,
-      referralSource: form.referralSource || undefined,
-    });
+    submitMutation.mutate({ name: form.name, email: form.email, phone: form.phone || undefined, referralType: form.referralType, budget: form.budget || undefined, neighborhoods: form.neighborhoods || undefined, timeline: form.timeline || undefined, notes: form.notes || undefined, currentCity: form.currentCity || undefined, referralSource: form.referralSource || undefined });
   };
 
   const isRenting = form.referralType === "renting";
-  const budgetRanges = isRenting ? RENTAL_BUDGET_RANGES : BUYING_BUDGET_RANGES;
+  const budgets = isRenting ? copy.rentalBudgets : copy.buyingBudgets;
 
   if (submitted) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <div className="container max-w-2xl py-20 text-center">
-          <div className="mx-auto w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
-            <CheckCircle2 className="w-10 h-10 text-emerald-600" />
-          </div>
-          <h1 className="text-3xl font-display font-bold text-foreground mb-4">
-            Request Received!
+        <main className="container max-w-2xl py-20 text-center">
+          <CheckCircle2 className="w-16 h-16 text-emerald-600 mx-auto mb-6" />
+          <h1 className="text-3xl font-display font-bold mb-4">
+            {t("realtor.successTitle")}
           </h1>
-          <p className="text-lg text-muted-foreground mb-4 max-w-md mx-auto">
-            We've got your info and will connect you with a trusted Charlotte {isRenting ? "apartment specialist" : "real estate professional"} within 48 business hours.
+          <p className="text-lg text-muted-foreground mb-4">
+            {isRenting
+              ? copy.successDescriptionApartment
+              : copy.successDescriptionHome}
           </p>
-          <p className="text-sm text-muted-foreground mb-8 max-w-sm mx-auto">
-            In the meantime, explore neighborhoods to get a head start on your search.
+          <p className="text-sm text-muted-foreground mb-8">
+            {copy.successNext}
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex gap-3 justify-center">
             <Link href="/neighborhoods">
-              <Button variant="outline" size="lg" className="gap-2">
-                <MapPin className="w-4 h-4" /> Explore Neighborhoods
+              <Button variant="outline">
+                <MapPin className="w-4 h-4 mr-2" />
+                {copy.exploreNeighborhoods}
               </Button>
             </Link>
             <Link href="/">
-              <Button variant="ghost" size="lg">
-                Back to Home
-              </Button>
+              <Button variant="ghost">{copy.backHome}</Button>
             </Link>
           </div>
-        </div>
+        </main>
         <Footer />
       </div>
     );
   }
 
+  const statIcons = [Building2, TrendingUp, Users, MapPin];
+  const stepIcons = [MessageSquare, UserCheck, Home];
+  const trustIcons = [Shield, Clock, DollarSign];
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-
-      {/* Hero */}
-      <section className="relative bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 py-16 md:py-24">
-        <div className="container max-w-6xl">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm font-medium mb-4">
-                <Home className="w-4 h-4" />
-                Free Home Matching
-              </div>
-              <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-4 leading-tight">
-                Find Your Perfect Charlotte Home
-              </h1>
-              <p className="text-lg text-muted-foreground mb-6">
-                Whether you're buying your first home, renting an apartment, or relocating to Charlotte — we'll connect you with a trusted local expert who knows the Queen City inside and out.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  100% free service
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  Vetted local agents
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  48hr business response
-                </div>
-              </div>
-            </div>
-
-            {/* Stats cards */}
-            <div className="grid grid-cols-2 gap-4">
-              <Card className="bg-white/80 backdrop-blur border-emerald-100">
-                <CardContent className="p-4 text-center">
-                  <Building2 className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-foreground">20+</div>
-                  <div className="text-xs text-muted-foreground">Neighborhoods Covered</div>
-                </CardContent>
-              </Card>
-              <Card className="bg-white/80 backdrop-blur border-emerald-100">
-                <CardContent className="p-4 text-center">
-                  <TrendingUp className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-foreground">Top 5</div>
-                  <div className="text-xs text-muted-foreground">Fastest Growing US City</div>
-                </CardContent>
-              </Card>
-              <Card className="bg-white/80 backdrop-blur border-emerald-100">
-                <CardContent className="p-4 text-center">
-                  <Users className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-foreground">100+</div>
-                  <div className="text-xs text-muted-foreground">People Move Daily</div>
-                </CardContent>
-              </Card>
-              <Card className="bg-white/80 backdrop-blur border-emerald-100">
-                <CardContent className="p-4 text-center">
-                  <MapPin className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-foreground">Local</div>
-                  <div className="text-xs text-muted-foreground">Expert Knowledge</div>
-                </CardContent>
-              </Card>
-            </div>
+      <main>
+        <section data-section="realtor-hero" className="bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 py-16 md:py-24">
+          <div className="container max-w-6xl grid md:grid-cols-2 gap-12 items-center">
+            <div><div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm font-medium mb-4"><Home className="w-4 h-4" />{copy.badge}</div><h1 className="text-4xl md:text-5xl font-display font-bold mb-4">{t("realtor.heroTitle")}</h1><p className="text-lg text-muted-foreground mb-6">{copy.heroDescription}</p><div className="flex flex-col sm:flex-row gap-3">{copy.benefits.map(benefit => <div key={benefit} className="flex items-center gap-2 text-sm text-muted-foreground"><CheckCircle2 className="w-4 h-4 text-emerald-500" />{benefit}</div>)}</div></div>
+            <div className="grid grid-cols-2 gap-4">{copy.stats.map((stat, index) => { const Icon = statIcons[index]; return <Card key={stat.label} className="bg-white/80 border-emerald-100"><CardContent className="p-4 text-center"><Icon className="w-8 h-8 text-emerald-600 mx-auto mb-2" /><p className="text-2xl font-bold">{stat.value}</p><p className="text-xs text-muted-foreground">{stat.label}</p></CardContent></Card>; })}</div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* How It Works */}
-      <section className="py-16 bg-card border-b border-border">
-        <div className="container max-w-4xl">
-          <h2 className="text-2xl font-display font-bold text-foreground text-center mb-10">
-            How It Works
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: <MessageSquare className="w-6 h-6" />,
-                step: "1",
-                title: "Tell Us What You Need",
-                desc: "Fill out the quick form below — buying, renting, relocating, or just exploring. Takes 60 seconds.",
-              },
-              {
-                icon: <UserCheck className="w-6 h-6" />,
-                step: "2",
-                title: "We Match You",
-                desc: "Within 48 business hours, we'll connect you with a vetted Charlotte agent who specializes in exactly what you need.",
-              },
-              {
-                icon: <Home className="w-6 h-6" />,
-                step: "3",
-                title: "Find Your Place",
-                desc: "Your agent handles the search, showings, and paperwork. You focus on getting excited about Charlotte.",
-              },
-            ].map((item, i) => (
-              <div key={i} className="text-center">
-                <div className="relative mx-auto w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 mb-4">
-                  {item.icon}
-                  <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-emerald-600 text-white text-xs font-bold flex items-center justify-center">
-                    {item.step}
-                  </span>
-                </div>
-                <h3 className="font-semibold text-foreground mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        <section data-section="realtor-how-it-works" className="py-16 bg-card border-b"><div className="container max-w-4xl"><h2 className="text-2xl font-display font-bold text-center mb-10">{copy.howTitle}</h2><div className="grid md:grid-cols-3 gap-8">{copy.steps.map((step, index) => { const Icon = stepIcons[index]; return <div key={step.title} className="text-center"><div className="mx-auto w-14 h-14 rounded-2xl bg-emerald-100 flex items-center justify-center text-emerald-600 mb-4"><Icon className="w-6 h-6" /></div><h3 className="font-semibold mb-2">{step.title}</h3><p className="text-sm text-muted-foreground">{step.description}</p></div>; })}</div></div></section>
 
-      {/* Success Stories / Testimonials */}
-      <section className="py-12 bg-gradient-to-b from-background to-emerald-50/30">
-        <div className="container max-w-5xl">
-          <h2 className="text-2xl font-display font-bold text-foreground text-center mb-2">What People Are Saying</h2>
-          <p className="text-sm text-muted-foreground text-center mb-8 max-w-lg mx-auto">Real stories from people who found their Charlotte home through Settle CLT.</p>
-          <div className="grid md:grid-cols-3 gap-5">
-            {[
-              {
-                quote: "We moved from Denver and had no idea where to start. Settle CLT matched us with an agent who knew South End inside and out. Closed on our first home in 6 weeks!",
-                name: "Sarah & Mike T.",
-                detail: "Relocated from Denver \u2192 South End",
-                type: "Buying",
-              },
-              {
-                quote: "As a first-time renter in Charlotte, the neighborhood quiz helped me narrow down to NoDa. My agent found me a perfect apartment within my budget in just 3 days.",
-                name: "Jordan P.",
-                detail: "First apartment in NoDa",
-                type: "Renting",
-              },
-              {
-                quote: "I was investing in Charlotte real estate from out of state. The agent they connected me with understood the rental market in University City and helped me close on two properties.",
-                name: "David L.",
-                detail: "Investor from New York",
-                type: "Investing",
-              },
-            ].map((t, i) => (
-              <Card key={i} className="bg-white border-emerald-100 shadow-sm">
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-1 mb-3">
-                    {[1,2,3,4,5].map(s => (
-                      <svg key={s} className="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                    ))}
-                  </div>
-                  <p className="text-sm text-foreground/90 leading-relaxed mb-4 italic">"{t.quote}"</p>
-                  <div className="border-t border-border pt-3">
-                    <p className="text-sm font-semibold text-foreground">{t.name}</p>
-                    <p className="text-xs text-muted-foreground">{t.detail}</p>
-                    <Badge variant="outline" className="mt-1.5 text-[10px] border-emerald-200 text-emerald-700">{t.type}</Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+        <section data-section="realtor-form" id="form" className="py-16"><div className="container max-w-2xl"><Card className="shadow-lg border-2"><CardHeader className="text-center"><CardTitle>{t("realtor.formTitle")}</CardTitle><CardDescription>{copy.formDescription}</CardDescription></CardHeader><CardContent><form onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid sm:grid-cols-2 gap-4"><div><Label htmlFor="realtor-name">{copy.name}</Label><Input id="realtor-name" placeholder={copy.namePlaceholder} value={form.name} onChange={event => setForm({ ...form, name: event.target.value })} required /></div><div><Label htmlFor="realtor-email">{copy.email}</Label><Input id="realtor-email" type="email" placeholder={copy.emailPlaceholder} value={form.email} onChange={event => setForm({ ...form, email: event.target.value })} required /></div></div>
+          <div><Label htmlFor="realtor-phone">{copy.phone}</Label><Input id="realtor-phone" type="tel" placeholder={copy.phonePlaceholder} value={form.phone} onChange={event => setForm({ ...form, phone: event.target.value })} /></div>
+          <div><Label>{copy.referralLabel}</Label><Select value={form.referralType || undefined} onValueChange={value => setForm({ ...form, referralType: value as ReferralType, budget: "" })}><SelectTrigger aria-label={t("realtor.referralTypeAria")}><SelectValue placeholder={copy.selectOption} /></SelectTrigger><SelectContent>{copy.referralOptions.map(option => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent></Select></div>
+          {form.referralType === "relocating" && <div><Label htmlFor="realtor-current-city">{copy.currentCity}</Label><Input id="realtor-current-city" placeholder={copy.currentCityPlaceholder} value={form.currentCity} onChange={event => setForm({ ...form, currentCity: event.target.value })} /></div>}
+          {isRenting && <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-sm text-emerald-700"><DollarSign className="w-4 h-4 inline mr-1" /><strong>{copy.rentalNoticeStrong}</strong> {copy.rentalNotice}</div>}
+          <div className="grid sm:grid-cols-2 gap-4"><div><Label>{isRenting ? copy.monthlyBudget : copy.budgetRange}</Label><Select value={form.budget} onValueChange={value => setForm({ ...form, budget: value })}><SelectTrigger aria-label={t("realtor.budgetAria")}><SelectValue placeholder={copy.selectBudget} /></SelectTrigger><SelectContent>{budgets.map(option => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent></Select></div><div><Label>{copy.timeline}</Label><Select value={form.timeline} onValueChange={value => setForm({ ...form, timeline: value })}><SelectTrigger aria-label={t("realtor.timelineAria")}><SelectValue placeholder={copy.timelinePlaceholder} /></SelectTrigger><SelectContent>{copy.timelines.map(option => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent></Select></div></div>
+          <div><Label htmlFor="realtor-neighborhoods">{copy.neighborhoods}</Label><Input id="realtor-neighborhoods" placeholder={copy.neighborhoodsPlaceholder} value={form.neighborhoods} onChange={event => setForm({ ...form, neighborhoods: event.target.value })} /><p className="text-xs text-muted-foreground">{copy.quizHintBefore} <Link href="/quiz" className="text-clt-teal underline">{copy.quizHintLink}</Link> {copy.quizHintAfter}</p></div>
+          <div><Label htmlFor="realtor-notes">{copy.notes}</Label><Textarea id="realtor-notes" placeholder={copy.notesPlaceholder} value={form.notes} onChange={event => setForm({ ...form, notes: event.target.value })} rows={3} /></div>
+          <Button type="submit" size="lg" className="w-full bg-emerald-600 text-white" disabled={submitMutation.isPending}>{submitMutation.isPending ? copy.submitting : <>{isRenting ? copy.submitApartment : copy.submitHome}<ArrowRight className="w-4 h-4 ml-2" /></>}</Button>
+          <p className="text-xs text-center text-muted-foreground">{copy.consentBeforePrivacy} <Link href="/privacy" className="underline">{copy.privacy}</Link> {copy.consentBetween} <Link href="/terms" className="underline">{copy.terms}</Link>{copy.consentAfter}</p>
+        </form></CardContent></Card>
+        <div data-section="realtor-trust-controls" className="mt-8 grid grid-cols-3 gap-4 text-center">{copy.trust.map((item, index) => { const Icon = trustIcons[index]; return <div key={item} className="flex flex-col items-center gap-2"><Icon className="w-5 h-5 text-emerald-500" /><span className="text-xs text-muted-foreground">{item}</span></div>; })}</div>
+        </div></section>
 
-      {/* Form */}
-      <section className="py-16" id="form">
-        <div className="container max-w-2xl">
-          <Card className="shadow-lg border-2">
-            <CardHeader className="text-center pb-2">
-              <CardTitle className="text-2xl font-display">Tell Us What You Need</CardTitle>
-              <CardDescription>Fill out the form below and we'll match you with the right agent.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="name">Full Name *</Label>
-                    <Input id="name" placeholder="Your name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="email">Email *</Label>
-                    <Input id="email" type="email" placeholder="you@email.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
-                  </div>
-                </div>
+        <section data-section="realtor-quiz-cta" className="py-12 bg-muted/30 border-y"><div className="container max-w-2xl text-center"><Search className="w-8 h-8 text-clt-teal mx-auto mb-3" /><h2 className="font-display font-bold text-lg mb-2">{copy.quizTitle}</h2><p className="text-sm text-muted-foreground mb-4">{copy.quizDescription}</p><Link href="/quiz"><Button variant="outline">{copy.quizButton}<ArrowRight className="w-4 h-4 ml-2" /></Button></Link></div></section>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="phone">Phone (optional)</Label>
-                  <Input id="phone" type="tel" placeholder="(555) 123-4567" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-                </div>
+        <section data-section="realtor-faq" className="py-16 bg-muted/30"><div className="container max-w-2xl"><h2 className="text-2xl font-display font-bold text-center mb-8">{copy.faqTitle}</h2><div className="space-y-3">{copy.faqs.map(item => <details key={item.question} className="bg-card rounded-xl border p-4"><summary className="font-semibold cursor-pointer">{item.question}</summary><p className="text-sm text-muted-foreground mt-3">{item.answer}</p></details>)}</div></div></section>
 
-                <div className="space-y-1.5">
-                  <Label>What are you looking for? *</Label>
-                  <Select value={form.referralType || undefined} onValueChange={(v) => setForm({ ...form, referralType: v as any, budget: "" })}>
-                    <SelectTrigger><SelectValue placeholder="Select an option" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="buying">Buying a home</SelectItem>
-                      <SelectItem value="selling">Selling a home</SelectItem>
-                      <SelectItem value="renting">Renting an apartment</SelectItem>
-                      <SelectItem value="relocating">Relocating to Charlotte</SelectItem>
-                      <SelectItem value="investing">Real estate investing</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {form.referralType === "relocating" && (
-                  <div className="space-y-1.5">
-                    <Label htmlFor="currentCity">Where are you moving from?</Label>
-                    <Input id="currentCity" placeholder="e.g. New York, Chicago, Atlanta..." value={form.currentCity} onChange={(e) => setForm({ ...form, currentCity: e.target.value })} />
-                  </div>
-                )}
-
-                {isRenting && (
-                  <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-sm text-emerald-700">
-                    <DollarSign className="w-4 h-4 inline mr-1" />
-                    <strong>Apartment locating is free for you.</strong> Apartment communities pay the locator directly — you pay nothing extra.
-                  </div>
-                )}
-
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <Label>{isRenting ? "Monthly Budget" : "Budget Range"}</Label>
-                    <Select value={form.budget} onValueChange={(v) => setForm({ ...form, budget: v })}>
-                      <SelectTrigger><SelectValue placeholder="Select budget" /></SelectTrigger>
-                      <SelectContent>
-                        {budgetRanges.map((b) => (<SelectItem key={b} value={b}>{b}</SelectItem>))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Timeline</Label>
-                    <Select value={form.timeline} onValueChange={(v) => setForm({ ...form, timeline: v })}>
-                      <SelectTrigger><SelectValue placeholder="When do you need help?" /></SelectTrigger>
-                      <SelectContent>
-                        {TIMELINES.map((t) => (<SelectItem key={t} value={t}>{t}</SelectItem>))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="neighborhoods">Preferred Neighborhoods</Label>
-                  <Input id="neighborhoods" placeholder="e.g. South End, NoDa, Ballantyne..." value={form.neighborhoods} onChange={(e) => setForm({ ...form, neighborhoods: e.target.value })} />
-                  <p className="text-xs text-muted-foreground">
-                    Not sure? <Link href="/quiz" className="text-clt-teal underline">Take our neighborhood quiz</Link> to find your match.
-                  </p>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="notes">Anything else we should know?</Label>
-                  <Textarea id="notes" placeholder="Tell us about your situation, must-haves, or questions..." value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={3} />
-                </div>
-
-                <Button type="submit" size="lg" className="w-full bg-emerald-600 hover:bg-emerald-700 text-white gap-2" disabled={submitMutation.isPending}>
-                  {submitMutation.isPending ? "Submitting..." : (
-                    <>
-                      {isRenting ? "Find My Apartment" : "Find Your Home"}
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
-                </Button>
-
-                <p className="text-xs text-center text-muted-foreground">
-                  By submitting, you agree to be contacted by a licensed NC real estate professional. This is a free service — no obligations.
-                  You may also review our <Link href="/privacy" className="underline">Privacy Policy</Link> and <Link href="/terms" className="underline">Terms of Service</Link>.
-                </p>
-              </form>
-            </CardContent>
-          </Card>
-
-          {/* Trust signals */}
-          <div className="mt-8 grid grid-cols-3 gap-4 text-center">
-            <div className="flex flex-col items-center gap-2">
-              <Shield className="w-5 h-5 text-emerald-500" />
-              <span className="text-xs text-muted-foreground">Vetted Agents Only</span>
-            </div>
-            <div className="flex flex-col items-center gap-2">
-              <Clock className="w-5 h-5 text-emerald-500" />
-              <span className="text-xs text-muted-foreground">48hr Response</span>
-            </div>
-            <div className="flex flex-col items-center gap-2">
-              <DollarSign className="w-5 h-5 text-emerald-500" />
-              <span className="text-xs text-muted-foreground">Zero Cost to You</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Not sure CTA */}
-      <section className="py-12 bg-muted/30 border-y border-border">
-        <div className="container max-w-2xl text-center">
-          <Search className="w-8 h-8 text-clt-teal mx-auto mb-3" />
-          <h3 className="font-display font-bold text-lg text-foreground mb-2">
-            Not Sure Where to Start?
-          </h3>
-          <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
-            Take our 2-minute neighborhood quiz to find the best Charlotte areas for your budget and lifestyle. Then come back here to get matched with an agent.
-          </p>
-          <Link href="/quiz">
-            <Button variant="outline" className="gap-2">
-              Take the Neighborhood Quiz <ArrowRight className="w-4 h-4" />
-            </Button>
-          </Link>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <FAQSection />
-
-      {/* NC Real Estate Commission Compliance */}
-      <section className="py-8 bg-muted/20 border-t border-border">
-        <div className="container max-w-3xl">
-          <p className="text-xs text-muted-foreground leading-relaxed text-center">
-            <strong>NC Real Estate Commission Disclosure:</strong> Settle CLT is not a licensed real estate brokerage.
-            We connect prospective buyers, renters, and investors with independent, licensed real estate professionals
-            in North Carolina. Any referral fees are paid by the agent, not by you. All agents in our network hold
-            active licenses with the <a href="https://www.ncrec.gov" target="_blank" rel="noopener noreferrer" className="underline">North Carolina Real Estate Commission (NCREC)</a>.
-            Settle CLT does not provide real estate advice, appraisals, or legal counsel. For questions about
-            NC real estate licensing, visit <a href="https://www.ncrec.gov" target="_blank" rel="noopener noreferrer" className="underline">ncrec.gov</a>.
-          </p>
-        </div>
-      </section>
-
+        <section data-section="realtor-disclosure" className="py-8 bg-muted/20 border-t"><div className="container max-w-3xl"><p className="text-xs text-muted-foreground leading-relaxed text-center"><strong>{copy.disclosureTitle}</strong> {copy.disclosure} {copy.disclosureBeforeSite} <a href="https://www.ncrec.gov" target="_blank" rel="noopener noreferrer" className="underline">ncrec.gov</a>{copy.disclosureAfterSite}</p></div></section>
+      </main>
       <Footer />
     </div>
   );

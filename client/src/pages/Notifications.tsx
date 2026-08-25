@@ -175,7 +175,7 @@ export default function Notifications() {
 
   if (loading) {
     return (
-      <div className="container py-12">
+      <main className="container py-12">
         <div
           className="animate-pulse space-y-4"
           role="status"
@@ -184,29 +184,29 @@ export default function Notifications() {
           <div className="h-8 bg-muted rounded w-48" />
           <div className="h-64 bg-muted rounded" />
         </div>
-      </div>
+      </main>
     );
   }
 
   if (!user) {
     return (
-      <div className="container py-20 text-center">
+      <main className="container py-20 text-center">
         <Bell className="w-12 h-12 mx-auto mb-4 text-muted-foreground/30" />
-        <h2 className="text-xl font-semibold mb-2">
+        <h1 className="text-xl font-semibold mb-2">
           {t("notifications.signInTitle")}
-        </h2>
+        </h1>
         <p className="text-muted-foreground mb-6">
           {t("notifications.signInDescription")}
         </p>
         <Button onClick={() => (window.location.href = getLoginUrl())}>
           {t("notifications.signIn")}
         </Button>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="container py-8 max-w-3xl mx-auto">
+    <main className="container py-8 max-w-3xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
         <button
           onClick={() => navigate("/")}
@@ -501,11 +501,11 @@ export default function Notifications() {
                           ? t("notifications.pushDenied")
                           : pushState === "error"
                             ? t("notifications.pushError")
-                          : pushState === "loading"
-                            ? t("notifications.pushLoading")
-                            : isPushSubscribed
-                              ? t("notifications.pushEnabled")
-                              : t("notifications.pushDisabled")}
+                            : pushState === "loading"
+                              ? t("notifications.pushLoading")
+                              : isPushSubscribed
+                                ? t("notifications.pushEnabled")
+                                : t("notifications.pushDisabled")}
                     </p>
                   </div>
                   <Button
@@ -536,6 +536,6 @@ export default function Notifications() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </main>
   );
 }

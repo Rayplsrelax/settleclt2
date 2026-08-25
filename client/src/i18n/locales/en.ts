@@ -1,3 +1,5 @@
+import { HOUSING_COPY } from "@shared/housing-copy";
+
 export const en = {
   // Navigation
   "nav.home": "Home",
@@ -57,6 +59,69 @@ export const en = {
     "Explore 20 neighborhoods, discover 700+ local services, and get honest advice from people who actually live here.",
   "home.browseDirectory": "Browse Directory",
   "home.viewEvents": "View Events",
+  "home.seoTitle": "Settle CLT — Your Complete Guide to Living in Charlotte, NC",
+  "home.seoDescription":
+    "Explore 20 Charlotte neighborhoods, discover 700+ local businesses, find events, and read local guides.",
+  "home.seoKeywords":
+    "Charlotte NC, moving to Charlotte, Charlotte neighborhoods, Charlotte local guide, CLT relocation",
+  "home.neighborhoodsStat": "Neighborhoods",
+  "home.servicesStat": "Local Services",
+  "home.categoriesStat": "Categories",
+  "home.quizBadge": "2-Minute Quiz",
+  "home.quizPrompt": "Not sure where to live?",
+  "home.quizDescription":
+    "Answer 6 quick questions about your budget, lifestyle, and priorities — we'll match you with the best Charlotte neighborhoods.",
+  "home.businessCtaTitle": "Own a Charlotte Business?",
+  "home.businessCtaDescription":
+    "List your Charlotte business so people exploring the area can find it. Listing is free.",
+  "home.businessCtaButton": "List Your Business — Free",
+  "home.latest": "Latest",
+  "home.read": "Read",
+  "home.viewAllBlogPosts": "View all blog posts",
+  "home.trendingTitle": "Trending in CLT",
+  "home.trendingDescription": "Popular topics and tags people are exploring",
+  "home.communityActivity": "Community Activity",
+  "home.communityActivityDescription":
+    "See what Charlotte explorers are up to right now",
+  "home.newsletterTitle": "Get the Charlotte Insider Newsletter",
+  "home.newsletterDescription":
+    "Weekly tips on neighborhoods, hidden gems, cost-saving hacks, and everything you need to know before (and after) your move.",
+  "home.subscribe": "Subscribe",
+  "home.joining": "Joining...",
+  "home.newsletterConsent":
+    "By subscribing, you agree to receive the Settle CLT newsletter. Free forever. Unsubscribe anytime.",
+  "home.newsletterSuccess": "Your subscription request was received",
+  "home.newsletterSuccessHint":
+    "If eligible, confirmation instructions may be sent to the address provided.",
+  "home.newsletterFollow": "Follow Settle CLT around Charlotte",
+  "home.newsletterFollowHint":
+    "Pick your favorite platform for local finds between newsletters.",
+  "home.newsletterError": "Something went wrong. Please try again.",
+  "home.articleFallbackExcerpt": "Read the full article on Settle CLT.",
+  "home.articleFallbackCategory": "Charlotte Guide",
+  "home.forYou": "For You, {name}",
+  "home.explorer": "Explorer",
+  "home.forYouDescription": "Based on your browsing and engagement",
+  "home.topInterests": "Your top interests",
+  "home.neighborhoodsForYou": "Neighborhoods for You",
+  "home.eventsForYou": "Events You'd Like",
+  "home.placesForYou": "Places to Check Out",
+  "activity.empty": "No activity yet. Be the first to explore Charlotte!",
+  "activity.anonymous": "A CLT explorer",
+  "activity.justNow": "just now",
+  "activity.stamped": "stamped {entity}",
+  "activity.stampedGeneric": "added a passport stamp",
+  "activity.attended": "attended {entity}",
+  "activity.attendedGeneric": "attended a local event",
+  "activity.commented": "commented on {targetType} {entity}",
+  "activity.commentedGeneric": "commented on a {targetType}",
+  "activity.bingoProgress": "made progress on {entity}",
+  "activity.bingoProgressGeneric": "made progress on a bingo card",
+  "activity.bingoCompleted": "completed {entity}",
+  "activity.bingoCompletedGeneric": "completed a bingo card",
+  "activity.targetType.neighborhood": "neighborhood",
+  "activity.targetType.service": "business",
+  "activity.targetType.generic": "local page",
 
   // Events page
   "events.title1": "What's Happening in",
@@ -84,7 +149,6 @@ export const en = {
   "directory.category": "Category",
   "directory.categoryGroup": "Category Group",
 
-
   // Events page extras
   "events.directions": "Directions",
   "events.submit": "Submit an Event",
@@ -96,12 +160,102 @@ export const en = {
   "events.recurring": "Recurring event",
   "events.dateTba": "Date TBA",
   "events.timeTba": "Time TBA",
+  "events.seoTitle": "Charlotte Events This Week & Weekend: Things to Do in CLT (2026)",
+  "events.seoDescription":
+    "Your complete Charlotte events calendar. Find concerts, festivals, sports, food events, family activities, and things to do in Charlotte NC this week and weekend.",
+  "events.seoKeywords":
+    "Charlotte events, events in Charlotte NC, things to do in Charlotte this weekend, Charlotte concerts, Charlotte festivals",
+  "events.seoHeading": "Things to Do in Charlotte, NC This Week & Weekend",
+  "events.seoParagraph1":
+    "Looking for things to do in Charlotte this weekend? Settle CLT's events calendar covers everything happening in the Queen City — from live concerts and music festivals to family-friendly activities, free community events, food and drink experiences, professional sports games, and seasonal festivals.",
+  "events.seoParagraph2":
+    "Whether you just moved to Charlotte or you're a lifelong local, use this page to find Charlotte events this week, plan your weekend, and discover new experiences across every neighborhood. Filter by date, category, or search for specific venues and artists.",
+  "events.dateRange": "Date Range",
+  "events.from": "From",
+  "events.to": "To",
+  "events.clearDates": "Clear dates",
+  "events.recurringEvents": "Recurring Events",
+  "events.newcomerFriendly": "Newcomer Friendly",
+  "events.promoted": "Promoted",
+  "events.promotedEvent": "Promoted Event",
+  "events.noMatching": "No matching events",
+  "events.noEventsYet": "No events yet",
+  "events.noMatchingHint": "Try adjusting your search, date range, or category filters.",
+  "events.noCategoryHint": "No events found in this category. Try a different filter or check back soon.",
+  "events.comingSoon": "Events are coming soon! Check back for more happening in Charlotte.",
+  "events.moreInfo": "Get Tickets / More Info",
+  "events.searchAria": "Search events, venues, and neighborhoods",
+  "events.clearSearchAria": "Clear event search",
+  "events.category.all": "All Events",
+  "events.category.concerts": "Concerts & Music",
+  "events.category.foodDrink": "Food & Drink",
+  "events.category.sports": "Sports",
+  "events.category.artsCulture": "Arts & Culture",
+  "events.category.festivals": "Festivals",
+  "events.category.family": "Family & Kids",
+  "events.category.nightlife": "Nightlife",
+  "events.category.free": "Free Events",
+  "events.category.markets": "Markets & Pop-ups",
+  "events.category.community": "Community",
+  "events.category.runWalk": "Run & Walk Clubs",
+  "events.category.yogaFitness": "Yoga & Fitness",
+  "events.category.farmersMarkets": "Farmers Markets",
+  "events.category.gameNights": "Game Nights & Trivia",
+  "events.category.veteran": "Veteran & Military",
+  "events.category.musicJam": "Live Music & Open Mic",
+  "events.category.kidsStorytime": "Kids & Storytime",
+  "events.category.meditation": "Meditation & Mindfulness",
+  "events.category.dogMeetups": "Dog Meetups",
+  "events.category.makersCrafts": "Makers & Crafts",
+  "events.category.neighborhood": "Neighborhood Events",
+  "events.category.professional": "Professional & Networking",
 
   // Directory page extras
   "directory.getDirections": "Get Directions",
   "directory.loadMore": "Load More",
   "directory.clearAllFilters": "Clear all filters",
   "directory.recentlyAdded": "Recently added to the directory",
+  "directory.seoTitle": "Charlotte Business Directory — 700+ Local Businesses",
+  "directory.seoDescription":
+    "Browse 700+ Charlotte businesses across 50+ categories, with ratings, reviews, and contact details.",
+  "directory.seoKeywords":
+    "Charlotte restaurants, Charlotte businesses, local directory Charlotte NC, Charlotte services",
+  "directory.countsSubtitle": "{businesses} Charlotte businesses across {categories} categories",
+  "directory.newBadge": "New",
+  "directory.growing": "{count} businesses and growing —",
+  "directory.list": "List",
+  "directory.map": "Map",
+  "directory.sortRecommended": "Sort: Recommended",
+  "directory.sortAria": "Sort directory results",
+  "directory.filters": "Filters",
+  "directory.clear": "Clear",
+  "directory.all": "All",
+  "directory.area": "Area",
+  "directory.coreNeighborhoods": "Core Neighborhoods",
+  "directory.metroCharlotte": "Metro Charlotte",
+  "directory.searchAria": "Search businesses and categories",
+  "directory.searchPlaceholder": "Search businesses, categories...",
+  "directory.showingList": "Showing {visible} of {total} {businesses}",
+  "directory.showingMap": "Showing all {total} {businesses} on the map",
+  "directory.businessSingular": "business",
+  "directory.businessPlural": "businesses",
+  "directory.inCategory": "in {category}",
+  "directory.nearArea": "near {area}",
+  "directory.visit": "Visit",
+  "directory.claim": "Claim",
+  "directory.premium": "Premium",
+  "directory.featured": "Featured",
+  "directory.promoted": "Promoted",
+  "directory.reviews": "reviews",
+  "directory.loadingMore": "Showing {visible} of {total} businesses",
+  "directory.showingAll": "Showing all {total} businesses",
+  "directory.visitWebsite": "Visit website →",
+  "directory.neighborhoodResults": "Showing services near {name}",
+  "directory.prioritizing": "Prioritizing results near {name}",
+  "directory.homeCtaTitle": "Looking for a home or apartment?",
+  "directory.homeCtaDescription":
+    HOUSING_COPY.en.request,
+  "directory.homeCtaButton": "Find Your Home",
 
   // Home page extras
   "home.exploreNeighborhoods": "Explore Neighborhoods",
@@ -140,8 +294,24 @@ export const en = {
   "blog.takeQuiz": "Take the Quiz",
   "blog.findHome": "Find Your Home",
   "blog.findHomeDescription":
-    "Get matched with a local real estate expert — free, no obligation.",
+    HOUSING_COPY.en.request,
   "blog.getStarted": "Get Started",
+  "blog.seoTitle": "Charlotte Blog — Local Tips, Guides & Stories",
+  "blog.seoDescription":
+    "Read insider guides to Charlotte NC, including neighborhoods, weekend plans, moving tips, and local stories.",
+  "blog.seoKeywords":
+    "Charlotte blog, Charlotte NC tips, moving to Charlotte guide, Charlotte neighborhood guides",
+  "blog.category.gettingStarted": "Getting Started",
+  "blog.category.costOfLiving": "Cost of Living",
+  "blog.category.lifestyle": "Lifestyle",
+  "blog.category.schools": "Schools",
+  "blog.category.transportation": "Transportation",
+  "blog.category.relocation": "Relocation",
+  "blog.category.pets": "Pets",
+  "blog.articleFallbackTitle": "Blog Article",
+  "blog.articleFallbackDescription":
+    "Read this article on Settle CLT — your guide to living in Charlotte, NC.",
+  "blog.articleFallbackKeywords": "Charlotte blog",
 
   // Contact page
   "contact.title": "Get in Touch",
@@ -150,8 +320,8 @@ export const en = {
   "contact.emailLabel": "Email",
   "contact.location": "Location",
   "contact.locationValue": "Charlotte, North Carolina",
-  "contact.responseTime": "Response Time",
-  "contact.responseTimeValue": "We typically respond within 24-48 hours",
+  "contact.responseTime": "Request receipt",
+  "contact.responseTimeValue": "Successful submissions are accepted for review.",
   "contact.commonTopics": "Common Topics",
   "contact.topicListing": "Listing or claiming your business",
   "contact.topicEvents": "Submitting events to the calendar",
@@ -159,9 +329,9 @@ export const en = {
   "contact.topicCorrections": "Reporting incorrect information",
   "contact.topicFeedback": "General feedback and suggestions",
   "contact.topicAccount": "Account and data deletion requests",
-  "contact.sentTitle": "Message Sent!",
+  "contact.sentTitle": "Message Received!",
   "contact.sentDescription":
-    "Thanks for reaching out. We'll get back to you within 24-48 hours.",
+    "Your message was received and accepted for review.",
   "contact.sendAnother": "Send Another Message",
   "contact.formTitle": "Send us a message",
   "contact.name": "Name",
@@ -173,8 +343,9 @@ export const en = {
   "contact.messagePlaceholder": "Tell us what's on your mind...",
   "contact.sending": "Sending...",
   "contact.send": "Send Message",
-  "contact.toastSuccess": "Message sent! We'll get back to you soon.",
-  "contact.toastError": "Something went wrong. Please try emailing us directly.",
+  "contact.toastSuccess": "Your message was received and accepted for review.",
+  "contact.toastError":
+    "We couldn't send your message. Please try again.",
   "contact.requiredError": "Please fill in all required fields.",
 
   // Authentication
@@ -230,6 +401,11 @@ export const en = {
   "neighborhoods.metroTitle": "Metro Charlotte",
   "neighborhoods.metroSubtitle":
     "{count} surrounding communities — suburbs, inner-ring towns, and exurbs",
+  "neighborhoods.seoTitle": "Charlotte Neighborhoods Guide — Compare Areas",
+  "neighborhoods.seoDescription":
+    "Explore 20 Charlotte neighborhoods with detailed guides, costs, local tips, and community reviews.",
+  "neighborhoods.seoKeywords":
+    "Charlotte neighborhoods, compare neighborhoods Charlotte NC, where to live Charlotte, South End, NoDa, Uptown Charlotte",
 
   // Account profile
   "profile.title": "Your Profile",
@@ -278,7 +454,8 @@ export const en = {
   "quiz.dimensions": "6 dimensions",
   "quiz.personalized": "Personalized",
   "quiz.priorities": "Your priorities",
-  "quiz.subtitle": "Answer 7 quick questions and we'll match you with the best neighborhoods based on your budget, lifestyle, and priorities.",
+  "quiz.subtitle":
+    "Answer 7 quick questions and we'll match you with the best neighborhoods based on your budget, lifestyle, and priorities.",
   "quiz.time": "Takes about 2 minutes. No signup required.",
   "quiz.start": "Let's Go",
 
@@ -288,7 +465,8 @@ export const en = {
   "submitEvent.browse": "Browse Events",
   "submitEvent.another": "Submit Another",
   "submitEvent.title": "Submit an Event",
-  "submitEvent.seoDescription": "Share Charlotte events with the community. Submit concerts, food festivals, sports, arts, and more for free.",
+  "submitEvent.seoDescription":
+    "Share Charlotte events with the community. Submit concerts, food festivals, sports, arts, and more for free.",
   "submitEvent.signIn": "Sign In to Submit",
   "submitEvent.community": "Community Events",
   "submitEvent.submit": "Submit Event",
@@ -296,8 +474,10 @@ export const en = {
 
   // Realtor matching
   "realtor.title": "Find Your Home in Charlotte",
-  "realtor.description": "Get matched with a trusted Charlotte real estate agent for buying, selling, renting, or relocating. Free service.",
-  "realtor.keywords": "Charlotte homes, Charlotte apartments, buy house Charlotte NC, Charlotte relocation, find home Charlotte, Charlotte rentals",
+  "realtor.description":
+    HOUSING_COPY.en.request,
+  "realtor.keywords":
+    "Charlotte homes, Charlotte apartments, buy house Charlotte NC, Charlotte relocation, find home Charlotte, Charlotte rentals",
   "realtor.faq": "Frequently Asked Questions",
   "realtor.submit": "Find My Match",
 
@@ -312,7 +492,8 @@ export const en = {
   // Neighborhood comparison
   "compare.pageTitle": "Compare Charlotte Neighborhoods Side by Side",
   "compare.title": "Compare Neighborhoods",
-  "compare.subtitle": "Select up to 3 neighborhoods to compare side-by-side across stats, costs, vibes, and more.",
+  "compare.subtitle":
+    "Select up to 3 neighborhoods to compare side-by-side across stats, costs, vibes, and more.",
   "compare.addNeighborhood": "Add neighborhood",
   "compare.selectNeighborhoods": "Select neighborhoods to compare",
   "compare.doneSelecting": "Done selecting",
@@ -368,13 +549,16 @@ export const en = {
   "directoryCategory.site": "Site",
   "directoryCategory.pricing": "See Business Pricing",
   "directoryCategory.ownBusiness": "Own a {category} business?",
-  "directoryCategory.claimDescription": "Claim your listing for free, update details, and upgrade when you want more visibility.",
+  "directoryCategory.claimDescription":
+    "Claim your listing for free, update details, and upgrade when you want more visibility.",
   "directoryCategory.genericHeadline": "{category} in Charlotte, NC",
-  "directoryCategory.genericIntro": "Browse {category} serving Charlotte and nearby metro communities. Compare local options, contact details, and service areas in one place.",
+  "directoryCategory.genericIntro":
+    "Browse {category} serving Charlotte and nearby metro communities. Compare local options, contact details, and service areas in one place.",
   "directoryCategory.checkServiceAreas": "Compare service areas",
   "directoryCategory.checkContact": "Review websites and contact options",
   "directoryCategory.checkShortlist": "Shortlist 2–3 providers",
-  "directoryCategory.checkVerified": "Use verified or claimed listings when available",
+  "directoryCategory.checkVerified":
+    "Use verified or claimed listings when available",
 
   // Neighborhood detail
   "neighborhoodDetail.allNeighborhoods": "All Neighborhoods",
@@ -422,12 +606,30 @@ export const en = {
   "neighborhoodDetail.recreationHighlights": "Recreation Highlights",
   "neighborhoodDetail.parksTrails": "Parks & Trails",
   "neighborhoodDetail.explore": "Explore {name}",
+  "neighborhoodDetail.radarWalk": "Walk",
+  "neighborhoodDetail.radarNightlife": "Nightlife",
+  "neighborhoodDetail.radarFamily": "Family",
+  "neighborhoodDetail.radarPet": "Pet",
+  "neighborhoodDetail.radarSchools": "Schools",
+  "neighborhoodDetail.radarSafety": "Safety",
+  "neighborhoodDetail.avgRent": "Avg Rent",
+  "neighborhoodDetail.homePrice": "Home Price",
+  "neighborhoodDetail.walkScore": "Walk Score",
+  "neighborhoodDetail.toUptown": "To Uptown",
+  "neighborhoodDetail.schools": "Schools",
+  "neighborhoodDetail.crime": "Crime",
+  "neighborhoodDetail.nightlife": "Nightlife",
+  "neighborhoodDetail.petScore": "Pet Score",
+  "neighborhoodDetail.family": "Family",
 
   // Passport
   "passport.title": "CLT Passport",
-  "passport.seoDescription": "Collect stamps for Charlotte places and events while tracking your local adventures.",
-  "passport.seoKeywords": "CLT Passport, Charlotte activities, Charlotte exploration, local Charlotte guide",
-  "passport.subtitle": "Collect stamps for every place you visit and event you attend in Charlotte.",
+  "passport.seoDescription":
+    "Collect stamps for Charlotte places and events while tracking your local adventures.",
+  "passport.seoKeywords":
+    "CLT Passport, Charlotte activities, Charlotte exploration, local Charlotte guide",
+  "passport.subtitle":
+    "Collect stamps for every place you visit and event you attend in Charlotte.",
   "passport.totalStamps": "Total Stamps",
   "passport.events": "Events",
   "passport.neighborhoods": "Neighborhoods",
@@ -445,7 +647,8 @@ export const en = {
   "passport.noPlaces": "No places found — use a custom name below",
   "passport.or": "or",
   "passport.customPlace": "Custom Place Name",
-  "passport.customPlacePlaceholder": "e.g., That amazing taco truck on Trade St",
+  "passport.customPlacePlaceholder":
+    "e.g., That amazing taco truck on Trade St",
   "passport.dateAttended": "Date Attended",
   "passport.dateVisited": "Date Visited",
   "passport.notesOptional": "Notes (optional)",
@@ -470,19 +673,30 @@ export const en = {
   "passport.eventStamps": "Event Stamps",
   "passport.bingoChallenges": "Bingo Challenges",
   "passport.leaderboard": "Leaderboard",
-  "passport.landingDescription": "Track every place you visit and event you attend in Charlotte. Collect stamps, complete challenges, and explore like a local.",
-  "passport.visitPlacesDescription": "Explore Charlotte restaurants, breweries, parks, and hidden gems.",
-  "passport.attendEventsDescription": "Stamp every Charlotte festival, concert, and community event you experience.",
-  "passport.collectStampsDescription": "Log visits with dates and notes to track your exploration journey.",
-  "passport.earnAchievementsDescription": "Complete challenges, climb the leaderboard, and share your progress.",
-  "passport.placeStampsDescription": "Track restaurants, breweries, parks, and shops with dates and notes.",
-  "passport.eventStampsDescription": "Log festivals, concerts, food events, and community gatherings.",
-  "passport.bingoChallengesDescription": "Complete themed challenge cards across Charlotte.",
-  "passport.leaderboardDescription": "See how you rank among other CLT explorers.",
+  "passport.landingDescription":
+    "Track every place you visit and event you attend in Charlotte. Collect stamps, complete challenges, and explore like a local.",
+  "passport.visitPlacesDescription":
+    "Explore Charlotte restaurants, breweries, parks, and hidden gems.",
+  "passport.attendEventsDescription":
+    "Stamp every Charlotte festival, concert, and community event you experience.",
+  "passport.collectStampsDescription":
+    "Log visits with dates and notes to track your exploration journey.",
+  "passport.earnAchievementsDescription":
+    "Complete challenges, climb the leaderboard, and share your progress.",
+  "passport.placeStampsDescription":
+    "Track restaurants, breweries, parks, and shops with dates and notes.",
+  "passport.eventStampsDescription":
+    "Log festivals, concerts, food events, and community gatherings.",
+  "passport.bingoChallengesDescription":
+    "Complete themed challenge cards across Charlotte.",
+  "passport.leaderboardDescription":
+    "See how you rank among other CLT explorers.",
   "passport.readyTitle": "Ready to explore Charlotte?",
-  "passport.readyDescription": "Create a free account and start collecting stamps today.",
+  "passport.readyDescription":
+    "Create a free account and start collecting stamps today.",
   "passport.getPassport": "Get Your CLT Passport",
-  "passport.emptyInstructions": "Start exploring Charlotte and add places or events you have visited.",
+  "passport.emptyInstructions":
+    "Start exploring Charlotte and add places or events you have visited.",
   "passport.browseDirectory": "Browse Directory",
   "passport.remove": "Remove",
   "passport.all": "All ({count})",
@@ -501,7 +715,8 @@ export const en = {
   "wishlist.title": "My Wishlist",
   "wishlist.subtitle": "Places you want to visit in Charlotte.",
   "wishlist.empty": "Your wishlist is empty",
-  "wishlist.emptyDescription": "Browse the directory and save listings to revisit later.",
+  "wishlist.emptyDescription":
+    "Browse the directory and save listings to revisit later.",
   "wishlist.browseDirectory": "Browse Directory",
   "wishlist.savedPlaces": "Saved Places ({count})",
   "wishlist.website": "Website",
@@ -511,8 +726,10 @@ export const en = {
   "wishlist.saveNotes": "Save notes",
   "wishlist.removed": "Removed from wishlist",
   "wishlist.notesUpdated": "Notes updated",
-  "wishlist.tip": "Tip: Select the heart icon on a directory listing to add it here.",
-  "wishlist.seoDescription": "Save and revisit your favorite Charlotte neighborhoods, businesses, and events.",
+  "wishlist.tip":
+    "Tip: Select the heart icon on a directory listing to add it here.",
+  "wishlist.seoDescription":
+    "Save and revisit your favorite Charlotte neighborhoods, businesses, and events.",
   "wishlist.authFeature": "save your wishlist",
   "wishlist.cancelEdit": "Cancel note editing",
 
@@ -520,7 +737,8 @@ export const en = {
   "leaderboard.title": "CLT Explorer Leaderboard",
   "leaderboard.subtitle": "See who's exploring Charlotte the most.",
   "leaderboard.noExplorers": "No explorers yet",
-  "leaderboard.noExplorersDescription": "Be the first to explore Charlotte and claim the top spot!",
+  "leaderboard.noExplorersDescription":
+    "Be the first to explore Charlotte and claim the top spot!",
   "leaderboard.startExploring": "Start Exploring",
   "leaderboard.rank": "Rank",
   "leaderboard.stamps": "stamps",
@@ -535,9 +753,12 @@ export const en = {
   "leaderboard.you": "You",
   "leaderboard.anonymous": "Anonymous Explorer",
   "leaderboard.wantToJoin": "Want to join the leaderboard?",
-  "leaderboard.joinDescription": "Sign in and start exploring Charlotte to earn your spot!",
-  "leaderboard.seoDescription": "See Charlotte explorer rankings by passport stamps, bingo completions, and neighborhoods visited.",
-  "leaderboard.seoKeywords": "Charlotte leaderboard, CLT explorers, Charlotte community, passport rankings",
+  "leaderboard.joinDescription":
+    "Sign in and start exploring Charlotte to earn your spot!",
+  "leaderboard.seoDescription":
+    "See Charlotte explorer rankings by passport stamps, bingo completions, and neighborhoods visited.",
+  "leaderboard.seoKeywords":
+    "Charlotte leaderboard, CLT explorers, Charlotte community, passport rankings",
   "leaderboard.shareDescription": "See who's exploring Charlotte the most",
   "leaderboard.rankValue": "Rank {rank}",
 
@@ -547,7 +768,8 @@ export const en = {
   "businessDetail.back": "Back to Directory",
   "businessDetail.notFound": "Business Not Found",
   "businessDetail.seoTitle": "{name} — {category} in {area}, Charlotte NC",
-  "businessDetail.seoDescription": "View contact details, hours, services, reviews, and directions for {name} in Charlotte.",
+  "businessDetail.seoDescription":
+    "View contact details, hours, services, reviews, and directions for {name} in Charlotte.",
   "businessDetail.website": "Visit Website",
   "businessDetail.directions": "Get Directions",
   "businessDetail.call": "Call",
@@ -557,7 +779,8 @@ export const en = {
   "businessDetail.reviews": "Community Reviews",
   "businessDetail.claim": "Claim This Business",
   "businessDetail.inquiry": "Send an Inquiry",
-  "businessDetail.inquiryDescription": "Contact {name} directly through their listing.",
+  "businessDetail.inquiryDescription":
+    "Contact {name} directly through their listing.",
   "businessDetail.name": "Name",
   "businessDetail.email": "Email",
   "businessDetail.phoneOptional": "Phone (optional)",
@@ -565,7 +788,8 @@ export const en = {
   "businessDetail.sending": "Sending...",
   "businessDetail.sendInquiry": "Send Inquiry",
   "businessDetail.inquirySent": "Your inquiry was sent to the business.",
-  "businessDetail.error": "We couldn’t complete that request. Please try again.",
+  "businessDetail.error":
+    "We couldn’t complete that request. Please try again.",
   "businessDetail.closePhotos": "Close photo viewer",
   "businessDetail.previousPhoto": "Previous photo",
   "businessDetail.nextPhoto": "Next photo",
@@ -578,8 +802,10 @@ export const en = {
   "businessDetail.googleReviews": "({count} Google reviews)",
   "businessDetail.bookVia": "Book or pay via {provider}",
   "businessDetail.aboutTitle": "About {name} in {area}, Charlotte NC",
-  "businessDetail.directoryContext": "{name} is listed in Settle CLT’s Charlotte directory under {category}. Use this page to check contact details, hours, photos, reviews, and directions.",
-  "businessDetail.compareContext": "If you are moving to Charlotte or settling in {area}, compare this listing with nearby options to choose the right fit.",
+  "businessDetail.directoryContext":
+    "{name} is listed in Settle CLT’s Charlotte directory under {category}. Use this page to check contact details, hours, photos, reviews, and directions.",
+  "businessDetail.compareContext":
+    "If you are moving to Charlotte or settling in {area}, compare this listing with nearby options to choose the right fit.",
   "businessDetail.sunday": "Sunday",
   "businessDetail.monday": "Monday",
   "businessDetail.tuesday": "Tuesday",
@@ -592,24 +818,34 @@ export const en = {
   "businessDetail.localBusiness": "Local Business",
   "businessDetail.bookQuote": "Book or Request a Quote",
   "businessDetail.fromPrice": "From {price}",
-  "businessDetail.serviceHint": "Use the booking or quote button above to ask about a service.",
+  "businessDetail.serviceHint":
+    "Use the booking or quote button above to ask about a service.",
 
   // Business pricing
   "businessPricing.seoTitle": "Settle CLT Business Pricing",
-  "businessPricing.seoDescription": "Claim your Charlotte business listing and compare visibility plans.",
+  "businessPricing.seoDescription":
+    "Claim your Charlotte business listing and compare visibility plans.",
   "businessPricing.badge": "Charlotte business growth",
-  "businessPricing.title": "Claim your Settle CLT listing for free. Upgrade when you want more visibility.",
-  "businessPricing.subtitle": "Help Charlotte customers find your business. Start with a free verified claim, then upgrade when you want more clicks and leads.",
+  "businessPricing.title":
+    "Claim your Settle CLT listing for free. Upgrade when you want more visibility.",
+  "businessPricing.subtitle":
+    "Help Charlotte customers find your business. Start with a free verified claim, then upgrade when you want more clicks and leads.",
   "businessPricing.findClaim": "Find & Claim Your Business",
   "businessPricing.addMissing": "Add a Missing Business",
   "businessPricing.howItWorks": "How it works",
-  "businessPricing.howDescription": "A simple path from free claim to measurable growth.",
-  "businessPricing.step1": "Find your directory listing and submit a free claim.",
-  "businessPricing.step2": "Settle CLT verifies the claim and gives the owner access.",
-  "businessPricing.step3": "Edit listing details and upgrade through secure checkout when ready.",
-  "businessPricing.step4": "Track views, clicks, leads, and listing performance.",
+  "businessPricing.howDescription":
+    "A simple path from free claim to measurable growth.",
+  "businessPricing.step1":
+    "Find your directory listing and submit a free claim.",
+  "businessPricing.step2":
+    "Settle CLT verifies the claim and gives the owner access.",
+  "businessPricing.step3":
+    "Edit listing details and upgrade through secure checkout when ready.",
+  "businessPricing.step4":
+    "Track views, clicks, leads, and listing performance.",
   "businessPricing.plans": "Business listing plans",
-  "businessPricing.plansDescription": "Start free and choose a paid tier when your business is ready for more visibility.",
+  "businessPricing.plansDescription":
+    "Start free and choose a paid tier when your business is ready for more visibility.",
   "businessPricing.freeClaim": "Free Claim",
   "businessPricing.featured": "Featured Listing",
   "businessPricing.premium": "Premium Listing",
@@ -619,10 +855,14 @@ export const en = {
   "businessPricing.popular": "Most popular",
   "businessPricing.leadFocused": "Lead-focused",
   "businessPricing.aiPowered": "AI-powered",
-  "businessPricing.freeDescription": "Verify ownership and control the basics of your listing.",
-  "businessPricing.featuredDescription": "Stand out in your category and gain stronger visibility.",
-  "businessPricing.premiumDescription": "Maximum directory visibility for businesses seeking more leads.",
-  "businessPricing.proDescription": "AI-assisted growth recommendations without automatic publishing.",
+  "businessPricing.freeDescription":
+    "Verify ownership and control the basics of your listing.",
+  "businessPricing.featuredDescription":
+    "Stand out in your category and gain stronger visibility.",
+  "businessPricing.premiumDescription":
+    "Maximum directory visibility for businesses seeking more leads.",
+  "businessPricing.proDescription":
+    "AI-assisted growth recommendations without automatic publishing.",
   "businessPricing.claimCta": "Claim Your Business",
   "businessPricing.trial14": "Start 14-day free trial",
   "businessPricing.trial7": "Start 7-day free trial",
@@ -630,7 +870,8 @@ export const en = {
   "businessPricing.trial7Note": "7-day free trial",
   "businessPricing.noCharge": "no charge until it ends",
   "businessPricing.freeFeature1": "Verified owner badge",
-  "businessPricing.freeFeature2": "Edit business name, phone, website, description, and hours",
+  "businessPricing.freeFeature2":
+    "Edit business name, phone, website, description, and hours",
   "businessPricing.freeFeature3": "Appear in directory search",
   "businessPricing.freeFeature4": "Basic listing analytics",
   "businessPricing.freeFeature5": "Upgrade any time after approval",
@@ -640,7 +881,8 @@ export const en = {
   "businessPricing.featuredFeature4": "Photo gallery up to 5 photos",
   "businessPricing.featuredFeature5": "Detailed click analytics",
   "businessPricing.featuredFeature6": "Service menu with starting prices",
-  "businessPricing.featuredFeature7": "Good fit for local service businesses testing demand",
+  "businessPricing.featuredFeature7":
+    "Good fit for local service businesses testing demand",
   "businessPricing.premiumFeature1": "Everything in Featured",
   "businessPricing.premiumFeature2": "Premium badge and listing highlight",
   "businessPricing.premiumFeature3": "Top search placement",
@@ -656,45 +898,58 @@ export const en = {
   "businessPricing.proFeature5": "Profile and lead follow-up recommendations",
   "businessPricing.proFeature6": "Photo gallery up to 30 photos",
   "businessPricing.trackClicks": "Track clicks",
-  "businessPricing.trackClicksCopy": "See listing views, contact clicks, and lead actions.",
+  "businessPricing.trackClicksCopy":
+    "See listing views, contact clicks, and lead actions.",
   "businessPricing.reachLocals": "Reach locals",
-  "businessPricing.reachLocalsCopy": "Get discovered by movers, residents, and Charlotte-area customers.",
+  "businessPricing.reachLocalsCopy":
+    "Get discovered by movers, residents, and Charlotte-area customers.",
   "businessPricing.measureValue": "Measure value",
-  "businessPricing.measureValueCopy": "Use conversion tracking to see what is working.",
+  "businessPricing.measureValueCopy":
+    "Use conversion tracking to see what is working.",
   "businessPricing.bestOffer": "Best first offer",
-  "businessPricing.bestOfferCopy": "Start with Featured when you want an affordable, easy-to-explain visibility upgrade.",
+  "businessPricing.bestOfferCopy":
+    "Start with Featured when you want an affordable, easy-to-explain visibility upgrade.",
   "businessPricing.startFree": "Start With a Free Claim",
 
   // Referral intake
   "referral.seoTitle": "Charlotte Local Business Referrals",
-  "referral.seoDescription": "Request recommendations for trusted Charlotte-area businesses.",
-  "referral.title": "Find a trusted local business",
-  "referral.subtitle": "Tell us what you need. We’ll recommend relevant Charlotte-area businesses without sharing your information broadly.",
+  "referral.seoDescription":
+    "Request recommendations for Charlotte-area businesses.",
+  "referral.title": "Find a local business",
+  "referral.subtitle":
+    "Tell us what you need. We’ll recommend relevant Charlotte-area businesses without sharing your information broadly.",
   "referral.request": "Request a referral",
-  "referral.privacy": "Your contact details are used only to follow up on this request or after you choose a recommended business.",
+  "referral.privacy":
+    "Your contact details are used only to follow up on this request or after you choose a recommended business.",
   "referral.name": "Name",
   "referral.email": "Email",
   "referral.phone": "Phone (optional)",
   "referral.category": "Service category (optional)",
   "referral.categoryPlaceholder": "Moving, dental, childcare...",
   "referral.need": "What do you need?",
-  "referral.needPlaceholder": "Describe the service or project you need help with.",
+  "referral.needPlaceholder":
+    "Describe the service or project you need help with.",
   "referral.submit": "Get recommendations",
   "referral.submitting": "Finding matches...",
   "referral.success": "Your referral request was received.",
   "referral.error": "We couldn’t submit your request. Please try again.",
   "referral.recommendations": "Recommended businesses",
-  "referral.recommendationsDescription": "These suggestions are based on your category and description. Review each profile before contacting them.",
+  "referral.recommendationsDescription":
+    "These suggestions are based on your category and description. Review each profile before contacting them.",
 
   // Bingo
   "bingo.seoTitle": "CLT Bingo — Charlotte Challenge Cards",
-  "bingo.seoDescription": "Play themed Charlotte challenge cards and explore one square at a time.",
+  "bingo.seoDescription":
+    "Play themed Charlotte challenge cards and explore one square at a time.",
   "bingo.title": "CLT Bingo Cards",
-  "bingo.subtitle": "Explore Charlotte through themed challenges and share your completed cards.",
+  "bingo.subtitle":
+    "Explore Charlotte through themed challenges and share your completed cards.",
   "bingo.empty": "No bingo cards yet",
-  "bingo.emptyDescription": "Check back soon for themed Charlotte exploration challenges!",
+  "bingo.emptyDescription":
+    "Check back soon for themed Charlotte exploration challenges!",
   "bingo.completed": "{completed}/{total} completed",
-  "bingo.completionToast": "🎉 Bingo! You completed the card! Share your achievement!",
+  "bingo.completionToast":
+    "🎉 Bingo! You completed the card! Share your achievement!",
   "bingo.signIn": "Start Playing",
   "bingo.loading": "Loading...",
   "bingo.hideShare": "Hide Share Card",
@@ -704,23 +959,29 @@ export const en = {
   "bingo.challengeCards": "Charlotte Challenge Cards",
   "bingo.explore": "Explore Charlotte.",
   "bingo.oneSquare": "One Square at a Time.",
-  "bingo.landingDescription": "CLT Bingo gives you themed challenge cards to discover the best of Charlotte.",
+  "bingo.landingDescription":
+    "CLT Bingo gives you themed challenge cards to discover the best of Charlotte.",
   "bingo.themedCards": "Themed Challenge Cards",
   "bingo.breweryTour": "Brewery Tour",
-  "bingo.breweryTourDescription": "Visit Charlotte breweries from NoDa to South End.",
+  "bingo.breweryTourDescription":
+    "Visit Charlotte breweries from NoDa to South End.",
   "bingo.coffeeTour": "Best Coffee in CLT",
   "bingo.coffeeTourDescription": "Discover Charlotte’s thriving coffee scene.",
   "bingo.dateNight": "Date Night CLT",
-  "bingo.dateNightDescription": "Explore romantic restaurants, rooftops, and unique experiences.",
+  "bingo.dateNightDescription":
+    "Explore romantic restaurants, rooftops, and unique experiences.",
   "bingo.howItWorks": "How It Works",
   "bingo.pickCard": "Pick a Card",
   "bingo.pickCardDescription": "Choose a themed Charlotte challenge card.",
   "bingo.visitCheck": "Visit & Check Off",
-  "bingo.visitCheckDescription": "Visit places and check off each square as you explore.",
+  "bingo.visitCheckDescription":
+    "Visit places and check off each square as you explore.",
   "bingo.completeShare": "Complete & Share",
-  "bingo.completeShareDescription": "Complete a card, share your progress, and climb the leaderboard.",
+  "bingo.completeShareDescription":
+    "Complete a card, share your progress, and climb the leaderboard.",
   "bingo.ready": "Ready to play CLT Bingo?",
-  "bingo.readyDescription": "Create a free account and start checking off Charlotte’s best spots.",
+  "bingo.readyDescription":
+    "Create a free account and start checking off Charlotte’s best spots.",
   "bingo.start": "Start Playing Bingo",
   "bingo.foodDrink": "Food & Drink",
   "bingo.experiences": "Experiences",
@@ -730,7 +991,8 @@ export const en = {
   "eventCategory.home": "Home",
   "eventCategory.events": "Events",
   "eventCategory.notFound": "Category Not Found",
-  "eventCategory.notFoundDescription": "We couldn't find the event category “{category}.” Browse all Charlotte events instead.",
+  "eventCategory.notFoundDescription":
+    "We couldn't find the event category “{category}.” Browse all Charlotte events instead.",
   "eventCategory.allEvents": "Explore All Events",
   "eventCategory.eventsCount": "{count} events",
   "eventCategory.eventSingular": "1 event",
@@ -748,9 +1010,11 @@ export const en = {
   "eventCategory.makersCrafts": "Makers Markets & Crafts",
   "eventCategory.freeCount": "{count} free",
   "eventCategory.empty": "No events in this category yet",
-  "eventCategory.emptyDescription": "We're still gathering events for this category. Check back soon or explore all events.",
+  "eventCategory.emptyDescription":
+    "We're still gathering events for this category. Check back soon or explore all events.",
   "eventCategory.moreEvents": "Explore More Charlotte Events",
-  "eventCategory.moreDescription": "Discover festivals, concerts, food events, and everything happening in the Queen City.",
+  "eventCategory.moreDescription":
+    "Discover festivals, concerts, food events, and everything happening in the Queen City.",
   "eventCategory.browseAll": "Browse All Charlotte Events",
   "eventCategory.free": "Free",
   "eventCategory.paid": "Paid",
@@ -758,58 +1022,77 @@ export const en = {
   "eventCategory.newcomerFriendly": "Newcomer Friendly",
   "eventCategory.moreInfo": "More Info",
   "eventCategory.genericTitle": "{category} in Charlotte",
-  "eventCategory.genericIntro": "Browse {category} and recurring community events across Charlotte, NC.",
+  "eventCategory.genericIntro":
+    "Browse {category} and recurring community events across Charlotte, NC.",
 
   // Things to do
   "things.seoTitle": "Things to Do in Charlotte NC",
-  "things.seoDescription": "Discover Charlotte events, free activities, family fun, food, nightlife, and outdoor adventures.",
+  "things.seoDescription":
+    "Discover Charlotte events, free activities, family fun, food, nightlife, and outdoor adventures.",
   "things.guideBadge": "Charlotte NC Guide",
   "things.title": "Things to Do in Charlotte, NC",
-  "things.subtitle": "Your complete guide to Charlotte events, activities, and experiences.",
+  "things.subtitle":
+    "Your complete guide to Charlotte events, activities, and experiences.",
   "things.browseEvents": "Browse Events Calendar",
   "things.exploreNeighborhoods": "Explore Neighborhoods",
   "things.thisWeek": "What to Do in Charlotte This Week & Weekend",
-  "things.categoriesIntro": "Charlotte has something for everyone. Explore the top categories of things to do right now.",
+  "things.categoriesIntro":
+    "Charlotte has something for everyone. Explore the top categories of things to do right now.",
   "things.bestNeighborhoods": "Best Charlotte Neighborhoods for Things to Do",
-  "things.neighborhoodsIntro": "Each Charlotte neighborhood has its own personality and activities.",
+  "things.neighborhoodsIntro":
+    "Each Charlotte neighborhood has its own personality and activities.",
   "things.viewAllNeighborhoods": "View All 20 Charlotte Neighborhoods →",
   "things.completeGuide": "Your Complete Guide to Things to Do in Charlotte NC",
-  "things.completeGuideIntro": "Charlotte’s entertainment, dining, and outdoor scenes offer something year-round for newcomers and longtime residents.",
+  "things.completeGuideIntro":
+    "Charlotte’s entertainment, dining, and outdoor scenes offer something year-round for newcomers and longtime residents.",
   "things.localDirectory": "Browse Local Directory",
   "things.findNeighborhood": "Find Your Neighborhood",
   "things.weekEvents": "See This Week's Events →",
   "things.liveMusic": "Live Music & Concerts",
-  "things.liveMusicDescription": "Arena shows and intimate sets across Charlotte’s live music scene.",
+  "things.liveMusicDescription":
+    "Arena shows and intimate sets across Charlotte’s live music scene.",
   "things.foodEvents": "Food & Drink Events",
-  "things.foodEventsDescription": "Food truck rallies, brewery events, tastings, and pop-up dinners.",
+  "things.foodEventsDescription":
+    "Food truck rallies, brewery events, tastings, and pop-up dinners.",
   "things.family": "Family Activities",
-  "things.familyDescription": "Museums, parks, festivals, markets, and activities for the whole family.",
+  "things.familyDescription":
+    "Museums, parks, festivals, markets, and activities for the whole family.",
   "things.festivals": "Festivals & Markets",
-  "things.festivalsDescription": "Seasonal markets, street fairs, and Charlotte festivals.",
+  "things.festivalsDescription":
+    "Seasonal markets, street fairs, and Charlotte festivals.",
   "things.outdoor": "Outdoor & Nature",
-  "things.outdoorDescription": "Greenways, lakes, hikes, and outdoor adventures near Charlotte.",
+  "things.outdoorDescription":
+    "Greenways, lakes, hikes, and outdoor adventures near Charlotte.",
   "things.free": "Free Things to Do",
-  "things.freeDescription": "Gallery crawls, park concerts, libraries, meetups, and free community events.",
+  "things.freeDescription":
+    "Gallery crawls, park concerts, libraries, meetups, and free community events.",
   "things.eventsWeekend": "Charlotte Events This Weekend",
-  "things.eventsWeekendCopy": "Every weekend brings live music, markets, brunch, sports, and neighborhood events.",
+  "things.eventsWeekendCopy":
+    "Every weekend brings live music, markets, brunch, sports, and neighborhood events.",
   "things.freeGuide": "Free Things to Do in Charlotte",
-  "things.freeGuideCopy": "Enjoy free gallery crawls, park concerts, greenways, libraries, and public spaces.",
+  "things.freeGuideCopy":
+    "Enjoy free gallery crawls, park concerts, greenways, libraries, and public spaces.",
   "things.familyGuide": "Family Activities in Charlotte NC",
-  "things.familyGuideCopy": "Charlotte offers museums, parks, outdoor adventures, and seasonal family events.",
+  "things.familyGuideCopy":
+    "Charlotte offers museums, parks, outdoor adventures, and seasonal family events.",
   "things.nightlife": "Charlotte Nightlife & Date Night",
-  "things.nightlifeCopy": "Explore rooftop bars, breweries, live music, restaurants, and performing arts.",
+  "things.nightlifeCopy":
+    "Explore rooftop bars, breweries, live music, restaurants, and performing arts.",
   "things.outdoorGuide": "Outdoor Adventures Near Charlotte",
-  "things.outdoorGuideCopy": "Hike, paddle, climb, run, and cycle within easy reach of Uptown.",
+  "things.outdoorGuideCopy":
+    "Hike, paddle, climb, run, and cycle within easy reach of Uptown.",
   "things.nodaVibe": "Arts district with breweries and live music",
   "things.southEndVibe": "Walkable rail trail with rooftops and restaurants",
   "things.plazaVibe": "Eclectic eats, vintage shops, and dive bars",
   "things.uptownVibe": "Sports, museums, and skyline views",
-  "things.dilworthVibe": "Historic charm, East Boulevard dining, and Freedom Park",
+  "things.dilworthVibe":
+    "Historic charm, East Boulevard dining, and Freedom Park",
   "things.southCharlotteVibe": "Family-friendly with SouthPark and Ballantyne",
 
   // Tag pages
   "tag.seoTitle": "{name} in Charlotte",
-  "tag.seoDescription": "Explore Charlotte events, businesses, neighborhoods, and articles tagged “{name}.”",
+  "tag.seoDescription":
+    "Explore Charlotte events, businesses, neighborhoods, and articles tagged “{name}.”",
   "tag.fallbackTitle": "Tag",
   "tag.fallbackDescription": "Browse Settle CLT content by tag.",
   "tag.notFound": "Tag not found",
@@ -831,50 +1114,63 @@ export const en = {
   "tag.categories.contentType": "Content type",
 
   // Newcomer plan
-  "newcomerPlan.seoTitle": "Your Charlotte Newcomer Plan — A Guided Move Checklist",
-  "newcomerPlan.seoDescription": "Build your Charlotte move plan: find and compare neighborhoods, save local services and events, and track discoveries with Passport.",
-  "newcomerPlan.seoKeywords": "Charlotte newcomer checklist, moving to Charlotte plan, Charlotte relocation guide, first week Charlotte NC",
+  "newcomerPlan.seoTitle":
+    "Your Charlotte Newcomer Plan — A Guided Move Checklist",
+  "newcomerPlan.seoDescription":
+    "Build your Charlotte move plan: find and compare neighborhoods, save local services and events, and track discoveries with Passport.",
+  "newcomerPlan.seoKeywords":
+    "Charlotte newcomer checklist, moving to Charlotte plan, Charlotte relocation guide, first week Charlotte NC",
   "newcomerPlan.breadcrumbHome": "Home",
   "newcomerPlan.breadcrumbCurrent": "Newcomer Plan",
   "newcomerPlan.badge": "Free · no signup required",
   "newcomerPlan.title": "Your guided plan for settling into Charlotte",
-  "newcomerPlan.subtitle": "Move from neighborhood research to a practical first week. Check off each stage here; your progress stays on this device.",
+  "newcomerPlan.subtitle":
+    "Move from neighborhood research to a practical first week. Check off each stage here; your progress stays on this device.",
   "newcomerPlan.progressSingular": "{completed} of {total} stage complete",
   "newcomerPlan.progressPlural": "{completed} of {total} stages complete",
-  "newcomerPlan.progressHint": "Start anywhere and return whenever you need the next step.",
+  "newcomerPlan.progressHint":
+    "Start anywhere and return whenever you need the next step.",
   "newcomerPlan.progressAria": "Newcomer plan progress",
   "newcomerPlan.step": "Step {number}",
   "newcomerPlan.completed": "Completed",
   "newcomerPlan.markComplete": "Mark complete",
-  "newcomerPlan.footerNote": "This first version stores checklist progress locally. Saved businesses, event stamps, and Passport history continue to use their existing Settle CLT features.",
+  "newcomerPlan.footerNote":
+    "This first version stores checklist progress locally. Saved businesses, event stamps, and Passport history continue to use their existing Settle CLT features.",
   "newcomerPlan.steps.quiz.stage": "Before your move",
   "newcomerPlan.steps.quiz.title": "Find your neighborhood fit",
-  "newcomerPlan.steps.quiz.description": "Take the two-minute quiz to turn your priorities into a Charlotte shortlist.",
+  "newcomerPlan.steps.quiz.description":
+    "Take the two-minute quiz to turn your priorities into a Charlotte shortlist.",
   "newcomerPlan.steps.quiz.action": "Take the quiz",
   "newcomerPlan.steps.compare.stage": "Before your move",
   "newcomerPlan.steps.compare.title": "Compare your shortlist",
-  "newcomerPlan.steps.compare.description": "Check rent, commute, walkability, schools, and local vibe side by side.",
+  "newcomerPlan.steps.compare.description":
+    "Check rent, commute, walkability, schools, and local vibe side by side.",
   "newcomerPlan.steps.compare.action": "Compare neighborhoods",
   "newcomerPlan.steps.services.stage": "Moving week",
   "newcomerPlan.steps.services.title": "Save move-in essentials",
-  "newcomerPlan.steps.services.description": "Browse movers, storage, utilities, internet, insurance, and other settling-in services.",
+  "newcomerPlan.steps.services.description":
+    "Browse movers, storage, utilities, internet, insurance, and other settling-in services.",
   "newcomerPlan.steps.services.action": "Browse essentials",
   "newcomerPlan.steps.events.stage": "Your first week",
   "newcomerPlan.steps.events.title": "Pick something local to do",
-  "newcomerPlan.steps.events.description": "Choose a newcomer-friendly event and start building a first-week plan.",
+  "newcomerPlan.steps.events.description":
+    "Choose a newcomer-friendly event and start building a first-week plan.",
   "newcomerPlan.steps.events.action": "Find an event",
   "newcomerPlan.steps.passport.stage": "After arrival",
   "newcomerPlan.steps.passport.title": "Track your Charlotte discoveries",
-  "newcomerPlan.steps.passport.description": "Use Passport stamps to remember the businesses, events, and neighborhoods you try.",
+  "newcomerPlan.steps.passport.description":
+    "Use Passport stamps to remember the businesses, events, and neighborhoods you try.",
   "newcomerPlan.steps.passport.action": "Open Passport",
 
   // Notifications
-  "notifications.seoTitle": "Notifications | Settle CLT",
-  "notifications.seoDescription": "Manage your notification preferences and view your notification history.",
+  "notifications.seoTitle": "Notifications",
+  "notifications.seoDescription":
+    "Manage your notification preferences and view your notification history.",
   "notifications.loading": "Loading notifications",
   "notifications.listLoading": "Loading notification history",
   "notifications.signInTitle": "Sign in to view notifications",
-  "notifications.signInDescription": "Get updates on business claims, reviews, events, and more.",
+  "notifications.signInDescription":
+    "Get updates on business claims, reviews, events, and more.",
   "notifications.signIn": "Sign In",
   "notifications.backAria": "Back to home",
   "notifications.title": "Notifications",
@@ -888,43 +1184,58 @@ export const en = {
   "notifications.empty": "No notifications yet",
   "notifications.emptyCategory": "No {category} notifications",
   "notifications.deleteAria": "Delete notification",
-  "notifications.sourceLanguageFallback": "Notification content is shown in its source language.",
+  "notifications.sourceLanguageFallback":
+    "Notification content is shown in its source language.",
   "notifications.preferencesTitle": "Notification Preferences",
-  "notifications.preferencesDescription": "Choose which notifications you want to receive and how you want to receive them.",
+  "notifications.preferencesDescription":
+    "Choose which notifications you want to receive and how you want to receive them.",
   "notifications.categoryHeader": "Category",
   "notifications.inAppHeader": "In-App",
   "notifications.emailHeader": "Email",
   "notifications.pushHeader": "Push",
   "notifications.preferenceAria": "{category} — {channel}",
   "notifications.pushTitle": "Browser Push Notifications",
-  "notifications.pushUnsupported": "Push notifications are not supported in this browser.",
-  "notifications.pushDenied": "Push notifications are blocked. Please enable them in your browser settings.",
-  "notifications.pushEnabled": "Push notifications are enabled. You'll receive alerts even when the site is closed.",
-  "notifications.pushDisabled": "Enable push notifications to receive alerts even when you're not on the site.",
+  "notifications.pushUnsupported":
+    "Push notifications are not supported in this browser.",
+  "notifications.pushDenied":
+    "Push notifications are blocked. Please enable them in your browser settings.",
+  "notifications.pushEnabled":
+    "Push notifications are enabled. You'll receive alerts even when the site is closed.",
+  "notifications.pushDisabled":
+    "Enable push notifications to receive alerts even when you're not on the site.",
   "notifications.pushLoading": "Updating push notifications...",
-  "notifications.pushError": "Push notifications could not be updated. Please try again.",
+  "notifications.pushError":
+    "Push notifications could not be updated. Please try again.",
   "notifications.disable": "Disable",
   "notifications.enable": "Enable",
   "notifications.retry": "Try again",
-  "notifications.pushPermissionNote": "Push notifications require browser permission. You'll be prompted to allow notifications when you enable push for the first time.",
+  "notifications.pushPermissionNote":
+    "Push notifications require browser permission. You'll be prompted to allow notifications when you enable push for the first time.",
   "notifications.categories.claim.label": "Business Claims",
-  "notifications.categories.claim.description": "Updates when your business claim is approved or denied",
+  "notifications.categories.claim.description":
+    "Updates when your business claim is approved or denied",
   "notifications.categories.review.label": "Reviews",
-  "notifications.categories.review.description": "New reviews on your claimed businesses",
+  "notifications.categories.review.description":
+    "New reviews on your claimed businesses",
   "notifications.categories.payment.label": "Payments",
-  "notifications.categories.payment.description": "Payment confirmations, failures, and subscription renewals",
+  "notifications.categories.payment.description":
+    "Payment confirmations, failures, and subscription renewals",
   "notifications.categories.event.label": "Events",
-  "notifications.categories.event.description": "New events in Charlotte and your favorite neighborhoods",
+  "notifications.categories.event.description":
+    "New events in Charlotte and your favorite neighborhoods",
   "notifications.categories.community.label": "Community",
-  "notifications.categories.community.description": "Bingo completions, leaderboard updates, and referrals",
+  "notifications.categories.community.description":
+    "Bingo completions, leaderboard updates, and referrals",
   "notifications.categories.system.label": "System",
-  "notifications.categories.system.description": "Welcome messages, announcements, and platform updates",
+  "notifications.categories.system.description":
+    "Welcome messages, announcements, and platform updates",
 
   // Authentication gate
   "authGate.loading": "Loading...",
   "authGate.inlinePrompt": "Sign in to {feature}",
   "authGate.required": "Sign in required",
-  "authGate.description": "Create a free account to {feature}. Public browsing remains free without an account.",
+  "authGate.description":
+    "Create a free account to {feature}. Public browsing remains free without an account.",
   "authGate.signIn": "Sign In",
 
   // Shared customer-facing UI
@@ -959,6 +1270,121 @@ export const en = {
   "language.toggleEn": "English",
   "language.switchToSpanish": "Switch to Spanish",
   "language.switchToEnglish": "Cambiar a inglés",
+
+  // Rendered audit remediation
+  "footer.copyright": "© {year} Settle CLT. All rights reserved.",
+  "search.trigger": "Search CLT...",
+  "search.dialogTitle": "Search Settle CLT",
+  "search.dialogDescription":
+    "Search across neighborhoods, businesses, events, and blog articles",
+  "search.inputPlaceholder":
+    "Search neighborhoods, businesses, events, articles...",
+  "search.prompt": "Type to search across all of Settle CLT",
+  "search.scope": "Neighborhoods, businesses, events, and blog articles",
+  "search.popular": "Popular searches",
+  "search.loading": "Loading search data…",
+  "search.loadError": "Search data couldn't be loaded",
+  "search.retry": "Retry",
+  "search.reload": "Reload search",
+  "search.noResults": "No results found for “{query}”",
+  "search.tryDifferent": "Try a different search term",
+  "search.moreResults": "+{count} more results",
+  "search.neighborhoods": "Neighborhoods",
+  "search.directory": "Directory",
+  "search.events": "Events",
+  "search.blog": "Blog",
+  "search.article": "Article",
+  "search.dateTbd": "TBD",
+  "search.untitledEvent": "Untitled event",
+  "listing.seoDescription":
+    "Submit a Charlotte business for directory review. Approved listings can use basic profile features and optional paid upgrades.",
+  "listing.seoKeywords":
+    "list business Charlotte, Charlotte business directory, business profile review, Charlotte listing",
+  "listing.heroDescription":
+    "Submit your Charlotte business for directory review. Publication is not guaranteed; approved listings can be claimed and updated.",
+  "listing.formTitle": "Submit Your Business",
+  "listing.submitPending": "Submitting...",
+  "listing.error": "Something went wrong. Please try again.",
+  "listing.name": "Your Name *",
+  "listing.email": "Email *",
+  "listing.businessName": "Business Name *",
+  "listing.category": "Category *",
+  "listing.area": "Area / Neighborhood",
+  "listing.phone": "Phone",
+  "listing.website": "Website",
+  "listing.description": "Description",
+  "listing.selectCategory": "Select a category",
+  "realtor.heroTitle": "Find Your Perfect Charlotte Home",
+  "realtor.successTitle": "Request Received!",
+  "realtor.formTitle": "Tell Us What You Need",
+  "realtor.validationRequired":
+    "Please fill in your name, email, and what you're looking for.",
+  "realtor.submitSuccess":
+    "Your request was received for review. A referral or response is not guaranteed.",
+  "realtor.error": "Something went wrong. Please try again.",
+  "realtor.referralTypeAria": "What are you looking for?",
+  "realtor.budgetAria": "Budget range",
+  "realtor.timelineAria": "Timeline",
+  "share.share": "Share",
+  "share.page": "Share this page",
+  "share.via": "Share via...",
+  "share.email": "Email",
+  "share.emailBody": "Check this out: {text}",
+  "share.copy": "Copy Link",
+  "share.copied": "Copied!",
+  "share.copySuccess": "Link copied to clipboard!",
+  "share.copyError": "Failed to copy link",
+  "reviews.title": "Community Reviews",
+  "reviews.review": "review",
+  "reviews.reviews": "reviews",
+  "reviews.cancel": "Cancel",
+  "reviews.write": "Write a Review",
+  "reviews.signIn": "Sign in to review",
+  "reviews.rating": "Your Rating",
+  "reviews.aspect": "Aspect",
+  "reviews.tip": "Your Tip or Review",
+  "reviews.placeholder": "Share your experience — what should newcomers know?",
+  "reviews.submit": "Submit Review",
+  "reviews.empty": "No reviews yet. Be the first to share your experience!",
+  "reviews.anonymous": "Anonymous",
+  "reviews.delete": "Delete review",
+  "reviews.selectRating": "Please select a rating",
+  "reviews.minimum": "Please write at least 5 characters",
+  "reviews.submitted": "Review submitted! Thanks for sharing your experience.",
+  "reviews.deleted": "Review deleted.",
+  "reviews.submitError": "We couldn't submit your review. Please try again.",
+  "reviews.deleteError": "We couldn't delete your review. Please try again.",
+  "reviews.starAria": "{rating} out of 5 stars",
+  "reviews.aspect.general": "General",
+  "reviews.aspect.vibe": "Vibe & Culture",
+  "reviews.aspect.food": "Food & Dining",
+  "reviews.aspect.safety": "Safety",
+  "reviews.aspect.transit": "Transit & Commute",
+  "reviews.aspect.nightlife": "Nightlife",
+  "reviews.aspect.cost": "Cost of Living",
+  "profile.signInTitle": "Sign in to Settle CLT",
+  "profile.signInDescription":
+    "Create an account to track your CLT Passport, save your wishlist, and share your experiences with the community.",
+  "submitEvent.signInDescription":
+    "Sign in to share events happening in Charlotte with the community.",
+  "business.signInDescription":
+    "Sign in to manage your claimed business listing.",
+  "business.noAccessDescription":
+    "You don't have an active business membership yet. Visit the directory to claim your business.",
+  "notFound.seoTitle": "Page Not Found (404)",
+  "notFound.seoDescription":
+    "The page you're looking for doesn't exist on Settle CLT. Head home to explore Charlotte.",
+  "auth.seoTitle": "Sign In or Create an Account",
+  "auth.seoDescription": "Sign in to Settle CLT or create an account.",
+  "neighborhoodDetail.previousPhoto": "Previous neighborhood photo",
+  "neighborhoodDetail.nextPhoto": "Next neighborhood photo",
+  "neighborhoodDetail.photoButton": "Show neighborhood photo {number}",
+  "neighborhoodDetail.seoTitle":
+    "{name} Charlotte NC Neighborhood Guide (2026): Vibe, Costs & Reviews",
+  "neighborhoodDetail.seoDescription":
+    "{name} Charlotte NC: {vibe}. {bestFor} See costs, crime stats, schools, day-in-the-life, pros and cons, and local businesses in {name}.",
+  "neighborhoodDetail.seoKeywords":
+    "{nameLower}, {nameLower} charlotte nc, {nameLower} neighborhood guide, {nameLower} charlotte, moving to {nameLower}, {nameLower} apartments, {nameLower} restaurants, charlotte nc neighborhoods",
 } as const;
 
 export type TranslationKey = keyof typeof en;

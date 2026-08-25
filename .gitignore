@@ -6,6 +6,8 @@
 dist/
 build/
 release-artifact/
+release-artifact.staging-*/
+release-artifact.previous-*/
 *.dist
 
 # Environment variables
